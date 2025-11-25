@@ -12,7 +12,10 @@ export enum WeaponType {
   LASER,  // 激光
   MISSILE, // 跟踪导弹
   WAVE,   // 波动炮 (穿透)
-  PLASMA  // 等离子 (范围爆炸)
+  PLASMA,  // 等离子 (范围爆炸)
+  TESLA,   // 电磁 (连锁)
+  MAGMA,   // 熔岩 (持续伤害)
+  SHURIKEN // 手里剑 (弹射)
 }
 
 export interface Vector2D {

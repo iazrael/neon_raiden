@@ -360,7 +360,7 @@ export class SpriteGenerator {
   }
 
   // 生成子弹
-  generateBullet(type: 'vulcan' | 'laser' | 'missile' | 'wave' | 'plasma' | 'enemy_orb' | 'enemy_beam'): HTMLCanvasElement {
+  generateBullet(type: 'vulcan' | 'laser' | 'missile' | 'wave' | 'plasma' | 'enemy_orb' | 'enemy_beam' | 'tesla' | 'magma' | 'shuriken'): HTMLCanvasElement {
     let w = 0, h = 0;
 
     if (type === 'vulcan') { w = 16; h = 32; }
@@ -369,6 +369,9 @@ export class SpriteGenerator {
     else if (type === 'wave') { w = 64; h = 32; }
     else if (type === 'plasma') { w = 48; h = 48; }
     else if (type === 'enemy_orb') { w = 32; h = 32; }
+    else if (type === 'tesla') { w = 32; h = 32; }
+    else if (type === 'magma') { w = 32; h = 32; }
+    else if (type === 'shuriken') { w = 32; h = 32; }
     else { w = 32; h = 32; }
 
     const { canvas, ctx } = this.createCanvas(w, h);
@@ -428,6 +431,43 @@ export class SpriteGenerator {
       ctx.beginPath();
       ctx.arc(0, 0, 10, 0, Math.PI * 2);
       ctx.fill();
+    } else if (type === 'tesla') {
+      ctx.strokeStyle = '#63b3ed';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = '#63b3ed';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(0, -15);
+      // Zigzag lightning
+      for (let i = 0; i < 4; i++) {
+        ctx.lineTo(i % 2 === 0 ? 5 : -5, -15 + (i + 1) * 8);
+      }
+      ctx.stroke();
+    } else if (type === 'magma') {
+      const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 15);
+      grad.addColorStop(0, '#fff');
+      grad.addColorStop(0.3, '#f6e05e');
+      grad.addColorStop(0.6, '#ed8936');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (type === 'shuriken') {
+      ctx.fillStyle = '#a0aec0';
+      ctx.beginPath();
+      // 4-pointed star
+      for (let i = 0; i < 4; i++) {
+        const angle = i * Math.PI / 2;
+        ctx.lineTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
+        ctx.lineTo(Math.cos(angle + Math.PI / 4) * 5, Math.sin(angle + Math.PI / 4) * 5);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
     }
 
     return canvas;
@@ -451,6 +491,9 @@ export class SpriteGenerator {
       case 5: color = '#ed64a6'; icon = this.generateBullet('plasma'); break;
       case 6: color = '#f56565'; label = 'B'; break; // Bomb
       case 7: color = '#a0aec0'; label = 'O'; break; // Option
+      case 8: color = '#63b3ed'; label = 'T'; break; // Tesla
+      case 9: color = '#ed8936'; label = 'F'; break; // Magma (Fire)
+      case 10: color = '#a0aec0'; label = 'S'; break; // Shuriken
     }
 
     ctx.translate(20, 20);

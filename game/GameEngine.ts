@@ -170,11 +170,19 @@ export class GameEngine {
     bindInput() {
         window.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
-            if (e.code === 'KeyB' && this.state === GameState.PLAYING) {
+            if ((e.code === 'KeyB' || e.code === 'Space') && this.state === GameState.PLAYING) {
                 this.triggerBomb();
             }
         });
         window.addEventListener('keyup', (e) => this.keys[e.code] = false);
+
+        // Mouse Movement
+        window.addEventListener('mousemove', (e) => {
+            if (this.state === GameState.PLAYING) {
+                this.player.x = e.clientX;
+                this.player.y = e.clientY;
+            }
+        });
 
         // Touch
         this.canvas.addEventListener('touchstart', (e) => {
@@ -317,6 +325,10 @@ export class GameEngine {
         if (this.weaponType === WeaponType.LASER) fireRate = 60;
         if (this.weaponType === WeaponType.WAVE) fireRate = 350 - (this.weaponLevel * 20);
         if (this.weaponType === WeaponType.PLASMA) fireRate = 600 - (this.weaponLevel * 50);
+        if (this.weaponType === WeaponType.TESLA) fireRate = 200 - (this.weaponLevel * 10);
+        if (this.weaponType === WeaponType.MAGMA) fireRate = 50;
+        if (this.weaponType === WeaponType.SHURIKEN) fireRate = 400 - (this.weaponLevel * 30);
+
 
         if (this.fireTimer > Math.max(30, fireRate)) {
             this.fireWeapon();
@@ -407,7 +419,11 @@ export class GameEngine {
             this.weaponType === WeaponType.VULCAN ? 'vulcan' :
                 this.weaponType === WeaponType.LASER ? 'laser' :
                     this.weaponType === WeaponType.MISSILE ? 'missile' :
-                        this.weaponType === WeaponType.WAVE ? 'wave' : 'plasma'
+                        this.weaponType === WeaponType.WAVE ? 'wave' :
+                            this.weaponType === WeaponType.TESLA ? 'laser' : // Reuse laser sound for now
+                                this.weaponType === WeaponType.MAGMA ? 'vulcan' : // Reuse vulcan sound
+                                    this.weaponType === WeaponType.SHURIKEN ? 'missile' : // Reuse missile sound
+                                        'plasma'
         );
 
         // Helper to spawn bullet
@@ -468,6 +484,41 @@ export class GameEngine {
         } else if (this.weaponType === WeaponType.PLASMA) {
             // Explosion radius handled in createPlasmaExplosion, here just bullet size
             spawn(this.player.x, this.player.y - 40, 0, -8, 80 + levelMult * 25, this.weaponType, 'bullet_plasma', 48 + levelMult * 8, 48 + levelMult * 8);
+        } else if (this.weaponType === WeaponType.TESLA) {
+            // Auto-lock to nearest enemy
+            let target: Entity | null = null;
+            let minDist = 400; // Range
+            this.enemies.forEach(e => {
+                const dist = Math.sqrt((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2);
+                if (dist < minDist && e.y < this.player.y) { // Only target enemies above
+                    minDist = dist;
+                    target = e;
+                }
+            });
+
+            const damage = 15 + levelMult * 4;
+            if (target) {
+                const angle = Math.atan2(target.y - this.player.y, target.x - this.player.x);
+                spawn(this.player.x, this.player.y - 20, Math.cos(angle) * 20, Math.sin(angle) * 20, damage, this.weaponType, 'bullet_tesla', 32, 32);
+            } else {
+                // No target, shoot straight
+                spawn(this.player.x, this.player.y - 20, 0, -20, damage, this.weaponType, 'bullet_tesla', 32, 32);
+            }
+        } else if (this.weaponType === WeaponType.MAGMA) {
+            // Short range flamethrower
+            const count = 3 + Math.floor(this.weaponLevel / 3);
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.random() - 0.5) * 0.5 - 1.57; // Upward cone
+                const speed = 10 + Math.random() * 5;
+                spawn(this.player.x, this.player.y - 20, Math.cos(angle) * speed, Math.sin(angle) * speed, 8 + levelMult * 2, this.weaponType, 'bullet_magma', 24, 24);
+            }
+        } else if (this.weaponType === WeaponType.SHURIKEN) {
+            // Bouncing projectiles
+            const count = 2 + Math.floor(this.weaponLevel / 3);
+            for (let i = 0; i < count; i++) {
+                const angle = -1.57 + (i - (count - 1) / 2) * 0.5;
+                spawn(this.player.x, this.player.y - 20, Math.cos(angle) * 12, Math.sin(angle) * 12, 12 + levelMult * 3, this.weaponType, 'bullet_shuriken', 24, 24);
+            }
         }
 
         // Option Fire
@@ -647,6 +698,18 @@ export class GameEngine {
         entities.forEach(e => {
             e.x += e.vx * timeScale;
             e.y += e.vy * timeScale;
+
+            // Shuriken Bounce
+            if (e.type === 'bullet' && e.spriteKey === 'bullet_shuriken') {
+                if (e.x < 0 || e.x > this.width) {
+                    e.vx *= -1;
+                    e.x = Math.max(0, Math.min(this.width, e.x));
+                }
+                if (e.y < 0) {
+                    e.vy *= -1;
+                    e.y = 0;
+                }
+            }
 
             // Kamikaze AI
             if (e.type === 'enemy' && e.subType === 3) {
@@ -879,7 +942,7 @@ export class GameEngine {
     }
 
     applyPowerup(type: number) {
-        // 0:Power, 1:Laser, 2:Vulcan, 3:Heal/Shield, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
+        // 0:Power, 1:Laser, 2:Vulcan, 3:Heal/Shield, 4:Wave, 5:Plasma, 6:Bomb, 7:Option, 8:Tesla, 9:Magma, 10:Shuriken
         switch (type) {
             case 0: // Power
                 this.weaponLevel = Math.min(10, this.weaponLevel + 1);
@@ -909,8 +972,10 @@ export class GameEngine {
                 else { this.weaponType = WeaponType.PLASMA; this.weaponLevel = 1; }
                 break;
             case 6: // Bomb
-                this.bombs++;
-                this.onBombChange(this.bombs);
+                if (this.bombs < 6) {
+                    this.bombs++;
+                    this.onBombChange(this.bombs);
+                }
                 break;
             case 7: // Option
                 if (this.options.length < 3) {
@@ -920,22 +985,37 @@ export class GameEngine {
                     });
                 }
                 break;
+            case 8: // Tesla
+                if (this.weaponType === WeaponType.TESLA) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+                else { this.weaponType = WeaponType.TESLA; this.weaponLevel = 1; }
+                break;
+            case 9: // Magma
+                if (this.weaponType === WeaponType.MAGMA) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+                else { this.weaponType = WeaponType.MAGMA; this.weaponLevel = 1; }
+                break;
+            case 10: // Shuriken
+                if (this.weaponType === WeaponType.SHURIKEN) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+                else { this.weaponType = WeaponType.SHURIKEN; this.weaponLevel = 1; }
+                break;
         }
     }
 
     spawnPowerup(x: number, y: number) {
-        // 0:Power, 1:Laser, 2:Vulcan, 3:Heal, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
+        // 0:Power, 1:Laser, 2:Vulcan, 3:Heal, 4:Wave, 5:Plasma, 6:Bomb, 7:Option, 8:Tesla, 9:Magma, 10:Shuriken
         // Weighted Random
         const r = Math.random();
         let type = 0;
-        if (r < 0.2) type = 0; // 20% Power
-        else if (r < 0.35) type = 2; // 15% Vulcan
-        else if (r < 0.45) type = 1; // 10% Laser
-        else if (r < 0.55) type = 3; // 10% Heal
-        else if (r < 0.65) type = 4; // 10% Wave
-        else if (r < 0.75) type = 5; // 10% Plasma
-        else if (r < 0.85) type = 7; // 10% Option
-        else type = 6; // 15% Bomb
+        if (r < 0.15) type = 0; // Power
+        else if (r < 0.25) type = 2; // Vulcan
+        else if (r < 0.35) type = 1; // Laser
+        else if (r < 0.45) type = 3; // Heal
+        else if (r < 0.55) type = 4; // Wave
+        else if (r < 0.65) type = 5; // Plasma
+        else if (r < 0.75) type = 7; // Option
+        else if (r < 0.80) type = 8; // Tesla
+        else if (r < 0.85) type = 9; // Magma
+        else if (r < 0.90) type = 10; // Shuriken
+        else type = 6; // Bomb
 
         this.powerups.push({
             x, y, width: 30, height: 30, vx: 0, vy: 2, hp: 1, maxHp: 1,
