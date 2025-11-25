@@ -1,4 +1,5 @@
 
+
 import { AudioSystem } from './AudioSystem';
 import { GameState, WeaponType, Particle, SpriteMap, Shockwave } from '../types';
 import { SpriteGenerator } from './SpriteGenerator';
@@ -12,14 +13,16 @@ interface Entity {
   vy: number;
   hp: number;
   maxHp: number;
-  type: 'player' | 'enemy' | 'boss' | 'bullet' | 'powerup';
-  subType?: number; // For varied enemies/powerups
+  type: 'player' | 'enemy' | 'boss' | 'bullet' | 'powerup' | 'option';
+  subType?: number; 
   color: string;
   markedForDeletion: boolean;
   angle?: number;
-  spriteKey?: string; // Key to look up in sprite map
-  frame?: number; // Animation frame
-  damage?: number; // Projectile damage
+  spriteKey?: string; 
+  frame?: number; 
+  damage?: number; 
+  owner?: Entity; // For options
+  angleOffset?: number; // For options
 }
 
 export class GameEngine {
@@ -38,44 +41,52 @@ export class GameEngine {
   maxLevels: number = 5;
   
   player: Entity;
+  options: Entity[] = []; // Wingmen
   enemies: Entity[] = [];
-  bullets: Entity[] = []; // Player bullets
+  bullets: Entity[] = []; 
   enemyBullets: Entity[] = [];
   particles: Particle[] = [];
   shockwaves: Shockwave[] = [];
   powerups: Entity[] = [];
+  meteors: {x: number, y: number, length: number, vx: number, vy: number}[] = [];
   
   boss: Entity | null = null;
-  levelProgress: number = 0; // 0 to 100 before boss
+  levelProgress: number = 0; 
   
   // Input
   keys: { [key: string]: boolean } = {};
   touch: { x: number, y: number, active: boolean } = { x: 0, y: 0, active: false };
   lastTouch: { x: number, y: number } = { x: 0, y: 0 };
   
-  // Game loop vars
+  // Game vars
   lastTime: number = 0;
   enemySpawnTimer: number = 0;
   fireTimer: number = 0;
+  meteorTimer: number = 0;
   
   // Player stats
   weaponType: WeaponType = WeaponType.VULCAN;
   weaponLevel: number = 1;
+  bombs: number = 3; // Start with 3 bombs
+  shield: number = 0; // Shield HP
   
   // Effects
   screenShake: number = 0;
 
+  // Callbacks
   onScoreChange: (score: number) => void;
   onLevelChange: (level: number) => void;
   onStateChange: (state: GameState) => void;
   onHpChange: (hp: number) => void;
+  onBombChange: (bombs: number) => void;
 
   constructor(
     canvas: HTMLCanvasElement, 
     onScoreChange: (s: number) => void,
     onLevelChange: (l: number) => void,
     onStateChange: (s: GameState) => void,
-    onHpChange: (hp: number) => void
+    onHpChange: (hp: number) => void,
+    onBombChange: (bombs: number) => void
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: false })!; 
@@ -86,24 +97,27 @@ export class GameEngine {
     this.onLevelChange = onLevelChange;
     this.onStateChange = onStateChange;
     this.onHpChange = onHpChange;
+    this.onBombChange = onBombChange;
 
-    this.loadAssets(); // Generate sprites
+    this.loadAssets(); 
     this.resize();
     window.addEventListener('resize', () => this.resize());
     
-    // Initial player
     this.player = this.createPlayer();
-
     this.bindInput();
   }
 
   loadAssets() {
-      // Generate and cache all sprites
+      // Sprites
       this.sprites['player'] = this.spriteGen.generatePlayer();
-      this.sprites['enemy_0'] = this.spriteGen.generateEnemy(0);
-      this.sprites['enemy_1'] = this.spriteGen.generateEnemy(1);
-      this.sprites['enemy_2'] = this.spriteGen.generateEnemy(2);
+      this.sprites['option'] = this.spriteGen.generateOption();
       
+      // Enemies (Types 0-4)
+      for(let i=0; i<=4; i++) {
+          this.sprites[`enemy_${i}`] = this.spriteGen.generateEnemy(i);
+      }
+      
+      // Bullets
       this.sprites['bullet_vulcan'] = this.spriteGen.generateBullet('vulcan');
       this.sprites['bullet_laser'] = this.spriteGen.generateBullet('laser');
       this.sprites['bullet_missile'] = this.spriteGen.generateBullet('missile');
@@ -111,14 +125,12 @@ export class GameEngine {
       this.sprites['bullet_plasma'] = this.spriteGen.generateBullet('plasma');
       this.sprites['bullet_enemy'] = this.spriteGen.generateBullet('enemy_orb');
       
-      this.sprites['powerup_0'] = this.spriteGen.generatePowerup(0);
-      this.sprites['powerup_1'] = this.spriteGen.generatePowerup(1);
-      this.sprites['powerup_2'] = this.spriteGen.generatePowerup(2);
-      this.sprites['powerup_3'] = this.spriteGen.generatePowerup(3);
-      this.sprites['powerup_4'] = this.spriteGen.generatePowerup(4);
-      this.sprites['powerup_5'] = this.spriteGen.generatePowerup(5);
+      // Powerups (Types 0-7)
+      for(let i=0; i<=7; i++) {
+          this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
+      }
 
-      // Generate Boss sprites for all 5 levels
+      // Bosses
       for(let i=1; i<=5; i++) {
           this.sprites[`boss_${i}`] = this.spriteGen.generateBoss(i);
       }
@@ -135,7 +147,7 @@ export class GameEngine {
     return {
       x: this.width / 2,
       y: this.height - 100,
-      width: 48, // Reduced hitbox size slightly relative to visual
+      width: 48, 
       height: 48,
       vx: 0,
       vy: 0,
@@ -149,10 +161,15 @@ export class GameEngine {
   }
 
   bindInput() {
-    window.addEventListener('keydown', (e) => this.keys[e.code] = true);
+    window.addEventListener('keydown', (e) => {
+        this.keys[e.code] = true;
+        if (e.code === 'KeyB' && this.state === GameState.PLAYING) {
+            this.triggerBomb();
+        }
+    });
     window.addEventListener('keyup', (e) => this.keys[e.code] = false);
 
-    // Touch - Relative movement
+    // Touch
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       const t = e.touches[0];
@@ -160,8 +177,10 @@ export class GameEngine {
       this.lastTouch.x = t.clientX;
       this.lastTouch.y = t.clientY;
       
-      if (this.state === GameState.MENU || this.state === GameState.GAME_OVER || this.state === GameState.VICTORY) {
-        this.startGame();
+      if (this.state !== GameState.PLAYING) {
+        if (this.state === GameState.MENU || this.state === GameState.GAME_OVER || this.state === GameState.VICTORY) {
+            this.startGame();
+        }
       }
     }, { passive: false });
 
@@ -172,10 +191,8 @@ export class GameEngine {
       const dx = t.clientX - this.lastTouch.x;
       const dy = t.clientY - this.lastTouch.y;
       
-      // Update player velocity for banking animation
       this.player.vx = dx; 
-      
-      this.player.x += dx * 1.5; // Sensitivity
+      this.player.x += dx * 1.5; 
       this.player.y += dy * 1.5;
       
       this.lastTouch.x = t.clientX;
@@ -194,13 +211,18 @@ export class GameEngine {
     this.level = 1;
     this.weaponLevel = 1;
     this.weaponType = WeaponType.VULCAN;
+    this.bombs = 3;
+    this.shield = 0;
+    
     this.player = this.createPlayer();
+    this.options = [];
     this.enemies = [];
     this.bullets = [];
     this.enemyBullets = [];
     this.particles = [];
     this.shockwaves = [];
     this.powerups = [];
+    this.meteors = [];
     this.boss = null;
     this.levelProgress = 0;
     this.screenShake = 0;
@@ -210,20 +232,48 @@ export class GameEngine {
     this.onScoreChange(this.score);
     this.onLevelChange(this.level);
     this.onHpChange(100);
+    this.onBombChange(this.bombs);
+  }
+
+  triggerBomb() {
+      if (this.bombs > 0 && this.state === GameState.PLAYING && this.player.hp > 0) {
+          this.bombs--;
+          this.onBombChange(this.bombs);
+          
+          this.audio.playBomb();
+          this.screenShake = 40;
+          this.addShockwave(this.width/2, this.height/2, '#fff', 500, 30);
+          
+          // Clear bullets
+          this.enemyBullets = [];
+          
+          // Kill all normal enemies
+          this.enemies.forEach(e => {
+              this.createExplosion(e.x, e.y, 'large', e.color);
+              e.hp = 0;
+              e.markedForDeletion = true;
+              this.score += 100;
+          });
+          this.onScoreChange(this.score);
+
+          // Damage Boss
+          if (this.boss) {
+              this.damageBoss(500);
+          }
+      }
   }
 
   update(dt: number) {
     if (this.state !== GameState.PLAYING) return;
 
-    const timeScale = dt / 16.66; // Normalize to 60fps
+    const timeScale = dt / 16.66; 
 
-    // Screen Shake Decay
     if (this.screenShake > 0) {
         this.screenShake *= 0.9;
         if (this.screenShake < 0.5) this.screenShake = 0;
     }
 
-    // Player Movement (Keyboard fallback)
+    // Player Movement (Keyboard)
     const speed = 7 * timeScale;
     let dx = 0;
     if (this.keys['ArrowLeft']) dx = -speed;
@@ -235,31 +285,43 @@ export class GameEngine {
         this.player.x += dx;
         this.player.vx = dx;
     } else if (!this.touch.active) {
-        this.player.vx = this.player.vx * 0.8; // Friction
+        this.player.vx = this.player.vx * 0.8; 
     }
 
-    // Boundary check
+    // Boundary
     this.player.x = Math.max(32, Math.min(this.width - 32, this.player.x));
     this.player.y = Math.max(32, Math.min(this.height - 32, this.player.y));
 
-    // Fire Player Bullets
-    this.fireTimer += dt;
-    let fireRate = 120;
-    if (this.weaponType === WeaponType.LASER) fireRate = 60;
-    if (this.weaponType === WeaponType.WAVE) fireRate = 300;
-    if (this.weaponType === WeaponType.PLASMA) fireRate = 600;
+    // Options (Wingmen) update
+    this.options.forEach((opt, index) => {
+        const targetAngle = (Date.now() / 1000) * 2 + (index * (Math.PI * 2 / this.options.length));
+        const radius = 60;
+        const tx = this.player.x + Math.cos(targetAngle) * radius;
+        const ty = this.player.y + Math.sin(targetAngle) * radius;
+        
+        // Smooth follow
+        opt.x += (tx - opt.x) * 0.2 * timeScale;
+        opt.y += (ty - opt.y) * 0.2 * timeScale;
+    });
 
-    if (this.fireTimer > fireRate) {
+    // Fire
+    this.fireTimer += dt;
+    let fireRate = 100 - (this.weaponLevel * 2); // Faster fire with level
+    if (this.weaponType === WeaponType.LASER) fireRate = 60;
+    if (this.weaponType === WeaponType.WAVE) fireRate = 350 - (this.weaponLevel * 20);
+    if (this.weaponType === WeaponType.PLASMA) fireRate = 600 - (this.weaponLevel * 50);
+
+    if (this.fireTimer > Math.max(30, fireRate)) {
        this.fireWeapon();
        this.fireTimer = 0;
     }
 
-    // Level Progress
+    // Level Logic
     if (!this.boss) {
       this.levelProgress += 0.05 * timeScale;
-      // Spawn Enemies
       this.enemySpawnTimer += dt;
-      const spawnRate = Math.max(500, 2000 - (this.level * 200));
+      // More enemies as level rises
+      const spawnRate = Math.max(300, 1500 - (this.level * 200)); 
       if (this.enemySpawnTimer > spawnRate) {
         this.spawnEnemy();
         this.enemySpawnTimer = 0;
@@ -269,17 +331,28 @@ export class GameEngine {
         this.spawnBoss();
       }
     } else {
-        // Boss Logic
         this.updateBoss(dt, timeScale);
     }
 
-    // Update Entities
+    // Meteors
+    this.meteorTimer += dt;
+    if (this.meteorTimer > 200) {
+        if (Math.random() < 0.1) this.spawnMeteor();
+        this.meteorTimer = 0;
+    }
+    this.meteors.forEach(m => {
+        m.x += m.vx * timeScale;
+        m.y += m.vy * timeScale;
+    });
+    this.meteors = this.meteors.filter(m => m.y < this.height + 100 && m.x > -100);
+
+    // Updates
     this.updateEntities(this.bullets, timeScale);
     this.updateEntities(this.enemyBullets, timeScale);
     this.updateEntities(this.enemies, timeScale);
     this.updateEntities(this.powerups, timeScale);
 
-    // Update Particles
+    // Particles
     this.particles.forEach(p => {
       p.x += p.vx * timeScale;
       p.y += p.vy * timeScale;
@@ -287,14 +360,13 @@ export class GameEngine {
     });
     this.particles = this.particles.filter(p => p.life > 0);
 
-    // Update Shockwaves
+    // Shockwaves
     this.shockwaves.forEach(s => {
         s.radius += (s.maxRadius - s.radius) * 0.1 * timeScale;
         s.life -= 0.02 * timeScale;
     });
     this.shockwaves = this.shockwaves.filter(s => s.life > 0);
 
-    // Collisions
     this.checkCollisions();
 
     // Clean up
@@ -303,13 +375,24 @@ export class GameEngine {
     this.enemies = this.enemies.filter(e => !e.markedForDeletion && e.y < this.height + 100);
     this.powerups = this.powerups.filter(e => !e.markedForDeletion && e.y < this.height + 50);
 
-    // Game Over check
     if (this.player.hp <= 0) {
       this.createExplosion(this.player.x, this.player.y, 'large', '#00ffff');
       this.audio.playExplosion('large');
+      this.audio.playDefeat();
       this.state = GameState.GAME_OVER;
       this.onStateChange(this.state);
     }
+  }
+
+  spawnMeteor() {
+      const speed = Math.random() * 10 + 10;
+      this.meteors.push({
+          x: Math.random() * this.width,
+          y: -100,
+          length: Math.random() * 50 + 20,
+          vx: (Math.random() - 0.5) * 5,
+          vy: speed
+      });
   }
 
   fireWeapon() {
@@ -320,114 +403,50 @@ export class GameEngine {
         this.weaponType === WeaponType.WAVE ? 'wave' : 'plasma'
     );
     
+    // Helper to spawn bullet
+    const spawn = (x: number, y: number, vx: number, vy: number, damage: number, type: WeaponType, sprite: string, w:number, h:number) => {
+        this.bullets.push({
+            x, y, width: w, height: h, vx, vy, hp: type === WeaponType.WAVE || type === WeaponType.LASER ? 999 : 1, 
+            maxHp: 1, type: 'bullet', color: '#fff', markedForDeletion: false,
+            spriteKey: sprite, damage
+        });
+    };
+
+    // Main Gun
+    const levelMult = this.weaponLevel;
     if (this.weaponType === WeaponType.VULCAN) {
-        const count = 1 + this.weaponLevel;
+        const count = 1 + Math.floor(this.weaponLevel / 2) * 2; // 1, 3, 5
         for (let i = 0; i < count; i++) {
-            const offset = (i - (count - 1) / 2) * 10;
-            const angle = (i - (count - 1) / 2) * 0.1;
-            this.bullets.push({
-                x: this.player.x + offset,
-                y: this.player.y - 20,
-                width: 10,
-                height: 20,
-                vx: Math.sin(angle) * 10,
-                vy: -15,
-                hp: 1,
-                maxHp: 1,
-                type: 'bullet',
-                color: '#ffaa00',
-                markedForDeletion: false,
-                spriteKey: 'bullet_vulcan',
-                damage: 10 + this.weaponLevel * 5
-            });
+            const angle = (i - (count - 1) / 2) * 0.15;
+            spawn(this.player.x, this.player.y - 20, Math.sin(angle) * 10, -15, 10 + levelMult * 2, this.weaponType, 'bullet_vulcan', 10, 20);
         }
     } else if (this.weaponType === WeaponType.LASER) {
-        this.bullets.push({
-            x: this.player.x,
-            y: this.player.y - 30,
-            width: 12 + this.weaponLevel * 2,
-            height: 40,
-            vx: 0,
-            vy: -25,
-            hp: 999,
-            maxHp: 999,
-            type: 'bullet',
-            color: '#00ffff',
-            markedForDeletion: false,
-            spriteKey: 'bullet_laser',
-            damage: 5 + this.weaponLevel
-        });
+        // Laser gets wider and damage goes up
+        const w = 12 + levelMult * 4;
+        spawn(this.player.x, this.player.y - 30, 0, -25, 5 + levelMult * 2, this.weaponType, 'bullet_laser', w, 40);
     } else if (this.weaponType === WeaponType.MISSILE) {
-        this.bullets.push({
-            x: this.player.x - 20,
-            y: this.player.y,
-            width: 16,
-            height: 32,
-            vx: -2,
-            vy: -12,
-            hp: 1,
-            maxHp: 1,
-            type: 'bullet',
-            color: '#ff00ff',
-            markedForDeletion: false,
-            spriteKey: 'bullet_missile',
-            damage: 20 + this.weaponLevel * 5
-        });
-        this.bullets.push({
-            x: this.player.x + 20,
-            y: this.player.y,
-            width: 16,
-            height: 32,
-            vx: 2,
-            vy: -12,
-            hp: 1,
-            maxHp: 1,
-            type: 'bullet',
-            color: '#ff00ff',
-            markedForDeletion: false,
-            spriteKey: 'bullet_missile',
-            damage: 20 + this.weaponLevel * 5
-        });
+        const count = 2 + Math.floor(levelMult / 3) * 2; // 2 or 4
+        for(let i=0; i<count; i++) {
+            spawn(this.player.x + (i%2===0?-20:20) * (Math.ceil((i+1)/2)), this.player.y, (i%2===0?-2:2), -12, 15 + levelMult * 5, this.weaponType, 'bullet_missile', 16, 32);
+        }
     } else if (this.weaponType === WeaponType.WAVE) {
-        // Wide projectile that pierces
-        this.bullets.push({
-            x: this.player.x,
-            y: this.player.y - 40,
-            width: 80 + this.weaponLevel * 10,
-            height: 30,
-            vx: 0,
-            vy: -15,
-            hp: 999, // Piercing
-            maxHp: 999,
-            type: 'bullet',
-            color: '#63b3ed',
-            markedForDeletion: false,
-            spriteKey: 'bullet_wave',
-            damage: 15 + this.weaponLevel * 5
-        });
+        spawn(this.player.x, this.player.y - 40, 0, -15, 20 + levelMult * 5, this.weaponType, 'bullet_wave', 80 + levelMult * 10, 30);
     } else if (this.weaponType === WeaponType.PLASMA) {
-        // Slow moving, big damage
-        this.bullets.push({
-            x: this.player.x,
-            y: this.player.y - 40,
-            width: 48 + this.weaponLevel * 5,
-            height: 48 + this.weaponLevel * 5,
-            vx: 0,
-            vy: -6,
-            hp: 1,
-            maxHp: 1,
-            type: 'bullet',
-            color: '#ed64a6',
-            markedForDeletion: false,
-            spriteKey: 'bullet_plasma',
-            damage: 100 + this.weaponLevel * 20
-        });
+        spawn(this.player.x, this.player.y - 40, 0, -6, 80 + levelMult * 20, this.weaponType, 'bullet_plasma', 48 + levelMult * 10, 48 + levelMult * 10);
     }
+
+    // Option Fire
+    this.options.forEach(opt => {
+        spawn(opt.x, opt.y, 0, -15, 10, WeaponType.VULCAN, 'bullet_vulcan', 8, 16);
+    });
   }
 
   spawnEnemy() {
     const x = Math.random() * (this.width - 60) + 30;
-    const type = Math.floor(Math.random() * 3); // 0: Basic, 1: Fast, 2: Tank
+    // Enemy variety based on level
+    const maxType = Math.min(4, Math.floor(this.level * 0.8) + 1);
+    const type = Math.floor(Math.random() * (maxType + 1)); 
+    
     let enemy: Entity = {
       x,
       y: -50,
@@ -447,7 +466,7 @@ export class GameEngine {
 
     if (type === 1) { // Fast
         enemy.width = 30;
-        enemy.vx = (Math.random() - 0.5) * 4;
+        enemy.vx = (Math.random() - 0.5) * 6;
         enemy.vy = 5 + this.level;
         enemy.hp = 10;
     } else if (type === 2) { // Tank
@@ -455,22 +474,31 @@ export class GameEngine {
         enemy.height = 60;
         enemy.vy = 1;
         enemy.hp = 60 + (this.level * 20);
+    } else if (type === 3) { // Kamikaze
+        enemy.width = 30;
+        enemy.vy = 7;
+        enemy.hp = 5;
+        // Logic to steer towards player in update
+    } else if (type === 4) { // Elite Gunboat
+        enemy.width = 70;
+        enemy.height = 50;
+        enemy.vy = 0.5;
+        enemy.hp = 150 + (this.level * 30);
     }
 
     this.enemies.push(enemy);
   }
 
   spawnBoss() {
-    const hpMultiplier = 1000 * this.level;
+    const hpMultiplier = 1500 * this.level;
     const sprite = this.sprites[`boss_${this.level}`];
-    // Scale boss size based on sprite
     const width = sprite ? sprite.width : 150;
     const height = sprite ? sprite.height : 150;
 
     this.boss = {
         x: this.width / 2,
         y: -150,
-        width: width * 0.8, // Slightly smaller hitbox than visual
+        width: width * 0.8,
         height: height * 0.8,
         vx: 0,
         vy: 1,
@@ -482,8 +510,8 @@ export class GameEngine {
         angle: 0,
         spriteKey: `boss_${this.level}`
     };
-    this.screenShake = 20; // Entry shake
-    this.audio.playPowerUp();
+    this.screenShake = 20;
+    this.audio.playPowerUp(); // Alarm sound-ish
   }
 
   updateBoss(dt: number, timeScale: number) {
@@ -492,21 +520,14 @@ export class GameEngine {
     if (this.boss.y < 150) {
         this.boss.y += 1 * timeScale;
     } else {
-        // Figure 8 movement pattern
         this.boss.x += Math.cos(Date.now() / 1000) * 2 * timeScale;
-        
-        // Attack Pattern
-        if (Math.random() < 0.05 * timeScale) {
-             this.bossFire();
-        }
+        if (Math.random() < 0.05 * timeScale) this.bossFire();
     }
   }
 
   bossFire() {
       if (!this.boss) return;
-      
-      const bulletsCount = 5 + (this.level * 2);
-      
+      const bulletsCount = 5 + (this.level * 3);
       for(let i=0; i<bulletsCount; i++) {
         const angle = (i / bulletsCount) * Math.PI * 2 + (Date.now() / 1000);
         this.enemyBullets.push({
@@ -514,8 +535,8 @@ export class GameEngine {
             y: this.boss.y + this.boss.height/4,
             width: 16,
             height: 16,
-            vx: Math.cos(angle) * 4,
-            vy: Math.sin(angle) * 4,
+            vx: Math.cos(angle) * 5,
+            vy: Math.sin(angle) * 5,
             hp: 1,
             maxHp: 1,
             type: 'bullet',
@@ -525,7 +546,6 @@ export class GameEngine {
         });
       }
       
-      // Aimed shot
       if (this.level >= 2) {
           const dx = this.player.x - this.boss.x;
           const dy = this.player.y - this.boss.y;
@@ -535,8 +555,8 @@ export class GameEngine {
             y: this.boss.y + this.boss.height/4,
             width: 20,
             height: 20,
-            vx: (dx/dist) * 8,
-            vy: (dy/dist) * 8,
+            vx: (dx/dist) * 9,
+            vy: (dy/dist) * 9,
             hp: 1,
             maxHp: 1,
             type: 'bullet',
@@ -547,12 +567,41 @@ export class GameEngine {
       }
   }
 
+  damageBoss(amount: number) {
+    if (!this.boss) return;
+    this.boss.hp -= amount;
+    if (this.boss.hp <= 0 && !this.boss.markedForDeletion) {
+        this.killBoss();
+    }
+  }
+
   updateEntities(entities: Entity[], timeScale: number) {
     entities.forEach(e => {
       e.x += e.vx * timeScale;
       e.y += e.vy * timeScale;
       
-      if (e.type === 'enemy' && Math.random() < 0.005 * timeScale) {
+      // Kamikaze AI
+      if (e.type === 'enemy' && e.subType === 3) {
+          if (e.y < this.player.y) {
+              const dx = this.player.x - e.x;
+              e.vx = (dx > 0 ? 1 : -1) * 2;
+          }
+      }
+
+      // Elite Gunboat Firing
+      if (e.type === 'enemy' && e.subType === 4 && Math.random() < 0.02 * timeScale) {
+          const dx = this.player.x - e.x;
+          const dy = this.player.y - e.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          this.enemyBullets.push({
+             x: e.x, y: e.y + 20, width: 12, height: 12, 
+             vx: (dx/dist) * 4, vy: (dy/dist) * 4, 
+             hp: 1, maxHp: 1, type: 'bullet', color: '#ff0', markedForDeletion: false, spriteKey: 'bullet_enemy'
+          });
+      }
+      
+      // General Enemy firing
+      if (e.type === 'enemy' && e.subType !== 3 && Math.random() < 0.005 * timeScale) {
           this.enemyBullets.push({
               x: e.x,
               y: e.y + e.height/2,
@@ -572,61 +621,30 @@ export class GameEngine {
   }
 
   checkCollisions() {
+    // Bullets vs Enemies
     this.bullets.forEach(b => {
-        // Enemies
         this.enemies.forEach(e => {
             if (this.isColliding(b, e)) {
-                if (this.weaponType === WeaponType.PLASMA) {
-                     this.createPlasmaExplosion(b.x, b.y);
-                     b.markedForDeletion = true;
-                } else if (this.weaponType === WeaponType.WAVE || this.weaponType === WeaponType.LASER) {
-                    // Piercing - do not delete bullet
-                } else {
-                    b.markedForDeletion = true; 
-                }
-                
-                this.damageEnemy(e, b.damage || 10);
-                if (b.type !== 'bullet' || this.weaponType !== WeaponType.PLASMA) {
-                   this.createExplosion(b.x, b.y, 'small', '#ffe066');
-                }
+                this.handleBulletHit(b, e);
             }
         });
-        
-        // Boss
         if (this.boss && this.isColliding(b, this.boss)) {
-             if (this.weaponType === WeaponType.PLASMA) {
-                 this.createPlasmaExplosion(b.x, b.y);
-                 b.markedForDeletion = true;
-             } else if (this.weaponType === WeaponType.WAVE || this.weaponType === WeaponType.LASER) {
-                 // Piercing
-             } else {
-                 b.markedForDeletion = true;
-             }
-             
-             this.damageBoss(b.damage || 10);
-             if (b.type !== 'bullet' || this.weaponType !== WeaponType.PLASMA) {
-                 this.createExplosion(b.x, b.y + 20, 'small', '#fff');
-             }
+             this.handleBulletHit(b, this.boss);
         }
     });
 
-    // Player vs Enemy Bullets/Enemies
+    // Enemy Stuff vs Player
     [...this.enemyBullets, ...this.enemies].forEach(e => {
         if (this.isColliding(e, this.player)) {
             e.markedForDeletion = true; 
             if (e.type === 'enemy') e.hp = 0; 
-            
-            this.player.hp -= 10;
-            this.screenShake = 10;
-            this.onHpChange(this.player.hp);
+            this.takeDamage(10);
             this.createExplosion(this.player.x, this.player.y, 'small', '#00ffff');
         }
     });
     
     if (this.boss && this.isColliding(this.boss, this.player)) {
-        this.player.hp -= 1; 
-        this.onHpChange(this.player.hp);
-        this.screenShake = 2;
+        this.takeDamage(1);
     }
 
     // Powerups
@@ -636,23 +654,94 @@ export class GameEngine {
             this.audio.playPowerUp();
             this.score += 500;
             this.onScoreChange(this.score);
-            
-            if (p.subType === 0) { 
-                this.weaponLevel = Math.min(5, this.weaponLevel + 1);
-            } else if (p.subType === 1) { 
-                this.weaponType = WeaponType.LASER;
-            } else if (p.subType === 2) { 
-                this.weaponType = WeaponType.VULCAN;
-            } else if (p.subType === 3) { 
-                this.player.hp = Math.min(100, this.player.hp + 30);
-                this.onHpChange(this.player.hp);
-            } else if (p.subType === 4) {
-                this.weaponType = WeaponType.WAVE;
-            } else if (p.subType === 5) {
-                this.weaponType = WeaponType.PLASMA;
-            }
+            this.applyPowerup(p.subType || 0);
         }
     });
+  }
+
+  takeDamage(amount: number) {
+      if (this.shield > 0) {
+          this.shield -= amount;
+          if (this.shield < 0) {
+              this.player.hp += this.shield; // Overflow damage
+              this.shield = 0;
+          }
+          this.screenShake = 5;
+      } else {
+          this.player.hp -= amount;
+          this.screenShake = 10;
+      }
+      this.onHpChange(this.player.hp);
+  }
+
+  handleBulletHit(b: Entity, target: Entity) {
+      if (this.weaponType === WeaponType.PLASMA) {
+           this.createPlasmaExplosion(b.x, b.y);
+           b.markedForDeletion = true;
+      } else if (this.weaponType === WeaponType.WAVE || this.weaponType === WeaponType.LASER) {
+          // Piercing
+      } else {
+          b.markedForDeletion = true; 
+      }
+      
+      target.hp -= (b.damage || 10);
+      this.audio.playHit();
+      
+      if (target.hp <= 0 && !target.markedForDeletion) {
+          if (target.type === 'boss') {
+              this.killBoss();
+          } else {
+              this.killEnemy(target);
+          }
+      } else if (b.type !== 'bullet' || this.weaponType !== WeaponType.PLASMA) {
+           this.createExplosion(b.x, b.y, 'small', '#ffe066');
+      }
+  }
+
+  killEnemy(e: Entity) {
+      e.markedForDeletion = true;
+      this.score += 100 * ((e.subType || 0) + 1);
+      this.onScoreChange(this.score);
+      this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
+      this.audio.playExplosion('small');
+      
+      if (Math.random() < 0.2) this.spawnPowerup(e.x, e.y); // Increased drop rate
+  }
+
+  killBoss() {
+      if (!this.boss) return;
+      const bx = this.boss.x;
+      const by = this.boss.y;
+
+      this.createExplosion(bx, by, 'large', '#ffffff');
+      this.addShockwave(bx, by);
+      this.screenShake = 30;
+
+      for(let i=0; i<15; i++) {
+          setTimeout(() => {
+              if (this.state === GameState.VICTORY) return;
+              this.createExplosion(bx + (Math.random()-0.5)*150, by + (Math.random()-0.5)*150, 'large', '#fff');
+          }, i * 100);
+      }
+      this.audio.playExplosion('large');
+      this.score += 5000 * this.level;
+      this.onScoreChange(this.score);
+      this.boss = null;
+      
+      setTimeout(() => {
+          if (this.level < this.maxLevels) {
+              this.level++;
+              this.levelProgress = 0;
+              this.onLevelChange(this.level);
+              this.player.hp = 100;
+              this.shield = 100; // Restore shield
+              this.onHpChange(100);
+          } else {
+              this.audio.playVictory();
+              this.state = GameState.VICTORY;
+              this.onStateChange(this.state);
+          }
+      }, 3000);
   }
 
   createPlasmaExplosion(x: number, y: number) {
@@ -661,82 +750,77 @@ export class GameEngine {
       this.screenShake = 15;
       this.audio.playExplosion('large');
 
-      // AoE Damage
       const range = 100;
       this.enemies.forEach(e => {
-          const dist = Math.sqrt((e.x - x)**2 + (e.y - y)**2);
-          if (dist < range) {
-              this.damageEnemy(e, 50);
+          if (Math.hypot(e.x - x, e.y - y) < range) {
+              e.hp -= 50;
+              if (e.hp <= 0) this.killEnemy(e);
           }
       });
-      // Clear bullets
       this.enemyBullets.forEach(b => {
-          const dist = Math.sqrt((b.x - x)**2 + (b.y - y)**2);
-          if (dist < range) {
-              b.markedForDeletion = true;
-          }
+          if (Math.hypot(b.x - x, b.y - y) < range) b.markedForDeletion = true;
       });
   }
 
-  damageEnemy(e: Entity, dmg: number) {
-      e.hp -= dmg;
-      if (e.hp <= 0 && !e.markedForDeletion) {
-          e.markedForDeletion = true;
-          this.score += 100 * (e.subType! + 1);
-          this.onScoreChange(this.score);
-          this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
-          this.audio.playExplosion('small');
-          
-          if (Math.random() < 0.15) this.spawnPowerup(e.x, e.y);
-      }
-  }
-
-  damageBoss(dmg: number) {
-      if (!this.boss) return;
-      this.boss.hp -= dmg;
-      if (this.boss.hp <= 0) {
-          // Capture Boss Position BEFORE setting null
-          const bx = this.boss.x;
-          const by = this.boss.y;
-
-          this.createExplosion(bx, by, 'large', '#ffffff');
-          this.addShockwave(bx, by);
-          this.screenShake = 30;
-
-          for(let i=0; i<15; i++) {
-              setTimeout(() => {
-                  if (this.state === GameState.VICTORY) return;
-                  // Use captured coords
-                  this.createExplosion(
-                      bx + (Math.random()-0.5)*150, 
-                      by + (Math.random()-0.5)*150, 
-                      'large', '#fff'
-                  );
-                  this.screenShake = 10;
-              }, i * 100);
-          }
-          this.audio.playExplosion('large');
-          this.score += 5000 * this.level;
-          this.onScoreChange(this.score);
-          this.boss = null;
-          
-          setTimeout(() => {
-              if (this.level < this.maxLevels) {
-                  this.level++;
-                  this.levelProgress = 0;
-                  this.onLevelChange(this.level);
-                  this.player.hp = 100;
-                  this.onHpChange(100);
+  applyPowerup(type: number) {
+      // 0:Power, 1:Laser, 2:Vulcan, 3:Heal/Shield, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
+      switch(type) {
+          case 0: // Power
+              this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+              break;
+          case 1: // Laser
+              if (this.weaponType === WeaponType.LASER) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+              else { this.weaponType = WeaponType.LASER; this.weaponLevel = 1; }
+              break;
+          case 2: // Vulcan
+              if (this.weaponType === WeaponType.VULCAN) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+              else { this.weaponType = WeaponType.VULCAN; this.weaponLevel = 1; }
+              break;
+          case 3: // Heal/Shield
+              if (this.player.hp >= 100) {
+                  this.shield = Math.min(100, this.shield + 50);
               } else {
-                  this.state = GameState.VICTORY;
-                  this.onStateChange(this.state);
+                  this.player.hp = Math.min(100, this.player.hp + 30);
+                  this.onHpChange(this.player.hp);
               }
-          }, 3000);
+              break;
+          case 4: // Wave
+              if (this.weaponType === WeaponType.WAVE) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+              else { this.weaponType = WeaponType.WAVE; this.weaponLevel = 1; }
+              break;
+          case 5: // Plasma
+               if (this.weaponType === WeaponType.PLASMA) this.weaponLevel = Math.min(10, this.weaponLevel + 1);
+              else { this.weaponType = WeaponType.PLASMA; this.weaponLevel = 1; }
+              break;
+          case 6: // Bomb
+              this.bombs++;
+              this.onBombChange(this.bombs);
+              break;
+          case 7: // Option
+              if (this.options.length < 3) {
+                  this.options.push({
+                      x: this.player.x, y: this.player.y, width: 16, height: 16, 
+                      vx:0, vy:0, hp:1, maxHp:1, type:'option', color:'#00ffff', markedForDeletion:false, spriteKey:'option'
+                  });
+              }
+              break;
       }
   }
 
   spawnPowerup(x: number, y: number) {
-      const type = Math.floor(Math.random() * 6); 
+      // 0:Power, 1:Laser, 2:Vulcan, 3:Heal, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
+      // Weighted Random
+      const r = Math.random();
+      let type = 0;
+      if (r < 0.2) type = 0; // 20% Power
+      else if (r < 0.35) type = 2; // 15% Vulcan
+      else if (r < 0.45) type = 1; // 10% Laser
+      else if (r < 0.55) type = 3; // 10% Heal
+      else if (r < 0.65) type = 4; // 10% Wave
+      else if (r < 0.75) type = 5; // 10% Plasma
+      else if (r < 0.85) type = 7; // 10% Option
+      else type = 6; // 15% Bomb
+      
       this.powerups.push({
           x, y, width: 30, height: 30, vx: 0, vy: 2, hp: 1, maxHp: 1, 
           type: 'powerup', subType: type, color: '#fff', markedForDeletion: false,
@@ -762,9 +846,9 @@ export class GameEngine {
       }
   }
 
-  addShockwave(x: number, y: number, color: string = '#ffffff') {
+  addShockwave(x: number, y: number, color: string = '#ffffff', maxRadius: number = 150, width: number = 5) {
       this.shockwaves.push({
-          x, y, radius: 10, maxRadius: 150, color, life: 1.0
+          x, y, radius: 10, maxRadius, color, life: 1.0, width
       });
   }
 
@@ -780,7 +864,6 @@ export class GameEngine {
   draw() {
     this.ctx.save();
     
-    // Screen Shake Effect
     if (this.screenShake > 0) {
         const sx = (Math.random() - 0.5) * this.screenShake;
         const sy = (Math.random() - 0.5) * this.screenShake;
@@ -790,20 +873,58 @@ export class GameEngine {
     this.ctx.fillStyle = '#050505';
     this.ctx.fillRect(0, 0, this.width, this.height);
 
-    // Dynamic Starfield
-    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    // Dynamic Starfield - Brighter and multi-layered
     const t = Date.now() / 1000;
+    
+    // Distant stars
+    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    for(let i=0; i<50; i++) {
+        const sx = (i * 137) % this.width;
+        const sy = (i * 97 + t * 20) % this.height;
+        this.ctx.beginPath();
+        this.ctx.rect(sx, sy, 1, 1);
+        this.ctx.fill();
+    }
+    
+    // Close stars
+    this.ctx.fillStyle = 'rgba(200, 230, 255, 0.8)';
     for(let i=0; i<30; i++) {
-        const speed = (i % 3) + 1;
+        const speed = (i % 3) + 2;
         const sx = (i * 57) % this.width;
-        const sy = (i * 31 + t * 100 * speed) % this.height;
+        const sy = (i * 31 + t * 60 * speed) % this.height;
         this.ctx.beginPath();
         this.ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
         this.ctx.fill();
     }
 
+    // Meteors
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    this.ctx.lineWidth = 2;
+    this.meteors.forEach(m => {
+        this.ctx.beginPath();
+        this.ctx.moveTo(m.x, m.y);
+        this.ctx.lineTo(m.x - m.vx * 5, m.y - m.vy * 5); // Trail
+        this.ctx.stroke();
+    });
+
     if (this.state !== GameState.GAME_OVER) {
         this.drawEntity(this.player);
+        // Draw Shield
+        if (this.shield > 0) {
+            this.ctx.save();
+            this.ctx.translate(this.player.x, this.player.y);
+            this.ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(1, this.shield/50)})`;
+            this.ctx.lineWidth = 3;
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = '#00ffff';
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+        
+        // Draw Options
+        this.options.forEach(opt => this.drawEntity(opt));
     }
 
     this.powerups.forEach(p => this.drawEntity(p));
@@ -812,7 +933,7 @@ export class GameEngine {
     this.bullets.forEach(b => this.drawEntity(b));
     this.enemyBullets.forEach(b => this.drawEntity(b));
 
-    // Draw Particles (Composite for glow)
+    // Particles
     this.ctx.globalCompositeOperation = 'lighter';
     this.particles.forEach(p => {
         this.ctx.globalAlpha = p.life / p.maxLife;
@@ -822,10 +943,10 @@ export class GameEngine {
         this.ctx.fill();
     });
 
-    // Draw Shockwaves
+    // Shockwaves
     this.shockwaves.forEach(s => {
         this.ctx.globalAlpha = s.life;
-        this.ctx.lineWidth = 5;
+        this.ctx.lineWidth = s.width || 5;
         this.ctx.strokeStyle = s.color;
         this.ctx.beginPath();
         this.ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
@@ -843,11 +964,9 @@ export class GameEngine {
     this.ctx.translate(Math.round(e.x), Math.round(e.y));
 
     if (e.type === 'player') {
-        // Banking effect
         const bankAngle = Math.max(-0.3, Math.min(0.3, (e.vx || 0) * 0.05));
         this.ctx.rotate(bankAngle);
         
-        // Engine trail
         this.ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.2})`;
         this.ctx.beginPath();
         this.ctx.moveTo(-5, 25);
@@ -856,27 +975,24 @@ export class GameEngine {
         this.ctx.fill();
     }
     
-    // Rotate bullets for visuals
-    if (e.spriteKey === 'bullet_wave') {
-        // Wave is upright, no rotation needed
-    }
     if (e.spriteKey === 'bullet_plasma') {
         this.ctx.rotate(Date.now() / 100);
+    }
+    
+    if (e.angle) {
+        this.ctx.rotate(e.angle);
     }
 
     if (e.spriteKey && this.sprites[e.spriteKey]) {
         const sprite = this.sprites[e.spriteKey];
-        // Draw centered
         this.ctx.drawImage(sprite, -sprite.width/2, -sprite.height/2);
     } else {
-        // Fallback drawing if sprite missing
         this.ctx.fillStyle = e.color;
         this.ctx.fillRect(-e.width/2, -e.height/2, e.width, e.height);
     }
 
-    // Boss HP Bar overlay
     if (e.type === 'boss') {
-        this.ctx.rotate(Math.PI); // Cancel boss rotation for UI
+        this.ctx.rotate(Math.PI); 
         this.ctx.fillStyle = 'rgba(255,0,0,0.5)';
         this.ctx.fillRect(-50, 0, 100, 6);
         this.ctx.fillStyle = '#00ff00';

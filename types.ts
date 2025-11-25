@@ -29,7 +29,7 @@ export interface Particle {
   maxLife: number;
   color: string;
   size: number;
-  type?: 'spark' | 'smoke';
+  type?: 'spark' | 'smoke' | 'star';
 }
 
 export interface Shockwave {
@@ -39,6 +39,7 @@ export interface Shockwave {
   maxRadius: number;
   color: string;
   life: number; // 0 to 1
+  width?: number;
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

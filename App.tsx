@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { GameEngine } from './game/GameEngine';
 import { GameUI } from './components/GameUI';
@@ -12,6 +13,7 @@ function App() {
   const [level, setLevel] = useState(1);
   const [gameState, setGameState] = useState<GameState>(GameState.MENU);
   const [hp, setHp] = useState(100);
+  const [bombs, setBombs] = useState(0);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -22,7 +24,8 @@ function App() {
       (newScore) => setScore(newScore),
       (newLevel) => setLevel(newLevel),
       (newState) => setGameState(newState),
-      (newHp) => setHp(newHp)
+      (newHp) => setHp(newHp),
+      (newBombs) => setBombs(newBombs)
     );
     engineRef.current = engine;
 
@@ -50,9 +53,13 @@ function App() {
   const handleStart = () => {
     engineRef.current?.startGame();
   };
+  
+  const handleBomb = () => {
+      engineRef.current?.triggerBomb();
+  };
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div className="relative w-full h-screen bg-black overflow-hidden touch-none select-none">
       <canvas 
         ref={canvasRef} 
         className="block w-full h-full"
@@ -62,8 +69,10 @@ function App() {
         score={score} 
         level={level} 
         hp={hp}
+        bombs={bombs}
         onStart={handleStart}
         onRestart={handleStart}
+        onUseBomb={handleBomb}
       />
     </div>
   );

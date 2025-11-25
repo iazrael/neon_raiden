@@ -1,4 +1,5 @@
 
+
 export class SpriteGenerator {
   createCanvas(width: number, height: number): { canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D } {
     const canvas = document.createElement('canvas');
@@ -70,9 +71,35 @@ export class SpriteGenerator {
     return canvas;
   }
 
+  // 僚机/浮游炮
+  generateOption(): HTMLCanvasElement {
+      const { canvas, ctx } = this.createCanvas(32, 32);
+      ctx.translate(16, 16);
+      
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = '#00ffff';
+      ctx.fillStyle = '#111';
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(0, -12);
+      ctx.lineTo(0, 12);
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(12, 0);
+      ctx.stroke();
+
+      return canvas;
+  }
+
   // 生成敌人
   generateEnemy(type: number): HTMLCanvasElement {
-    const size = type === 2 ? 80 : 48;
+    const size = (type === 2 || type === 4) ? 80 : 48;
     const { canvas, ctx } = this.createCanvas(size, size);
     ctx.save();
     ctx.translate(size/2, size/2);
@@ -86,8 +113,6 @@ export class SpriteGenerator {
       ctx.lineTo(-15, -10);
       ctx.closePath();
       ctx.fill();
-      
-      // 核心
       ctx.fillStyle = '#feb2b2';
       ctx.beginPath();
       ctx.arc(0, 0, 5, 0, Math.PI * 2);
@@ -101,14 +126,12 @@ export class SpriteGenerator {
       ctx.bezierCurveTo(15, -10, 20, 10, 0, 20);
       ctx.bezierCurveTo(-20, 10, -15, -10, 0, -20);
       ctx.fill();
-
       ctx.strokeStyle = '#d6bcfa';
       ctx.lineWidth = 2;
       ctx.stroke();
 
     } else if (type === 2) { // 坦克/重型：绿色
       ctx.fillStyle = '#2f855a';
-      // 六边形底盘
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const angle = i * Math.PI / 3;
@@ -116,8 +139,6 @@ export class SpriteGenerator {
       }
       ctx.closePath();
       ctx.fill();
-
-      // 炮塔
       ctx.fillStyle = '#68d391';
       ctx.beginPath();
       ctx.rect(-10, -15, 20, 30);
@@ -125,29 +146,58 @@ export class SpriteGenerator {
       ctx.beginPath();
       ctx.arc(0, 0, 12, 0, Math.PI * 2);
       ctx.fill();
+      
+    } else if (type === 3) { // 自爆机：橙色尖刺
+        ctx.fillStyle = '#dd6b20';
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = i * Math.PI / 4;
+            ctx.lineTo(20 * Math.cos(angle), 20 * Math.sin(angle));
+            ctx.lineTo(10 * Math.cos(angle + Math.PI/8), 10 * Math.sin(angle + Math.PI/8));
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+    } else if (type === 4) { // 精英炮舰：蓝色
+        ctx.fillStyle = '#2b6cb0';
+        ctx.beginPath();
+        ctx.moveTo(0, 30);
+        ctx.lineTo(30, -10);
+        ctx.lineTo(10, -30);
+        ctx.lineTo(-10, -30);
+        ctx.lineTo(-30, -10);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.fillStyle = '#63b3ed';
+        ctx.beginPath();
+        ctx.rect(-25, -5, 10, 20); // Guns
+        ctx.rect(15, -5, 10, 20);
+        ctx.fill();
     }
 
     ctx.restore();
     return canvas;
   }
 
-  // 生成 Boss (根据等级生成不同复杂度)
+  // 生成 Boss
   generateBoss(level: number): HTMLCanvasElement {
     const size = 160 + (level * 20);
     const { canvas, ctx } = this.createCanvas(size, size);
     ctx.save();
     ctx.translate(size/2, size/2);
-    ctx.rotate(Math.PI); // 面向下
+    ctx.rotate(Math.PI); 
 
-    // 颜色主题
     const hue = (level * 60) % 360;
     const primaryColor = `hsl(${hue}, 70%, 30%)`;
     const secondaryColor = `hsl(${hue}, 100%, 70%)`;
 
-    // 绘制主体结构
     ctx.fillStyle = primaryColor;
     
-    // 主躯干
     ctx.beginPath();
     ctx.moveTo(0, -size/3);
     ctx.lineTo(size/4, 0);
@@ -159,13 +209,11 @@ export class SpriteGenerator {
     ctx.strokeStyle = '#fff';
     ctx.stroke();
 
-    // 侧翼 (根据等级增加翅膀数量)
     const wings = 1 + Math.floor(level / 2);
     for(let i=0; i<wings; i++) {
         const offset = 20 + i * 20;
         ctx.fillStyle = '#2d3748';
         
-        // 左翼
         ctx.beginPath();
         ctx.moveTo(-size/4, -i*10);
         ctx.lineTo(-size/2 + i*5, size/4);
@@ -173,7 +221,6 @@ export class SpriteGenerator {
         ctx.fill();
         ctx.stroke();
 
-        // 右翼
         ctx.beginPath();
         ctx.moveTo(size/4, -i*10);
         ctx.lineTo(size/2 - i*5, size/4);
@@ -182,7 +229,6 @@ export class SpriteGenerator {
         ctx.stroke();
     }
 
-    // 核心发光部件
     ctx.shadowBlur = 20;
     ctx.shadowColor = secondaryColor;
     ctx.fillStyle = secondaryColor;
@@ -190,13 +236,12 @@ export class SpriteGenerator {
     ctx.arc(0, 0, 15 + level * 2, 0, Math.PI * 2);
     ctx.fill();
     
-    // 额外的武器挂载点
     const mounts = 2 + level;
     for(let i=0; i<mounts; i++) {
-        const angle = (i / mounts) * Math.PI; // 半圆分布
+        const angle = (i / mounts) * Math.PI; 
         const r = size/3;
         const x = Math.cos(angle) * r;
-        const y = Math.sin(angle) * r * 0.5; // 压扁一点
+        const y = Math.sin(angle) * r * 0.5;
         
         ctx.beginPath();
         ctx.arc(x, y, 5, 0, Math.PI * 2);
@@ -242,7 +287,6 @@ export class SpriteGenerator {
         ctx.lineTo(0, 10);
         ctx.lineTo(-5, 5);
         ctx.fill();
-        // 尾焰
         ctx.fillStyle = '#ed8936';
         ctx.beginPath();
         ctx.arc(0, 12, 3, 0, Math.PI * 2);
@@ -255,7 +299,6 @@ export class SpriteGenerator {
         ctx.arc(0, 10, 30, Math.PI * 1.2, Math.PI * 1.8);
         ctx.fill();
     } else if (type === 'plasma') {
-        // Swirling energy ball
         const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, 20);
         grad.addColorStop(0, '#fff');
         grad.addColorStop(0.4, '#ed64a6');
@@ -264,7 +307,6 @@ export class SpriteGenerator {
         ctx.beginPath();
         ctx.arc(0, 0, 20, 0, Math.PI * 2);
         ctx.fill();
-        
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -284,24 +326,29 @@ export class SpriteGenerator {
     return canvas;
   }
 
+  // 生成掉落物，现在包含内部图标
   generatePowerup(type: number): HTMLCanvasElement {
       const { canvas, ctx } = this.createCanvas(40, 40);
       
       let color = '#fff';
-      let label = '?';
+      let icon: HTMLCanvasElement | null = null;
+      let label = '';
 
+      // 0:Power, 1:Laser, 2:Vulcan, 3:Heal/Shield, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
       switch(type) {
-          case 0: color = '#ecc94b'; label = 'P'; break; // Power
-          case 1: color = '#4fd1c5'; label = 'L'; break; // Laser
-          case 2: color = '#ed8936'; label = 'V'; break; // Vulcan
-          case 3: color = '#48bb78'; label = 'H'; break; // Heal
-          case 4: color = '#63b3ed'; label = 'W'; break; // Wave
-          case 5: color = '#ed64a6'; label = 'X'; break; // Plasma
+          case 0: color = '#ecc94b'; label = 'P'; break; 
+          case 1: color = '#4fd1c5'; icon = this.generateBullet('laser'); break;
+          case 2: color = '#ed8936'; icon = this.generateBullet('vulcan'); break;
+          case 3: color = '#48bb78'; label = 'H'; break;
+          case 4: color = '#63b3ed'; icon = this.generateBullet('wave'); break;
+          case 5: color = '#ed64a6'; icon = this.generateBullet('plasma'); break;
+          case 6: color = '#f56565'; label = 'B'; break; // Bomb
+          case 7: color = '#a0aec0'; label = 'O'; break; // Option
       }
       
       ctx.translate(20, 20);
       
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillStyle = 'rgba(20, 20, 30, 0.8)';
       ctx.beginPath();
       ctx.roundRect(-15, -15, 30, 30, 5);
       ctx.fill();
@@ -310,11 +357,20 @@ export class SpriteGenerator {
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      ctx.fillStyle = color;
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, 0, 1);
+      if (icon) {
+          ctx.save();
+          // Scale down icon to fit
+          ctx.scale(0.6, 0.6);
+          // Center icon
+          ctx.drawImage(icon, -icon.width/2, -icon.height/2);
+          ctx.restore();
+      } else {
+          ctx.fillStyle = color;
+          ctx.font = 'bold 20px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, 0, 1);
+      }
 
       return canvas;
   }

@@ -36,23 +36,23 @@ export class AudioSystem {
       osc.type = 'square';
       osc.frequency.setValueAtTime(400, now);
       osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.setValueAtTime(0.3, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
       osc.start(now);
       osc.stop(now + 0.1);
     } else if (type === 'laser') {
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(800, now);
-      osc.frequency.linearRampToValueAtTime(1200, now + 0.2);
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+      osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
       osc.start(now);
-      osc.stop(now + 0.2);
+      osc.stop(now + 0.15);
     } else if (type === 'missile') {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(150, now);
       osc.frequency.linearRampToValueAtTime(50, now + 0.3);
-      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.setValueAtTime(0.3, now);
       gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
       osc.start(now);
       osc.stop(now + 0.3);
@@ -60,7 +60,7 @@ export class AudioSystem {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(300, now);
       osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
-      gain.gain.setValueAtTime(0.6, now);
+      gain.gain.setValueAtTime(0.4, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
       osc.start(now);
       osc.stop(now + 0.3);
@@ -68,7 +68,7 @@ export class AudioSystem {
       osc.type = 'square'; // Buzzier sound
       osc.frequency.setValueAtTime(100, now);
       osc.frequency.linearRampToValueAtTime(50, now + 0.5);
-      gain.gain.setValueAtTime(0.8, now);
+      gain.gain.setValueAtTime(0.5, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
       osc.start(now);
       osc.stop(now + 0.5);
@@ -78,7 +78,7 @@ export class AudioSystem {
   playExplosion(size: 'small' | 'large') {
     if (!this.ctx || !this.masterGain) return;
     
-    const duration = size === 'large' ? 0.8 : 0.3;
+    const duration = size === 'large' ? 0.8 : 0.2;
     const bufferSize = this.ctx.sampleRate * duration;
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -101,11 +101,49 @@ export class AudioSystem {
     gain.connect(this.masterGain);
 
     const now = this.ctx.currentTime;
-    gain.gain.setValueAtTime(size === 'large' ? 0.8 : 0.4, now);
+    gain.gain.setValueAtTime(size === 'large' ? 0.8 : 0.3, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
     filter.frequency.exponentialRampToValueAtTime(100, now + duration);
 
     noise.start(now);
+  }
+
+  playHit() {
+    if (!this.ctx || !this.masterGain) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    
+    const now = this.ctx.currentTime;
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(200, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.05);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+    
+    osc.start(now);
+    osc.stop(now + 0.05);
+  }
+
+  playBomb() {
+     if (!this.ctx || !this.masterGain) return;
+     // Deep rumbling sweep
+     const osc = this.ctx.createOscillator();
+     const gain = this.ctx.createGain();
+     osc.connect(gain);
+     gain.connect(this.masterGain);
+     const now = this.ctx.currentTime;
+     
+     osc.type = 'sawtooth';
+     osc.frequency.setValueAtTime(100, now);
+     osc.frequency.exponentialRampToValueAtTime(10, now + 1.5);
+     
+     gain.gain.setValueAtTime(0.8, now);
+     gain.gain.linearRampToValueAtTime(0, now + 1.5);
+     
+     osc.start(now);
+     osc.stop(now + 1.5);
   }
 
   playPowerUp() {
@@ -126,5 +164,43 @@ export class AudioSystem {
 
     osc.start(now);
     osc.stop(now + 0.4);
+  }
+
+  playVictory() {
+     if (!this.ctx || !this.masterGain) return;
+     const now = this.ctx.currentTime;
+     const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+     notes.forEach((freq, i) => {
+         const osc = this.ctx!.createOscillator();
+         const gain = this.ctx!.createGain();
+         osc.connect(gain);
+         gain.connect(this.masterGain!);
+         
+         osc.type = 'square';
+         osc.frequency.value = freq;
+         gain.gain.setValueAtTime(0.2, now + i*0.1);
+         gain.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.4);
+         osc.start(now + i*0.1);
+         osc.stop(now + i*0.1 + 0.4);
+     });
+  }
+
+  playDefeat() {
+     if (!this.ctx || !this.masterGain) return;
+     const now = this.ctx.currentTime;
+     const notes = [300, 250, 200, 150]; 
+     notes.forEach((freq, i) => {
+         const osc = this.ctx!.createOscillator();
+         const gain = this.ctx!.createGain();
+         osc.connect(gain);
+         gain.connect(this.masterGain!);
+         
+         osc.type = 'sawtooth';
+         osc.frequency.value = freq;
+         gain.gain.setValueAtTime(0.2, now + i*0.2);
+         gain.gain.linearRampToValueAtTime(0.01, now + i*0.2 + 0.3);
+         osc.start(now + i*0.2);
+         osc.stop(now + i*0.2 + 0.3);
+     });
   }
 }
