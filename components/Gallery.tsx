@@ -31,8 +31,8 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
         }
 
         // Generate sprite on the fly if needed, or use a pre-generated one
-        // Since SpriteGenerator returns Canvases, we can draw them directly.
-        let sprite: HTMLCanvasElement | null = null;
+        // Since SpriteGenerator returns Canvases or Images, we can draw them directly.
+        let sprite: HTMLCanvasElement | HTMLImageElement | null = null;
 
         if (spriteKey === 'player') sprite = spriteGen.current.generatePlayer();
         else if (spriteKey.startsWith('enemy_')) {
@@ -49,7 +49,26 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
         }
 
         if (sprite) {
-            ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+            if (sprite instanceof HTMLImageElement && !sprite.complete) {
+                sprite.onload = () => {
+                    // Redraw when loaded
+                    // We need to re-apply transforms because context is restored at end of function
+                    // But we can't easily re-apply them without refactoring.
+                    // Instead, let's just trigger a re-render or handle it here if we are careful.
+                    // Actually, since this is inside a function, the context state is lost after restore.
+                    // We should probably just let the effect re-run or force update.
+                    // But simpler: just draw it here with same transforms.
+                    ctx.save();
+                    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    const scale = isBoss ? 1.5 : 3;
+                    ctx.scale(scale, scale);
+                    if (isBoss) ctx.rotate(Math.PI);
+                    ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+                    ctx.restore();
+                };
+            } else {
+                ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+            }
         } else if (color) {
             // Fallback for simple shapes if sprite gen fails or isn't mapped
             ctx.fillStyle = color;
