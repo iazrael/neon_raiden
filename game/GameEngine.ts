@@ -6,6 +6,7 @@ import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
+import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
 
 export class GameEngine {
     canvas: HTMLCanvasElement;
@@ -119,6 +120,9 @@ export class GameEngine {
         }
         // Notify initial max level
         setTimeout(() => this.onMaxLevelChange(this.maxLevelReached), 0);
+        
+        // Ensure first weapon is always available
+        unlockWeapon(WeaponType.VULCAN);
     }
 
     resize() {
@@ -423,6 +427,7 @@ export class GameEngine {
         if (!this.boss) return;
         const bx = this.boss.x;
         const by = this.boss.y;
+        const bossLevel = this.level;
 
         this.createExplosion(bx, by, 'large', '#ffffff');
         this.addShockwave(bx, by);
@@ -437,6 +442,10 @@ export class GameEngine {
         this.audio.playExplosion('large');
         this.score += 5000 * this.level;
         this.onScoreChange(this.score);
+        
+        // Unlock boss when defeated
+        unlockBoss(bossLevel);
+        
         this.boss = null;
         this.bossWingmen = [];
         this.isLevelTransitioning = true; // Block new boss spawns
@@ -594,6 +603,11 @@ export class GameEngine {
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');
 
+        // Unlock enemy when defeated
+        if (e.subType !== undefined) {
+            unlockEnemy(e.subType);
+        }
+
         const dropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
         if (Math.random() < dropRate) this.spawnPowerup(e.x, e.y);
     }
@@ -667,6 +681,9 @@ export class GameEngine {
                 // Weapon-specific powerups
                 const weaponType = effects.weaponTypeMap[type as keyof typeof effects.weaponTypeMap];
                 if (weaponType !== undefined && weaponType !== null) {
+                    // Unlock weapon when picked up
+                    unlockWeapon(weaponType);
+                    
                     if (this.weaponType === weaponType) {
                         // Same weapon type - upgrade level
                         this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);

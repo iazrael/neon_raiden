@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { WeaponType } from '@/types';
 import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, PlayerConfig, ASSETS_BASE_PATH, BossWeaponNames, WingmenNames } from '@/game/config';
+import { isWeaponUnlocked, isEnemyUnlocked, isBossUnlocked } from '@/game/unlockedItems';
 
 interface GalleryProps {
     onClose: () => void;
@@ -82,7 +83,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
         description: `Base Damage: ${config.baseDamage}`,
         chineseDescription: config.chineseDescription || '',
         config,
-        unlockLevel: parseInt(type) + 1 // Simplified unlock logic
+        isUnlocked: isWeaponUnlocked(parseInt(type) as WeaponType)
     }));
 
     const enemies = Object.entries(EnemyConfig.types).map(([type, config]) => ({
@@ -92,7 +93,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
         description: `Base HP: ${config.baseHp}`,
         chineseDescription: config.chineseDescription || '',
         config,
-        unlockLevel: [1, 2, 3, 3, 5, 6, 7][parseInt(type)] || 1
+        isUnlocked: isEnemyUnlocked(parseInt(type) as EnemyType)
     }));
 
     const bosses = Object.values(BossConfig).map((config) => ({
@@ -102,7 +103,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
         chineseDescription: config.chineseDescription || '',
         level: config.level,
         config,
-        unlockLevel: config.level + 1, // Unlock after beating
+        isUnlocked: isBossUnlocked(config.level),
         weapons: config.weapons || [],
         wingmenCount: config.wingmenCount || 0,
         wingmenType: config.wingmenType || 0
@@ -135,7 +136,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                 return (
                     <div className="grid grid-cols-2 gap-3 sm:gap-3">
                         {weapons.map((w) => {
-                            const isLocked = maxLevelReached < w.unlockLevel;
+                            const isLocked = !w.isUnlocked;
                             return (
                                 <div key={w.type}
                                     className={`p-4 sm:p-3 border-2 rounded-lg active:scale-98 cursor-pointer transition-all pointer-events-auto select-none min-h-[90px] flex flex-col justify-center shadow-md ${isLocked
@@ -155,7 +156,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                     }}
                                 >
                                     <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : w.name}</div>
-                                    <div className="text-xs opacity-70 mt-1.5">{isLocked ? `Unlock at Lv.${w.unlockLevel}` : `DMG: ${w.config.baseDamage}`}</div>
+                                    <div className="text-xs opacity-70 mt-1.5">{isLocked ? `Pick up this weapon to unlock` : `DMG: ${w.config.baseDamage}`}</div>
                                 </div>
                             );
                         })}
@@ -165,7 +166,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                 return (
                     <div className="grid grid-cols-2 gap-3 sm:gap-3">
                         {enemies.map((e) => {
-                            const isLocked = maxLevelReached < e.unlockLevel;
+                            const isLocked = !e.isUnlocked;
                             return (
                                 <div key={e.type}
                                     className={`p-4 sm:p-3 border-2 rounded-lg active:scale-98 cursor-pointer transition-all pointer-events-auto select-none min-h-[90px] flex flex-col justify-center shadow-md ${isLocked
@@ -185,7 +186,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                     }}
                                 >
                                     <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : e.name}</div>
-                                    <div className="text-xs opacity-70 mt-1.5">{isLocked ? `Encounter at Lv.${e.unlockLevel}` : `HP: ${e.config.baseHp}`}</div>
+                                    <div className="text-xs opacity-70 mt-1.5">{isLocked ? `Defeat this enemy to unlock` : `HP: ${e.config.baseHp}`}</div>
                                 </div>
                             );
                         })}
@@ -195,7 +196,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                 return (
                     <div className="grid grid-cols-1 gap-4">
                         {bosses.map((b) => {
-                            const isLocked = maxLevelReached < b.unlockLevel;
+                            const isLocked = !b.isUnlocked;
                             return (
                                 <div key={b.level}
                                     className={`p-5 sm:p-3 border-2 rounded-lg active:scale-98 cursor-pointer transition-all pointer-events-auto select-none min-h-[90px] flex flex-col justify-center shadow-lg ${isLocked
@@ -218,7 +219,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                         <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : b.name}</div>
                                         <div className="text-sm font-mono px-2 py-0.5 bg-purple-500/20 rounded">LV.{b.level}</div>
                                     </div>
-                                    <div className="text-xs opacity-70 mt-2">{isLocked ? `Defeat Lv.${b.level} Boss` : `HP: ${b.config.hp}`}</div>
+                                    <div className="text-xs opacity-70 mt-2">{isLocked ? `Defeat this Boss to unlock` : `HP: ${b.config.hp}`}</div>
                                 </div>
                             );
                         })}
@@ -227,17 +228,23 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
         }
     };
 
-    // Auto-select first item when tab changes (but don't show detail)
+    // Auto-select first unlocked item when tab changes (but don't show detail)
     useEffect(() => {
         setShowDetail(false);
         if (activeTab === 'FIGHTERS') {
             setSelectedItem(fighters[0] || null);
         } else if (activeTab === 'ARMORY') {
-            setSelectedItem(weapons[0] || null);
+            // Try to select first unlocked weapon, otherwise first locked weapon
+            const unlockedWeapon = weapons.find(w => w.isUnlocked);
+            setSelectedItem(unlockedWeapon || weapons[0] || null);
         } else if (activeTab === 'BESTIARY') {
-            setSelectedItem(enemies[0] || null);
+            // Try to select first unlocked enemy, otherwise first locked enemy
+            const unlockedEnemy = enemies.find(e => e.isUnlocked);
+            setSelectedItem(unlockedEnemy || enemies[0] || null);
         } else if (activeTab === 'BOSSES') {
-            setSelectedItem(bosses[0] || null);
+            // Try to select first unlocked boss, otherwise first locked boss
+            const unlockedBoss = bosses.find(b => b.isUnlocked);
+            setSelectedItem(unlockedBoss || bosses[0] || null);
         }
     }, [activeTab]);
 
