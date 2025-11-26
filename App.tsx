@@ -4,6 +4,8 @@ import { GameEngine } from './game/GameEngine';
 import { GameUI } from './components/GameUI';
 import { GameState } from './types';
 
+import { SpriteGenerator } from './game/SpriteGenerator';
+
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
@@ -19,6 +21,9 @@ function App() {
   const [maxLevelReached, setMaxLevelReached] = useState(1);
 
   useEffect(() => {
+    // Preload assets
+    SpriteGenerator.preloadAssets();
+
     if (!canvasRef.current) return;
 
     // Initialize Engine

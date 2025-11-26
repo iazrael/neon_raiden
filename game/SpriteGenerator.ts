@@ -1,8 +1,60 @@
-import { BulletSizeConfig } from '@/game/config';
-import { ASSETS_BASE_PATH } from '@/game/config';
-import { BulletType } from '@/types';
+import { BulletSizeConfig, ASSETS_BASE_PATH, WeaponConfig, EnemyConfig, BossConfig } from '@/game/config';
+import { BulletType, WeaponType } from '@/types';
 
 export class SpriteGenerator {
+    private static cache: Map<string, HTMLImageElement> = new Map();
+
+    // Preload all assets
+    static async preloadAssets(): Promise<void> {
+        const promises: Promise<void>[] = [];
+
+        const load = (src: string) => {
+            if (this.cache.has(src)) return;
+            const img = new Image();
+            img.src = src;
+            this.cache.set(src, img); // Cache immediately
+            const p = new Promise<void>((resolve, reject) => {
+                if (img.complete) {
+                    resolve();
+                } else {
+                    img.onload = () => resolve();
+                    img.onerror = () => {
+                        console.warn(`Failed to load asset: ${src}`);
+                        resolve();
+                    };
+                }
+            });
+            promises.push(p);
+        };
+
+        // Fighters
+        load(`${ASSETS_BASE_PATH}fighters/player.svg`);
+        load(`${ASSETS_BASE_PATH}fighters/option.svg`);
+
+        // Enemies
+        for (let i = 0; i <= 6; i++) {
+            load(`${ASSETS_BASE_PATH}enemies/enemy_${i}.svg`);
+        }
+
+        // Bullets
+        const bulletFiles = [
+            'bullet_vulcan', 'bullet_laser', 'bullet_missile', 'bullet_wave',
+            'bullet_plasma', 'bullet_enemy', 'bullet_tesla', 'bullet_magma', 'bullet_shuriken'
+        ];
+        bulletFiles.forEach(f => load(`${ASSETS_BASE_PATH}bullets/${f}.svg`));
+
+        // Powerups
+        // load(`${ASSETS_BASE_PATH}powerups/powerup_bg.svg`); // Removed as we use canvas for bg
+
+        // Bosses
+        for (let i = 1; i <= 10; i++) {
+            load(`${ASSETS_BASE_PATH}bosses/boss_${i}.svg`);
+        }
+
+        await Promise.all(promises);
+        console.log('All assets preloaded');
+    }
+
     createCanvas(width: number, height: number): { canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D } {
         const canvas = document.createElement('canvas');
         canvas.width = width;
@@ -11,11 +63,32 @@ export class SpriteGenerator {
         return { canvas, ctx };
     }
 
-    private loadSVG(path: string, width: number, height: number): HTMLImageElement {
+    private loadSVG(src: string, width: number, height: number): HTMLImageElement {
+        if (SpriteGenerator.cache.has(src)) {
+            const cached = SpriteGenerator.cache.get(src)!;
+            // Return a clone or the same instance?
+            // If we return the same instance, width/height might be overwritten if different sizes are requested for same src.
+            // But usually src maps to one size.
+            // However, to be safe, we can just return the cached image.
+            // Canvas drawImage works fine with same image instance.
+            // But we need to ensure width/height properties are set if they are used for layout.
+            // The cached image has naturalWidth/Height.
+            // The `width` and `height` properties on HTMLImageElement are display size.
+            // Let's update them just in case.
+            cached.width = width;
+            cached.height = height;
+            return cached;
+        }
+
         const img = new Image();
         img.width = width;
         img.height = height;
-        img.src = path;
+        img.src = src;
+        // Cache it immediately, though it might not be loaded yet.
+        // But better to cache loaded ones.
+        // If we use preloadAssets, they should be in cache.
+        // If not, we add to cache.
+        SpriteGenerator.cache.set(src, img);
         return img;
     }
 
@@ -68,9 +141,6 @@ export class SpriteGenerator {
     generatePowerup(type: number): HTMLCanvasElement {
         const { canvas, ctx } = this.createCanvas(40, 40);
 
-        const bg = new Image();
-        bg.src = `${ASSETS_BASE_PATH}powerups/powerup_bg.svg`;
-
         let iconSrc = '';
         let label = '';
         let color = '#fff';
@@ -90,42 +160,43 @@ export class SpriteGenerator {
             case 10: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_shuriken.svg`; break; // Shuriken
         }
 
-        const draw = () => {
-            ctx.clearRect(0, 0, 40, 40);
-            if (bg.complete) {
-                ctx.drawImage(bg, 0, 0, 40, 40);
+        // Draw Background (Canvas)
+        ctx.translate(20, 20);
+        ctx.fillStyle = 'rgba(20, 20, 30, 0.8)';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(-15, -15, 30, 30, 5);
+        } else {
+            ctx.rect(-15, -15, 30, 30); // Fallback
+        }
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
 
-                // Overlay color tint for border if possible, or just stroke rect on top
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
-                ctx.strokeRect(2, 2, 36, 36);
-            }
+        // Draw Icon or Label
+        if (iconSrc) {
+            const img = this.loadSVG(iconSrc, 24, 24); // Use loadSVG to get cached image
+            const drawIcon = () => {
+                ctx.save();
+                // Icon size is 24x24, centered
+                ctx.drawImage(img, -12, -12, 24, 24);
+                ctx.restore();
+            };
 
-            if (iconSrc) {
-                const icon = new Image();
-                icon.src = iconSrc;
-                if (icon.complete) {
-                    // Center icon
-                    const iw = 24;
-                    const ih = 24;
-                    ctx.drawImage(icon, (40 - iw) / 2, (40 - ih) / 2, iw, ih);
-                } else {
-                    icon.onload = draw;
-                }
+            if (img.complete) {
+                drawIcon();
             } else {
-                ctx.fillStyle = color;
-                ctx.font = 'bold 20px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(label, 20, 22);
+                img.addEventListener('load', drawIcon);
             }
-        };
-
-        bg.onload = draw;
-        // Trigger initial draw in case cached
-        draw();
+        } else {
+            ctx.fillStyle = color;
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, 0, 1);
+        }
 
         return canvas;
     }
 }
-

@@ -278,8 +278,8 @@ export const EnemyConfig = {
 
 // ==================== 敌人掉落物配置 ====================
 export const PowerupDropConfig = {
-    elitePowerupDropRate: 0.8,      // 精英怪掉落概率（80%）
-    normalPowerupDropRate: 0.2,     // 普通怪掉落概率（20%）
+    elitePowerupDropRate: 0.6,      // 精英怪掉落概率（60%）
+    normalPowerupDropRate: 0.1,     // 普通怪掉落概率（10%）
 };
 
 // ==================== 道具掉落概率配置 ====================
