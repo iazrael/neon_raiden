@@ -1,0 +1,63 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .neon-glow {
+        filter: drop-shadow(0 0 8px #00ff88) drop-shadow(0 0 16px #00ff88);
+      }
+      .neon-purple {
+        filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px #ff00ff);
+      }
+      .background {
+        fill: #0a0a0a;
+      }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" class="background"/>
+  
+  <!-- Grid Pattern -->
+  <g stroke="#00ff88" stroke-width="1" opacity="0.1">
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+  </g>
+  
+  <!-- Main Raiden Symbol - Stylized Thunder/Lightning -->
+  <g class="neon-glow">
+    <!-- Left side of lightning bolt -->
+    <polygon points="256,80 180,220 240,220 140,420 256,280 200,280 300,80" 
+             fill="none" stroke="#00ff88" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Right side accent - Purple glow -->
+  <g class="neon-purple" opacity="0.8">
+    <polygon points="256,80 280,160 320,160 270,240 300,320 250,260 260,360 240,300 200,340 220,240 180,200 220,180" 
+             fill="none" stroke="#ff00ff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Center Core - Green dot -->
+  <g class="neon-glow">
+    <circle cx="256" cy="256" r="20" fill="#00ff88"/>
+    <circle cx="256" cy="256" r="30" fill="none" stroke="#00ff88" stroke-width="3"/>
+  </g>
+  
+  <!-- Decorative corners -->
+  <g stroke="#00ff88" stroke-width="3" class="neon-glow" fill="none">
+    <line x1="80" y1="60" x2="120" y2="60"/>
+    <line x1="60" y1="60" x2="60" y2="100"/>
+    
+    <line x1="432" y1="60" x2="452" y2="60"/>
+    <line x1="452" y1="60" x2="452" y2="100"/>
+    
+    <line x1="60" y1="432" x2="60" y2="452"/>
+    <line x1="60" y1="452" x2="100" y2="452"/>
+    
+    <line x1="432" y1="452" x2="452" y2="452"/>
+    <line x1="452" y1="412" x2="452" y2="452"/>
+  </g>
+  
+</svg>

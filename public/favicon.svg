@@ -1,0 +1,12 @@
+<svg width="32" height="32" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .neon-glow { filter: drop-shadow(0 0 4px #00ff88); }
+      .background { fill: #0a0a0a; }
+    </style>
+  </defs>
+  <rect width="512" height="512" class="background"/>
+  <polygon points="256,80 180,220 240,220 140,420 256,280 200,280 300,80" 
+           fill="none" stroke="#00ff88" stroke-width="12" stroke-linejoin="round" stroke-linecap="round" class="neon-glow"/>
+  <circle cx="256" cy="256" r="20" fill="#00ff88" class="neon-glow"/>
+</svg>
