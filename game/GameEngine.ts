@@ -55,6 +55,7 @@ export class GameEngine {
 
     // Level transition
     showLevelTransition: boolean = false;
+    isLevelTransitioning: boolean = false; // Flag to prevent actions during transition
     levelTransitionTimer: number = 0;
 
     // Callbacks
@@ -171,6 +172,7 @@ export class GameEngine {
         this.levelProgress = 0;
         this.screenShake = 0;
         this.showLevelTransition = false;
+        this.isLevelTransitioning = false;
         this.levelTransitionTimer = 0;
         this.bossTransitionTimer = 0;
         this.levelStartTime = Date.now(); // Initialize level start time
@@ -285,10 +287,11 @@ export class GameEngine {
             // Spawn boss when both conditions are met:
             // 1. Level progress >= 90%
             // 2. Minimum level duration has passed (60 seconds)
+            // 3. Not currently transitioning levels
             const levelDuration = (Date.now() - this.levelStartTime) / 1000; // in seconds
             const minDuration = BossSpawnConfig.minLevelDuration;
             const minProgress = BossSpawnConfig.minLevelProgress;
-            if (this.levelProgress >= minProgress && levelDuration >= minDuration) {
+            if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
                 this.spawnBoss();
             }
         } else {
@@ -436,6 +439,7 @@ export class GameEngine {
         this.onScoreChange(this.score);
         this.boss = null;
         this.bossWingmen = [];
+        this.isLevelTransitioning = true; // Block new boss spawns
 
         setTimeout(() => {
             if (this.level < this.maxLevels) {
@@ -458,10 +462,12 @@ export class GameEngine {
                 // Show level transition UI
                 this.showLevelTransition = true;
                 this.levelTransitionTimer = 0;
+                this.isLevelTransitioning = false; // Allow spawns again (though level progress is 0)
             } else {
                 this.audio.playVictory();
                 this.state = GameState.VICTORY;
                 this.onStateChange(this.state);
+                this.isLevelTransitioning = false;
             }
         }, 3000);
     }
