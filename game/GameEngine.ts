@@ -884,7 +884,7 @@ export class GameEngine {
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');
 
-        if (Math.random() < (e.isElite ? 0.8 : 0.2)) this.spawnPowerup(e.x, e.y); // Increased drop rate for Elites
+        if (Math.random() < (e.isElite ? 0.5 : 0.05)) this.spawnPowerup(e.x, e.y); // Reduced drop rate (Elite 50%, Normal 5%)
     }
 
     killBoss() {

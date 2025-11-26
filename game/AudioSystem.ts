@@ -92,7 +92,7 @@ export class AudioSystem {
     noiseFilter.frequency.exponentialRampToValueAtTime(100, now + 0.3);
 
     const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(size === 'large' ? 0.8 : 0.4, now);
+    noiseGain.gain.setValueAtTime(size === 'large' ? 1.5 : 0.8, now);
     noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
 
     noise.connect(noiseFilter);
@@ -107,7 +107,7 @@ export class AudioSystem {
     osc.frequency.exponentialRampToValueAtTime(10, now + (size === 'large' ? 0.8 : 0.4));
 
     const oscGain = this.ctx.createGain();
-    oscGain.gain.setValueAtTime(size === 'large' ? 1.0 : 0.5, now);
+    oscGain.gain.setValueAtTime(size === 'large' ? 1.5 : 0.8, now);
     oscGain.gain.exponentialRampToValueAtTime(0.01, now + (size === 'large' ? 0.8 : 0.4));
 
     // Lowpass for bass to make it deep

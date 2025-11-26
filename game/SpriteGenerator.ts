@@ -131,35 +131,46 @@ export class SpriteGenerator {
       ctx.stroke();
 
     } else if (type === 2) { // 坦克/重型：绿色
+      // Chassis
+      ctx.fillStyle = '#276749';
+      ctx.fillRect(-25, -30, 50, 60);
+      // Treads
+      ctx.fillStyle = '#22543d';
+      ctx.fillRect(-35, -35, 10, 70);
+      ctx.fillRect(25, -35, 10, 70);
+      // Turret
+      ctx.fillStyle = '#48bb78';
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+      // Cannon
       ctx.fillStyle = '#2f855a';
+      ctx.fillRect(-5, 10, 10, 30);
+      // Detail
+      ctx.fillStyle = '#9ae6b4';
       ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const angle = i * Math.PI / 3;
-        ctx.lineTo(25 * Math.cos(angle), 25 * Math.sin(angle));
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = '#68d391';
-      ctx.beginPath();
-      ctx.rect(-10, -15, 20, 30);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
       ctx.fill();
 
-    } else if (type === 3) { // 自爆机：橙色尖刺
-      ctx.fillStyle = '#dd6b20';
+    } else if (type === 3) { // 自爆机：橙色尖刺 (Spiked Mine)
+      ctx.fillStyle = '#c05621';
       ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      // Spikes
+      ctx.fillStyle = '#ed8936';
       for (let i = 0; i < 8; i++) {
         const angle = i * Math.PI / 4;
-        ctx.lineTo(20 * Math.cos(angle), 20 * Math.sin(angle));
-        ctx.lineTo(10 * Math.cos(angle + Math.PI / 8), 10 * Math.sin(angle + Math.PI / 8));
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
+        ctx.lineTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
+        ctx.lineTo(Math.cos(angle + 0.2) * 18, Math.sin(angle + 0.2) * 18);
+        ctx.fill();
       }
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = '#fff';
+      // Core
+      ctx.fillStyle = '#fbd38d';
       ctx.beginPath();
-      ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
       ctx.fill();
 
     } else if (type === 4) { // 精英炮舰：蓝色
@@ -206,18 +217,36 @@ export class SpriteGenerator {
       ctx.shadowBlur = 0;
 
     } else if (type === 6) { // Type 6: Mine Layer (Bulky, Dark Grey/Yellow)
-      ctx.fillStyle = '#4a5568';
-      ctx.fillRect(-25, -15, 50, 30);
-
-      // Mine rack
-      ctx.fillStyle = '#ecc94b';
+      // Main Body
+      ctx.fillStyle = '#2d3748';
       ctx.beginPath();
-      ctx.arc(0, 0, 10, 0, Math.PI * 2); // Mine ready
+      ctx.moveTo(-30, -20);
+      ctx.lineTo(30, -20);
+      ctx.lineTo(40, 0);
+      ctx.lineTo(30, 20);
+      ctx.lineTo(-30, 20);
+      ctx.lineTo(-40, 0);
+      ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = '#718096';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(-25, -15, 50, 30);
+      // Armor Plates
+      ctx.fillStyle = '#4a5568';
+      ctx.fillRect(-20, -15, 40, 30);
+
+      // Mine Rack / Warning Stripes
+      ctx.fillStyle = '#ecc94b';
+      ctx.beginPath();
+      ctx.moveTo(-15, -10); ctx.lineTo(-5, 10); ctx.lineTo(-10, 10); ctx.lineTo(-20, -10);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(5, -10); ctx.lineTo(15, 10); ctx.lineTo(10, 10); ctx.lineTo(0, -10);
+      ctx.fill();
+
+      // Rear Mine Port
+      ctx.fillStyle = '#1a202c';
+      ctx.beginPath();
+      ctx.arc(0, 20, 8, Math.PI, 0);
+      ctx.fill();
     }
 
     ctx.restore();
@@ -491,9 +520,9 @@ export class SpriteGenerator {
       case 5: color = '#ed64a6'; icon = this.generateBullet('plasma'); break;
       case 6: color = '#f56565'; label = 'B'; break; // Bomb
       case 7: color = '#a0aec0'; label = 'O'; break; // Option
-      case 8: color = '#63b3ed'; label = 'T'; break; // Tesla
-      case 9: color = '#ed8936'; label = 'F'; break; // Magma (Fire)
-      case 10: color = '#a0aec0'; label = 'S'; break; // Shuriken
+      case 8: color = '#63b3ed'; icon = this.generateBullet('tesla'); break; // Tesla
+      case 9: color = '#ed8936'; icon = this.generateBullet('magma'); break; // Magma (Fire)
+      case 10: color = '#a0aec0'; icon = this.generateBullet('shuriken'); break; // Shuriken
     }
 
     ctx.translate(20, 20);
