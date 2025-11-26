@@ -1,4 +1,5 @@
 import { BulletSizeConfig } from '@/game/config';
+import { ASSETS_BASE_PATH } from '@/game/config';
 import { BulletType } from '@/types';
 
 export class SpriteGenerator {
@@ -10,413 +11,121 @@ export class SpriteGenerator {
         return { canvas, ctx };
     }
 
+    private loadSVG(path: string, width: number, height: number): HTMLImageElement {
+        const img = new Image();
+        img.width = width;
+        img.height = height;
+        img.src = path;
+        return img;
+    }
+
     // 生成玩家战机 (雷电风格)
-    generatePlayer(): HTMLCanvasElement {
-        const { canvas, ctx } = this.createCanvas(64, 64);
-
-        ctx.save();
-        ctx.translate(32, 32);
-
-        // 机翼
-        ctx.fillStyle = '#4a5568';
-        ctx.beginPath();
-        ctx.moveTo(0, -20);
-        ctx.lineTo(24, 15);
-        ctx.lineTo(24, 25);
-        ctx.lineTo(8, 10);
-        ctx.lineTo(-8, 10);
-        ctx.lineTo(-24, 25);
-        ctx.lineTo(-24, 15);
-        ctx.closePath();
-        ctx.fill();
-
-        // 机身
-        const grad = ctx.createLinearGradient(-10, 0, 10, 0);
-        grad.addColorStop(0, '#2d3748');
-        grad.addColorStop(0.5, '#a0aec0');
-        grad.addColorStop(1, '#2d3748');
-        ctx.fillStyle = grad;
-
-        ctx.beginPath();
-        ctx.moveTo(0, -30);
-        ctx.bezierCurveTo(8, -10, 8, 20, 0, 28);
-        ctx.bezierCurveTo(-8, 20, -8, -10, 0, -30);
-        ctx.fill();
-
-        // 驾驶舱
-        ctx.fillStyle = '#0bc5ea';
-        ctx.shadowColor = '#0bc5ea';
-        ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.ellipse(0, -5, 3, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // 细节线条
-        ctx.strokeStyle = '#63b3ed';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(-24, 15); ctx.lineTo(-8, 10);
-        ctx.moveTo(24, 15); ctx.lineTo(8, 10);
-        ctx.stroke();
-
-        // 尾翼
-        ctx.fillStyle = '#2d3748';
-        ctx.beginPath();
-        ctx.moveTo(0, 15);
-        ctx.lineTo(8, 28);
-        ctx.lineTo(-8, 28);
-        ctx.fill();
-
-        ctx.restore();
-        return canvas;
+    generatePlayer(): HTMLImageElement {
+        return this.loadSVG(`${ASSETS_BASE_PATH}fighters/player.svg`, 64, 64);
     }
 
     // 僚机/浮游炮
-    generateOption(): HTMLCanvasElement {
-        const { canvas, ctx } = this.createCanvas(32, 32);
-        ctx.translate(16, 16);
-
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = '#00ffff';
-        ctx.fillStyle = '#111';
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = 2;
-
-        ctx.beginPath();
-        ctx.arc(0, 0, 8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, -12);
-        ctx.lineTo(0, 12);
-        ctx.moveTo(-12, 0);
-        ctx.lineTo(12, 0);
-        ctx.stroke();
-
-        return canvas;
+    generateOption(): HTMLImageElement {
+        return this.loadSVG(`${ASSETS_BASE_PATH}fighters/option.svg`, 32, 32);
     }
 
     // 生成敌人
-    generateEnemy(type: number): HTMLCanvasElement {
-        const size = (type === 2 || type === 4) ? 80 : 48;
-        const { canvas, ctx } = this.createCanvas(size, size);
-        ctx.save();
-        ctx.translate(size / 2, size / 2);
-
-        if (type === 0) { // 杂兵：红色无人机
-            ctx.fillStyle = '#c53030';
-            ctx.beginPath();
-            ctx.moveTo(0, 15);
-            ctx.lineTo(15, -10);
-            ctx.lineTo(0, -5);
-            ctx.lineTo(-15, -10);
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = '#feb2b2';
-            ctx.beginPath();
-            ctx.arc(0, 0, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-        } else if (type === 1) { // 快速：紫色飞翼
-            ctx.rotate(Math.PI);
-            ctx.fillStyle = '#805ad5';
-            ctx.beginPath();
-            ctx.moveTo(0, -20);
-            ctx.bezierCurveTo(15, -10, 20, 10, 0, 20);
-            ctx.bezierCurveTo(-20, 10, -15, -10, 0, -20);
-            ctx.fill();
-            ctx.strokeStyle = '#d6bcfa';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-        } else if (type === 2) { // 坦克/重型：绿色
-            // Chassis
-            ctx.fillStyle = '#276749';
-            ctx.fillRect(-25, -30, 50, 60);
-            // Treads
-            ctx.fillStyle = '#22543d';
-            ctx.fillRect(-35, -35, 10, 70);
-            ctx.fillRect(25, -35, 10, 70);
-            // Turret
-            ctx.fillStyle = '#48bb78';
-            ctx.beginPath();
-            ctx.arc(0, 0, 18, 0, Math.PI * 2);
-            ctx.fill();
-            // Cannon
-            ctx.fillStyle = '#2f855a';
-            ctx.fillRect(-5, 10, 10, 30);
-            // Detail
-            ctx.fillStyle = '#9ae6b4';
-            ctx.beginPath();
-            ctx.arc(0, 0, 8, 0, Math.PI * 2);
-            ctx.fill();
-
-        } else if (type === 3) { // 自爆机：橙色尖刺 (Spiked Mine)
-            ctx.fillStyle = '#c05621';
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-            // Spikes
-            ctx.fillStyle = '#ed8936';
-            for (let i = 0; i < 8; i++) {
-                const angle = i * Math.PI / 4;
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
-                ctx.lineTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
-                ctx.lineTo(Math.cos(angle + 0.2) * 18, Math.sin(angle + 0.2) * 18);
-                ctx.fill();
-            }
-            // Core
-            ctx.fillStyle = '#fbd38d';
-            ctx.beginPath();
-            ctx.arc(0, 0, 8, 0, Math.PI * 2);
-            ctx.fill();
-
-        } else if (type === 4) { // 精英炮舰：蓝色
-            ctx.fillStyle = '#2b6cb0';
-            ctx.beginPath();
-            ctx.moveTo(0, 30);
-            ctx.lineTo(30, -10);
-            ctx.lineTo(10, -30);
-            ctx.lineTo(-10, -30);
-            ctx.lineTo(-30, -10);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = '#63b3ed';
-            ctx.beginPath();
-            ctx.rect(-25, -5, 10, 20); // Guns
-            ctx.rect(15, -5, 10, 20);
-            ctx.fill();
-        } else if (type === 5) { // Type 5: Laser Interceptor (Sleek, White/Cyan)
-            ctx.rotate(Math.PI);
-            ctx.fillStyle = '#e2e8f0';
-            ctx.beginPath();
-            ctx.moveTo(0, -25);
-            ctx.lineTo(15, 15);
-            ctx.lineTo(0, 5);
-            ctx.lineTo(-15, 15);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.strokeStyle = '#0bc5ea';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, -25);
-            ctx.lineTo(0, 5);
-            ctx.stroke();
-
-            // Glowing core
-            ctx.shadowColor = '#0bc5ea';
-            ctx.shadowBlur = 10;
-            ctx.fillStyle = '#0bc5ea';
-            ctx.beginPath();
-            ctx.arc(0, -5, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-        } else if (type === 6) { // Type 6: Mine Layer (Bulky, Dark Grey/Yellow)
-            // Main Body
-            ctx.fillStyle = '#2d3748';
-            ctx.beginPath();
-            ctx.moveTo(-30, -20);
-            ctx.lineTo(30, -20);
-            ctx.lineTo(40, 0);
-            ctx.lineTo(30, 20);
-            ctx.lineTo(-30, 20);
-            ctx.lineTo(-40, 0);
-            ctx.closePath();
-            ctx.fill();
-
-            // Armor Plates
-            ctx.fillStyle = '#4a5568';
-            ctx.fillRect(-20, -15, 40, 30);
-
-            // Mine Rack / Warning Stripes
-            ctx.fillStyle = '#ecc94b';
-            ctx.beginPath();
-            ctx.moveTo(-15, -10); ctx.lineTo(-5, 10); ctx.lineTo(-10, 10); ctx.lineTo(-20, -10);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(5, -10); ctx.lineTo(15, 10); ctx.lineTo(10, 10); ctx.lineTo(0, -10);
-            ctx.fill();
-
-            // Rear Mine Port
-            ctx.fillStyle = '#1a202c';
-            ctx.beginPath();
-            ctx.arc(0, 20, 8, Math.PI, 0);
-            ctx.fill();
-        }
-        ctx.restore();
-        return canvas;
+    generateEnemy(type: number): HTMLImageElement {
+        const size = (type === 2 || type === 4 || type === 6) ? 80 : 48;
+        return this.loadSVG(`${ASSETS_BASE_PATH}enemies/enemy_${type}.svg`, size, size);
     }
 
     // 生成 Boss - Load from external SVG files
     generateBoss(level: number): HTMLImageElement {
         const size = 160 + (level * 20);
-        const img = new Image();
-        img.width = size;
-        img.height = size;
-        img.src = `/assets/bosses/boss_${level}.svg`;
-        return img;
+        return this.loadSVG(`${ASSETS_BASE_PATH}bosses/boss_${level}.svg`, size, size);
     }
 
     // 生成子弹
-    generateBullet(type: BulletType): HTMLCanvasElement {
+    generateBullet(type: BulletType): HTMLImageElement {
         const sizeConfig = BulletSizeConfig[type] || BulletSizeConfig[BulletType.ENEMY_ORB];
         const w = sizeConfig.width;
         const h = sizeConfig.height;
 
-        const { canvas, ctx } = this.createCanvas(w, h);
-        ctx.translate(w / 2, h / 2);
-
-        if (type === BulletType.VULCAN) {
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = '#ecc94b';
-            ctx.fillStyle = '#ffeb3b';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 4, 10, 0, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (type === BulletType.LASER) {
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#4fd1c5';
-            ctx.fillStyle = '#e6fffa';
-            ctx.fillRect(-4, -25, 8, 50);
-        } else if (type === BulletType.MISSILE) {
-            ctx.fillStyle = '#9f7aea';
-            ctx.beginPath();
-            ctx.moveTo(0, -15);
-            ctx.lineTo(5, 5);
-            ctx.lineTo(0, 10);
-            ctx.lineTo(-5, 5);
-            ctx.fill();
-            ctx.fillStyle = '#ed8936';
-            ctx.beginPath();
-            ctx.arc(0, 12, 3, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (type === BulletType.WAVE) {
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#4299e1';
-            ctx.fillStyle = '#63b3ed';
-            ctx.beginPath();
-            ctx.arc(0, 10, 30, Math.PI * 1.2, Math.PI * 1.8);
-            ctx.fill();
-        } else if (type === BulletType.PLASMA) {
-            const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, 20);
-            grad.addColorStop(0, '#fff');
-            grad.addColorStop(0.4, '#ed64a6');
-            grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(0, 0, 20, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 15, 8, Math.PI / 4, 0, Math.PI * 2);
-            ctx.stroke();
-        } else if (type === BulletType.ENEMY_ORB) {
-            const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 10);
-            grad.addColorStop(0, '#fff');
-            grad.addColorStop(0.5, '#f56565');
-            grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(0, 0, 10, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (type === BulletType.TESLA) {
-            ctx.strokeStyle = '#63b3ed';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#63b3ed';
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.moveTo(0, -15);
-            // Zigzag lightning
-            for (let i = 0; i < 4; i++) {
-                ctx.lineTo(i % 2 === 0 ? 5 : -5, -15 + (i + 1) * 8);
-            }
-            ctx.stroke();
-        } else if (type === BulletType.MAGMA) {
-            const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 15);
-            grad.addColorStop(0, '#fff');
-            grad.addColorStop(0.3, '#f6e05e');
-            grad.addColorStop(0.6, '#ed8936');
-            grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-        } else if (type === BulletType.SHURIKEN) {
-            ctx.fillStyle = '#a0aec0';
-            ctx.beginPath();
-            // 4-pointed star
-            for (let i = 0; i < 4; i++) {
-                const angle = i * Math.PI / 2;
-                ctx.lineTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
-                ctx.lineTo(Math.cos(angle + Math.PI / 4) * 5, Math.sin(angle + Math.PI / 4) * 5);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(0, 0, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.fill();
+        // Map types to filenames
+        let filename = 'bullet_vulcan';
+        switch (type) {
+            case BulletType.VULCAN: filename = 'bullet_vulcan'; break;
+            case BulletType.LASER: filename = 'bullet_laser'; break;
+            case BulletType.MISSILE: filename = 'bullet_missile'; break;
+            case BulletType.WAVE: filename = 'bullet_wave'; break;
+            case BulletType.PLASMA: filename = 'bullet_plasma'; break;
+            case BulletType.ENEMY_ORB: filename = 'bullet_enemy'; break;
+            case BulletType.TESLA: filename = 'bullet_tesla'; break;
+            case BulletType.MAGMA: filename = 'bullet_magma'; break;
+            case BulletType.SHURIKEN: filename = 'bullet_shuriken'; break;
         }
 
-        return canvas;
+        return this.loadSVG(`${ASSETS_BASE_PATH}bullets/${filename}.svg`, w, h);
     }
 
     // 生成掉落物，现在包含内部图标
     generatePowerup(type: number): HTMLCanvasElement {
         const { canvas, ctx } = this.createCanvas(40, 40);
 
-        let color = '#fff';
-        let icon: HTMLCanvasElement | null = null;
+        const bg = new Image();
+        bg.src = `${ASSETS_BASE_PATH}powerups/powerup_bg.svg`;
+
+        let iconSrc = '';
         let label = '';
+        let color = '#fff';
 
         // 0:Power, 1:Laser, 2:Vulcan, 3:Heal/Shield, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
         switch (type) {
             case 0: color = '#ecc94b'; label = 'P'; break;
-            case 1: color = '#4fd1c5'; icon = this.generateBullet(BulletType.LASER); break;
-            case 2: color = '#ed8936'; icon = this.generateBullet(BulletType.VULCAN); break;
+            case 1: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_laser.svg`; break;
+            case 2: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_vulcan.svg`; break;
             case 3: color = '#48bb78'; label = 'H'; break;
-            case 4: color = '#63b3ed'; icon = this.generateBullet(BulletType.WAVE); break;
-            case 5: color = '#ed64a6'; icon = this.generateBullet(BulletType.PLASMA); break;
+            case 4: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_wave.svg`; break;
+            case 5: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_plasma.svg`; break;
             case 6: color = '#f56565'; label = 'B'; break; // Bomb
             case 7: color = '#a0aec0'; label = 'O'; break; // Option
-            case 8: color = '#63b3ed'; icon = this.generateBullet(BulletType.TESLA); break; // Tesla
-            case 9: color = '#ed8936'; icon = this.generateBullet(BulletType.MAGMA); break; // Magma (Fire)
-            case 10: color = '#a0aec0'; icon = this.generateBullet(BulletType.SHURIKEN); break; // Shuriken
+            case 8: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_tesla.svg`; break; // Tesla
+            case 9: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_magma.svg`; break; // Magma (Fire)
+            case 10: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_shuriken.svg`; break; // Shuriken
         }
 
-        ctx.translate(20, 20);
+        const draw = () => {
+            ctx.clearRect(0, 0, 40, 40);
+            if (bg.complete) {
+                ctx.drawImage(bg, 0, 0, 40, 40);
 
-        ctx.fillStyle = 'rgba(20, 20, 30, 0.8)';
-        ctx.beginPath();
-        ctx.roundRect(-15, -15, 30, 30, 5);
-        ctx.fill();
+                // Overlay color tint for border if possible, or just stroke rect on top
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(2, 2, 36, 36);
+            }
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
-        ctx.stroke();
+            if (iconSrc) {
+                const icon = new Image();
+                icon.src = iconSrc;
+                if (icon.complete) {
+                    // Center icon
+                    const iw = 24;
+                    const ih = 24;
+                    ctx.drawImage(icon, (40 - iw) / 2, (40 - ih) / 2, iw, ih);
+                } else {
+                    icon.onload = draw;
+                }
+            } else {
+                ctx.fillStyle = color;
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, 20, 22);
+            }
+        };
 
-        if (icon) {
-            ctx.save();
-            // Scale down icon to fit
-            ctx.scale(0.6, 0.6);
-            // Center icon
-            ctx.drawImage(icon, -icon.width / 2, -icon.height / 2);
-            ctx.restore();
-        } else {
-            ctx.fillStyle = color;
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, 0, 1);
-        }
+        bg.onload = draw;
+        // Trigger initial draw in case cached
+        draw();
 
         return canvas;
     }
 }
+

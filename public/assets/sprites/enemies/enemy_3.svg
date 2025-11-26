@@ -1,0 +1,16 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(24, 24)">
+    <circle cx="0" cy="0" r="15" fill="#c05621"/>
+    <!-- Spikes -->
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(0)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(45)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(90)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(135)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(180)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(225)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(270)"/>
+    <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(315)"/>
+    <!-- Core -->
+    <circle cx="0" cy="0" r="8" fill="#fbd38d"/>
+  </g>
+</svg>

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WeaponType } from '@/types';
-import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType } from '@/game/config';
-import { SpriteGenerator } from '@/game/SpriteGenerator';
+import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, ASSETS_BASE_PATH } from '@/game/config';
 
 interface GalleryProps {
     onClose: () => void;
@@ -14,8 +13,6 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
     const [activeTab, setActiveTab] = useState<Tab>('FIGHTERS');
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [showDetail, setShowDetail] = useState(false);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const spriteGen = useRef(new SpriteGenerator());
 
     // Add scrollbar hiding styles
     useEffect(() => {
@@ -50,104 +47,32 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
         };
     }, []);
 
-    // Helper to draw sprite to a canvas
-    const drawSprite = (ctx: CanvasRenderingContext2D, spriteKey: string, color?: string, isBoss: boolean = false) => {
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.save();
-        ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
-
-        // Scale up for visibility
-        const scale = isBoss ? 1.5 : 3;
-        ctx.scale(scale, scale);
-
-        if (isBoss) {
-            ctx.rotate(Math.PI); // Bosses face down
-        }
-
-        // Generate sprite on the fly if needed, or use a pre-generated one
-        // Since SpriteGenerator returns Canvases or Images, we can draw them directly.
-        let sprite: HTMLCanvasElement | HTMLImageElement | null = null;
-
-        if (spriteKey === 'player') sprite = spriteGen.current.generatePlayer();
-        else if (spriteKey.startsWith('enemy_')) {
-            const type = parseInt(spriteKey.split('_')[1]);
-            sprite = spriteGen.current.generateEnemy(type);
-        }
-        else if (spriteKey.startsWith('boss_')) {
-            const level = parseInt(spriteKey.split('_')[1]);
-            sprite = spriteGen.current.generateBoss(level);
-        }
-        else if (spriteKey.startsWith('bullet_')) {
-            const typeStr = spriteKey.split('_')[1] as any;
-            sprite = spriteGen.current.generateBullet(typeStr);
-        }
-
-        if (sprite) {
-            if (sprite instanceof HTMLImageElement && !sprite.complete) {
-                sprite.onload = () => {
-                    // Redraw when loaded
-                    // We need to re-apply transforms because context is restored at end of function
-                    // But we can't easily re-apply them without refactoring.
-                    // Instead, let's just trigger a re-render or handle it here if we are careful.
-                    // Actually, since this is inside a function, the context state is lost after restore.
-                    // We should probably just let the effect re-run or force update.
-                    // But simpler: just draw it here with same transforms.
-                    ctx.save();
-                    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
-                    const scale = isBoss ? 1.5 : 3;
-                    ctx.scale(scale, scale);
-                    if (isBoss) ctx.rotate(Math.PI);
-                    ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
-                    ctx.restore();
-                };
-            } else {
-                ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+    const getSpriteSrc = (item: any, tab: Tab): string => {
+        if (tab === 'FIGHTERS') return `${ASSETS_BASE_PATH}fighters/player.svg`;
+        if (tab === 'ARMORY') {
+            const config = WeaponConfig[item.type as WeaponType];
+            if (config) {
+                // Map weapon type to bullet SVG
+                let filename = 'bullet_vulcan';
+                switch (item.type) {
+                    case WeaponType.VULCAN: filename = 'bullet_vulcan'; break;
+                    case WeaponType.LASER: filename = 'bullet_laser'; break;
+                    case WeaponType.MISSILE: filename = 'bullet_missile'; break;
+                    case WeaponType.WAVE: filename = 'bullet_wave'; break;
+                    case WeaponType.PLASMA: filename = 'bullet_plasma'; break;
+                    case WeaponType.TESLA: filename = 'bullet_tesla'; break;
+                    case WeaponType.MAGMA: filename = 'bullet_magma'; break;
+                    case WeaponType.SHURIKEN: filename = 'bullet_shuriken'; break;
+                }
+                return `${ASSETS_BASE_PATH}bullets/${filename}.svg`;
             }
-        } else if (color) {
-            // Fallback for simple shapes if sprite gen fails or isn't mapped
-            ctx.fillStyle = color;
-            ctx.fillRect(-10, -10, 20, 20);
         }
-
-        ctx.restore();
+        if (tab === 'BESTIARY') return `${ASSETS_BASE_PATH}enemies/enemy_${item.type}.svg`;
+        if (tab === 'BOSSES') return `${ASSETS_BASE_PATH}bosses/boss_${item.level}.svg`;
+        return '';
     };
 
-    // Effect to draw selected item
-    useEffect(() => {
-        if (!selectedItem || !canvasRef.current) return;
-        const ctx = canvasRef.current.getContext('2d');
-        if (!ctx) return;
 
-        let spriteKey = '';
-        let color = '#fff';
-        let isBoss = false;
-
-        try {
-            if (activeTab === 'FIGHTERS') {
-                spriteKey = 'player';
-                color = '#00ffff';
-            } else if (activeTab === 'ARMORY' && selectedItem.type !== undefined) {
-                const config = WeaponConfig[selectedItem.type as WeaponType];
-                if (config) {
-                    spriteKey = config.sprite;
-                    color = config.color;
-                }
-            } else if (activeTab === 'BESTIARY' && selectedItem.type !== undefined) {
-                spriteKey = `enemy_${selectedItem.type}`;
-                // Enemy color logic is inside generator, but we can pass a dummy one
-            } else if (activeTab === 'BOSSES' && selectedItem.level !== undefined) {
-                spriteKey = `boss_${selectedItem.level}`;
-                isBoss = true;
-            }
-
-            if (spriteKey) {
-                drawSprite(ctx, spriteKey, color, isBoss);
-            }
-        } catch (error) {
-            console.error('Error drawing sprite:', error);
-        }
-
-    }, [selectedItem, activeTab]);
 
     // Data Sources
     const fighters = [
@@ -337,10 +262,9 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 min-w-[90px] py-4 px-3 text-sm text-center border-b-2 transition-all whitespace-nowrap font-bold active:scale-95 ${
-                            activeTab === tab
-                                ? 'border-cyan-400 bg-cyan-900/40 text-cyan-100'
-                                : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-white/5'
+                        className={`flex-1 min-w-[90px] py-4 px-3 text-sm text-center border-b-2 transition-all whitespace-nowrap font-bold active:scale-95 ${activeTab === tab
+                            ? 'border-cyan-400 bg-cyan-900/40 text-cyan-100'
+                            : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-white/5'
                             }`}
                     >
                         {tab}
@@ -355,10 +279,9 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`p-4 text-sm lg:text-base text-left border-l-4 transition-all font-bold ${
-                                activeTab === tab
-                                    ? 'border-cyan-400 bg-cyan-900/30 text-cyan-100'
-                                    : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                            className={`p-4 text-sm lg:text-base text-left border-l-4 transition-all font-bold ${activeTab === tab
+                                ? 'border-cyan-400 bg-cyan-900/30 text-cyan-100'
+                                : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
                                 }`}
                         >
                             {tab}
@@ -377,11 +300,11 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                     {showDetail && selectedItem && (
                         <>
                             {/* 遮罩层 */}
-                            <div 
+                            <div
                                 className="fixed sm:absolute inset-0 bg-black/60 backdrop-blur-sm z-40 pointer-events-auto"
                                 onClick={handleDetailClose}
                             />
-                            
+
                             {/* Detail View - 从底部/右侧滑出 */}
                             <div className={`
                                 fixed sm:absolute
@@ -410,7 +333,11 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                                     <div className="w-32 h-32 sm:w-40 sm:h-40 border border-cyan-500/20 rounded-full flex items-center justify-center bg-black/50 mb-6 relative group flex-shrink-0">
                                         <div className="absolute inset-0 rounded-full border border-cyan-500/30 animate-[spin_10s_linear_infinite]"></div>
                                         <div className="absolute inset-2 rounded-full border border-cyan-500/10 animate-[spin_15s_linear_infinite_reverse]"></div>
-                                        <canvas ref={canvasRef} width={200} height={200} className="relative z-10 filter drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] group-hover:scale-110 transition-transform duration-500 w-28 h-28 sm:w-32" />
+                                        <img
+                                            src={getSpriteSrc(selectedItem, activeTab)}
+                                            alt={selectedItem.name}
+                                            className="relative z-10 filter drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] group-hover:scale-110 transition-transform duration-500 w-28 h-28 sm:w-32 object-contain"
+                                        />
                                     </div>
 
                                     <div className="w-full space-y-4 text-sm sm:text-base">

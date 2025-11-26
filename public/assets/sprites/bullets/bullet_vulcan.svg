@@ -1,0 +1,9 @@
+<svg width="8" height="20" viewBox="0 0 8 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="4" cy="10" rx="4" ry="10" fill="#ffeb3b"/>
+  <defs>
+    <filter id="glow" x="0" y="0" width="8" height="20" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+</svg>

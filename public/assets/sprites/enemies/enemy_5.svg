@@ -1,0 +1,13 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(24, 24) rotate(180)">
+    <path d="M0 -25 L15 15 L0 5 L-15 15 Z" fill="#e2e8f0"/>
+    <path d="M0 -25 L0 5" stroke="#0bc5ea" stroke-width="2"/>
+    <circle cx="0" cy="-5" r="4" fill="#0bc5ea" filter="url(#glow)"/>
+  </g>
+  <defs>
+    <filter id="glow" x="-10" y="-15" width="20" height="20" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+</svg>

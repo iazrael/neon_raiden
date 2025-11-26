@@ -36,6 +36,9 @@ export const GameConfig = {
     debug: false,       // 调试模式开关
 };
 
+// ==================== 资源路径配置 ====================
+export const ASSETS_BASE_PATH = './assets/sprites/';
+
 // ==================== 玩家配置 ====================
 export const PlayerConfig = {
     speed: 7,           // 移动速度

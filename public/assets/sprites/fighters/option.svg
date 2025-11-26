@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="16" cy="16" r="8" fill="#111" stroke="#00ffff" stroke-width="2"/>
+  <path d="M16 4 L16 28 M4 16 L28 16" stroke="#00ffff" stroke-width="2"/>
+  <defs>
+    <filter id="glow" x="0" y="0" width="32" height="32" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+</svg>

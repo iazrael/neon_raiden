@@ -36,6 +36,7 @@ export class RenderSystem {
         this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet(BulletType.SHURIKEN);
 
         // Powerups (Types 0-10)
+        // Powerups are still generated as Canvas because they combine dynamic text/icons
         for (let i = 0; i <= 10; i++) {
             this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
         }
@@ -156,14 +157,7 @@ export class RenderSystem {
         });
 
         // Shockwaves
-        this.ctx.globalCompositeOperation = 'source-over'; // Reset for shockwaves? Or keep lighter?
-        // Original code didn't specify for shockwaves, but they were after particles.
-        // Let's assume source-over or lighter. Shockwaves usually look good with lighter but let's stick to original flow.
-        // Original had: particles (lighter) -> shockwaves (default alpha, no composite specified so it inherits lighter? No, ctx.restore() wasn't called between.
-        // Wait, original:
-        // Particles: lighter
-        // Shockwaves: no change to composite, so it IS lighter.
-        // Then restore at end.
+        this.ctx.globalCompositeOperation = 'source-over';
 
         shockwaves.forEach(s => {
             this.ctx.globalAlpha = s.life;
@@ -188,6 +182,7 @@ export class RenderSystem {
             const bankAngle = Math.max(-0.3, Math.min(0.3, (e.vx || 0) * 0.05));
             this.ctx.rotate(bankAngle);
 
+            // Engine flame
             this.ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.2})`;
             this.ctx.beginPath();
             this.ctx.moveTo(-5, 25);
@@ -206,9 +201,17 @@ export class RenderSystem {
 
         if (e.spriteKey && this.sprites[e.spriteKey]) {
             const sprite = this.sprites[e.spriteKey];
-            if (sprite instanceof HTMLImageElement && !sprite.complete) {
-                // Skip drawing if not loaded
+            if (sprite instanceof HTMLImageElement) {
+                if (sprite.complete && sprite.naturalWidth > 0) {
+                    // Use intrinsic size or entity size?
+                    // Usually entity size is logical size.
+                    // If we want to scale sprite to entity size:
+                    this.ctx.drawImage(sprite, -e.width / 2, -e.height / 2, e.width, e.height);
+                } else {
+                    // Not loaded yet
+                }
             } else {
+                // Canvas
                 this.ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
             }
         } else {
@@ -238,3 +241,4 @@ export class RenderSystem {
         this.ctx.restore();
     }
 }
+

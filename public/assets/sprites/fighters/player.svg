@@ -1,0 +1,26 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Wings -->
+  <path d="M32 12 L56 47 L56 57 L40 42 L24 42 L8 57 L8 47 Z" fill="#4a5568" stroke="#63b3ed" stroke-width="1"/>
+  
+  <!-- Main Body -->
+  <path d="M32 2 C40 22 40 52 32 60 C24 52 24 22 32 2 Z" fill="url(#bodyGrad)"/>
+  
+  <!-- Cockpit -->
+  <ellipse cx="32" cy="27" rx="3" ry="6" fill="#0bc5ea" filter="url(#glow)"/>
+  
+  <!-- Tail -->
+  <path d="M32 47 L40 60 L24 60 Z" fill="#2d3748"/>
+  
+  <!-- Definitions -->
+  <defs>
+    <linearGradient id="bodyGrad" x1="22" y1="32" x2="42" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2d3748"/>
+      <stop offset="0.5" stop-color="#a0aec0"/>
+      <stop offset="1" stop-color="#2d3748"/>
+    </linearGradient>
+    <filter id="glow" x="20" y="15" width="24" height="24" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+</svg>
