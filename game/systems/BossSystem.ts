@@ -43,11 +43,14 @@ export class BossSystem {
         this.laserTimer = 0;
         this.movementTimer = 0;
 
+        // Apply hitbox scaling for more precise collision detection
+        const hitboxScale = config.hitboxScale || 1.0;
+
         return {
             x: spawnX,
             y: -150,
-            width: width * config.size,
-            height: height * config.size,
+            width: width * config.size * hitboxScale,
+            height: height * config.size * hitboxScale,
             vx: 0,
             vy: config.speed,
             hp: hp,

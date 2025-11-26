@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { GameState } from '@/types';
+import { getVersion } from '@/game/version';
 
 interface GameUIProps {
   state: GameState;
@@ -17,7 +18,7 @@ interface GameUIProps {
 
 export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs = 0, onStart, onRestart, onUseBomb, showLevelTransition = false, levelTransitionTimer = 0 }) => {
   return (
-    <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 font-mono text-white select-none">
+    <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-safe font-mono text-white select-none">
 
       {/* HUD - Always Visible during play */}
       <div className="flex justify-between items-start w-full z-10">
@@ -95,18 +96,25 @@ export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs =
         </div>
       )}
 
-      {/* Level Transition Overlay */}
+      {/* Level Transition Overlay - Top Left */}
       {showLevelTransition && (
         <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 backdrop-blur-sm"
+          className="absolute top-8 left-4 pointer-events-none z-50"
           style={{
-            opacity: levelTransitionTimer < 500 ? levelTransitionTimer / 500 :
-              levelTransitionTimer > 2500 ? (3000 - levelTransitionTimer) / 500 : 1
+            opacity: levelTransitionTimer < 300 ? levelTransitionTimer / 300 :
+              levelTransitionTimer > 1200 ? (1500 - levelTransitionTimer) / 300 : 1
           }}
         >
-          <div className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 via-cyan-400 to-blue-600 tracking-wider drop-shadow-[0_0_30px_rgba(6,182,212,0.9)] animate-pulse">
+          <div className="text-2xl font-bold text-cyan-400 tracking-wider drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
             STAGE {level}
           </div>
+        </div>
+      )}
+
+      {/* Version Display - Bottom Right */}
+      {state === GameState.PLAYING && (
+        <div className="absolute bottom-4 right-4 text-xs text-white/40 pointer-events-none z-10 pb-safe">
+          {getVersion()}
         </div>
       )}
 

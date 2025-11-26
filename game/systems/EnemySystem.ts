@@ -1,5 +1,5 @@
 import { Entity } from '@/types';
-import { EnemyConfig } from '@/game/config';
+import { EnemyConfig, EnemySpawnWeights } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
 export class EnemySystem {
@@ -21,16 +21,22 @@ export class EnemySystem {
     spawnEnemy(level: number, enemies: Entity[]) {
         const x = Math.random() * (this.width - 60) + 30;
 
-        // Weighted Spawning Logic
-        const availableTypes = [0];
-        if (level >= 2) availableTypes.push(1);
-        if (level >= 3) availableTypes.push(2);
-        if (level >= 4) availableTypes.push(3);
-        if (level >= 5) availableTypes.push(4);
-        if (level >= 6) availableTypes.push(5);
-        if (level >= 7) availableTypes.push(6);
+        // Use weighted spawning system
+        const weights = EnemySpawnWeights[level as keyof typeof EnemySpawnWeights] || EnemySpawnWeights[10];
+        const weightEntries = Object.entries(weights);
+        const totalWeight = weightEntries.reduce((sum, [_, weight]) => sum + weight, 0);
 
-        const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        let random = Math.random() * totalWeight;
+        let type = 0;
+
+        for (const [typeStr, weight] of weightEntries) {
+            random -= weight;
+            if (random <= 0) {
+                type = parseInt(typeStr);
+                break;
+            }
+        }
+
         // @ts-ignore
         const config = EnemyConfig.types[type];
 
@@ -146,22 +152,29 @@ export class EnemySystem {
                 });
             }
 
+
             // General Enemy firing (Reduced for specialized types)
-            if (e.subType !== 3 && e.subType !== 5 && e.subType !== 6 && Math.random() < 0.005 * timeScale) {
-                enemyBullets.push({
-                    x: e.x,
-                    y: e.y + e.height / 2,
-                    width: 12,
-                    height: 12,
-                    vx: 0,
-                    vy: 5,
-                    hp: 1,
-                    maxHp: 1,
-                    type: 'bullet',
-                    color: '#ff9999',
-                    markedForDeletion: false,
-                    spriteKey: 'bullet_enemy'
-                });
+            if (e.subType !== 5 && e.subType !== 6) {
+                // @ts-ignore
+                const enemyConfig = EnemyConfig.types[e.subType || 0];
+                const shootFreq = enemyConfig.shootFrequency || 0.005;
+
+                if (Math.random() < shootFreq * timeScale) {
+                    enemyBullets.push({
+                        x: e.x,
+                        y: e.y + e.height / 2,
+                        width: 12,
+                        height: 12,
+                        vx: 0,
+                        vy: 5,
+                        hp: 1,
+                        maxHp: 1,
+                        type: 'bullet',
+                        color: '#ff9999',
+                        markedForDeletion: false,
+                        spriteKey: 'bullet_enemy'
+                    });
+                }
             }
         });
     }

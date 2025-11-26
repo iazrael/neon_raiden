@@ -111,6 +111,20 @@ export const WeaponConfig = {
     }
 };
 
+// Enemy spawn weights by level - higher weight = more frequent spawning
+export const EnemySpawnWeights = {
+    1: { 0: 10 }, // Only normal enemies
+    2: { 0: 7, 1: 5 }, // More fast enemies
+    3: { 0: 5, 1: 4, 2: 3, 3: 3 }, // Introduce tank and kamikaze
+    4: { 0: 4, 1: 5, 2: 3, 3: 4 }, // More fast and kamikaze
+    5: { 0: 3, 1: 5, 2: 3, 3: 5, 4: 2 }, // Elite gunboats appear
+    6: { 0: 2, 1: 6, 2: 2, 3: 6, 4: 2, 5: 3 }, // Laser interceptors, more fast/kamikaze
+    7: { 0: 2, 1: 6, 2: 2, 3: 7, 4: 2, 5: 3, 6: 2 }, // Mine layers, even more kamikaze
+    8: { 0: 1, 1: 7, 2: 2, 3: 8, 4: 2, 5: 4, 6: 3 }, // Heavy emphasis on fast/kamikaze
+    9: { 0: 1, 1: 8, 2: 1, 3: 9, 4: 2, 5: 4, 6: 3 }, // Maximum fast/kamikaze
+    10: { 0: 1, 1: 9, 2: 1, 3: 10, 4: 2, 5: 5, 6: 4 } // Final level chaos
+};
+
 export const EnemyConfig = {
     baseSpawnRate: 1500,
     spawnRateReductionPerLevel: 200,
@@ -118,6 +132,7 @@ export const EnemyConfig = {
     eliteChance: 0.15,
     eliteHpMultiplier: 3,
     eliteSizeMultiplier: 1.3,
+    enemyCountMultiplier: 1.15, // Enemies increase by 15% per level
     types: {
         0: { // Normal
             baseHp: 20,
@@ -135,7 +150,8 @@ export const EnemyConfig = {
             speedPerLevel: 1,
             width: 30,
             height: 40,
-            score: 200
+            score: 200,
+            shootFrequency: 0.015 // Increased shooting frequency
         },
         2: { // Tank
             baseHp: 60,
@@ -153,7 +169,8 @@ export const EnemyConfig = {
             speedPerLevel: 0,
             width: 30,
             height: 30,
-            score: 400
+            score: 400,
+            shootFrequency: 0.02 // Increased shooting frequency
         },
         4: { // Elite Gunboat
             baseHp: 150,
@@ -185,6 +202,41 @@ export const EnemyConfig = {
     }
 };
 
+// Powerup drop rates configuration
+export const PowerupDropRates = {
+    0: 0.25,  // Power: 25%
+    1: 0.10,  // Laser: 10%
+    2: 0.10,  // Vulcan: 10%
+    3: 0.20,  // HP: 20%
+    4: 0.15,  // Wave: 15%
+    5: 0.10,  // Plasma: 10%
+    6: 0.05,  // Bomb: 5%
+    7: 0.08,  // Option: 8%
+    8: 0.05,  // Tesla: 5%
+    9: 0.05,  // Magma: 5%
+    10: 0.05  // Shuriken: 5%
+};
+
+// Helper function to select powerup type based on drop rates
+export function selectPowerupType(): number {
+    const r = Math.random();
+    let cumulative = 0;
+
+    for (let type = 0; type <= 10; type++) {
+        cumulative += PowerupDropRates[type as keyof typeof PowerupDropRates];
+        if (r < cumulative) {
+            return type;
+        }
+    }
+
+    return 0; // Fallback to Power
+}
+
+// Boss spawn timing configuration (in seconds)
+export const BossSpawnConfig = {
+    minLevelDuration: 60, // Minimum seconds before boss can spawn
+};
+
 export const BossConfig = {
     1: {
         hp: 1500,
@@ -192,7 +244,7 @@ export const BossConfig = {
         size: 0.8,
         bulletCount: 8,
         bulletSpeed: 4.0,
-        fireRate: 0.03,
+        fireRate: 0.05, // Increased from 0.03 for more aggression
         targetedShotSpeed: 0,
         hasLaser: false,
         weaponCount: 1,
@@ -204,15 +256,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'none',
         laserDamage: 0,
-        laserCooldown: 0
+        laserCooldown: 0,
+        hitboxScale: 0.8 // Tighter hitbox for more precise collision
     },
     2: {
-        hp: 3000,
+        hp: 1800, // Reduced from 3000, 1500 × 1.2
         speed: 1.2,
         size: 0.8,
         bulletCount: 11,
         bulletSpeed: 4.5,
-        fireRate: 0.04,
+        fireRate: 0.06, // Increased from 0.04
         targetedShotSpeed: 9,
         hasLaser: false,
         weaponCount: 1,
@@ -224,15 +277,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'none',
         laserDamage: 0,
-        laserCooldown: 0
+        laserCooldown: 0,
+        hitboxScale: 0.8
     },
     3: {
-        hp: 4500,
+        hp: 2160, // Reduced from 4500, 1800 × 1.2
         speed: 1.4,
         size: 0.85,
         bulletCount: 14,
         bulletSpeed: 5.0,
-        fireRate: 0.045,
+        fireRate: 0.065, // Increased from 0.045
         targetedShotSpeed: 10,
         hasLaser: false,
         weaponCount: 1,
@@ -244,15 +298,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'none',
         laserDamage: 0,
-        laserCooldown: 0
+        laserCooldown: 0,
+        hitboxScale: 0.8
     },
     4: {
-        hp: 6000,
+        hp: 2592, // Reduced from 6000, 2160 × 1.2
         speed: 1.6,
         size: 0.85,
         bulletCount: 17,
         bulletSpeed: 5.5,
-        fireRate: 0.05,
+        fireRate: 0.07, // Increased from 0.05
         targetedShotSpeed: 11,
         hasLaser: false,
         weaponCount: 1,
@@ -264,15 +319,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'none',
         laserDamage: 0,
-        laserCooldown: 0
+        laserCooldown: 0,
+        hitboxScale: 0.8
     },
     5: {
-        hp: 7500,
+        hp: 3110, // Reduced from 7500, 2592 × 1.2
         speed: 1.8,
         size: 0.9,
         bulletCount: 20,
         bulletSpeed: 6.0,
-        fireRate: 0.055,
+        fireRate: 0.075, // Increased from 0.055
         targetedShotSpeed: 12,
         hasLaser: false,
         weaponCount: 1,
@@ -284,15 +340,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'none',
         laserDamage: 0,
-        laserCooldown: 0
+        laserCooldown: 0,
+        hitboxScale: 0.8
     },
     6: {
-        hp: 9000,
+        hp: 3732, // Reduced from 9000, 3110 × 1.2
         speed: 2.0,
         size: 0.9,
         bulletCount: 23,
         bulletSpeed: 6.5,
-        fireRate: 0.06,
+        fireRate: 0.08, // Increased from 0.06
         targetedShotSpeed: 13,
         hasLaser: true,
         weaponCount: 2,
@@ -304,15 +361,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'continuous',
         laserDamage: 30,
-        laserCooldown: 3000
+        laserCooldown: 3000,
+        hitboxScale: 0.8
     },
     7: {
-        hp: 10500,
+        hp: 4478, // Reduced from 10500, 3732 × 1.2
         speed: 2.2,
         size: 0.95,
         bulletCount: 26,
         bulletSpeed: 7.0,
-        fireRate: 0.065,
+        fireRate: 0.085, // Increased from 0.065
         targetedShotSpeed: 14,
         hasLaser: true,
         weaponCount: 2,
@@ -324,15 +382,16 @@ export const BossConfig = {
         wingmenType: 0,
         laserType: 'continuous',
         laserDamage: 35,
-        laserCooldown: 2800
+        laserCooldown: 2800,
+        hitboxScale: 0.8
     },
     8: {
-        hp: 12000,
+        hp: 5374, // Reduced from 12000, 4478 × 1.2
         speed: 2.4,
         size: 0.95,
         bulletCount: 29,
         bulletSpeed: 7.5,
-        fireRate: 0.07,
+        fireRate: 0.09, // Increased from 0.07
         targetedShotSpeed: 15,
         hasLaser: true,
         weaponCount: 2,
@@ -344,15 +403,16 @@ export const BossConfig = {
         wingmenType: 5,
         laserType: 'pulsed',
         laserDamage: 40,
-        laserCooldown: 2500
+        laserCooldown: 2500,
+        hitboxScale: 0.8
     },
     9: {
-        hp: 13500,
+        hp: 6449, // Reduced from 13500, 5374 × 1.2
         speed: 2.6,
         size: 1.0,
         bulletCount: 32,
         bulletSpeed: 8.0,
-        fireRate: 0.075,
+        fireRate: 0.095, // Increased from 0.075
         targetedShotSpeed: 16,
         hasLaser: true,
         weaponCount: 3,
@@ -364,15 +424,16 @@ export const BossConfig = {
         wingmenType: 5,
         laserType: 'pulsed',
         laserDamage: 45,
-        laserCooldown: 2200
+        laserCooldown: 2200,
+        hitboxScale: 0.8
     },
     10: {
-        hp: 15000,
+        hp: 7739, // Reduced from 15000, 6449 × 1.2
         speed: 2.8,
         size: 1.0,
         bulletCount: 35,
         bulletSpeed: 8.5,
-        fireRate: 0.08,
+        fireRate: 0.1, // Increased from 0.08
         targetedShotSpeed: 17,
         hasLaser: true,
         weaponCount: 3,
@@ -384,6 +445,7 @@ export const BossConfig = {
         wingmenType: 6,
         laserType: 'pulsed',
         laserDamage: 50,
-        laserCooldown: 2000
+        laserCooldown: 2000,
+        hitboxScale: 0.8
     }
 };

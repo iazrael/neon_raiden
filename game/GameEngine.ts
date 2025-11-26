@@ -1,6 +1,6 @@
 import { AudioSystem } from './AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity } from '@/types';
-import { GameConfig, PlayerConfig } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -50,6 +50,7 @@ export class GameEngine {
     meteorTimer: number = 0;
     screenShake: number = 0;
     bossTransitionTimer: number = 0;
+    levelStartTime: number = 0; // Track when level started
 
     // Level transition
     showLevelTransition: boolean = false;
@@ -164,6 +165,7 @@ export class GameEngine {
         this.showLevelTransition = false;
         this.levelTransitionTimer = 0;
         this.bossTransitionTimer = 0;
+        this.levelStartTime = Date.now(); // Initialize level start time
         this.audio.resume();
 
         this.onStateChange(this.state);
@@ -210,7 +212,7 @@ export class GameEngine {
         // Level transition UI
         if (this.showLevelTransition) {
             this.levelTransitionTimer += dt;
-            if (this.levelTransitionTimer > 3000) {
+            if (this.levelTransitionTimer > 1500) { // Reduced from 3000ms
                 this.showLevelTransition = false;
                 this.levelTransitionTimer = 0;
             }
@@ -272,8 +274,12 @@ export class GameEngine {
                 this.enemySpawnTimer = 0;
             }
 
-            // Spawn boss at 80% progress
-            if (this.levelProgress >= 80) {
+            // Spawn boss when both conditions are met:
+            // 1. Level progress >= 80%
+            // 2. Minimum level duration has passed
+            const levelDuration = (Date.now() - this.levelStartTime) / 1000; // in seconds
+            const minDuration = BossSpawnConfig.minLevelDuration;
+            if (this.levelProgress >= 80 && levelDuration >= minDuration) {
                 this.spawnBoss();
             }
         } else {
@@ -426,6 +432,7 @@ export class GameEngine {
             if (this.level < this.maxLevels) {
                 this.level++;
                 this.levelProgress = 0;
+                this.levelStartTime = Date.now(); // Reset level start time for new level
                 this.onLevelChange(this.level);
                 this.player.hp = PlayerConfig.maxHp;
                 this.shield = PlayerConfig.maxShield;
@@ -602,19 +609,7 @@ export class GameEngine {
     }
 
     spawnPowerup(x: number, y: number) {
-        const r = Math.random();
-        let type = 0;
-        if (r < 0.15) type = 0;
-        else if (r < 0.25) type = 2;
-        else if (r < 0.35) type = 1;
-        else if (r < 0.45) type = 3;
-        else if (r < 0.55) type = 4;
-        else if (r < 0.65) type = 5;
-        else if (r < 0.75) type = 7;
-        else if (r < 0.80) type = 8;
-        else if (r < 0.85) type = 9;
-        else if (r < 0.90) type = 10;
-        else type = 6;
+        const type = selectPowerupType();
 
         this.powerups.push({
             x, y, width: 30, height: 30, vx: 0, vy: 2, hp: 1, maxHp: 1,
