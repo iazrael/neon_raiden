@@ -1,4 +1,4 @@
-import { WeaponType } from './types';
+import { WeaponType } from '@/types';
 
 export const GameConfig = {
     width: 0, // Set dynamically

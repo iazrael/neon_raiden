@@ -1,5 +1,5 @@
 import { AudioSystem } from './AudioSystem';
-import { GameState, WeaponType, Particle, Shockwave, Entity } from '../types';
+import { GameState, WeaponType, Particle, Shockwave, Entity } from '@/types';
 import { GameConfig, PlayerConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
@@ -89,6 +89,13 @@ export class GameEngine {
                         this.startGame();
                     }
                 }
+            }
+        };
+
+        this.input.onMouseMove = (x, y) => {
+            if (this.state === GameState.PLAYING) {
+                this.player.x = x;
+                this.player.y = y;
             }
         };
 

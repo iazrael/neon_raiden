@@ -6,6 +6,7 @@ export class InputSystem {
     canvas: HTMLCanvasElement;
 
     onAction: ((action: string) => void) | null = null;
+    onMouseMove: ((x: number, y: number) => void) | null = null;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -24,13 +25,9 @@ export class InputSystem {
         // Mouse Movement (treated as direct position for now, or we can ignore if we want pure keyboard/touch)
         // The original game used mousemove to set player position directly.
         window.addEventListener('mousemove', (e) => {
-            // We'll store this in touch for simplicity or a separate mouse object
-            // But to keep it compatible with the original logic which set player.x/y directly:
-            // We might need to expose this.
             this.touch.x = e.clientX;
             this.touch.y = e.clientY;
-            // We don't set active=true for mouse hover usually, but let's see.
-            // Original: window.addEventListener('mousemove', (e) => { if (playing) { player.x = e.clientX; player.y = e.clientY; } });
+            if (this.onMouseMove) this.onMouseMove(e.clientX, e.clientY);
         });
 
         // Touch

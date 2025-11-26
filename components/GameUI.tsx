@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GameState } from '../types';
+import { GameState } from '@/types';
 
 interface GameUIProps {
   state: GameState;

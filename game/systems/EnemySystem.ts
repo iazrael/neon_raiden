@@ -1,6 +1,6 @@
-import { Entity } from '../types';
-import { EnemyConfig } from '../config';
-import { AudioSystem } from '../AudioSystem';
+import { Entity } from '@/types';
+import { EnemyConfig } from '@/config';
+import { AudioSystem } from '@/AudioSystem';
 
 export class EnemySystem {
     audio: AudioSystem;

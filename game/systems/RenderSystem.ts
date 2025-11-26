@@ -1,5 +1,5 @@
-import { SpriteGenerator } from '../SpriteGenerator';
-import { SpriteMap, Entity, Particle, Shockwave, GameState } from '../types';
+import { SpriteGenerator } from '@/SpriteGenerator';
+import { SpriteMap, Entity, Particle, Shockwave, GameState } from '@/types';
 
 export class RenderSystem {
     ctx: CanvasRenderingContext2D;
