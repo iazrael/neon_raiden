@@ -1,4 +1,4 @@
-import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap } from '@/game/config';
+import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES } from '@/game/config';
 import { BulletType, WeaponType } from '@/types';
 
 export class SpriteGenerator {
@@ -137,19 +137,21 @@ export class SpriteGenerator {
         let label = '';
         let color = '#fff';
 
-        // 0:Power, 1:Laser, 2:Vulcan, 3:Heal/Shield, 4:Wave, 5:Plasma, 6:Bomb, 7:Option
-        switch (type) {
-            case 0: color = '#ecc94b'; label = 'P'; break;
-            case 1: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_laser.svg`; break;
-            case 2: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_vulcan.svg`; break;
-            case 3: color = '#48bb78'; label = 'H'; break;
-            case 4: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_wave.svg`; break;
-            case 5: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_plasma.svg`; break;
-            case 6: color = '#f56565'; label = 'B'; break; // Bomb
-            case 7: color = '#a0aec0'; label = 'O'; break; // Option
-            case 8: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_tesla.svg`; break; // Tesla
-            case 9: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_magma.svg`; break; // Magma (Fire)
-            case 10: iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_shuriken.svg`; break; // Shuriken
+        // PowerupType: 0-7 are weapon types (VULCAN, LASER, MISSILE, WAVE, PLASMA, TESLA, MAGMA, SHURIKEN)
+        // PowerupType: 100=POWER, 101=HP, 102=BOMB, 103=OPTION
+        if (type >= 0 && type <= 7) {
+            // Weapon powerups - use bullet sprite
+            const weaponType = PowerupToWeaponMap[type]
+            const weaponName = WEAPON_NAMES[weaponType]
+            iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_${weaponName}.svg`;
+        } else {
+            // Special powerups
+            switch (type) {
+                case 100: color = '#ecc94b'; label = 'P'; break; // POWER
+                case 101: color = '#48bb78'; label = 'H'; break; // HP
+                case 102: color = '#f56565'; label = 'B'; break; // BOMB
+                case 103: color = '#a0aec0'; label = 'O'; break; // OPTION
+            }
         }
 
         // Draw Background (Canvas)

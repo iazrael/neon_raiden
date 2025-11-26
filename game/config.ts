@@ -3,17 +3,21 @@ import { WeaponType, BulletType } from '@/types';
 // ==================== 道具类型枚举 ====================
 // Powerup types enumeration for better readability
 export enum PowerupType {
-    POWER = 0,      // 武器能量提升 - 提升当前武器等级
-    LASER = 1,      // 激光武器 - 切换/升级为激光
-    VULCAN = 2,     // 散弹武器 - 切换/升级为散弹
-    HP = 3,         // 生命值恢复 - 恢复30HP，满血转为护盾
-    WAVE = 4,       // 波动炮 - 切换/升级为波动炮
-    PLASMA = 5,     // 等离子炮 - 切换/升级为等离子炮
-    BOMB = 6,       // 炸弹 - 增加一个全屏炸弹
-    OPTION = 7,     // 僚机 - 增加一个僚机（上限3个）
-    TESLA = 8,      // 电磁炮 - 切换/升级为电磁武器
-    MAGMA = 9,      // 熔岩炮 - 切换/升级为熔岩弹
-    SHURIKEN = 10   // 手里剑 - 切换/升级为手里剑
+    // Weapon Types (Directly mapped to WeaponType 0-7)
+    VULCAN = 0,     // 散弹武器
+    LASER = 1,      // 激光武器
+    MISSILE = 2,    // 跟踪导弹
+    WAVE = 3,       // 波动炮
+    PLASMA = 4,     // 等离子炮
+    TESLA = 5,      // 电磁炮
+    MAGMA = 6,      // 熔岩炮
+    SHURIKEN = 7,   // 手里剑
+
+    // Special Powerups (Start from 100)
+    POWER = 100,    // 武器能量提升
+    HP = 101,       // 生命值恢复
+    BOMB = 102,     // 炸弹
+    OPTION = 103    // 僚机
 }
 
 // ==================== 敌人类型枚举 ====================
@@ -42,14 +46,29 @@ export const BulletToWeaponMap: { [key in BulletType]?: WeaponType } = {
 };
 
 // PowerupType to WeaponType mapping for powerup icons
+// PowerupType to WeaponType mapping for powerup icons
+// Now much simpler as weapon powerups match WeaponType values
 export const PowerupToWeaponMap: { [key: number]: WeaponType } = {
-    [PowerupType.LASER]: WeaponType.LASER,
     [PowerupType.VULCAN]: WeaponType.VULCAN,
+    [PowerupType.LASER]: WeaponType.LASER,
+    [PowerupType.MISSILE]: WeaponType.MISSILE,
     [PowerupType.WAVE]: WeaponType.WAVE,
     [PowerupType.PLASMA]: WeaponType.PLASMA,
     [PowerupType.TESLA]: WeaponType.TESLA,
     [PowerupType.MAGMA]: WeaponType.MAGMA,
     [PowerupType.SHURIKEN]: WeaponType.SHURIKEN
+};
+
+// Weapon Names Map for Audio and UI
+export const WEAPON_NAMES: { [key in WeaponType]: string } = {
+    [WeaponType.VULCAN]: 'vulcan',
+    [WeaponType.LASER]: 'laser',
+    [WeaponType.MISSILE]: 'missile',
+    [WeaponType.WAVE]: 'wave',
+    [WeaponType.PLASMA]: 'plasma',
+    [WeaponType.TESLA]: 'tesla',
+    [WeaponType.MAGMA]: 'magma',
+    [WeaponType.SHURIKEN]: 'shuriken'
 };
 
 // ==================== 游戏基础配置 ====================
@@ -144,8 +163,8 @@ export const WeaponConfig = {
         speed: 8,               // 子弹速度（缓慢）
         baseFireRate: 600,      // 基础射速（毫秒）
         ratePerLevel: 50,       // 每级射速提升（毫秒减少）
-        width: 48,              // 子弹基础宽度（随等级变大）
-        height: 48,             // 子弹基础高度（随等级变大）
+        width: 32,              // 子弹基础宽度（随等级变大）
+        height: 32,             // 子弹基础高度（随等级变大）
         color: '#ed64a6',       // 子弹颜色
         sprite: 'bullet_plasma' // 精灵图名称
     },
@@ -310,17 +329,18 @@ export const PowerupDropConfig = {
 // 击杀敌人有20%概率掉落道具，以下为各类道具的相对权重
 // 权重分配基于武器强度：强力武器（PLASMA、WAVE）较稀有，基础武器较常见
 export const PowerupDropRates = {
-    [PowerupType.POWER]: 0.20,      // 武器能量提升: 20% (通用升级，最常见)
-    [PowerupType.HP]: 0.18,         // 生命值恢复: 18% (生存必需)
-    [PowerupType.LASER]: 0.12,      // 激光武器: 12% (平衡型武器)
-    [PowerupType.VULCAN]: 0.12,     // 散弹武器: 12% (基础武器)
-    [PowerupType.SHURIKEN]: 0.10,   // 手里剑: 10% (手里剑)
-    [PowerupType.TESLA]: 0.09,      // 电磁炮: 9% (进阶武器)
-    [PowerupType.MAGMA]: 0.09,      // 熔岩炮: 9% (进阶武器)
-    [PowerupType.WAVE]: 0.05,       // 波动炮: 5% (强力武器，稀有)
-    [PowerupType.PLASMA]: 0.03,     // 等离子炮: 3% (终极武器，非常稀有)
-    [PowerupType.BOMB]: 0.02,       // 炸弹: 2% (战略道具，罕见)
-    [PowerupType.OPTION]: 0.02      // 僚机: 0% (战略道具，罕见)
+    [PowerupType.POWER]: 0.20,      // 武器能量提升: 20%
+    [PowerupType.HP]: 0.18,         // 生命值恢复: 18%
+    [PowerupType.VULCAN]: 0.10,     // 散弹武器: 10%
+    [PowerupType.LASER]: 0.10,      // 激光武器: 10%
+    [PowerupType.MISSILE]: 0.10,    // 导弹: 10%
+    [PowerupType.SHURIKEN]: 0.08,   // 手里剑: 8%
+    [PowerupType.TESLA]: 0.08,      // 电磁炮: 8%
+    [PowerupType.MAGMA]: 0.08,      // 熔岩炮: 8%
+    [PowerupType.WAVE]: 0.04,       // 波动炮: 4%
+    [PowerupType.PLASMA]: 0.02,     // 等离子炮: 2%
+    [PowerupType.BOMB]: 0.01,       // 炸弹: 1%
+    [PowerupType.OPTION]: 0.01      // 僚机: 1%
 };
 
 // 根据掉落概率选择道具类型的辅助函数
@@ -328,7 +348,8 @@ export function selectPowerupType(): number {
     const r = Math.random();
     let cumulative = 0;
 
-    for (let type = PowerupType.POWER; type <= PowerupType.SHURIKEN; type++) {
+    for (const typeStr in PowerupDropRates) {
+        const type = Number(typeStr);
         cumulative += PowerupDropRates[type as keyof typeof PowerupDropRates];
         if (r < cumulative) {
             return type;
@@ -348,17 +369,18 @@ export const PowerupEffects = {
 
     // 道具与武器类型映射
     weaponTypeMap: {
-        [PowerupType.POWER]: null,              // 通用武器升级（无特定武器类型）
-        [PowerupType.HP]: null,                     // HP恢复（单独处理）
-        [PowerupType.BOMB]: null,                   // 炸弹（单独处理）
-        [PowerupType.OPTION]: null,                 // 僚机（单独处理）
-        [PowerupType.LASER]: WeaponType.LASER,      // 激光武器
-        [PowerupType.VULCAN]: WeaponType.VULCAN,    // 散弹武器
-        [PowerupType.WAVE]: WeaponType.WAVE,        // 波动炮
-        [PowerupType.PLASMA]: WeaponType.PLASMA,    // 等离子炮
-        [PowerupType.TESLA]: WeaponType.TESLA,      // 电磁炮
-        [PowerupType.MAGMA]: WeaponType.MAGMA,      // 熔岩炮
-        [PowerupType.SHURIKEN]: WeaponType.SHURIKEN // 手里剑
+        [PowerupType.POWER]: null,
+        [PowerupType.HP]: null,
+        [PowerupType.BOMB]: null,
+        [PowerupType.OPTION]: null,
+        [PowerupType.VULCAN]: WeaponType.VULCAN,
+        [PowerupType.LASER]: WeaponType.LASER,
+        [PowerupType.MISSILE]: WeaponType.MISSILE,
+        [PowerupType.WAVE]: WeaponType.WAVE,
+        [PowerupType.PLASMA]: WeaponType.PLASMA,
+        [PowerupType.TESLA]: WeaponType.TESLA,
+        [PowerupType.MAGMA]: WeaponType.MAGMA,
+        [PowerupType.SHURIKEN]: WeaponType.SHURIKEN
     }
 };
 
@@ -382,6 +404,15 @@ export enum BossName {
     APOCALYPSE = 'APOCALYPSE'        // 第10关 - 天启
 }
 
+// ==================== Boss武器类型枚举 ====================
+export enum BossWeaponType {
+    RADIAL = 'radial',       // 环形弹幕
+    TARGETED = 'targeted',   // 瞄准弹
+    SPREAD = 'spread',       // 扇形弹幕
+    HOMING = 'homing',       // 追踪导弹
+    LASER = 'laser'          // 激光
+}
+
 // ==================== Boss配置 ====================
 export const BossConfig = {
     // 第1关 - 守护者（无人机母舰）
@@ -400,7 +431,7 @@ export const BossConfig = {
         hasLaser: false,                // 是否具备激光
         weaponCount: 1,                 // 武器系统数量
         score: 5000,                    // 击杀得分
-        weapons: ['radial'],            // 武器类型：环形弹幕
+        weapons: [BossWeaponType.RADIAL],            // 武器类型：环形弹幕
         movementPattern: 'sine',        // 移动模式：正弦波动
         spawnX: 'random',               // 生成位置：随机
         wingmenCount: 0,                // 僚机数量
@@ -426,7 +457,7 @@ export const BossConfig = {
         hasLaser: false,
         weaponCount: 1,
         score: 10000,
-        weapons: ['radial', 'targeted'], // 武器类型：环形 + 瞄准
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED], // 武器类型：环形 + 瞄准
         movementPattern: 'sine',
         spawnX: 'random',
         wingmenCount: 0,
@@ -452,7 +483,7 @@ export const BossConfig = {
         hasLaser: false,
         weaponCount: 1,
         score: 15000,
-        weapons: ['radial', 'targeted'],
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         movementPattern: 'figure8',     // 移动模式：8字盘旋
         spawnX: 'random',
         wingmenCount: 0,
@@ -478,7 +509,7 @@ export const BossConfig = {
         hasLaser: false,
         weaponCount: 1,
         score: 20000,
-        weapons: ['radial', 'targeted'],
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         movementPattern: 'figure8',
         spawnX: 'random',
         wingmenCount: 0,
@@ -504,7 +535,7 @@ export const BossConfig = {
         hasLaser: false,
         weaponCount: 1,
         score: 25000,
-        weapons: ['radial', 'targeted'],
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         movementPattern: 'figure8',
         spawnX: 'random',
         wingmenCount: 0,
@@ -530,7 +561,7 @@ export const BossConfig = {
         hasLaser: true,                 // 具备激光
         weaponCount: 2,
         score: 30000,
-        weapons: ['radial', 'targeted', 'laser'], // 武器类型：环形 + 瞄准 + 激光
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER], // 武器类型：环形 + 瞄准 + 激光
         movementPattern: 'tracking',    // 移动模式：追踪
         spawnX: 'random',
         wingmenCount: 0,
@@ -556,7 +587,7 @@ export const BossConfig = {
         hasLaser: true,
         weaponCount: 2,
         score: 35000,
-        weapons: ['radial', 'targeted', 'laser'],
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
         movementPattern: 'tracking',
         spawnX: 'random',
         wingmenCount: 0,
@@ -583,7 +614,7 @@ export const BossConfig = {
         hasLaser: true,
         weaponCount: 2,
         score: 40000,
-        weapons: ['radial', 'targeted', 'laser', 'spread'], // 武器类型：环形 + 瞄准 + 激光 + 扇形
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD], // 武器类型：环形 + 瞄准 + 激光 + 扇形
         movementPattern: 'aggressive',  // 移动模式：激进（追踪+俯冲）
         spawnX: 'random',
         wingmenCount: 1,                // 僚机数量：1个
@@ -610,7 +641,7 @@ export const BossConfig = {
         hasLaser: true,
         weaponCount: 3,
         score: 45000,
-        weapons: ['radial', 'targeted', 'laser', 'spread', 'homing'], // 武器类型：环形 + 瞄准 + 激光 + 扇形 + 追踪
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING], // 武器类型：环形 + 瞄准 + 激光 + 扇形 + 追踪
         movementPattern: 'aggressive',
         spawnX: 'random',
         wingmenCount: 2,                // 僚机数量：2个
@@ -637,7 +668,7 @@ export const BossConfig = {
         hasLaser: true,
         weaponCount: 3,
         score: 50000,
-        weapons: ['radial', 'targeted', 'laser', 'spread', 'homing'],
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         movementPattern: 'aggressive',
         spawnX: 'random',
         wingmenCount: 2,                // 僚机数量：2个

@@ -100,6 +100,9 @@ function App() {
           setGameState(GameState.MENU);
         }}
         playClick={playClick}
+        onBackToMenu={() => {
+          setGameState(GameState.MENU);
+        }}
       />
     </div>
   );

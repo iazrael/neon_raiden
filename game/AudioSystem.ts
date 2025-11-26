@@ -1,3 +1,5 @@
+import { WeaponType } from '@/types';
+import { WEAPON_NAMES } from './config';
 
 export class AudioSystem {
   private ctx: AudioContext | null = null;
@@ -97,7 +99,7 @@ export class AudioSystem {
     }
   }
 
-  playShoot(type: 'vulcan' | 'laser' | 'missile' | 'wave' | 'plasma') {
+  playShoot(type: WeaponType) {
     if (!this.ctx || !this.masterGain) return;
 
     const osc = this.ctx.createOscillator();
@@ -107,8 +109,9 @@ export class AudioSystem {
     gain.connect(this.masterGain);
 
     const now = this.ctx.currentTime;
+    // const type = WEAPON_NAMES[weaponType];
 
-    if (type === 'vulcan') {
+    if (type === WeaponType.VULCAN) {
       osc.type = 'square';
       osc.frequency.setValueAtTime(400, now);
       osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
@@ -116,7 +119,7 @@ export class AudioSystem {
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
       osc.start(now);
       osc.stop(now + 0.1);
-    } else if (type === 'laser') {
+    } else if (type === WeaponType.LASER) {
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(800, now);
       osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
@@ -124,7 +127,7 @@ export class AudioSystem {
       gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
       osc.start(now);
       osc.stop(now + 0.15);
-    } else if (type === 'missile') {
+    } else if (type === WeaponType.MISSILE) {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(150, now);
       osc.frequency.linearRampToValueAtTime(50, now + 0.3);
@@ -132,7 +135,7 @@ export class AudioSystem {
       gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
       osc.start(now);
       osc.stop(now + 0.3);
-    } else if (type === 'wave') {
+    } else if (type === WeaponType.WAVE) {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(300, now);
       osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
@@ -140,7 +143,7 @@ export class AudioSystem {
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
       osc.start(now);
       osc.stop(now + 0.3);
-    } else if (type === 'plasma') {
+    } else if (type === WeaponType.PLASMA) {
       osc.type = 'square'; // Buzzier sound
       osc.frequency.setValueAtTime(100, now);
       osc.frequency.linearRampToValueAtTime(50, now + 0.5);
@@ -148,6 +151,34 @@ export class AudioSystem {
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
       osc.start(now);
       osc.stop(now + 0.5);
+    } else if (type === WeaponType.TESLA) {
+      // Electric zap sound - high frequency with modulation
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1500, now);
+      osc.frequency.linearRampToValueAtTime(2000, now + 0.05);
+      osc.frequency.linearRampToValueAtTime(1500, now + 0.1);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } else if (type === WeaponType.MAGMA) {
+      // Fiery crackling sound - low rumble with noise
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } else if (type === WeaponType.SHURIKEN) {
+      // Slicing/whoosh sound - sweeping high frequency
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1000, now);
+      osc.frequency.linearRampToValueAtTime(600, now + 0.15);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+      osc.start(now);
+      osc.stop(now + 0.15);
     }
   }
 

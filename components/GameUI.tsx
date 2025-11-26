@@ -18,6 +18,7 @@ interface GameUIProps {
   onOpenGallery?: () => void;
   onCloseGallery?: () => void;
   playClick?: (type?: 'default' | 'confirm' | 'cancel' | 'menu') => void;
+  onBackToMenu?: () => void;
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -35,6 +36,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   onOpenGallery,
   onCloseGallery,
   playClick,
+  onBackToMenu,
 }) => {
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-safe font-mono text-white select-none">
@@ -140,6 +142,16 @@ export const GameUI: React.FC<GameUIProps> = ({
             className="px-8 py-3 bg-white text-red-900 font-bold rounded hover:bg-gray-200 active:scale-95 transition-transform uppercase tracking-widest"
           >
             Reboot System
+          </button>
+
+          <button
+            onClick={() => {
+              playClick?.('cancel');
+              onBackToMenu?.();
+            }}
+            className="mt-4 px-6 py-2 bg-transparent text-red-400 font-bold border border-red-900/50 hover:bg-red-900/20 hover:border-red-500 rounded transition-all uppercase tracking-widest text-sm"
+          >
+            Return to Home
           </button>
         </div>
       )}

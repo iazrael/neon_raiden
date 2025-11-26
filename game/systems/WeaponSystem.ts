@@ -1,5 +1,5 @@
 import { WeaponType, Entity } from '@/types';
-import { WeaponConfig } from '@/game/config';
+import { WeaponConfig, WEAPON_NAMES } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
 export class WeaponSystem {
@@ -122,15 +122,6 @@ export class WeaponSystem {
     }
 
     playShootSound(weaponType: WeaponType) {
-        this.audio.playShoot(
-            weaponType === WeaponType.VULCAN ? 'vulcan' :
-                weaponType === WeaponType.LASER ? 'laser' :
-                    weaponType === WeaponType.MISSILE ? 'missile' :
-                        weaponType === WeaponType.WAVE ? 'wave' :
-                            weaponType === WeaponType.TESLA ? 'laser' :
-                                weaponType === WeaponType.MAGMA ? 'vulcan' :
-                                    weaponType === WeaponType.SHURIKEN ? 'missile' :
-                                        'plasma'
-        );
+        this.audio.playShoot(weaponType);
     }
 }

@@ -1,5 +1,5 @@
-import { Entity, SpriteMap } from '@/types';
-import { getBossConfigByLevel } from '@/game/config';
+import { Entity, SpriteMap, WeaponType } from '@/types';
+import { getBossConfigByLevel, BossWeaponType } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
 export class BossSystem {
@@ -172,7 +172,7 @@ export class BossSystem {
         if (!config) return;
 
         // Radial Burst
-        if (config.weapons.includes('radial')) {
+        if (config.weapons.includes(BossWeaponType.RADIAL)) {
             for (let i = 0; i < config.bulletCount; i++) {
                 const angle = (i / config.bulletCount) * Math.PI * 2 + (Date.now() / 1000);
                 enemyBullets.push({
@@ -193,7 +193,7 @@ export class BossSystem {
         }
 
         // Targeted Shot
-        if (config.weapons.includes('targeted') && config.targetedShotSpeed > 0) {
+        if (config.weapons.includes(BossWeaponType.TARGETED) && config.targetedShotSpeed > 0) {
             const dx = player.x - boss.x;
             const dy = player.y - boss.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
@@ -214,7 +214,7 @@ export class BossSystem {
         }
 
         // Spread Shot
-        if (config.weapons.includes('spread')) {
+        if (config.weapons.includes(BossWeaponType.SPREAD)) {
             for (let i = -2; i <= 2; i++) {
                 const angle = Math.PI / 2 + (i * Math.PI / 12);
                 enemyBullets.push({
@@ -235,7 +235,7 @@ export class BossSystem {
         }
 
         // Homing Missiles
-        if (config.weapons.includes('homing')) {
+        if (config.weapons.includes(BossWeaponType.HOMING)) {
             for (let i = 0; i < 2; i++) {
                 const offsetX = (i === 0 ? -1 : 1) * 30;
                 enemyBullets.push({
@@ -260,7 +260,7 @@ export class BossSystem {
     fireLaser(boss: Entity, enemyBullets: Entity[], level: number, player: Entity, laserType: string) {
         const config = getBossConfigByLevel(level);
         if (!config) return;
-        this.audio.playShoot('laser');
+        this.audio.playShoot(WeaponType.LASER);
 
         if (laserType === 'continuous') {
             // Continuous beam - single long-lasting laser

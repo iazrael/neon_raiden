@@ -1,4 +1,4 @@
-import { Entity } from '@/types';
+import { Entity, WeaponType } from '@/types';
 import { EnemyConfig, EnemySpawnWeights } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
@@ -109,7 +109,7 @@ export class EnemySystem {
                         e.state = 2;
                         e.timer = 0;
                         // Fire Laser
-                        this.audio.playShoot('laser');
+                        this.audio.playShoot(WeaponType.LASER);
                         enemyBullets.push({
                             x: e.x, y: e.y + 30, width: 10, height: 800,
                             vx: 0, vy: 20,
