@@ -1,0 +1,18 @@
+{
+  "input": "public/logo.svg",
+  "output": "public",
+  "icons": [
+    {
+      "size": 180,
+      "filename": "logo-180.png"
+    },
+    {
+      "size": 192,
+      "filename": "logo-192.png"
+    },
+    {
+      "size": 512,
+      "filename": "logo-512.png"
+    }
+  ]
+}

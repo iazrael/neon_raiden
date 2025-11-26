@@ -11,50 +11,24 @@
     "categories": [
         "games"
     ],
-    "screenshots": [
-        {
-            "src": "./logo.svg",
-            "sizes": "512x512",
-            "type": "image/svg+xml",
-            "form_factor": "any"
-        },
-        {
-            "src": "./logo.svg",
-            "sizes": "540x720",
-            "type": "image/svg+xml",
-            "form_factor": "narrow"
-        }
-    ],
     "icons": [
         {
-            "src": "./favicon.svg",
-            "sizes": "32x32",
+            "src": "./logo.svg",
+            "sizes": "any",
             "type": "image/svg+xml",
-            "purpose": "any"
+            "purpose": "any maskable"
         },
         {
-            "src": "./logo.svg",
+            "src": "./logo-192.png",
             "sizes": "192x192",
-            "type": "image/svg+xml",
-            "purpose": "any"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
-            "src": "./logo.svg",
+            "src": "/logo-512.png",
             "sizes": "512x512",
-            "type": "image/svg+xml",
-            "purpose": "any"
-        },
-        {
-            "src": "./logo.svg",
-            "sizes": "192x192",
-            "type": "image/svg+xml",
-            "purpose": "maskable"
-        },
-        {
-            "src": "./logo.svg",
-            "sizes": "512x512",
-            "type": "image/svg+xml",
-            "purpose": "maskable"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
     "shortcuts": [
@@ -65,9 +39,10 @@
             "url": "./?mode=play",
             "icons": [
                 {
-                    "src": "./favicon.svg",
+                    "src": "./logo-192.png",
                     "sizes": "192x192",
-                    "type": "image/svg+xml"
+                    "type": "image/png",
+                    "purpose": "any maskable"
                 }
             ]
         }

@@ -230,17 +230,17 @@ export const EnemyConfig = {
 
 // Powerup drop rates configuration
 export const PowerupDropRates = {
-    [PowerupType.POWER]: 0.25,      // 武器能量提升: 25%
+    [PowerupType.POWER]: 0.30,      // 武器能量提升: 25%
     [PowerupType.LASER]: 0.10,      // 激光武器: 10%
     [PowerupType.VULCAN]: 0.10,     // 散弹武器: 10%
     [PowerupType.HP]: 0.20,         // 生命值恢复: 20%
     [PowerupType.WAVE]: 0.15,       // 波动炮: 15%
     [PowerupType.PLASMA]: 0.10,     // 等离子炮: 10%
-    [PowerupType.BOMB]: 0.05,       // 炸弹: 5%
-    [PowerupType.OPTION]: 0.08,     // 僚机: 8%
-    [PowerupType.TESLA]: 0.05,      // 电磁炮: 5%
-    [PowerupType.MAGMA]: 0.05,      // 熔岩炮: 5%
-    [PowerupType.SHURIKEN]: 0.05    // 手里剑: 5%
+    [PowerupType.BOMB]: 0.15,       // 炸弹: 5%
+    [PowerupType.OPTION]: 0.12,     // 僚机: 8%
+    [PowerupType.TESLA]: 0.15,      // 电磁炮: 5%
+    [PowerupType.MAGMA]: 0.15,      // 熔岩炮: 5%
+    [PowerupType.SHURIKEN]: 0.15    // 手里剑: 5%
 };
 
 // Helper function to select powerup type based on drop rates
@@ -269,6 +269,9 @@ export const PowerupEffects = {
     // Weapon type mapping for powerups
     weaponTypeMap: {
         [PowerupType.POWER]: null,        // Generic power upgrade
+        [PowerupType.HP]: null,           // HP restoration (handled separately)
+        [PowerupType.BOMB]: null,         // Bomb (handled separately)
+        [PowerupType.OPTION]: null,       // Option (handled separately)
         [PowerupType.LASER]: WeaponType.LASER,
         [PowerupType.VULCAN]: WeaponType.VULCAN,
         [PowerupType.WAVE]: WeaponType.WAVE,
