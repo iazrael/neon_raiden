@@ -82,6 +82,10 @@ export const GameUI: React.FC<GameUIProps> = ({
           >
             DATABASE
           </button>
+
+          <div className="mt-8 text-xs text-cyan-500/50 tracking-widest font-mono">
+            {getVersion()}
+          </div>
         </div>
       )}
 
