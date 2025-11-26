@@ -159,9 +159,11 @@ export class SpriteGenerator {
         // PowerupType: 0-7 are weapon types (VULCAN, LASER, MISSILE, WAVE, PLASMA, TESLA, MAGMA, SHURIKEN)
         // PowerupType: 100=POWER, 101=HP, 102=BOMB, 103=OPTION
         if (type >= 0 && type <= 7) {
-            // Weapon powerups - use bullet sprite
+            // Weapon powerups - use bullet sprite and weapon color
             const weaponType = PowerupToWeaponMap[type]
             const weaponName = WEAPON_NAMES[weaponType]
+            const weaponConfig = WeaponConfig[weaponType];
+            color = weaponConfig.color;  // Use weapon's color for the border
             iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_${weaponName}.svg`;
         } else {
             // Special powerups

@@ -35,9 +35,13 @@ export class RenderSystem {
         this.sprites['bullet_magma'] = this.spriteGen.generateBullet(BulletType.MAGMA);
         this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet(BulletType.SHURIKEN);
 
-        // Powerups (Types 0-10)
+        // Powerups (Types 0-7 are weapons, 100-103 are special powerups)
         // Powerups are still generated as Canvas because they combine dynamic text/icons
-        for (let i = 0; i <= 10; i++) {
+        for (let i = 0; i <= 7; i++) {
+            this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
+        }
+        // Special powerups
+        for (let i = 100; i <= 103; i++) {
             this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
         }
 
