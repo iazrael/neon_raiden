@@ -1,5 +1,5 @@
 import { SpriteGenerator } from '@/game/SpriteGenerator';
-import { SpriteMap, Entity, Particle, Shockwave, GameState } from '@/types';
+import { SpriteMap, Entity, Particle, Shockwave, GameState, BulletType } from '@/types';
 
 export class RenderSystem {
     ctx: CanvasRenderingContext2D;
@@ -25,15 +25,15 @@ export class RenderSystem {
         }
 
         // Bullets
-        this.sprites['bullet_vulcan'] = this.spriteGen.generateBullet('vulcan');
-        this.sprites['bullet_laser'] = this.spriteGen.generateBullet('laser');
-        this.sprites['bullet_missile'] = this.spriteGen.generateBullet('missile');
-        this.sprites['bullet_wave'] = this.spriteGen.generateBullet('wave');
-        this.sprites['bullet_plasma'] = this.spriteGen.generateBullet('plasma');
-        this.sprites['bullet_enemy'] = this.spriteGen.generateBullet('enemy_orb');
-        this.sprites['bullet_tesla'] = this.spriteGen.generateBullet('tesla');
-        this.sprites['bullet_magma'] = this.spriteGen.generateBullet('magma');
-        this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet('shuriken');
+        this.sprites['bullet_vulcan'] = this.spriteGen.generateBullet(BulletType.VULCAN);
+        this.sprites['bullet_laser'] = this.spriteGen.generateBullet(BulletType.LASER);
+        this.sprites['bullet_missile'] = this.spriteGen.generateBullet(BulletType.MISSILE);
+        this.sprites['bullet_wave'] = this.spriteGen.generateBullet(BulletType.WAVE);
+        this.sprites['bullet_plasma'] = this.spriteGen.generateBullet(BulletType.PLASMA);
+        this.sprites['bullet_enemy'] = this.spriteGen.generateBullet(BulletType.ENEMY_ORB);
+        this.sprites['bullet_tesla'] = this.spriteGen.generateBullet(BulletType.TESLA);
+        this.sprites['bullet_magma'] = this.spriteGen.generateBullet(BulletType.MAGMA);
+        this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet(BulletType.SHURIKEN);
 
         // Powerups (Types 0-10)
         for (let i = 0; i <= 10; i++) {

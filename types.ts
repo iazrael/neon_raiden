@@ -19,6 +19,19 @@ export enum WeaponType {
   SHURIKEN // 手里剑 (弹射)
 }
 
+export enum BulletType {
+  VULCAN = 'vulcan',        // 散弹
+  LASER = 'laser',          // 激光
+  MISSILE = 'missile',      // 导弹
+  WAVE = 'wave',            // 波动炮
+  PLASMA = 'plasma',        // 等离子炮
+  TESLA = 'tesla',          // 电磁炮
+  MAGMA = 'magma',          // 熔岩弹
+  SHURIKEN = 'shuriken',    // 手里剑
+  ENEMY_ORB = 'enemy_orb',  // 敌人普通弹
+  ENEMY_BEAM = 'enemy_beam' // 敌人光束
+}
+
 export interface Vector2D {
   x: number;
   y: number;

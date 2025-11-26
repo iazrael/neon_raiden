@@ -1,4 +1,4 @@
-import { WeaponType } from '@/types';
+import { WeaponType, BulletType } from '@/types';
 
 // ==================== 道具类型枚举 ====================
 // Powerup types enumeration for better readability
@@ -602,6 +602,21 @@ export const BossConfig = {
         laserCooldown: 2000,            // 激光冷却时间2秒
         hitboxScale: 0.8
     }
+};
+
+// ==================== 子弹尺寸配置 ====================
+// 子弹类型到其显示尺寸的映射
+export const BulletSizeConfig = {
+    [BulletType.VULCAN]: { width: 16, height: 32 },
+    [BulletType.LASER]: { width: 24, height: 64 },
+    [BulletType.MISSILE]: { width: 24, height: 48 },
+    [BulletType.WAVE]: { width: 64, height: 32 },
+    [BulletType.PLASMA]: { width: 48, height: 48 },
+    [BulletType.ENEMY_ORB]: { width: 32, height: 32 },
+    [BulletType.ENEMY_BEAM]: { width: 32, height: 32 },
+    [BulletType.TESLA]: { width: 32, height: 32 },
+    [BulletType.MAGMA]: { width: 32, height: 32 },
+    [BulletType.SHURIKEN]: { width: 32, height: 32 }
 };
 
 // 根据关卡等级获取Boss配置的辅助函数
