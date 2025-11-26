@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
     './favicon.svg',
     './logo.svg',
     './manifest.json',
+    './tailwindcss-3.4.17.js'
 ];
 
 // 安装Service Worker

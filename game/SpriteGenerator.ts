@@ -126,21 +126,7 @@ export class SpriteGenerator {
             h = config.height;
         }
 
-        // Map types to filenames
-        let filename = 'bullet_vulcan';
-        switch (type) {
-            case BulletType.VULCAN: filename = 'bullet_vulcan'; break;
-            case BulletType.LASER: filename = 'bullet_laser'; break;
-            case BulletType.MISSILE: filename = 'bullet_missile'; break;
-            case BulletType.WAVE: filename = 'bullet_wave'; break;
-            case BulletType.PLASMA: filename = 'bullet_plasma'; break;
-            case BulletType.ENEMY_ORB: filename = 'bullet_enemy'; break;
-            case BulletType.TESLA: filename = 'bullet_tesla'; break;
-            case BulletType.MAGMA: filename = 'bullet_magma'; break;
-            case BulletType.SHURIKEN: filename = 'bullet_shuriken'; break;
-        }
-
-        return this.loadSVG(`${ASSETS_BASE_PATH}bullets/${filename}.svg`, w, h);
+        return this.loadSVG(`${ASSETS_BASE_PATH}bullets/bullet_${type}.svg`, w, h);
     }
 
     // 生成掉落物，现在包含内部图标
