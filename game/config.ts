@@ -1,5 +1,31 @@
 import { WeaponType } from '@/types';
 
+// Powerup types enumeration for better readability
+export enum PowerupType {
+    POWER = 0,      // 武器能量提升
+    LASER = 1,      // 激光武器
+    VULCAN = 2,     // 散弹武器
+    HP = 3,         // 生命值恢复
+    WAVE = 4,       // 波动炮
+    PLASMA = 5,     // 等离子炮
+    BOMB = 6,       // 炸弹
+    OPTION = 7,     // 僚机
+    TESLA = 8,      // 电磁炮
+    MAGMA = 9,      // 熔岩炮
+    SHURIKEN = 10   // 手里剑
+}
+
+// Enemy types enumeration for better readability
+export enum EnemyType {
+    NORMAL = 0,             // 普通敌人
+    FAST = 1,               // 快速移动
+    TANK = 2,               // 坦克型
+    KAMIKAZE = 3,           // 神风特攻
+    ELITE_GUNBOAT = 4,      // 精英炮艇
+    LASER_INTERCEPTOR = 5,  // 激光拦截机
+    MINE_LAYER = 6          // 布雷机
+}
+
 export const GameConfig = {
     width: 0, // Set dynamically
     height: 0, // Set dynamically
@@ -113,16 +139,16 @@ export const WeaponConfig = {
 
 // Enemy spawn weights by level - higher weight = more frequent spawning
 export const EnemySpawnWeights = {
-    1: { 0: 10 }, // Only normal enemies
-    2: { 0: 7, 1: 5 }, // More fast enemies
-    3: { 0: 5, 1: 4, 2: 3, 3: 3 }, // Introduce tank and kamikaze
-    4: { 0: 4, 1: 5, 2: 3, 3: 4 }, // More fast and kamikaze
-    5: { 0: 3, 1: 5, 2: 3, 3: 5, 4: 2 }, // Elite gunboats appear
-    6: { 0: 2, 1: 6, 2: 2, 3: 6, 4: 2, 5: 3 }, // Laser interceptors, more fast/kamikaze
-    7: { 0: 2, 1: 6, 2: 2, 3: 7, 4: 2, 5: 3, 6: 2 }, // Mine layers, even more kamikaze
-    8: { 0: 1, 1: 7, 2: 2, 3: 8, 4: 2, 5: 4, 6: 3 }, // Heavy emphasis on fast/kamikaze
-    9: { 0: 1, 1: 8, 2: 1, 3: 9, 4: 2, 5: 4, 6: 3 }, // Maximum fast/kamikaze
-    10: { 0: 1, 1: 9, 2: 1, 3: 10, 4: 2, 5: 5, 6: 4 } // Final level chaos
+    1: { [EnemyType.NORMAL]: 10 },
+    2: { [EnemyType.NORMAL]: 7, [EnemyType.FAST]: 5 },
+    3: { [EnemyType.NORMAL]: 5, [EnemyType.FAST]: 4, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 3 },
+    4: { [EnemyType.NORMAL]: 4, [EnemyType.FAST]: 5, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 4 },
+    5: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 5, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 5, [EnemyType.ELITE_GUNBOAT]: 2 },
+    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 6, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 6, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3 },
+    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 6, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 7, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 2 },
+    8: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 7, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 8, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
+    9: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 8, [EnemyType.TANK]: 1, [EnemyType.KAMIKAZE]: 9, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
+    10: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 9, [EnemyType.TANK]: 1, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 5, [EnemyType.MINE_LAYER]: 4 }
 };
 
 export const EnemyConfig = {
@@ -134,7 +160,7 @@ export const EnemyConfig = {
     eliteSizeMultiplier: 1.3,
     enemyCountMultiplier: 1.15, // Enemies increase by 15% per level
     types: {
-        0: { // Normal
+        [EnemyType.NORMAL]: { // 普通敌人
             baseHp: 20,
             hpPerLevel: 10,
             baseSpeed: 2,
@@ -143,7 +169,7 @@ export const EnemyConfig = {
             height: 40,
             score: 100
         },
-        1: { // Fast
+        [EnemyType.FAST]: { // 快速移动
             baseHp: 10,
             hpPerLevel: 0,
             baseSpeed: 5,
@@ -153,7 +179,7 @@ export const EnemyConfig = {
             score: 200,
             shootFrequency: 0.015 // Increased shooting frequency
         },
-        2: { // Tank
+        [EnemyType.TANK]: { // 坦克型
             baseHp: 60,
             hpPerLevel: 20,
             baseSpeed: 1,
@@ -162,7 +188,7 @@ export const EnemyConfig = {
             height: 60,
             score: 300
         },
-        3: { // Kamikaze
+        [EnemyType.KAMIKAZE]: { // 神风特攻
             baseHp: 5,
             hpPerLevel: 0,
             baseSpeed: 7,
@@ -172,7 +198,7 @@ export const EnemyConfig = {
             score: 400,
             shootFrequency: 0.02 // Increased shooting frequency
         },
-        4: { // Elite Gunboat
+        [EnemyType.ELITE_GUNBOAT]: { // 精英炮艇
             baseHp: 150,
             hpPerLevel: 30,
             baseSpeed: 0.5,
@@ -181,7 +207,7 @@ export const EnemyConfig = {
             height: 50,
             score: 500
         },
-        5: { // Laser Interceptor
+        [EnemyType.LASER_INTERCEPTOR]: { // 激光拦截机
             baseHp: 80,
             hpPerLevel: 15,
             baseSpeed: 4,
@@ -190,7 +216,7 @@ export const EnemyConfig = {
             height: 50,
             score: 600
         },
-        6: { // Mine Layer
+        [EnemyType.MINE_LAYER]: { // 布雷机
             baseHp: 120,
             hpPerLevel: 20,
             baseSpeed: 1.5,
@@ -204,17 +230,17 @@ export const EnemyConfig = {
 
 // Powerup drop rates configuration
 export const PowerupDropRates = {
-    0: 0.25,  // Power: 25%
-    1: 0.10,  // Laser: 10%
-    2: 0.10,  // Vulcan: 10%
-    3: 0.20,  // HP: 20%
-    4: 0.15,  // Wave: 15%
-    5: 0.10,  // Plasma: 10%
-    6: 0.05,  // Bomb: 5%
-    7: 0.08,  // Option: 8%
-    8: 0.05,  // Tesla: 5%
-    9: 0.05,  // Magma: 5%
-    10: 0.05  // Shuriken: 5%
+    [PowerupType.POWER]: 0.25,      // 武器能量提升: 25%
+    [PowerupType.LASER]: 0.10,      // 激光武器: 10%
+    [PowerupType.VULCAN]: 0.10,     // 散弹武器: 10%
+    [PowerupType.HP]: 0.20,         // 生命值恢复: 20%
+    [PowerupType.WAVE]: 0.15,       // 波动炮: 15%
+    [PowerupType.PLASMA]: 0.10,     // 等离子炮: 10%
+    [PowerupType.BOMB]: 0.05,       // 炸弹: 5%
+    [PowerupType.OPTION]: 0.08,     // 僚机: 8%
+    [PowerupType.TESLA]: 0.05,      // 电磁炮: 5%
+    [PowerupType.MAGMA]: 0.05,      // 熔岩炮: 5%
+    [PowerupType.SHURIKEN]: 0.05    // 手里剑: 5%
 };
 
 // Helper function to select powerup type based on drop rates
@@ -222,29 +248,65 @@ export function selectPowerupType(): number {
     const r = Math.random();
     let cumulative = 0;
 
-    for (let type = 0; type <= 10; type++) {
+    for (let type = PowerupType.POWER; type <= PowerupType.SHURIKEN; type++) {
         cumulative += PowerupDropRates[type as keyof typeof PowerupDropRates];
         if (r < cumulative) {
             return type;
         }
     }
 
-    return 0; // Fallback to Power
-}
+    return PowerupType.POWER; // Fallback to Power
+};
+
+// Powerup effects configuration
+export const PowerupEffects = {
+    maxWeaponLevel: 10,
+    maxOptions: 3,
+    maxBombs: 6,
+    hpRestoreAmount: 30,
+    shieldRestoreAmount: 25,
+
+    // Weapon type mapping for powerups
+    weaponTypeMap: {
+        [PowerupType.POWER]: null,        // Generic power upgrade
+        [PowerupType.LASER]: WeaponType.LASER,
+        [PowerupType.VULCAN]: WeaponType.VULCAN,
+        [PowerupType.WAVE]: WeaponType.WAVE,
+        [PowerupType.PLASMA]: WeaponType.PLASMA,
+        [PowerupType.TESLA]: WeaponType.TESLA,
+        [PowerupType.MAGMA]: WeaponType.MAGMA,
+        [PowerupType.SHURIKEN]: WeaponType.SHURIKEN
+    }
+};
 
 // Boss spawn timing configuration (in seconds)
 export const BossSpawnConfig = {
     minLevelDuration: 60, // Minimum seconds before boss can spawn
 };
 
+// Boss names for better readability
+export enum BossName {
+    GUARDIAN = 'GUARDIAN',           // 守护者 - Level 1
+    INTERCEPTOR = 'INTERCEPTOR',     // 拦截者 - Level 2
+    DESTROYER = 'DESTROYER',         // 毁灭者 - Level 3
+    ANNIHILATOR = 'ANNIHILATOR',     // 歼灭者 - Level 4
+    DOMINATOR = 'DOMINATOR',         // 主宰者 - Level 5
+    OVERLORD = 'OVERLORD',           // 霸主 - Level 6
+    TITAN = 'TITAN',                 // 泰坦 - Level 7
+    COLOSSUS = 'COLOSSUS',           // 巨像 - Level 8
+    LEVIATHAN = 'LEVIATHAN',         // 利维坦 - Level 9
+    APOCALYPSE = 'APOCALYPSE'        // 天启 - Level 10
+}
+
 export const BossConfig = {
-    1: {
+    [BossName.GUARDIAN]: {
+        level: 1,
         hp: 1500,
         speed: 1.0,
         size: 0.8,
         bulletCount: 8,
         bulletSpeed: 4.0,
-        fireRate: 0.05, // Increased from 0.03 for more aggression
+        fireRate: 0.05,
         targetedShotSpeed: 0,
         hasLaser: false,
         weaponCount: 1,
@@ -257,15 +319,16 @@ export const BossConfig = {
         laserType: 'none',
         laserDamage: 0,
         laserCooldown: 0,
-        hitboxScale: 0.8 // Tighter hitbox for more precise collision
+        hitboxScale: 0.8
     },
-    2: {
-        hp: 1800, // Reduced from 3000, 1500 × 1.2
+    [BossName.INTERCEPTOR]: {
+        level: 2,
+        hp: 1800, // 1500 × 1.2
         speed: 1.2,
         size: 0.8,
         bulletCount: 11,
         bulletSpeed: 4.5,
-        fireRate: 0.06, // Increased from 0.04
+        fireRate: 0.06,
         targetedShotSpeed: 9,
         hasLaser: false,
         weaponCount: 1,
@@ -280,13 +343,14 @@ export const BossConfig = {
         laserCooldown: 0,
         hitboxScale: 0.8
     },
-    3: {
-        hp: 2160, // Reduced from 4500, 1800 × 1.2
+    [BossName.DESTROYER]: {
+        level: 3,
+        hp: 2160, // 1800 × 1.2
         speed: 1.4,
         size: 0.85,
         bulletCount: 14,
         bulletSpeed: 5.0,
-        fireRate: 0.065, // Increased from 0.045
+        fireRate: 0.065,
         targetedShotSpeed: 10,
         hasLaser: false,
         weaponCount: 1,
@@ -301,13 +365,14 @@ export const BossConfig = {
         laserCooldown: 0,
         hitboxScale: 0.8
     },
-    4: {
-        hp: 2592, // Reduced from 6000, 2160 × 1.2
+    [BossName.ANNIHILATOR]: {
+        level: 4,
+        hp: 2592, // 2160 × 1.2
         speed: 1.6,
         size: 0.85,
         bulletCount: 17,
         bulletSpeed: 5.5,
-        fireRate: 0.07, // Increased from 0.05
+        fireRate: 0.07,
         targetedShotSpeed: 11,
         hasLaser: false,
         weaponCount: 1,
@@ -322,13 +387,14 @@ export const BossConfig = {
         laserCooldown: 0,
         hitboxScale: 0.8
     },
-    5: {
-        hp: 3110, // Reduced from 7500, 2592 × 1.2
+    [BossName.DOMINATOR]: {
+        level: 5,
+        hp: 3110, // 2592 × 1.2
         speed: 1.8,
         size: 0.9,
         bulletCount: 20,
         bulletSpeed: 6.0,
-        fireRate: 0.075, // Increased from 0.055
+        fireRate: 0.075,
         targetedShotSpeed: 12,
         hasLaser: false,
         weaponCount: 1,
@@ -343,13 +409,14 @@ export const BossConfig = {
         laserCooldown: 0,
         hitboxScale: 0.8
     },
-    6: {
-        hp: 3732, // Reduced from 9000, 3110 × 1.2
+    [BossName.OVERLORD]: {
+        level: 6,
+        hp: 3732, // 3110 × 1.2
         speed: 2.0,
         size: 0.9,
         bulletCount: 23,
         bulletSpeed: 6.5,
-        fireRate: 0.08, // Increased from 0.06
+        fireRate: 0.08,
         targetedShotSpeed: 13,
         hasLaser: true,
         weaponCount: 2,
@@ -364,13 +431,14 @@ export const BossConfig = {
         laserCooldown: 3000,
         hitboxScale: 0.8
     },
-    7: {
-        hp: 4478, // Reduced from 10500, 3732 × 1.2
+    [BossName.TITAN]: {
+        level: 7,
+        hp: 4478, // 3732 × 1.2
         speed: 2.2,
         size: 0.95,
         bulletCount: 26,
         bulletSpeed: 7.0,
-        fireRate: 0.085, // Increased from 0.065
+        fireRate: 0.085,
         targetedShotSpeed: 14,
         hasLaser: true,
         weaponCount: 2,
@@ -385,13 +453,14 @@ export const BossConfig = {
         laserCooldown: 2800,
         hitboxScale: 0.8
     },
-    8: {
-        hp: 5374, // Reduced from 12000, 4478 × 1.2
+    [BossName.COLOSSUS]: {
+        level: 8,
+        hp: 5374, // 4478 × 1.2
         speed: 2.4,
         size: 0.95,
         bulletCount: 29,
         bulletSpeed: 7.5,
-        fireRate: 0.09, // Increased from 0.07
+        fireRate: 0.09,
         targetedShotSpeed: 15,
         hasLaser: true,
         weaponCount: 2,
@@ -406,13 +475,14 @@ export const BossConfig = {
         laserCooldown: 2500,
         hitboxScale: 0.8
     },
-    9: {
-        hp: 6449, // Reduced from 13500, 5374 × 1.2
+    [BossName.LEVIATHAN]: {
+        level: 9,
+        hp: 6449, // 5374 × 1.2
         speed: 2.6,
         size: 1.0,
         bulletCount: 32,
         bulletSpeed: 8.0,
-        fireRate: 0.095, // Increased from 0.075
+        fireRate: 0.095,
         targetedShotSpeed: 16,
         hasLaser: true,
         weaponCount: 3,
@@ -427,13 +497,14 @@ export const BossConfig = {
         laserCooldown: 2200,
         hitboxScale: 0.8
     },
-    10: {
-        hp: 7739, // Reduced from 15000, 6449 × 1.2
+    [BossName.APOCALYPSE]: {
+        level: 10,
+        hp: 7739, // 6449 × 1.2
         speed: 2.8,
         size: 1.0,
         bulletCount: 35,
         bulletSpeed: 8.5,
-        fireRate: 0.1, // Increased from 0.08
+        fireRate: 0.1,
         targetedShotSpeed: 17,
         hasLaser: true,
         weaponCount: 3,
@@ -449,3 +520,9 @@ export const BossConfig = {
         hitboxScale: 0.8
     }
 };
+
+// Helper function to get boss config by level
+export function getBossConfigByLevel(level: number) {
+    const bossEntry = Object.entries(BossConfig).find(([_, config]) => config.level === level);
+    return bossEntry ? bossEntry[1] : null;
+}

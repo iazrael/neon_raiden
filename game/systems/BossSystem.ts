@@ -1,5 +1,5 @@
 import { Entity, SpriteMap } from '@/types';
-import { BossConfig } from '@/game/config';
+import { getBossConfigByLevel } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
 export class BossSystem {
@@ -21,7 +21,11 @@ export class BossSystem {
     }
 
     spawn(level: number, sprites: SpriteMap): Entity {
-        const config = BossConfig[level as keyof typeof BossConfig];
+        const config = getBossConfigByLevel(level);
+        if (!config) {
+            throw new Error(`Boss config not found for level ${level}`);
+        }
+
         const hp = config.hp;
         const sprite = sprites[`boss_${level}`];
         const width = sprite ? sprite.width : 150;
@@ -65,7 +69,8 @@ export class BossSystem {
     }
 
     spawnWingmen(level: number, boss: Entity, sprites: SpriteMap): Entity[] {
-        const config = BossConfig[level as keyof typeof BossConfig];
+        const config = getBossConfigByLevel(level);
+        if (!config) return [];
         const wingmen: Entity[] = [];
 
         for (let i = 0; i < config.wingmenCount; i++) {
@@ -96,7 +101,8 @@ export class BossSystem {
     }
 
     update(boss: Entity, dt: number, timeScale: number, player: Entity, enemyBullets: Entity[], level: number) {
-        const config = BossConfig[level as keyof typeof BossConfig];
+        const config = getBossConfigByLevel(level);
+        if (!config) return;
 
         // Entry phase
         if (boss.state === 0) {
@@ -162,7 +168,8 @@ export class BossSystem {
     }
 
     fire(boss: Entity, enemyBullets: Entity[], level: number, player: Entity) {
-        const config = BossConfig[level as keyof typeof BossConfig];
+        const config = getBossConfigByLevel(level);
+        if (!config) return;
 
         // Radial Burst
         if (config.weapons.includes('radial')) {
@@ -251,7 +258,8 @@ export class BossSystem {
     }
 
     fireLaser(boss: Entity, enemyBullets: Entity[], level: number, player: Entity, laserType: string) {
-        const config = BossConfig[level as keyof typeof BossConfig];
+        const config = getBossConfigByLevel(level);
+        if (!config) return;
         this.audio.playShoot('laser');
 
         if (laserType === 'continuous') {

@@ -1,6 +1,6 @@
 import { AudioSystem } from './AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupType, PowerupEffects } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -593,18 +593,66 @@ export class GameEngine {
     }
 
     applyPowerup(type: number) {
+        const effects = PowerupEffects;
+
         switch (type) {
-            case 0: this.weaponLevel = Math.min(10, this.weaponLevel + 1); break;
-            case 1: if (this.weaponType === WeaponType.LASER) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.LASER; this.weaponLevel = 1; } break;
-            case 2: if (this.weaponType === WeaponType.VULCAN) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.VULCAN; this.weaponLevel = 1; } break;
-            case 3: if (this.player.hp >= 100) { this.shield = Math.min(50, this.shield + 25); } else { this.player.hp = Math.min(100, this.player.hp + 30); this.onHpChange(this.player.hp); } break;
-            case 4: if (this.weaponType === WeaponType.WAVE) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.WAVE; this.weaponLevel = 1; } break;
-            case 5: if (this.weaponType === WeaponType.PLASMA) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.PLASMA; this.weaponLevel = 1; } break;
-            case 6: if (this.bombs < 6) { this.bombs++; this.onBombChange(this.bombs); } break;
-            case 7: if (this.options.length < 3) { this.options.push({ x: this.player.x, y: this.player.y, width: 16, height: 16, vx: 0, vy: 0, hp: 1, maxHp: 1, type: 'option', color: '#00ffff', markedForDeletion: false, spriteKey: 'option' }); } break;
-            case 8: if (this.weaponType === WeaponType.TESLA) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.TESLA; this.weaponLevel = 1; } break;
-            case 9: if (this.weaponType === WeaponType.MAGMA) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.MAGMA; this.weaponLevel = 1; } break;
-            case 10: if (this.weaponType === WeaponType.SHURIKEN) this.weaponLevel = Math.min(10, this.weaponLevel + 1); else { this.weaponType = WeaponType.SHURIKEN; this.weaponLevel = 1; } break;
+            case PowerupType.POWER:
+                // Generic power upgrade for current weapon
+                this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
+                break;
+
+            case PowerupType.HP:
+                // HP restoration
+                if (this.player.hp >= 100) {
+                    this.shield = Math.min(PlayerConfig.maxShield, this.shield + effects.shieldRestoreAmount);
+                } else {
+                    this.player.hp = Math.min(PlayerConfig.maxHp, this.player.hp + effects.hpRestoreAmount);
+                    this.onHpChange(this.player.hp);
+                }
+                break;
+
+            case PowerupType.BOMB:
+                // Bomb pickup
+                if (this.bombs < effects.maxBombs) {
+                    this.bombs++;
+                    this.onBombChange(this.bombs);
+                }
+                break;
+
+            case PowerupType.OPTION:
+                // Option/僚机 pickup
+                if (this.options.length < effects.maxOptions) {
+                    this.options.push({
+                        x: this.player.x,
+                        y: this.player.y,
+                        width: 16,
+                        height: 16,
+                        vx: 0,
+                        vy: 0,
+                        hp: 1,
+                        maxHp: 1,
+                        type: 'option',
+                        color: '#00ffff',
+                        markedForDeletion: false,
+                        spriteKey: 'option'
+                    });
+                }
+                break;
+
+            default:
+                // Weapon-specific powerups
+                const weaponType = effects.weaponTypeMap[type as keyof typeof effects.weaponTypeMap];
+                if (weaponType !== undefined && weaponType !== null) {
+                    if (this.weaponType === weaponType) {
+                        // Same weapon type - upgrade level
+                        this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
+                    } else {
+                        // Different weapon type - switch weapon
+                        this.weaponType = weaponType;
+                        this.weaponLevel = 1;
+                    }
+                }
+                break;
         }
     }
 
