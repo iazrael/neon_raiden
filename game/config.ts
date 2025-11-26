@@ -84,6 +84,8 @@ export const ASSETS_BASE_PATH = './assets/sprites/';
 
 // ==================== 玩家配置 ====================
 export const PlayerConfig = {
+    chineseName: '霓虹雷电',
+    chineseDescription: '高级原型战斗机，配备自适应武器系统，速度快、护盾强大，是抵挡敌人进攻的最后防线。',
     speed: 7,           // 移动速度
     width: 48,          // 碰撞箱宽度
     height: 48,         // 碰撞箱高度
@@ -102,6 +104,8 @@ export const WeaponConfig = {
     // 特性：扇形发射，子弹分裂（1→3→5→7）
     // 升级：等级1-2(1发)，3-5(3发)，6-8(5发)，9-10(7发)
     [WeaponType.VULCAN]: {
+        chineseName: '散弹枪',
+        chineseDescription: '扇形发射的经典近距离武器，子弹密度随等级提升而增加。火力覆盖广泛但威力一般。',
         baseDamage: 10,         // 基础伤害
         damagePerLevel: 3,      // 每级伤害增长
         speed: 15,              // 子弹速度
@@ -116,6 +120,8 @@ export const WeaponConfig = {
     // 特性：笔直高能激光，可穿透
     // 升级：等级1-4(单光束)，5-7(双光束)，8-10(三光束)
     [WeaponType.LASER]: {
+        chineseName: '激光炮',
+        chineseDescription: '高能激光束，笔直射出可穿透敌人，威力稳定。高等级时可分裂成多道光束。',
         baseDamage: 5,          // 基础伤害
         damagePerLevel: 3,      // 每级伤害增长
         speed: 25,              // 子弹速度
@@ -130,6 +136,8 @@ export const WeaponConfig = {
     // 特性：跟踪导弹，自动追踪最近敌人
     // 升级：等级1-2(2发)，3-5(4发)，6-8(6发)，9-10(8发)
     [WeaponType.MISSILE]: {
+        chineseName: '追踪导弹',
+        chineseDescription: '自动追踪敌人的智能导弹，发射数量随等级增加。威力强劲但射速较慢。',
         baseDamage: 15,         // 基础伤害
         damagePerLevel: 6,      // 每级伤害增长
         speed: 12,              // 子弹速度
@@ -144,6 +152,8 @@ export const WeaponConfig = {
     // 特性：宽幅波动，可穿透，威力巨大但射速慢
     // 升级：宽度92px→200px，射速330ms→150ms
     [WeaponType.WAVE]: {
+        chineseName: '波动炮',
+        chineseDescription: '宽幅能量波冲击，覆盖面积大可穿透敌人。威力极大但射速较慢，适合清场。',
         baseDamage: 20,         // 基础伤害
         damagePerLevel: 6,      // 每级伤害增长
         speed: 15,              // 子弹速度
@@ -158,6 +168,8 @@ export const WeaponConfig = {
     // 特性：缓慢移动能量球，AOE爆炸伤害
     // 升级：尺寸56×56→128×128，爆炸范围扩大
     [WeaponType.PLASMA]: {
+        chineseName: '等离子炮',
+        chineseDescription: '高能等离子球，触发爆炸产生范围伤害。威力最强但射速最慢，稀有武器。',
         baseDamage: 80,         // 基础伤害（单发最高）
         damagePerLevel: 25,     // 每级伤害增长
         speed: 8,               // 子弹速度（缓慢）
@@ -172,6 +184,8 @@ export const WeaponConfig = {
     // 特性：自动锁定最近敌人，连锁攻击
     // 升级：连锁范围扩大，伤害递增
     [WeaponType.TESLA]: {
+        chineseName: '电磁炮',
+        chineseDescription: '释放电磁脉冲锁定敌人，支持连锁攻击。等级越高连锁范围越大威力越强。',
         baseDamage: 15,         // 基础伤害
         damagePerLevel: 4,      // 每级伤害增长
         speed: 20,              // 子弹速度
@@ -186,6 +200,8 @@ export const WeaponConfig = {
     // 特性：锥形散射，持续灼烧伤害
     // 升级：等级1-2(3发)，3-5(4发)，6-8(5发)，9-10(6发)
     [WeaponType.MAGMA]: {
+        chineseName: '熔岩弹',
+        chineseDescription: '锥形散射的炽热熔岩弹，命中后产生灼烧效果。覆盖面广但单发威力较弱。',
         baseDamage: 8,          // 基础伤害
         damagePerLevel: 2,      // 每级伤害增长
         speed: 12,              // 子弹平均速度（有随机变化）
@@ -200,6 +216,8 @@ export const WeaponConfig = {
     // 特性：扇形发射，可弹射反弹
     // 升级：等级1-2(2发)，3-5(3发)，6-8(4发)，9-10(5发)
     [WeaponType.SHURIKEN]: {
+        chineseName: '手里剑',
+        chineseDescription: '东方古老武器的现代版本，扇形发射可反弹。等级高时大范围覆盖地面。',
         baseDamage: 12,         // 基础伤害
         damagePerLevel: 3,      // 每级伤害增长
         speed: 12,              // 子弹速度
@@ -258,6 +276,8 @@ export const EnemyConfig = {
         // Scout - 红色无人机（普通敌人）
         // 行为：缓慢直线飞行，偶尔发射子弹
         [EnemyType.NORMAL]: {
+            chineseName: '红色无人机',
+            chineseDescription: '最基础的敌人单位，速度慢、血量低，是水送的得分来源。',
             baseHp: 20,             // 基础生命值
             hpPerLevel: 10,         // 每关生命值增长
             baseSpeed: 2,           // 基础速度
@@ -269,6 +289,8 @@ export const EnemyConfig = {
         // Wing - 紫色飞翼（快速移动）
         // 行为：快速折线移动，难以瞄准
         [EnemyType.FAST]: {
+            chineseName: '紫色飞翼',
+            chineseDescription: '速度轻快的飞翼敌机，折线移动较难瞄准。虽然血量低但子弹轰炸强，带来麻烦。',
             baseHp: 10,             // 基础生命值
             hpPerLevel: 0,          // 生命值不随关卡增长
             baseSpeed: 5,           // 基础速度
@@ -281,6 +303,8 @@ export const EnemyConfig = {
         // Tank - 绿色重坦（坦克型）
         // 行为：移动缓慢，体积大，血厚
         [EnemyType.TANK]: {
+            chineseName: '绿色重坦',
+            chineseDescription: '默无声息的重型坦克车，体积大血量厚，移动缓慢。是不容忽视的重大威胁。',
             baseHp: 60,             // 基础生命值
             hpPerLevel: 20,         // 每关生命值增长
             baseSpeed: 1,           // 基础速度
@@ -292,6 +316,8 @@ export const EnemyConfig = {
         // Kamikaze - 橙色尖刺（神风特攻）
         // 行为：快速冲向玩家位置，不发射子弹（自爆机）
         [EnemyType.KAMIKAZE]: {
+            chineseName: '橙色尖刺',
+            chineseDescription: '橙色尖刺形的尖兵机，速度最快直接冲撞。血量低但子弹轰炸强，带来残血。',
             baseHp: 5,              // 基础生命值
             hpPerLevel: 0,          // 生命值不随关卡增长
             baseSpeed: 7,           // 基础速度
@@ -304,6 +330,8 @@ export const EnemyConfig = {
         // Gunboat - 蓝色炮舰（精英炮艇）
         // 行为：移动极慢，发射瞄准玩家的快速弹幕
         [EnemyType.ELITE_GUNBOAT]: {
+            chineseName: '蓝色炮舰',
+            chineseDescription: '蓝色炮艇级、体积巨大血量厚。移动极慢但火力猛烈，是中低等级的大麻烦。',
             baseHp: 150,            // 基础生命值
             hpPerLevel: 30,         // 每关生命值增长
             baseSpeed: 0.5,         // 基础速度
@@ -315,6 +343,8 @@ export const EnemyConfig = {
         // Interceptor - 白色/青色（激光拦截机）
         // 行为：移动到屏幕中段悬停，预警后发射贯穿激光
         [EnemyType.LASER_INTERCEPTOR]: {
+            chineseName: '激光拦截机',
+            chineseDescription: '白色/青色的双翼拦截机。会在屏幕中段悬停，然后发射强大激光造成较高伤害。',
             baseHp: 80,             // 基础生命值
             hpPerLevel: 15,         // 每关生命值增长
             baseSpeed: 4,           // 基础速度
@@ -326,6 +356,8 @@ export const EnemyConfig = {
         // Layer - 深灰/黄色（布雷机）
         // 行为：移动缓慢，在身后持续留下静止空雷
         [EnemyType.MINE_LAYER]: {
+            chineseName: '布雷机',
+            chineseDescription: '深灰/黄色的布雷敌机。缓慢移动但持续留下静止空雷，是中后期关卡会遇到的障碍。',
             baseHp: 120,            // 基础生命值
             hpPerLevel: 20,         // 每关生命值增长
             baseSpeed: 1.5,         // 基础速度
@@ -431,6 +463,26 @@ export enum BossWeaponType {
     LASER = 'laser'          // 激光
 }
 
+// Boss武器名称映射
+export const BossWeaponNames: { [key in BossWeaponType]: string } = {
+    [BossWeaponType.RADIAL]: '环形弹幕',
+    [BossWeaponType.TARGETED]: '瞄准弹',
+    [BossWeaponType.SPREAD]: '扇形弹幕',
+    [BossWeaponType.HOMING]: '追踪导弹',
+    [BossWeaponType.LASER]: '激光'
+};
+
+// 敌人类型中文名称映射（用于Boss僚机）
+export const WingmenNames: { [key: number]: string } = {
+    0: '红色无人机',
+    1: '紫色飞翼',
+    2: '绿色重坦',
+    3: '橙色尖刺',
+    4: '蓝色炮舰',
+    5: '激光拦截机',
+    6: '布雷机'
+};
+
 // ==================== Boss配置 ====================
 export const BossConfig = {
     // 第1关 - 守护者（无人机母舰）
@@ -438,6 +490,8 @@ export const BossConfig = {
     // 攻击模式：环形弹幕
     // 移动模式：正弦波动
     [BossName.GUARDIAN]: {
+        chineseName: '守护者',
+        chineseDescription: '无人机母舰，第一个会遭遇的Boss。装备环形弹幕武器。平衡的攻防配置是学习的好机会。',
         level: 1,                       // 关卡等级
         hp: 1500,                       // 生命值（基准值）
         speed: 1.2,                     // 移动速度
@@ -464,6 +518,8 @@ export const BossConfig = {
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：正弦波动
     [BossName.INTERCEPTOR]: {
+        chineseName: '拦截者',
+        chineseDescription: '突击巡洋舰，速度轻快血量较低。装备环形弹幕、瞄准弹武器。攻击速度快需要提高警惕才能躲避。',
         level: 2,
         hp: 1400,                       // 较低血量
         speed: 2.0,                     // 高速
@@ -486,10 +542,12 @@ export const BossConfig = {
         hitboxScale: 0.8
     },
     // 第3关 - 毁灭者（重型战列舰）
-    // 特点：血厚攻击强，但速度慢，重型坦克
+    // 特点：血厚攻击强，但速度慢，重型坂克
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：8字盘旋
     [BossName.DESTROYER]: {
+        chineseName: '毁灭者',
+        chineseDescription: '重型战列舰，血量可观。装备环形弹幕、瞄准弹武器。密集的攻击需要敏感期锐的反应能力。',
         level: 3,
         hp: 2400,                       // 高血量
         speed: 0.8,                     // 低速
@@ -516,6 +574,8 @@ export const BossConfig = {
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：8字盘旋
     [BossName.ANNIHILATOR]: {
+        chineseName: '歼灭者',
+        chineseDescription: '隐形战机，射击速度快为其特点。装备环形弹幕、瞄准弹武器。密集攻击需要大量躲避和反应。',
         level: 4,
         hp: 2000,                       // 中等血量
         speed: 1.5,
@@ -542,6 +602,8 @@ export const BossConfig = {
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：8字盘旋
     [BossName.DOMINATOR]: {
+        chineseName: '主宰者',
+        chineseDescription: '能量要塞，弹幕最密集难以躲避。装备环形弹幕、瞄准弹武器。等级越高攻击越强，是中期的大麻烦。',
         level: 5,
         hp: 2800,                       // 中等血量
         speed: 1.3,                     // 中等偏慢
@@ -568,6 +630,8 @@ export const BossConfig = {
     // 攻击模式：环形弹幕 + 瞄准弹 + 连续光束激光
     // 移动模式：追踪模式
     [BossName.OVERLORD]: {
+        chineseName: '霸主',
+        chineseDescription: '双子舰，首次提升激光攻击。装备环形弹幕、瞄准弹、连续激光武器。追踪你的位置然后画激光求救。',
         level: 6,
         hp: 3200,                       // 中等血量
         speed: 1.8,                     // 中快
@@ -594,6 +658,8 @@ export const BossConfig = {
     // 攻击模式：环形弹幕 + 瞄准弹 + 连续光束激光
     // 移动模式：追踪模式
     [BossName.TITAN]: {
+        chineseName: '泰坦',
+        chineseDescription: '三角要塞，血段你的第一道大关。装备环形弹幕、瞄准弹、连续激光武器。重装坦克的防御是你最强的寄望。',
         level: 7,
         hp: 5000,                       // 超高血量
         speed: 1.0,                     // 慢速
@@ -621,6 +687,8 @@ export const BossConfig = {
     // 移动模式：激进模式（主动追踪）
     // 僚机：1个激光拦截机
     [BossName.COLOSSUS]: {
+        chineseName: '巨像',
+        chineseDescription: '蛛型机甲，爆发刺客型内下手。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕武器，配置1个激光拦截机僚机。脉冲激光是其主要威胁，需要全力象。',
         level: 8,
         hp: 4000,                       // 较低血量
         speed: 2.2,                     // 高速
@@ -648,6 +716,8 @@ export const BossConfig = {
     // 移动模式：激进模式
     // 僚机：2个激光拦截机
     [BossName.LEVIATHAN]: {
+        chineseName: '利维坦',
+        chineseDescription: '环形核心，全能战士不可谋下。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个激光拦截机僚机。那些会发动旁点的激光是你最大的敌手。',
         level: 9,
         hp: 6000,                       // 中上血量
         speed: 1.6,                     // 中等速度
@@ -675,6 +745,8 @@ export const BossConfig = {
     // 移动模式：激进模式
     // 僚机：2个布雷机
     [BossName.APOCALYPSE]: {
+        chineseName: '天启',
+        chineseDescription: '最终龙王，装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个布雷机僚机。五重弹幕与激光齐飞，僚机掩护下势不可挡。唯有掌握节奏、把握间隙，才能突破天启的绝望防线。',
         level: 10,
         hp: 10000,                      // 1.67倍增长（相比第9关）
         speed: 2.3,                     // 高速

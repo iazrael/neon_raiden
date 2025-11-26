@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WeaponType } from '@/types';
-import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, PlayerConfig, ASSETS_BASE_PATH } from '@/game/config';
+import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, PlayerConfig, ASSETS_BASE_PATH, BossWeaponNames, WingmenNames } from '@/game/config';
 
 interface GalleryProps {
     onClose: () => void;
@@ -68,7 +68,9 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
     const fighters = [
         {
             name: 'Neon Raiden',
+            chineseName: PlayerConfig.chineseName,
             description: 'Advanced prototype fighter with adaptable weapon systems.',
+            chineseDescription: PlayerConfig.chineseDescription,
             config: PlayerConfig
         }
     ];
@@ -76,6 +78,9 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
     const weapons = Object.entries(WeaponConfig).map(([type, config]) => ({
         type: parseInt(type),
         name: WeaponType[parseInt(type)],
+        chineseName: config.chineseName || WeaponType[parseInt(type)],
+        description: `Base Damage: ${config.baseDamage}`,
+        chineseDescription: config.chineseDescription || '',
         config,
         unlockLevel: parseInt(type) + 1 // Simplified unlock logic
     }));
@@ -83,15 +88,24 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
     const enemies = Object.entries(EnemyConfig.types).map(([type, config]) => ({
         type: parseInt(type),
         name: EnemyType[parseInt(type)],
+        chineseName: config.chineseName || EnemyType[parseInt(type)],
+        description: `Base HP: ${config.baseHp}`,
+        chineseDescription: config.chineseDescription || '',
         config,
         unlockLevel: [1, 2, 3, 3, 5, 6, 7][parseInt(type)] || 1
     }));
 
     const bosses = Object.values(BossConfig).map((config) => ({
         name: Object.keys(BossName)[config.level - 1], // Rough mapping
+        chineseName: config.chineseName || Object.keys(BossName)[config.level - 1],
+        description: `HP: ${config.hp}`,
+        chineseDescription: config.chineseDescription || '',
         level: config.level,
         config,
-        unlockLevel: config.level + 1 // Unlock after beating
+        unlockLevel: config.level + 1, // Unlock after beating
+        weapons: config.weapons || [],
+        wingmenCount: config.wingmenCount || 0,
+        wingmenType: config.wingmenType || 0
     }));
 
     const renderContent = () => {
@@ -347,7 +361,8 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
 
                                     <div className="w-full space-y-4 text-sm sm:text-base">
                                         <div className="border-b border-cyan-500/30 pb-3">
-                                            <h3 className="text-2xl sm:text-3xl font-bold text-cyan-100">{selectedItem.name || 'Unknown'}</h3>
+                                            <h3 className="text-2xl sm:text-3xl font-bold text-cyan-100">{selectedItem.chineseName || selectedItem.name || 'Unknown'}</h3>
+                                            <p className="text-lg font-bold text-cyan-300">{selectedItem.name || ''}</p>
                                             <div className="text-cyan-500 text-sm tracking-widest uppercase opacity-70 mt-1">
                                                 {activeTab === 'BOSSES' ? `Threat Level: ${selectedItem.level}` : activeTab}
                                             </div>
@@ -496,11 +511,31 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                                     </div>
                                                                 </>
                                                             )}
-                                                            {selectedItem.config.wingmenCount > 0 && (
-                                                                <div className="flex justify-between border-b border-gray-800 py-2">
-                                                                    <span className="text-gray-500 text-xs">WINGMEN</span>
-                                                                    <span className="text-blue-300 font-semibold">{selectedItem.config.wingmenCount}</span>
-                                                                </div>
+                                                            {/* Weapons Display */}
+                                                            {selectedItem.weapons && selectedItem.weapons.length > 0 && (
+                                                                <>
+                                                                    <div className="col-span-2 border-b border-gray-800 py-2 mt-2 mb-2">
+                                                                        <span className="text-gray-500 text-xs uppercase">WEAPONS</span>
+                                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                                            {selectedItem.weapons.map((weapon: string, idx: number) => (
+                                                                                <span key={idx} className="px-2 py-1 bg-yellow-500/20 border border-yellow-500/50 rounded text-yellow-300 text-xs">
+                                                                                    {BossWeaponNames[weapon as keyof typeof BossWeaponNames] || weapon}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                            {/* Wingmen Display */}
+                                                            {selectedItem.wingmenCount > 0 && (
+                                                                <>
+                                                                    <div className="col-span-2 border-b border-gray-800 py-2">
+                                                                        <span className="text-gray-500 text-xs uppercase">WINGMENS</span>
+                                                                        <div className="mt-2 flex items-center justify-between">
+                                                                            <span className="text-blue-300 font-semibold">{WingmenNames[selectedItem.wingmenType] || '未知'} × {selectedItem.wingmenCount}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </>
                                                             )}
                                                         </>
                                                     )}
@@ -508,9 +543,9 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                             )}
                                         </div>
 
-                                        {selectedItem.description && (
-                                            <p className="text-gray-400 italic text-sm mt-4 border-l-2 border-cyan-500/50 pl-4 leading-relaxed">
-                                                "{selectedItem.description}"
+                                        {selectedItem.chineseDescription && (
+                                            <p className="text-cyan-300 italic text-base mt-2 border-l-2 border-cyan-500/50 pl-4 leading-relaxed">
+                                                {selectedItem.chineseDescription}
                                             </p>
                                         )}
                                     </div>
