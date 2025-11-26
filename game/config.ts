@@ -130,8 +130,8 @@ export const WeaponConfig = {
         speed: 15,              // 子弹速度
         baseFireRate: 350,      // 基础射速（毫秒）
         ratePerLevel: 20,       // 每级射速提升（毫秒减少）
-        width: 80,              // 子弹基础宽度（随等级变宽）
-        height: 30,             // 子弹高度
+        width: 60,              // 子弹基础宽度（随等级变宽）
+        height: 24,             // 子弹高度
         color: '#0ff',          // 子弹颜色
         sprite: 'bullet_wave'   // 精灵图名称
     },
@@ -196,16 +196,16 @@ export const WeaponConfig = {
 // ==================== 敌人生成权重配置 ====================
 // 按关卡配置敌人类型的生成权重 - 权重越高，生成概率越大
 export const EnemySpawnWeights = {
-    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3 },
-    2: { [EnemyType.NORMAL]: 7, [EnemyType.FAST]: 5 },
-    3: { [EnemyType.NORMAL]: 5, [EnemyType.FAST]: 4, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 3 },
-    4: { [EnemyType.NORMAL]: 4, [EnemyType.FAST]: 5, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 4 },
-    5: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 5, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 5, [EnemyType.ELITE_GUNBOAT]: 2 },
-    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 6, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 6, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3 },
-    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 6, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 7, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 2 },
-    8: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 7, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 8, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
-    9: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 8, [EnemyType.TANK]: 1, [EnemyType.KAMIKAZE]: 9, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
-    10: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 9, [EnemyType.TANK]: 1, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 5, [EnemyType.MINE_LAYER]: 4 }
+    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3, [EnemyType.TANK]: 1 },
+    2: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2 },
+    3: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 10, [EnemyType.KAMIKAZE]: 2 },
+    4: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 2, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 10 },
+    5: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 10 },
+    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 3, [EnemyType.LASER_INTERCEPTOR]: 10 },
+    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 10 },
+    8: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 8, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
+    9: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 8, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
+    10: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 9, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 5, [EnemyType.MINE_LAYER]: 4 }
 };
 
 // ==================== 敌人配置 ====================

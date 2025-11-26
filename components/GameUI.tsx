@@ -17,6 +17,7 @@ interface GameUIProps {
   maxLevelReached?: number;
   onOpenGallery?: () => void;
   onCloseGallery?: () => void;
+  playClick?: (type?: 'default' | 'confirm' | 'cancel' | 'menu') => void;
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -33,6 +34,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   maxLevelReached = 1,
   onOpenGallery,
   onCloseGallery,
+  playClick,
 }) => {
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-safe font-mono text-white select-none">
@@ -47,13 +49,12 @@ export const GameUI: React.FC<GameUIProps> = ({
         <div className="flex flex-col items-end w-1/3">
           <div className="w-full bg-gray-800 h-4 rounded-full border border-gray-600 overflow-hidden relative">
             <div
-              className={`h-full ${
-                hp > 50
-                  ? "bg-gradient-to-r from-green-500 to-green-400"
-                  : hp > 20
+              className={`h-full ${hp > 50
+                ? "bg-gradient-to-r from-green-500 to-green-400"
+                : hp > 20
                   ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
                   : "bg-gradient-to-r from-red-600 to-red-500"
-              } transition-all duration-200`}
+                } transition-all duration-200`}
               style={{ width: `${Math.max(0, hp)}%` }}
             ></div>
           </div>
@@ -71,11 +72,10 @@ export const GameUI: React.FC<GameUIProps> = ({
           </span>
           <button
             onClick={onUseBomb}
-            className={`w-20 h-20 rounded-full border-4 ${
-              bombs > 0
-                ? "border-red-500 bg-red-600/50 animate-pulse hover:bg-red-500/80 active:scale-95"
-                : "border-gray-600 bg-gray-800/50 opacity-50"
-            } flex items-center justify-center transition-all shadow-[0_0_20px_rgba(220,38,38,0.5)]`}
+            className={`w-20 h-20 rounded-full border-4 ${bombs > 0
+              ? "border-red-500 bg-red-600/50 animate-pulse hover:bg-red-500/80 active:scale-95"
+              : "border-gray-600 bg-gray-800/50 opacity-50"
+              } flex items-center justify-center transition-all shadow-[0_0_20px_rgba(220,38,38,0.5)]`}
             disabled={bombs <= 0}
           >
             <span className="text-3xl">☢️</span>
@@ -95,14 +95,20 @@ export const GameUI: React.FC<GameUIProps> = ({
             System Online // Awaiting Pilot
           </p>
           <button
-            onClick={onStart}
+            onClick={() => {
+              playClick?.('confirm');
+              onStart();
+            }}
             className="px-10 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-none border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-pulse active:scale-95 transition-transform skew-x-[-10deg]"
           >
             START MISSION
           </button>
 
           <button
-            onClick={onOpenGallery}
+            onClick={() => {
+              playClick?.('menu');
+              onOpenGallery?.();
+            }}
             className="mt-4 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-none border border-gray-600 shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-transform skew-x-[-10deg] text-sm tracking-widest"
           >
             LIBRARY
@@ -115,7 +121,7 @@ export const GameUI: React.FC<GameUIProps> = ({
       )}
 
       {state === GameState.GALLERY && (
-        <Gallery onClose={onCloseGallery!} maxLevelReached={maxLevelReached} />
+        <Gallery onClose={onCloseGallery!} maxLevelReached={maxLevelReached} playClick={playClick} />
       )}
 
       {state === GameState.GAME_OVER && (
@@ -127,7 +133,10 @@ export const GameUI: React.FC<GameUIProps> = ({
             SCORE: <span className="text-white font-bold">{score}</span>
           </div>
           <button
-            onClick={onRestart}
+            onClick={() => {
+              playClick?.('confirm');
+              onRestart();
+            }}
             className="px-8 py-3 bg-white text-red-900 font-bold rounded hover:bg-gray-200 active:scale-95 transition-transform uppercase tracking-widest"
           >
             Reboot System
@@ -147,7 +156,10 @@ export const GameUI: React.FC<GameUIProps> = ({
             Galaxy secured. Returning to base.
           </div>
           <button
-            onClick={onRestart}
+            onClick={() => {
+              playClick?.('confirm');
+              onRestart();
+            }}
             className="px-8 py-3 bg-yellow-400 text-black font-bold rounded hover:bg-yellow-300 active:scale-95 transition-transform uppercase tracking-widest"
           >
             Play Again
@@ -164,8 +176,8 @@ export const GameUI: React.FC<GameUIProps> = ({
               levelTransitionTimer < 300
                 ? levelTransitionTimer / 300
                 : levelTransitionTimer > 1200
-                ? (1500 - levelTransitionTimer) / 300
-                : 1,
+                  ? (1500 - levelTransitionTimer) / 300
+                  : 1,
           }}
         >
           <div className="text-2xl font-bold text-cyan-400 tracking-wider drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">

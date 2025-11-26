@@ -13,11 +13,87 @@ export class AudioSystem {
     } catch (e) {
       console.warn("Web Audio API not supported");
     }
+
+    // Resume audio context on user interaction (essential for Safari)
+    const resumeAudio = () => {
+      this.resume();
+    };
+    window.addEventListener('touchstart', resumeAudio, { passive: true });
+    window.addEventListener('click', resumeAudio);
+    window.addEventListener('keydown', resumeAudio);
+
+    // Handle visibility change to suspend/resume audio
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (this.ctx && this.ctx.state === 'running') {
+          this.ctx.suspend();
+        }
+      } else {
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+    });
   }
 
   resume() {
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(e => console.warn("Audio resume failed", e));
+    }
+  }
+
+  playClick(type: 'default' | 'confirm' | 'cancel' | 'menu' = 'default') {
+    if (!this.ctx || !this.masterGain) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    const now = this.ctx.currentTime;
+
+    if (type === 'confirm') {
+      // High pitch ascending - Success/Start
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(1600, now + 0.1);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } else if (type === 'cancel') {
+      // Lower pitch descending - Back/Close
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } else if (type === 'menu') {
+      // Soft short click - Navigation/Tab
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1000, now);
+
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+
+      osc.start(now);
+      osc.stop(now + 0.03);
+    } else {
+      // Default click (existing)
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+      osc.start(now);
+      osc.stop(now + 0.05);
     }
   }
 

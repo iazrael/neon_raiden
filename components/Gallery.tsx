@@ -5,11 +5,12 @@ import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, ASSETS_BASE
 interface GalleryProps {
     onClose: () => void;
     maxLevelReached: number;
+    playClick?: (type?: 'default' | 'confirm' | 'cancel' | 'menu') => void;
 }
 
 type Tab = 'FIGHTERS' | 'ARMORY' | 'BESTIARY' | 'BOSSES';
 
-export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) => {
+export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, playClick }) => {
     const [activeTab, setActiveTab] = useState<Tab>('FIGHTERS');
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [showDetail, setShowDetail] = useState(false);
@@ -235,12 +236,14 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
 
     // Handle item selection
     const handleItemSelect = (item: any) => {
+        playClick?.('default');
         setSelectedItem(item);
         setShowDetail(true);
     };
 
     // Handle detail close
     const handleDetailClose = () => {
+        playClick?.('cancel');
         setShowDetail(false);
     };
 
@@ -251,7 +254,10 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                 <h2 className="text-lg sm:text-2xl font-bold text-cyan-400 tracking-widest flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
                     <span className="text-2xl sm:text-3xl flex-shrink-0">❖</span> <span className="truncate">LIBRARY</span>
                 </h2>
-                <button onClick={onClose} className="ml-2 px-3 py-2 text-xs sm:text-sm border border-red-500/50 text-red-400 hover:bg-red-900/20 rounded transition-colors flex-shrink-0">
+                <button onClick={() => {
+                    playClick?.('cancel');
+                    onClose();
+                }} className="ml-2 px-3 py-2 text-xs sm:text-sm border border-red-500/50 text-red-400 hover:bg-red-900/20 rounded transition-colors flex-shrink-0">
                     CLOSE
                 </button>
             </div>
@@ -261,7 +267,10 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                 {(['FIGHTERS', 'ARMORY', 'BESTIARY', 'BOSSES'] as Tab[]).map(tab => (
                     <button
                         key={tab}
-                        onClick={() => setActiveTab(tab)}
+                        onClick={() => {
+                            playClick?.('menu');
+                            setActiveTab(tab);
+                        }}
                         className={`flex-1 min-w-[90px] py-4 px-3 text-sm text-center border-b-2 transition-all whitespace-nowrap font-bold active:scale-95 ${activeTab === tab
                             ? 'border-cyan-400 bg-cyan-900/40 text-cyan-100'
                             : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-white/5'
@@ -278,7 +287,10 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached }) =>
                     {(['FIGHTERS', 'ARMORY', 'BESTIARY', 'BOSSES'] as Tab[]).map(tab => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
+                            onClick={() => {
+                                playClick?.('menu');
+                                setActiveTab(tab);
+                            }}
                             className={`p-4 text-sm lg:text-base text-left border-l-4 transition-all font-bold ${activeTab === tab
                                 ? 'border-cyan-400 bg-cyan-900/30 text-cyan-100'
                                 : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'

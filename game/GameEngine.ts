@@ -738,7 +738,8 @@ export class GameEngine {
             this.powerups,
             this.meteors,
             this.shield,
-            this.screenShake
+            this.screenShake,
+            this.weaponLevel
         );
     }
 

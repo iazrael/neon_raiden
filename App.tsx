@@ -71,6 +71,10 @@ function App() {
     engineRef.current?.triggerBomb();
   };
 
+  const playClick = (type?: 'default' | 'confirm' | 'cancel' | 'menu') => {
+    engineRef.current?.audio.playClick(type);
+  };
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden touch-none select-none">
       <canvas
@@ -89,8 +93,13 @@ function App() {
         showLevelTransition={showLevelTransition}
         levelTransitionTimer={levelTransitionTimer}
         maxLevelReached={maxLevelReached}
-        onOpenGallery={() => setGameState(GameState.GALLERY)}
-        onCloseGallery={() => setGameState(GameState.MENU)}
+        onOpenGallery={() => {
+          setGameState(GameState.GALLERY);
+        }}
+        onCloseGallery={() => {
+          setGameState(GameState.MENU);
+        }}
+        playClick={playClick}
       />
     </div>
   );

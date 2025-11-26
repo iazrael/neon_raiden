@@ -72,7 +72,8 @@ export class RenderSystem {
         powerups: Entity[],
         meteors: any[],
         shield: number,
-        screenShake: number
+        screenShake: number,
+        weaponLevel: number
     ) {
         this.ctx.save();
 
@@ -120,7 +121,7 @@ export class RenderSystem {
         });
 
         if (gameState !== GameState.GAME_OVER) {
-            this.drawEntity(player);
+            this.drawEntity(player, weaponLevel);
             // Draw Shield
             if (shield > 0) {
                 this.ctx.save();
@@ -174,7 +175,7 @@ export class RenderSystem {
         this.ctx.restore();
     }
 
-    drawEntity(e: Entity) {
+    drawEntity(e: Entity, weaponLevel?: number) {
         this.ctx.save();
         this.ctx.translate(Math.round(e.x), Math.round(e.y));
 
@@ -188,7 +189,19 @@ export class RenderSystem {
             this.ctx.moveTo(-5, 25);
             this.ctx.lineTo(5, 25);
             this.ctx.lineTo(0, 40 + Math.random() * 10);
+            this.ctx.lineTo(0, 40 + Math.random() * 10);
             this.ctx.fill();
+
+            // Draw Weapon Level
+            this.ctx.save();
+            this.ctx.rotate(-bankAngle); // Cancel rotation for text
+            this.ctx.fillStyle = '#00ffff';
+            this.ctx.font = 'bold 12px monospace';
+            this.ctx.textAlign = 'center';
+            this.ctx.shadowColor = '#00ffff';
+            this.ctx.shadowBlur = 5;
+            this.ctx.fillText(`LV.${weaponLevel || 1}`, 0, -50);
+            this.ctx.restore();
         }
 
         if (e.spriteKey === 'bullet_plasma') {
