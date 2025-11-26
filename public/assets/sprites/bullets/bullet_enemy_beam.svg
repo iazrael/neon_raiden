@@ -1,0 +1,21 @@
+<svg width="12" height="32" viewBox="0 0 12 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Beam body with gradient -->
+  <rect x="2" y="0" width="8" height="32" fill="url(#beamGrad)" rx="4"/>
+  <!-- Bright core -->
+  <rect x="4" y="0" width="4" height="32" fill="url(#coreGrad)" rx="2"/>
+  <!-- Glow effect -->
+  <ellipse cx="6" cy="4" rx="5" ry="3" fill="#FFA500" opacity="0.6"/>
+  
+  <defs>
+    <linearGradient id="beamGrad" x1="6" y1="0" x2="6" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8C00"/>
+      <stop offset="0.5" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#FF4500"/>
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="6" y1="0" x2="6" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#FFD700"/>
+      <stop offset="1" stop-color="#FFA500"/>
+    </linearGradient>
+  </defs>
+</svg>

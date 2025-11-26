@@ -32,6 +32,12 @@ export enum BulletType {
   ENEMY_BEAM = 'enemy_beam' // 敌人光束
 }
 
+// 敌人子弹类型枚举 - 独立管理，方便扩展
+export enum EnemyBulletType {
+  ORB = 'enemy_orb',      // 普通能量球
+  BEAM = 'enemy_beam'     // 光束弹
+}
+
 export interface Vector2D {
   x: number;
   y: number;

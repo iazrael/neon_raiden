@@ -54,18 +54,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
             const config = WeaponConfig[item.type as WeaponType];
             if (config) {
                 // Map weapon type to bullet SVG
-                let filename = 'bullet_vulcan';
-                switch (item.type) {
-                    case WeaponType.VULCAN: filename = 'bullet_vulcan'; break;
-                    case WeaponType.LASER: filename = 'bullet_laser'; break;
-                    case WeaponType.MISSILE: filename = 'bullet_missile'; break;
-                    case WeaponType.WAVE: filename = 'bullet_wave'; break;
-                    case WeaponType.PLASMA: filename = 'bullet_plasma'; break;
-                    case WeaponType.TESLA: filename = 'bullet_tesla'; break;
-                    case WeaponType.MAGMA: filename = 'bullet_magma'; break;
-                    case WeaponType.SHURIKEN: filename = 'bullet_shuriken'; break;
-                }
-                return `${ASSETS_BASE_PATH}bullets/${filename}.svg`;
+                return `${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`;
             }
         }
         if (tab === 'BESTIARY') return `${ASSETS_BASE_PATH}enemies/enemy_${item.type}.svg`;

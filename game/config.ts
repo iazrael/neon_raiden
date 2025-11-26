@@ -1,4 +1,4 @@
-import { WeaponType, BulletType } from '@/types';
+import { WeaponType, BulletType, EnemyBulletType } from '@/types';
 
 // ==================== 道具类型枚举 ====================
 // Powerup types enumeration for better readability
@@ -209,6 +209,24 @@ export const WeaponConfig = {
         height: 24,             // 子弹高度
         color: '#ccc',          // 子弹颜色
         sprite: 'bullet_shuriken' // 精灵图名称
+    }
+};
+
+// ==================== 敌人子弹配置 ====================
+export const EnemyBulletConfig = {
+    // ENEMY_ORB - 敌人普通能量球（红色）
+    [EnemyBulletType.ORB]: {
+        width: 20,              // 子弹宽度
+        height: 20,             // 子弹高度
+        color: '#f56565',       // 子弹颜色（红色）
+        sprite: 'bullet_enemy_orb' // 精灵图名称
+    },
+    // ENEMY_BEAM - 敌人光束弹（橙色）
+    [EnemyBulletType.BEAM]: {
+        width: 12,              // 子弹宽度
+        height: 32,             // 子弹高度
+        color: '#f97316',       // 子弹颜色（橙色）
+        sprite: 'bullet_enemy_beam' // 精灵图名称
     }
 };
 

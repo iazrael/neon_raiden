@@ -1,5 +1,5 @@
-import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES } from '@/game/config';
-import { BulletType, WeaponType } from '@/types';
+import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES, EnemyBulletConfig } from '@/game/config';
+import { BulletType, WeaponType, EnemyBulletType } from '@/types';
 
 export class SpriteGenerator {
     private static cache: Map<string, HTMLImageElement> = new Map();
@@ -36,12 +36,15 @@ export class SpriteGenerator {
             load(`${ASSETS_BASE_PATH}enemies/enemy_${i}.svg`);
         }
 
-        // Bullets
-        const bulletFiles = [
-            'bullet_vulcan', 'bullet_laser', 'bullet_missile', 'bullet_wave',
-            'bullet_plasma', 'bullet_enemy', 'bullet_tesla', 'bullet_magma', 'bullet_shuriken'
-        ];
-        bulletFiles.forEach(f => load(`${ASSETS_BASE_PATH}bullets/${f}.svg`));
+        // Bullets - Player weapons
+        Object.values(WeaponConfig).forEach(config => {
+            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
+        });
+
+        // Bullets - Enemy bullets
+        Object.values(EnemyBulletConfig).forEach(config => {
+            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
+        });
 
         // Powerups
         // load(`${ASSETS_BASE_PATH}powerups/powerup_bg.svg`); // Removed as we use canvas for bg
@@ -116,17 +119,33 @@ export class SpriteGenerator {
 
     // 生成子弹
     generateBullet(type: BulletType): HTMLImageElement {
-        let w = 32; // Default for enemy bullets
+        let w = 32; // Default
         let h = 32;
+        let spriteName = `bullet_${type}`;
 
+        // 玩家武器子弹
         const weaponType = BulletToWeaponMap[type];
         if (weaponType !== undefined) {
             const config = WeaponConfig[weaponType];
             w = config.width;
             h = config.height;
+            spriteName = config.sprite;
+        }
+        // 敌人子弹
+        else if (type === BulletType.ENEMY_ORB) {
+            const config = EnemyBulletConfig[EnemyBulletType.ORB];
+            w = config.width;
+            h = config.height;
+            spriteName = config.sprite;
+        }
+        else if (type === BulletType.ENEMY_BEAM) {
+            const config = EnemyBulletConfig[EnemyBulletType.BEAM];
+            w = config.width;
+            h = config.height;
+            spriteName = config.sprite;
         }
 
-        return this.loadSVG(`${ASSETS_BASE_PATH}bullets/bullet_${type}.svg`, w, h);
+        return this.loadSVG(`${ASSETS_BASE_PATH}bullets/${spriteName}.svg`, w, h);
     }
 
     // 生成掉落物，现在包含内部图标
