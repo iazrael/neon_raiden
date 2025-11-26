@@ -1,4 +1,4 @@
-import { SpriteGenerator } from '@/SpriteGenerator';
+import { SpriteGenerator } from '@/game/SpriteGenerator';
 import { SpriteMap, Entity, Particle, Shockwave, GameState } from '@/types';
 
 export class RenderSystem {

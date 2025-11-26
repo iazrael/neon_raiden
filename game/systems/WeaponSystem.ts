@@ -1,6 +1,6 @@
 import { WeaponType, Entity } from '@/types';
-import { WeaponConfig } from '@/config';
-import { AudioSystem } from '@/AudioSystem';
+import { WeaponConfig } from '@/game/config';
+import { AudioSystem } from '@/game/AudioSystem';
 
 export class WeaponSystem {
     audio: AudioSystem;

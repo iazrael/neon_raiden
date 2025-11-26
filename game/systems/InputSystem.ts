@@ -30,6 +30,10 @@ export class InputSystem {
             if (this.onMouseMove) this.onMouseMove(e.clientX, e.clientY);
         });
 
+        window.addEventListener('mousedown', () => {
+            if (this.onAction) this.onAction('touch_start');
+        });
+
         // Touch
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();

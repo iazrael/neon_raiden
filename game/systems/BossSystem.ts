@@ -1,6 +1,6 @@
 import { Entity, SpriteMap } from '@/types';
-import { BossConfig } from '@/config';
-import { AudioSystem } from '@/AudioSystem';
+import { BossConfig } from '@/game/config';
+import { AudioSystem } from '@/game/AudioSystem';
 
 export class BossSystem {
     audio: AudioSystem;
