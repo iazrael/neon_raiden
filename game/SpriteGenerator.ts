@@ -1,4 +1,4 @@
-import { BulletSizeConfig, ASSETS_BASE_PATH, WeaponConfig, EnemyConfig, BossConfig } from '@/game/config';
+import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap } from '@/game/config';
 import { BulletType, WeaponType } from '@/types';
 
 export class SpriteGenerator {
@@ -116,9 +116,15 @@ export class SpriteGenerator {
 
     // 生成子弹
     generateBullet(type: BulletType): HTMLImageElement {
-        const sizeConfig = BulletSizeConfig[type] || BulletSizeConfig[BulletType.ENEMY_ORB];
-        const w = sizeConfig.width;
-        const h = sizeConfig.height;
+        let w = 32; // Default for enemy bullets
+        let h = 32;
+
+        const weaponType = BulletToWeaponMap[type];
+        if (weaponType !== undefined) {
+            const config = WeaponConfig[weaponType];
+            w = config.width;
+            h = config.height;
+        }
 
         // Map types to filenames
         let filename = 'bullet_vulcan';
@@ -176,11 +182,29 @@ export class SpriteGenerator {
 
         // Draw Icon or Label
         if (iconSrc) {
-            const img = this.loadSVG(iconSrc, 24, 24); // Use loadSVG to get cached image
+            // Get the original dimensions from WeaponConfig
+            let originalWidth = 24;
+            let originalHeight = 24;
+
+            if (PowerupToWeaponMap[type] !== undefined) {
+                const weaponType = PowerupToWeaponMap[type];
+                const config = WeaponConfig[weaponType];
+                originalWidth = config.width;
+                originalHeight = config.height;
+            }
+
+            // Calculate scaling to fit within 24x24 while preserving aspect ratio
+            const maxSize = 24;
+            const scale = Math.min(maxSize / originalWidth, maxSize / originalHeight);
+            const scaledWidth = originalWidth * scale;
+            const scaledHeight = originalHeight * scale;
+
+            // Load SVG with scaled dimensions
+            const img = this.loadSVG(iconSrc, scaledWidth, scaledHeight);
             const drawIcon = () => {
                 ctx.save();
-                // Icon size is 24x24, centered
-                ctx.drawImage(img, -12, -12, 24, 24);
+                // Draw centered
+                ctx.drawImage(img, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
                 ctx.restore();
             };
 

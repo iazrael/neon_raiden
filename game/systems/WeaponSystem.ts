@@ -46,7 +46,7 @@ export class WeaponSystem {
             }
         } else if (weaponType === WeaponType.LASER) {
             // Laser: Thicker and multi-beam at high levels
-            const w = config.width + weaponLevel * 3;
+            const w = config.width + weaponLevel * 1; // Reduced from 3 to 1
 
             if (weaponLevel < 5) {
                 spawn(player.x, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w, config.height);
@@ -58,6 +58,7 @@ export class WeaponSystem {
                 spawn(player.x - 25, player.y - 30, -1, -config.speed + 1, damage, weaponType, config.sprite, w * 0.7, config.height);
                 spawn(player.x + 25, player.y - 30, 1, -config.speed + 1, damage, weaponType, config.sprite, w * 0.7, config.height);
             }
+
 
         } else if (weaponType === WeaponType.MISSILE) {
             // 2 -> 4 -> 6 -> 8

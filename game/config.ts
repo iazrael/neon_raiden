@@ -28,6 +28,30 @@ export enum EnemyType {
     MINE_LAYER = 6          // 布雷机 - Layer (深灰/黄色)
 }
 
+// ==================== 类型映射 ====================
+// BulletType to WeaponType mapping for sprite generation
+export const BulletToWeaponMap: { [key in BulletType]?: WeaponType } = {
+    [BulletType.VULCAN]: WeaponType.VULCAN,
+    [BulletType.LASER]: WeaponType.LASER,
+    [BulletType.MISSILE]: WeaponType.MISSILE,
+    [BulletType.WAVE]: WeaponType.WAVE,
+    [BulletType.PLASMA]: WeaponType.PLASMA,
+    [BulletType.TESLA]: WeaponType.TESLA,
+    [BulletType.MAGMA]: WeaponType.MAGMA,
+    [BulletType.SHURIKEN]: WeaponType.SHURIKEN,
+};
+
+// PowerupType to WeaponType mapping for powerup icons
+export const PowerupToWeaponMap: { [key: number]: WeaponType } = {
+    [PowerupType.LASER]: WeaponType.LASER,
+    [PowerupType.VULCAN]: WeaponType.VULCAN,
+    [PowerupType.WAVE]: WeaponType.WAVE,
+    [PowerupType.PLASMA]: WeaponType.PLASMA,
+    [PowerupType.TESLA]: WeaponType.TESLA,
+    [PowerupType.MAGMA]: WeaponType.MAGMA,
+    [PowerupType.SHURIKEN]: WeaponType.SHURIKEN
+};
+
 // ==================== 游戏基础配置 ====================
 export const GameConfig = {
     width: 0,           // 游戏宽度（动态设置）
@@ -78,8 +102,8 @@ export const WeaponConfig = {
         speed: 25,              // 子弹速度
         baseFireRate: 60,       // 基础射速（毫秒）
         ratePerLevel: 0,        // 固定射速，不随等级变化
-        width: 12,              // 子弹基础宽度（随等级变粗）
-        height: 60,             // 子弹高度
+        width: 8,               // 子弹基础宽度（随等级变粗）
+        height: 50,             // 子弹高度
         color: '#f0f',          // 子弹颜色
         sprite: 'bullet_laser'  // 精灵图名称
     },
@@ -134,8 +158,8 @@ export const WeaponConfig = {
         speed: 20,              // 子弹速度
         baseFireRate: 200,      // 基础射速（毫秒）
         ratePerLevel: 10,       // 每级射速提升（毫秒减少）
-        width: 32,              // 子弹宽度
-        height: 32,             // 子弹高度
+        width: 16,              // 子弹宽度
+        height: 64,             // 子弹高度
         color: '#ccf',          // 子弹颜色
         sprite: 'bullet_tesla'  // 精灵图名称
     },
@@ -172,7 +196,7 @@ export const WeaponConfig = {
 // ==================== 敌人生成权重配置 ====================
 // 按关卡配置敌人类型的生成权重 - 权重越高，生成概率越大
 export const EnemySpawnWeights = {
-    1: { [EnemyType.NORMAL]: 10 },
+    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3 },
     2: { [EnemyType.NORMAL]: 7, [EnemyType.FAST]: 5 },
     3: { [EnemyType.NORMAL]: 5, [EnemyType.FAST]: 4, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 3 },
     4: { [EnemyType.NORMAL]: 4, [EnemyType.FAST]: 5, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 4 },
@@ -623,21 +647,6 @@ export const BossConfig = {
         laserCooldown: 2000,            // 激光冷却时间2秒
         hitboxScale: 0.8
     }
-};
-
-// ==================== 子弹尺寸配置 ====================
-// 子弹类型到其显示尺寸的映射
-export const BulletSizeConfig = {
-    [BulletType.VULCAN]: { width: 16, height: 32 },
-    [BulletType.LASER]: { width: 24, height: 64 },
-    [BulletType.MISSILE]: { width: 24, height: 48 },
-    [BulletType.WAVE]: { width: 64, height: 32 },
-    [BulletType.PLASMA]: { width: 48, height: 48 },
-    [BulletType.ENEMY_ORB]: { width: 32, height: 32 },
-    [BulletType.ENEMY_BEAM]: { width: 32, height: 32 },
-    [BulletType.TESLA]: { width: 32, height: 32 },
-    [BulletType.MAGMA]: { width: 32, height: 32 },
-    [BulletType.SHURIKEN]: { width: 32, height: 32 }
 };
 
 // 根据关卡等级获取Boss配置的辅助函数
