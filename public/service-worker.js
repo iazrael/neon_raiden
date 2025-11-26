@@ -1,4 +1,6 @@
-const CACHE_NAME = 'neon-raiden-v1';
+// Service Worker缓存配置
+// CACHE_NAME会在Vite构建时根据package.json中的版本号自动注入
+const CACHE_NAME = '__APP_CACHE_NAME__';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -8,6 +10,7 @@ const ASSETS_TO_CACHE = [
 ];
 
 // 安装Service Worker
+// 当CACHE_NAME版本号更新时，会自动建立新缓存
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {

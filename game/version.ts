@@ -1,25 +1,28 @@
 // Version management for Neon Raiden
-const MAJOR_VERSION = 1;
-const MINOR_VERSION = 0;
+// 版本号在构建时一次性不变，由Vite根据package.json注入
 
-// Generate patch version based on build timestamp
-function getPatchVersion(): number {
-    // Use a base timestamp (project start) and calculate days since
-    const baseTimestamp = new Date('2025-01-01').getTime();
-    const now = Date.now();
-    const daysSinceBase = Math.floor((now - baseTimestamp) / (1000 * 60 * 60 * 24));
-    return daysSinceBase;
-}
+declare const __APP_VERSION__: string;
+declare const __APP_VERSION_MAJOR__: string;
+declare const __APP_VERSION_MINOR__: string;
+declare const __APP_VERSION_PATCH__: string;
 
 export function getVersion(): string {
-    return `v${MAJOR_VERSION}.${MINOR_VERSION}.${getPatchVersion()}`;
+    return `v${__APP_VERSION__}`;
 }
 
 export function getVersionInfo() {
     return {
-        major: MAJOR_VERSION,
-        minor: MINOR_VERSION,
-        patch: getPatchVersion(),
+        major: parseInt(__APP_VERSION_MAJOR__, 10),
+        minor: parseInt(__APP_VERSION_MINOR__, 10),
+        patch: parseInt(__APP_VERSION_PATCH__, 10),
         full: getVersion()
     };
+}
+
+/**
+ * 获取缓存名称，应用于Service Worker中
+ * 格式: neon-raiden-v{major}.{minor}.{patch}
+ */
+export function getCacheName(): string {
+    return `neon-raiden-${getVersion()}`;
 }

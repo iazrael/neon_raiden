@@ -273,6 +273,12 @@ export const EnemyConfig = {
     }
 };
 
+// ==================== 敌人掉落物配置 ====================
+export const PowerupDropConfig = {
+    elitePowerupDropRate: 0.8,      // 精英怪掉落概率（80%）
+    normalPowerupDropRate: 0.2,     // 普通怪掉落概率（20%）
+};
+
 // ==================== 道具掉落概率配置 ====================
 // 击杀敌人有20%概率掉落道具，以下为各类道具的相对权重
 export const PowerupDropRates = {
@@ -350,16 +356,17 @@ export enum BossName {
 // ==================== Boss配置 ====================
 export const BossConfig = {
     // 第1关 - 守护者（无人机母舰）
+    // 特点：平衡型新手教学Boss
     // 攻击模式：环形弹幕
     // 移动模式：正弦波动
     [BossName.GUARDIAN]: {
         level: 1,                       // 关卡等级
-        hp: 1500,                       // 生命值
-        speed: 1.0,                     // 移动速度
+        hp: 1500,                       // 生命值（基准值）
+        speed: 1.2,                     // 移动速度
         size: 0.8,                      // 体积缩放
         bulletCount: 8,                 // 环形弹幕子弹数
         bulletSpeed: 4.0,               // 子弹速度
-        fireRate: 0.05,                 // 开火频率（5%每帧）
+        fireRate: 0.06,                 // 开火频率（6%每帧，提升基础难度）
         targetedShotSpeed: 0,           // 瞄准弹速度（0=无）
         hasLaser: false,                // 是否具备激光
         weaponCount: 1,                 // 武器系统数量
@@ -375,17 +382,18 @@ export const BossConfig = {
         hitboxScale: 0.8                // 碰撞箱缩放比例
     },
     // 第2关 - 拦截者（突击巡洋舰）
+    // 特点：高速低血，灵活骚扰型
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：正弦波动
     [BossName.INTERCEPTOR]: {
         level: 2,
-        hp: 1800,                       // 1500 × 1.2
-        speed: 1.2,
+        hp: 1400,                       // 较低血量
+        speed: 2.0,                     // 高速
         size: 0.8,
-        bulletCount: 11,
+        bulletCount: 10,
         bulletSpeed: 4.5,
-        fireRate: 0.06,
-        targetedShotSpeed: 9,           // 瞄准弹速度
+        fireRate: 0.08,                 // 高频率攻击
+        targetedShotSpeed: 8,           // 瞄准弹速度
         hasLaser: false,
         weaponCount: 1,
         score: 10000,
@@ -400,17 +408,18 @@ export const BossConfig = {
         hitboxScale: 0.8
     },
     // 第3关 - 毁灭者（重型战列舰）
+    // 特点：血厚攻击强，但速度慢，重型坦克
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：8字盘旋
     [BossName.DESTROYER]: {
         level: 3,
-        hp: 2160,                       // 1800 × 1.2
-        speed: 1.4,
+        hp: 2400,                       // 高血量
+        speed: 0.8,                     // 低速
         size: 0.85,
-        bulletCount: 14,
-        bulletSpeed: 5.0,
-        fireRate: 0.065,
-        targetedShotSpeed: 10,
+        bulletCount: 16,                // 密集弹幕
+        bulletSpeed: 5.5,               // 高速子弹
+        fireRate: 0.04,                 // 低频高伤
+        targetedShotSpeed: 9,
         hasLaser: false,
         weaponCount: 1,
         score: 15000,
@@ -425,17 +434,18 @@ export const BossConfig = {
         hitboxScale: 0.8
     },
     // 第4关 - 歼灭者（隐形战机）
+    // 特点：瞄准弹极快，精准狙击型，血量中等
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：8字盘旋
     [BossName.ANNIHILATOR]: {
         level: 4,
-        hp: 2592,                       // 2160 × 1.2
-        speed: 1.6,
+        hp: 2000,                       // 中等血量
+        speed: 1.5,
         size: 0.85,
-        bulletCount: 17,
-        bulletSpeed: 5.5,
-        fireRate: 0.07,
-        targetedShotSpeed: 11,
+        bulletCount: 12,                // 较少环形弹
+        bulletSpeed: 5.0,
+        fireRate: 0.06,
+        targetedShotSpeed: 14,          // 极快瞄准弹
         hasLaser: false,
         weaponCount: 1,
         score: 20000,
@@ -450,17 +460,18 @@ export const BossConfig = {
         hitboxScale: 0.8
     },
     // 第5关 - 主宰者（能量要塞）
+    // 特点：弹幕密集覆盖型，高频攻击
     // 攻击模式：环形弹幕 + 瞄准弹
     // 移动模式：8字盘旋
     [BossName.DOMINATOR]: {
         level: 5,
-        hp: 3110,                       // 2592 × 1.2
-        speed: 1.8,
+        hp: 2800,                       // 中等血量
+        speed: 1.3,                     // 中等偏慢
         size: 0.9,
-        bulletCount: 20,
-        bulletSpeed: 6.0,
-        fireRate: 0.075,
-        targetedShotSpeed: 12,
+        bulletCount: 24,                // 密集弹幕
+        bulletSpeed: 5.0,
+        fireRate: 0.09,                 // 高频攻击
+        targetedShotSpeed: 10,
         hasLaser: false,
         weaponCount: 1,
         score: 25000,
@@ -475,17 +486,18 @@ export const BossConfig = {
         hitboxScale: 0.8
     },
     // 第6关 - 霸主（双子舰）
+    // 特点：首个激光Boss，激光突破型
     // 攻击模式：环形弹幕 + 瞄准弹 + 连续光束激光
     // 移动模式：追踪模式
     [BossName.OVERLORD]: {
         level: 6,
-        hp: 3732,                       // 3110 × 1.2
-        speed: 2.0,
+        hp: 3200,                       // 中等血量
+        speed: 1.8,                     // 中快
         size: 0.9,
-        bulletCount: 23,
-        bulletSpeed: 6.5,
-        fireRate: 0.08,
-        targetedShotSpeed: 13,
+        bulletCount: 18,
+        bulletSpeed: 6.0,
+        fireRate: 0.07,
+        targetedShotSpeed: 10,
         hasLaser: true,                 // 具备激光
         weaponCount: 2,
         score: 30000,
@@ -495,22 +507,23 @@ export const BossConfig = {
         wingmenCount: 0,
         wingmenType: 0,
         laserType: 'continuous',        // 激光类型：连续光束
-        laserDamage: 30,                // 激光伤害
+        laserDamage: 35,                // 激光伤害
         laserCooldown: 3000,            // 激光冷却时间3秒
         hitboxScale: 0.8
     },
     // 第7关 - 泰坦（三角要塞）
+    // 特点：超高血量重装坦克型，速度慢
     // 攻击模式：环形弹幕 + 瞄准弹 + 连续光束激光
     // 移动模式：追踪模式
     [BossName.TITAN]: {
         level: 7,
-        hp: 4478,                       // 3732 × 1.2
-        speed: 2.2,
+        hp: 5000,                       // 超高血量
+        speed: 1.0,                     // 慢速
         size: 0.95,
-        bulletCount: 26,
-        bulletSpeed: 7.0,
-        fireRate: 0.085,
-        targetedShotSpeed: 14,
+        bulletCount: 20,
+        bulletSpeed: 6.5,
+        fireRate: 0.065,                // 中低频
+        targetedShotSpeed: 11,
         hasLaser: true,
         weaponCount: 2,
         score: 35000,
@@ -520,23 +533,24 @@ export const BossConfig = {
         wingmenCount: 0,
         wingmenType: 0,
         laserType: 'continuous',
-        laserDamage: 35,
-        laserCooldown: 2800,            // 激光冷却时间2.8秒
+        laserDamage: 30,                // 中等激光伤害
+        laserCooldown: 3500,            // 激光冷却时间3.5秒
         hitboxScale: 0.8
     },
     // 第8关 - 巨像（蛛型机甲）
+    // 特点：爆发刺客型，脉冲激光高爆发，血量较低速度快
     // 攻击模式：环形弹幕 + 瞄准弹 + 脉冲激光 + 扇形弹幕
     // 移动模式：激进模式（主动追踪）
     // 僚机：1个激光拦截机
     [BossName.COLOSSUS]: {
         level: 8,
-        hp: 5374,                       // 4478 × 1.2
-        speed: 2.4,
+        hp: 4000,                       // 较低血量
+        speed: 2.2,                     // 高速
         size: 0.95,
-        bulletCount: 29,
-        bulletSpeed: 7.5,
-        fireRate: 0.09,
-        targetedShotSpeed: 15,
+        bulletCount: 22,
+        bulletSpeed: 7.0,
+        fireRate: 0.08,                 // 中高频
+        targetedShotSpeed: 12,
         hasLaser: true,
         weaponCount: 2,
         score: 40000,
@@ -546,23 +560,24 @@ export const BossConfig = {
         wingmenCount: 1,                // 僚机数量：1个
         wingmenType: 5,                 // 僚机类型：激光拦截机
         laserType: 'pulsed',            // 激光类型：脉冲
-        laserDamage: 40,                // 激光伤害（单发20，5连发）
+        laserDamage: 50,                // 激光伤害（单发10，5连发）
         laserCooldown: 2500,            // 激光冷却时间2.5秒
         hitboxScale: 0.8
     },
     // 第9关 - 利维坦（环形核心）
+    // 特点：全能战士型，追踪导弹+高频攻击
     // 攻击模式：环形弹幕 + 瞄准弹 + 脉冲激光 + 扇形弹幕 + 追踪导弹
     // 移动模式：激进模式
     // 僚机：2个激光拦截机
     [BossName.LEVIATHAN]: {
         level: 9,
-        hp: 6449,                       // 5374 × 1.2
-        speed: 2.6,
+        hp: 6000,                       // 中上血量
+        speed: 1.6,                     // 中等速度
         size: 1.0,
-        bulletCount: 32,
-        bulletSpeed: 8.0,
-        fireRate: 0.095,
-        targetedShotSpeed: 16,
+        bulletCount: 26,
+        bulletSpeed: 7.5,
+        fireRate: 0.095,                // 高频攻击
+        targetedShotSpeed: 13,
         hasLaser: true,
         weaponCount: 3,
         score: 45000,
@@ -572,23 +587,24 @@ export const BossConfig = {
         wingmenCount: 2,                // 僚机数量：2个
         wingmenType: 5,                 // 僚机类型：激光拦截机
         laserType: 'pulsed',
-        laserDamage: 45,                // 激光伤害（单发22.5，5连发）
+        laserDamage: 45,                // 激光伤害（单发9，5连发）
         laserCooldown: 2200,            // 激光冷却时间2.2秒
         hitboxScale: 0.8
     },
     // 第10关 - 天启（最终恶魔）
+    // 特点：终极Boss，全面强化但不过分突兀
     // 攻击模式：环形弹幕 + 瞄准弹 + 脉冲激光 + 扇形弹幕 + 追踪导弹
     // 移动模式：激进模式
     // 僚机：2个布雷机
     [BossName.APOCALYPSE]: {
         level: 10,
-        hp: 7739,                       // 6449 × 1.2
-        speed: 2.8,
+        hp: 10000,                      // 1.67倍增长（相比第9关）
+        speed: 2.3,                     // 高速
         size: 1.0,
-        bulletCount: 35,
-        bulletSpeed: 8.5,
-        fireRate: 0.1,                  // 开火频率最高（10%每帧）
-        targetedShotSpeed: 17,
+        bulletCount: 30,
+        bulletSpeed: 8.0,
+        fireRate: 0.10,                 // 高频攻击
+        targetedShotSpeed: 15,
         hasLaser: true,
         weaponCount: 3,
         score: 50000,
@@ -598,7 +614,7 @@ export const BossConfig = {
         wingmenCount: 2,                // 僚机数量：2个
         wingmenType: 6,                 // 僚机类型：布雷机
         laserType: 'pulsed',
-        laserDamage: 50,                // 激光伤害（单发25，5连发）
+        laserDamage: 55,                // 激光伤害（单发11，5连发）
         laserCooldown: 2000,            // 激光冷却时间2秒
         hitboxScale: 0.8
     }

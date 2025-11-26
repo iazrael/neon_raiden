@@ -1,6 +1,6 @@
 import { AudioSystem } from './AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupType, PowerupEffects } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupType, PowerupEffects, PowerupDropConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -586,7 +586,8 @@ export class GameEngine {
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');
 
-        if (Math.random() < (e.isElite ? 0.5 : 0.05)) this.spawnPowerup(e.x, e.y);
+        const dropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
+        if (Math.random() < dropRate) this.spawnPowerup(e.x, e.y);
     }
 
     createPlasmaExplosion(x: number, y: number) {
