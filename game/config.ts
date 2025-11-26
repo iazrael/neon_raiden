@@ -281,18 +281,19 @@ export const PowerupDropConfig = {
 
 // ==================== 道具掉落概率配置 ====================
 // 击杀敌人有20%概率掉落道具，以下为各类道具的相对权重
+// 权重分配基于武器强度：强力武器（PLASMA、WAVE）较稀有，基础武器较常见
 export const PowerupDropRates = {
-    [PowerupType.POWER]: 0.30,      // 武器能量提升: 25%
-    [PowerupType.LASER]: 0.10,      // 激光武器: 10%
-    [PowerupType.VULCAN]: 0.10,     // 散弹武器: 10%
-    [PowerupType.HP]: 0.20,         // 生命值恢复: 20%
-    [PowerupType.WAVE]: 0.15,       // 波动炮: 15%
-    [PowerupType.PLASMA]: 0.10,     // 等离子炮: 10%
-    [PowerupType.BOMB]: 0.15,       // 炸弹: 5%
-    [PowerupType.OPTION]: 0.12,     // 僚机: 8%
-    [PowerupType.TESLA]: 0.15,      // 电磁炮: 5%
-    [PowerupType.MAGMA]: 0.15,      // 熔岩炮: 5%
-    [PowerupType.SHURIKEN]: 0.15    // 手里剑: 5%
+    [PowerupType.POWER]: 0.20,      // 武器能量提升: 20% (通用升级，最常见)
+    [PowerupType.HP]: 0.18,         // 生命值恢复: 18% (生存必需)
+    [PowerupType.LASER]: 0.12,      // 激光武器: 12% (平衡型武器)
+    [PowerupType.VULCAN]: 0.12,     // 散弹武器: 12% (基础武器)
+    [PowerupType.SHURIKEN]: 0.10,   // 手里剑: 10% (手里剑)
+    [PowerupType.TESLA]: 0.09,      // 电磁炮: 9% (进阶武器)
+    [PowerupType.MAGMA]: 0.09,      // 熔岩炮: 9% (进阶武器)
+    [PowerupType.WAVE]: 0.05,       // 波动炮: 5% (强力武器，稀有)
+    [PowerupType.PLASMA]: 0.03,     // 等离子炮: 3% (终极武器，非常稀有)
+    [PowerupType.BOMB]: 0.02,       // 炸弹: 2% (战略道具，罕见)
+    [PowerupType.OPTION]: 0.02      // 僚机: 0% (战略道具，罕见)
 };
 
 // 根据掉落概率选择道具类型的辅助函数
@@ -337,6 +338,7 @@ export const PowerupEffects = {
 // ==================== Boss生成时机配置 ====================
 export const BossSpawnConfig = {
     minLevelDuration: 60,   // Boss生成前的最小关卡持续时间（秒）
+    minLevelProgress: 99    // Boss生成前的最小关卡进度（%）
 };
 
 // ==================== Boss名称枚举 ====================

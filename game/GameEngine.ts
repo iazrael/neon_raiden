@@ -283,11 +283,12 @@ export class GameEngine {
             }
 
             // Spawn boss when both conditions are met:
-            // 1. Level progress >= 80%
-            // 2. Minimum level duration has passed
+            // 1. Level progress >= 90%
+            // 2. Minimum level duration has passed (60 seconds)
             const levelDuration = (Date.now() - this.levelStartTime) / 1000; // in seconds
             const minDuration = BossSpawnConfig.minLevelDuration;
-            if (this.levelProgress >= 80 && levelDuration >= minDuration) {
+            const minProgress = BossSpawnConfig.minLevelProgress;
+            if (this.levelProgress >= minProgress && levelDuration >= minDuration) {
                 this.spawnBoss();
             }
         } else {
@@ -441,6 +442,7 @@ export class GameEngine {
                 this.level++;
                 this.levelProgress = 0;
                 this.levelStartTime = Date.now(); // Reset level start time for new level
+                this.enemySpawnTimer = 0; // Reset enemy spawn timer
                 this.onLevelChange(this.level);
 
                 if (this.level > this.maxLevelReached) {
