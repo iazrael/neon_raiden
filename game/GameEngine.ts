@@ -95,11 +95,7 @@ export class GameEngine {
             if (action === 'bomb_or_fire') {
                 if (this.state === GameState.PLAYING) this.triggerBomb();
             } else if (action === 'touch_start') {
-                if (this.state !== GameState.PLAYING) {
-                    if (this.state === GameState.MENU || this.state === GameState.GAME_OVER || this.state === GameState.VICTORY) {
-                        this.startGame();
-                    }
-                }
+                // Removed auto-start on touch. Game now only starts via UI button.
             }
         };
 

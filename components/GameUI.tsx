@@ -80,7 +80,7 @@ export const GameUI: React.FC<GameUIProps> = ({
             onClick={onOpenGallery}
             className="mt-4 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-none border border-gray-600 shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-transform skew-x-[-10deg] text-sm tracking-widest"
           >
-            DATABASE
+            LIBRARY
           </button>
 
           <div className="mt-8 text-xs text-cyan-500/50 tracking-widest font-mono">
