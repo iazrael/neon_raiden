@@ -45,4 +45,28 @@ export interface Shockwave {
   width?: number;
 }
 
+export interface Entity {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  vx: number;
+  vy: number;
+  hp: number;
+  maxHp: number;
+  type: 'player' | 'enemy' | 'boss' | 'bullet' | 'powerup' | 'option';
+  subType?: number;
+  color: string;
+  markedForDeletion: boolean;
+  angle?: number;
+  spriteKey?: string;
+  frame?: number;
+  damage?: number;
+  owner?: Entity; // For options
+  angleOffset?: number; // For options
+  isElite?: boolean;
+  state?: number; // For AI state
+  timer?: number; // For AI timer
+}
+
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };
