@@ -1,0 +1,37 @@
+<svg width="360" height="360" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a0aec0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(180, 180)">
+    <!-- Horns -->
+    <path d="M-30 -60 Q-60 -90 -40 -30" stroke="#742a2a" stroke-width="8" fill="none"/>
+    <path d="M30 -60 Q60 -90 40 -30" stroke="#742a2a" stroke-width="8" fill="none"/>
+
+    <!-- Head/Body -->
+    <path d="M0 -70 L40 -30 L30 60 L0 80 L-30 60 L-40 -30 Z" fill="#1a202c" stroke="#9b2c2c" stroke-width="3"/>
+    
+    <!-- Face Details -->
+    <path d="M-20 -20 L-10 0 L-30 0 Z" fill="#f56565" filter="url(#glow)"/>
+    <path d="M20 -20 L30 0 L10 0 Z" fill="#f56565" filter="url(#glow)"/>
+    
+    <!-- Core -->
+    <circle cx="0" cy="30" r="15" fill="#9f1239" filter="url(#glow)">
+      <animate attributeName="r" values="15;18;15" dur="0.5s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Wings/Weapons -->
+    <path d="M-40 -30 L-80 0 L-50 40" stroke="#742a2a" stroke-width="4" fill="none"/>
+    <path d="M40 -30 L80 0 L50 40" stroke="#742a2a" stroke-width="4" fill="none"/>
+  </g>
+</svg>

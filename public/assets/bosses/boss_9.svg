@@ -1,0 +1,38 @@
+<svg width="340" height="340" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a0aec0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(170, 170)">
+    <!-- Outer Ring -->
+    <circle cx="0" cy="0" r="70" fill="none" stroke="#c53030" stroke-width="8" stroke-dasharray="20,10">
+       <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="10s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Inner Ring -->
+    <circle cx="0" cy="0" r="50" fill="none" stroke="#e53e3e" stroke-width="6" stroke-dasharray="10,10">
+       <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="8s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Core -->
+    <circle cx="0" cy="0" r="25" fill="#fff" filter="url(#glow)" />
+    
+    <!-- Emitters -->
+    <g fill="#63b3ed">
+      <circle cx="0" cy="-70" r="6" />
+      <circle cx="70" cy="0" r="6" />
+      <circle cx="0" cy="70" r="6" />
+      <circle cx="-70" cy="0" r="6" />
+    </g>
+  </g>
+</svg>

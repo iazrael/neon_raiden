@@ -1,0 +1,39 @@
+<svg width="320" height="320" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a0aec0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(160, 160)">
+    <!-- Legs -->
+    <g stroke="#805ad5" stroke-width="4" fill="none">
+      <path d="M-20 -20 L-60 -60" />
+      <path d="M20 -20 L60 -60" />
+      <path d="M-25 0 L-70 0" />
+      <path d="M25 0 L70 0" />
+      <path d="M-20 20 L-60 60" />
+      <path d="M20 20 L60 60" />
+      <path d="M0 -30 L0 -70" />
+      <path d="M0 30 L0 70" />
+    </g>
+    
+    <!-- Body -->
+    <circle cx="0" cy="0" r="35" fill="#44337a" stroke="#b794f4" stroke-width="3"/>
+    
+    <!-- Eyes -->
+    <g fill="#f56565" filter="url(#glow)">
+      <circle cx="-10" cy="-10" r="5" />
+      <circle cx="10" cy="-10" r="5" />
+      <circle cx="0" cy="10" r="8" />
+    </g>
+  </g>
+</svg>

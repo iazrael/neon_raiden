@@ -1,0 +1,33 @@
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a0aec0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(150, 150)">
+    <!-- Main Triangle -->
+    <path d="M0 -90 L80 50 L-80 50 Z" fill="#742a2a" stroke="#c53030" stroke-width="4"/>
+    
+    <!-- Inner Structure -->
+    <path d="M0 -50 L40 20 L-40 20 Z" fill="#9b2c2c" />
+    
+    <!-- Laser Arrays -->
+    <g fill="#fc8181" filter="url(#glow)">
+      <circle cx="0" cy="-90" r="10" />
+      <circle cx="80" cy="50" r="10" />
+      <circle cx="-80" cy="50" r="10" />
+    </g>
+    
+    <!-- Core -->
+    <circle cx="0" cy="10" r="15" fill="#fff5f5" filter="url(#glow)" />
+  </g>
+</svg>

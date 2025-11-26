@@ -206,7 +206,11 @@ export class RenderSystem {
 
         if (e.spriteKey && this.sprites[e.spriteKey]) {
             const sprite = this.sprites[e.spriteKey];
-            this.ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+            if (sprite instanceof HTMLImageElement && !sprite.complete) {
+                // Skip drawing if not loaded
+            } else {
+                this.ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+            }
         } else {
             this.ctx.fillStyle = e.color;
             this.ctx.fillRect(-e.width / 2, -e.height / 2, e.width, e.height);
