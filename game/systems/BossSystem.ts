@@ -19,7 +19,8 @@ export class BossSystem {
     }
 
     spawn(level: number, sprites: SpriteMap): Entity {
-        const hp = BossConfig.hpPerLevel * level;
+        const config = BossConfig[level as keyof typeof BossConfig];
+        const hp = config.hp;
         const sprite = sprites[`boss_${level}`];
         const width = sprite ? sprite.width : 150;
         const height = sprite ? sprite.height : 150;
@@ -29,10 +30,10 @@ export class BossSystem {
         return {
             x: this.width / 2,
             y: -150,
-            width: width * 0.8,
-            height: height * 0.8,
+            width: width * config.size,
+            height: height * config.size,
             vx: 0,
-            vy: 1,
+            vy: config.speed,
             hp: hp,
             maxHp: hp,
             type: 'boss',
@@ -44,29 +45,31 @@ export class BossSystem {
     }
 
     update(boss: Entity, dt: number, timeScale: number, player: Entity, enemyBullets: Entity[], level: number) {
+        const config = BossConfig[level as keyof typeof BossConfig];
+
         if (boss.y < 150) {
-            boss.y += 1 * timeScale;
+            boss.y += config.speed * timeScale;
         } else {
             boss.x += Math.cos(Date.now() / 1000) * 2 * timeScale;
-            if (Math.random() < 0.05 * timeScale) {
+            if (Math.random() < config.fireRate * timeScale) {
                 this.fire(boss, enemyBullets, level, player);
             }
         }
     }
 
     fire(boss: Entity, enemyBullets: Entity[], level: number, player: Entity) {
-        const bulletsCount = BossConfig.baseBulletCount + (level * BossConfig.bulletCountPerLevel);
+        const config = BossConfig[level as keyof typeof BossConfig];
 
         // Radial Burst
-        for (let i = 0; i < bulletsCount; i++) {
-            const angle = (i / bulletsCount) * Math.PI * 2 + (Date.now() / 1000);
+        for (let i = 0; i < config.bulletCount; i++) {
+            const angle = (i / config.bulletCount) * Math.PI * 2 + (Date.now() / 1000);
             enemyBullets.push({
                 x: boss.x,
                 y: boss.y + boss.height / 4,
                 width: 16,
                 height: 16,
-                vx: Math.cos(angle) * 5,
-                vy: Math.sin(angle) * 5,
+                vx: Math.cos(angle) * config.bulletSpeed,
+                vy: Math.sin(angle) * config.bulletSpeed,
                 hp: 1,
                 maxHp: 1,
                 type: 'bullet',
@@ -77,7 +80,7 @@ export class BossSystem {
         }
 
         // Targeted Shot
-        if (level >= 2) {
+        if (config.targetedShotSpeed > 0) {
             const dx = player.x - boss.x;
             const dy = player.y - boss.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
@@ -86,8 +89,8 @@ export class BossSystem {
                 y: boss.y + boss.height / 4,
                 width: 20,
                 height: 20,
-                vx: (dx / dist) * 9,
-                vy: (dy / dist) * 9,
+                vx: (dx / dist) * config.targetedShotSpeed,
+                vy: (dy / dist) * config.targetedShotSpeed,
                 hp: 1,
                 maxHp: 1,
                 type: 'bullet',

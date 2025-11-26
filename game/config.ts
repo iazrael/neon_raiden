@@ -186,8 +186,124 @@ export const EnemyConfig = {
 };
 
 export const BossConfig = {
-    hpPerLevel: 1500,
-    baseBulletCount: 5,
-    bulletCountPerLevel: 3,
-    scorePerLevel: 5000
+    1: {
+        hp: 1500,
+        speed: 1.0,
+        size: 0.8,
+        bulletCount: 8,
+        bulletSpeed: 4.0,
+        fireRate: 0.03,
+        targetedShotSpeed: 0,
+        hasLaser: false,
+        weaponCount: 1,
+        score: 5000
+    },
+    2: {
+        hp: 3000,
+        speed: 1.2,
+        size: 0.8,
+        bulletCount: 11,
+        bulletSpeed: 4.5,
+        fireRate: 0.04,
+        targetedShotSpeed: 9,
+        hasLaser: false,
+        weaponCount: 1,
+        score: 10000
+    },
+    3: {
+        hp: 4500,
+        speed: 1.4,
+        size: 0.85,
+        bulletCount: 14,
+        bulletSpeed: 5.0,
+        fireRate: 0.045,
+        targetedShotSpeed: 10,
+        hasLaser: false,
+        weaponCount: 1,
+        score: 15000
+    },
+    4: {
+        hp: 6000,
+        speed: 1.6,
+        size: 0.85,
+        bulletCount: 17,
+        bulletSpeed: 5.5,
+        fireRate: 0.05,
+        targetedShotSpeed: 11,
+        hasLaser: false,
+        weaponCount: 1,
+        score: 20000
+    },
+    5: {
+        hp: 7500,
+        speed: 1.8,
+        size: 0.9,
+        bulletCount: 20,
+        bulletSpeed: 6.0,
+        fireRate: 0.055,
+        targetedShotSpeed: 12,
+        hasLaser: false,
+        weaponCount: 1,
+        score: 25000
+    },
+    6: {
+        hp: 9000,
+        speed: 2.0,
+        size: 0.9,
+        bulletCount: 23,
+        bulletSpeed: 6.5,
+        fireRate: 0.06,
+        targetedShotSpeed: 13,
+        hasLaser: true,
+        weaponCount: 2,
+        score: 30000
+    },
+    7: {
+        hp: 10500,
+        speed: 2.2,
+        size: 0.95,
+        bulletCount: 26,
+        bulletSpeed: 7.0,
+        fireRate: 0.065,
+        targetedShotSpeed: 14,
+        hasLaser: true,
+        weaponCount: 2,
+        score: 35000
+    },
+    8: {
+        hp: 12000,
+        speed: 2.4,
+        size: 0.95,
+        bulletCount: 29,
+        bulletSpeed: 7.5,
+        fireRate: 0.07,
+        targetedShotSpeed: 15,
+        hasLaser: true,
+        weaponCount: 2,
+        score: 40000
+    },
+    9: {
+        hp: 13500,
+        speed: 2.6,
+        size: 1.0,
+        bulletCount: 32,
+        bulletSpeed: 8.0,
+        fireRate: 0.075,
+        targetedShotSpeed: 16,
+        hasLaser: true,
+        weaponCount: 3,
+        score: 45000
+    },
+    10: {
+        hp: 15000,
+        speed: 2.8,
+        size: 1.0,
+        bulletCount: 35,
+        bulletSpeed: 8.5,
+        fireRate: 0.08,
+        targetedShotSpeed: 17,
+        hasLaser: true,
+        weaponCount: 3,
+        score: 50000
+    }
 };
