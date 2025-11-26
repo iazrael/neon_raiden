@@ -16,6 +16,7 @@ function App() {
   const [bombs, setBombs] = useState(0);
   const [showLevelTransition, setShowLevelTransition] = useState(false);
   const [levelTransitionTimer, setLevelTransitionTimer] = useState(0);
+  const [maxLevelReached, setMaxLevelReached] = useState(1);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -27,7 +28,8 @@ function App() {
       (newLevel) => setLevel(newLevel),
       (newState) => setGameState(newState),
       (newHp) => setHp(newHp),
-      (newBombs) => setBombs(newBombs)
+      (newBombs) => setBombs(newBombs),
+      (maxLevel) => setMaxLevelReached(maxLevel)
     );
     engineRef.current = engine;
 
@@ -81,6 +83,9 @@ function App() {
         onUseBomb={handleBomb}
         showLevelTransition={showLevelTransition}
         levelTransitionTimer={levelTransitionTimer}
+        maxLevelReached={maxLevelReached}
+        onOpenGallery={() => setGameState(GameState.GALLERY)}
+        onCloseGallery={() => setGameState(GameState.MENU)}
       />
     </div>
   );

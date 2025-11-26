@@ -2,6 +2,7 @@
 import React from 'react';
 import { GameState } from '@/types';
 import { getVersion } from '@/game/version';
+import { Gallery } from './Gallery';
 
 interface GameUIProps {
   state: GameState;
@@ -14,9 +15,17 @@ interface GameUIProps {
   onUseBomb?: () => void;
   showLevelTransition?: boolean;
   levelTransitionTimer?: number;
+  maxLevelReached?: number;
+  onOpenGallery?: () => void;
+  onCloseGallery?: () => void;
 }
 
-export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs = 0, onStart, onRestart, onUseBomb, showLevelTransition = false, levelTransitionTimer = 0 }) => {
+export const GameUI: React.FC<GameUIProps> = ({
+  state, score, level, hp, bombs = 0,
+  onStart, onRestart, onUseBomb,
+  showLevelTransition = false, levelTransitionTimer = 0,
+  maxLevelReached = 1, onOpenGallery, onCloseGallery
+}) => {
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-safe font-mono text-white select-none">
 
@@ -66,7 +75,18 @@ export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs =
           >
             START MISSION
           </button>
+
+          <button
+            onClick={onOpenGallery}
+            className="mt-4 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-none border border-gray-600 shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-transform skew-x-[-10deg] text-sm tracking-widest"
+          >
+            DATABASE
+          </button>
         </div>
+      )}
+
+      {state === GameState.GALLERY && (
+        <Gallery onClose={onCloseGallery!} maxLevelReached={maxLevelReached} />
       )}
 
       {state === GameState.GAME_OVER && (

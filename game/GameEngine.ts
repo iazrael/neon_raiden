@@ -24,6 +24,7 @@ export class GameEngine {
     level: number = 1;
     maxLevels: number = GameConfig.maxLevels;
     levelProgress: number = 0;
+    maxLevelReached: number = 1;
 
     // Entities
     player: Entity;
@@ -62,6 +63,7 @@ export class GameEngine {
     onStateChange: (state: GameState) => void;
     onHpChange: (hp: number) => void;
     onBombChange: (bombs: number) => void;
+    onMaxLevelChange: (level: number) => void;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -69,7 +71,8 @@ export class GameEngine {
         onLevelChange: (l: number) => void,
         onStateChange: (s: GameState) => void,
         onHpChange: (hp: number) => void,
-        onBombChange: (bombs: number) => void
+        onBombChange: (bombs: number) => void,
+        onMaxLevelChange: (level: number) => void
     ) {
         this.canvas = canvas;
         this.onScoreChange = onScoreChange;
@@ -77,6 +80,7 @@ export class GameEngine {
         this.onStateChange = onStateChange;
         this.onHpChange = onHpChange;
         this.onBombChange = onBombChange;
+        this.onMaxLevelChange = onMaxLevelChange;
 
         // Initialize Systems
         this.audio = new AudioSystem();
@@ -110,6 +114,14 @@ export class GameEngine {
         window.addEventListener('resize', () => this.resize());
 
         this.player = this.createPlayer();
+
+        // Load progress
+        const savedMaxLevel = localStorage.getItem('neon_raiden_max_level');
+        if (savedMaxLevel) {
+            this.maxLevelReached = parseInt(savedMaxLevel, 10);
+        }
+        // Notify initial max level
+        setTimeout(() => this.onMaxLevelChange(this.maxLevelReached), 0);
     }
 
     resize() {
@@ -434,6 +446,13 @@ export class GameEngine {
                 this.levelProgress = 0;
                 this.levelStartTime = Date.now(); // Reset level start time for new level
                 this.onLevelChange(this.level);
+
+                if (this.level > this.maxLevelReached) {
+                    this.maxLevelReached = this.level;
+                    localStorage.setItem('neon_raiden_max_level', this.maxLevelReached.toString());
+                    this.onMaxLevelChange(this.maxLevelReached);
+                }
+
                 this.player.hp = PlayerConfig.maxHp;
                 this.shield = PlayerConfig.maxShield;
                 this.onHpChange(this.player.hp);

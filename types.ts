@@ -4,7 +4,8 @@ export enum GameState {
   PLAYING,
   PAUSED,
   GAME_OVER,
-  VICTORY
+  VICTORY,
+  GALLERY
 }
 
 export enum WeaponType {
