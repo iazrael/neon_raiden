@@ -253,7 +253,7 @@ export class SpriteGenerator {
     return canvas;
   }
 
-  // 生成 Boss
+  // 生成 Boss - All redesigned with complex, unique visuals
   generateBoss(level: number): HTMLCanvasElement {
     const size = 160 + (level * 20);
     const { canvas, ctx } = this.createCanvas(size, size);
@@ -261,127 +261,488 @@ export class SpriteGenerator {
     ctx.translate(size / 2, size / 2);
     ctx.rotate(Math.PI);
 
-    // Level 6: Gemini (Twin Ships)
-    if (level === 6) {
-      ctx.fillStyle = '#4299e1';
-      // Ship 1
-      ctx.beginPath(); ctx.moveTo(-40, -40); ctx.lineTo(-20, 40); ctx.lineTo(-60, 40); ctx.fill();
-      // Ship 2
-      ctx.beginPath(); ctx.moveTo(40, -40); ctx.lineTo(60, 40); ctx.lineTo(20, 40); ctx.fill();
-      // Connector
-      ctx.fillStyle = '#2b6cb0';
-      ctx.fillRect(-40, -10, 80, 20);
-      ctx.restore();
-      return canvas;
-    }
-
-    // Level 7: Triangle Fortress
-    if (level === 7) {
-      ctx.fillStyle = '#ed8936';
+    // Level 1: Drone Carrier - Carrier ship with drone bays
+    if (level === 1) {
+      // Main hull
+      ctx.fillStyle = '#1a365d';
       ctx.beginPath();
-      ctx.moveTo(0, -size / 2);
-      ctx.lineTo(size / 2, size / 3);
-      ctx.lineTo(-size / 2, size / 3);
+      ctx.moveTo(-50, -30);
+      ctx.lineTo(50, -30);
+      ctx.lineTo(60, 30);
+      ctx.lineTo(-60, 30);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = '#744210';
-      ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-      return canvas;
-    }
 
-    // Level 8: Spider Mech
-    if (level === 8) {
-      ctx.fillStyle = '#9f7aea';
-      ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#553c9a'; ctx.lineWidth = 8;
-      for (let i = 0; i < 8; i++) {
-        const angle = i * Math.PI / 4;
-        ctx.beginPath(); ctx.moveTo(Math.cos(angle) * 40, Math.sin(angle) * 40);
-        ctx.lineTo(Math.cos(angle) * 80, Math.sin(angle) * 80); ctx.stroke();
-      }
-      ctx.restore();
-      return canvas;
-    }
-
-    // Level 9: Ring Core
-    if (level === 9) {
-      ctx.strokeStyle = '#f56565'; ctx.lineWidth = 20;
-      ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-      return canvas;
-    }
-
-    // Level 10: Final Demon
-    if (level === 10) {
-      ctx.fillStyle = '#000';
-      ctx.beginPath(); ctx.moveTo(0, -80); ctx.lineTo(60, -40); ctx.lineTo(40, 60); ctx.lineTo(0, 80); ctx.lineTo(-40, 60); ctx.lineTo(-60, -40); ctx.fill();
-      ctx.strokeStyle = '#f00'; ctx.lineWidth = 4; ctx.stroke();
-      // Eyes
-      ctx.fillStyle = '#f00';
-      ctx.beginPath(); ctx.arc(-20, -20, 10, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(20, -20, 10, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-      return canvas;
-    }
-
-    // Default (Levels 1-5)
-    const hue = (level * 60) % 360;
-    const primaryColor = `hsl(${hue}, 70%, 30%)`;
-    const secondaryColor = `hsl(${hue}, 100%, 70%)`;
-
-    ctx.fillStyle = primaryColor;
-
-    ctx.beginPath();
-    ctx.moveTo(0, -size / 3);
-    ctx.lineTo(size / 4, 0);
-    ctx.lineTo(0, size / 2.5);
-    ctx.lineTo(-size / 4, 0);
-    ctx.closePath();
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#fff';
-    ctx.stroke();
-
-    const wings = 1 + Math.floor(level / 2);
-    for (let i = 0; i < wings; i++) {
-      const offset = 20 + i * 20;
+      // Armor plating
       ctx.fillStyle = '#2d3748';
+      ctx.fillRect(-40, -20, 80, 40);
 
-      ctx.beginPath();
-      ctx.moveTo(-size / 4, -i * 10);
-      ctx.lineTo(-size / 2 + i * 5, size / 4);
-      ctx.lineTo(-size / 4, size / 3);
-      ctx.fill();
-      ctx.stroke();
+      // Drone bays (glowing)
+      ctx.fillStyle = '#3182ce';
+      for (let i = -1; i <= 1; i++) {
+        ctx.fillRect(i * 25 - 5, -10, 10, 20);
+      }
 
+      // Core
+      ctx.fillStyle = '#63b3ed';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#63b3ed';
       ctx.beginPath();
-      ctx.moveTo(size / 4, -i * 10);
-      ctx.lineTo(size / 2 - i * 5, size / 4);
-      ctx.lineTo(size / 4, size / 3);
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
     }
 
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = secondaryColor;
-    ctx.fillStyle = secondaryColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, 15 + level * 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    const mounts = 2 + level;
-    for (let i = 0; i < mounts; i++) {
-      const angle = (i / mounts) * Math.PI;
-      const r = size / 3;
-      const x = Math.cos(angle) * r;
-      const y = Math.sin(angle) * r * 0.5;
-
+    // Level 2: Assault Cruiser - Military vessel with turrets
+    if (level === 2) {
+      // Main body
+      ctx.fillStyle = '#2d3748';
       ctx.beginPath();
-      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.moveTo(0, -50);
+      ctx.lineTo(40, 0);
+      ctx.lineTo(30, 50);
+      ctx.lineTo(-30, 50);
+      ctx.lineTo(-40, 0);
+      ctx.closePath();
       ctx.fill();
+
+      // Turrets
+      ctx.fillStyle = '#4a5568';
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.arc(i * 30, 0, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Gun barrels
+        ctx.fillStyle = '#718096';
+        ctx.fillRect(i * 30 - 3, 10, 6, 25);
+      }
+
+      // Bridge
+      ctx.fillStyle = '#0bc5ea';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#0bc5ea';
+      ctx.fillRect(-15, -30, 30, 20);
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 3: Heavy Battleship - Armored warship
+    if (level === 3) {
+      // Hull
+      ctx.fillStyle = '#1a202c';
+      ctx.fillRect(-60, -40, 120, 80);
+
+      // Armor layers
+      ctx.fillStyle = '#2d3748';
+      ctx.fillRect(-50, -35, 100, 70);
+      ctx.fillStyle = '#4a5568';
+      ctx.fillRect(-40, -30, 80, 60);
+
+      // Main cannon
+      ctx.fillStyle = '#718096';
+      ctx.fillRect(-8, 20, 16, 50);
+
+      // Side cannons
+      for (let i = -1; i <= 1; i += 2) {
+        ctx.fillRect(i * 40 - 4, 10, 8, 30);
+      }
+
+      // Engine glow
+      ctx.fillStyle = '#f56565';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#f56565';
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.arc(i * 25, -30, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 4: Stealth Fighter - Angular stealth design
+    if (level === 4) {
+      // Stealth body
+      ctx.fillStyle = '#1a202c';
+      ctx.beginPath();
+      ctx.moveTo(0, -60);
+      ctx.lineTo(50, -20);
+      ctx.lineTo(60, 40);
+      ctx.lineTo(0, 50);
+      ctx.lineTo(-60, 40);
+      ctx.lineTo(-50, -20);
+      ctx.closePath();
+      ctx.fill();
+
+      // Angular panels
+      ctx.fillStyle = '#2d3748';
+      ctx.beginPath();
+      ctx.moveTo(0, -50);
+      ctx.lineTo(40, -15);
+      ctx.lineTo(0, 0);
+      ctx.lineTo(-40, -15);
+      ctx.closePath();
+      ctx.fill();
+
+      // Stealth coating highlights
+      ctx.strokeStyle = '#4a5568';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-50, -20);
+      ctx.lineTo(0, -60);
+      ctx.lineTo(50, -20);
+      ctx.stroke();
+
+      // Cockpit
+      ctx.fillStyle = '#0bc5ea';
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = '#0bc5ea';
+      ctx.beginPath();
+      ctx.ellipse(0, -20, 12, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 5: Energy Fortress - Crystalline structure
+    if (level === 5) {
+      // Crystal core
+      ctx.fillStyle = '#805ad5';
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const r = i % 2 === 0 ? 60 : 40;
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Energy layers
+      ctx.fillStyle = '#9f7aea';
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const r = i % 2 === 0 ? 45 : 30;
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Central core
+      ctx.fillStyle = '#d6bcfa';
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = '#d6bcfa';
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Energy nodes
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        ctx.fillStyle = '#e9d8fd';
+        ctx.beginPath();
+        ctx.arc(Math.cos(angle) * 50, Math.sin(angle) * 50, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 6: Gemini Twins - Two interconnected ships with laser cannons
+    if (level === 6) {
+      // Ship 1 (Left)
+      ctx.fillStyle = '#2c5282';
+      ctx.beginPath();
+      ctx.moveTo(-60, -40);
+      ctx.lineTo(-30, -40);
+      ctx.lineTo(-20, 50);
+      ctx.lineTo(-70, 50);
+      ctx.closePath();
+      ctx.fill();
+
+      // Ship 2 (Right)
+      ctx.beginPath();
+      ctx.moveTo(60, -40);
+      ctx.lineTo(30, -40);
+      ctx.lineTo(20, 50);
+      ctx.lineTo(70, 50);
+      ctx.closePath();
+      ctx.fill();
+
+      // Connector bridge
+      ctx.fillStyle = '#1a365d';
+      ctx.fillRect(-40, -15, 80, 30);
+
+      // Laser cannons
+      ctx.fillStyle = '#0bc5ea';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#0bc5ea';
+      for (let i = -1; i <= 1; i += 2) {
+        ctx.fillRect(i * 45 - 3, 20, 6, 35);
+        ctx.beginPath();
+        ctx.arc(i * 45, 15, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // Bridge core
+      ctx.fillStyle = '#63b3ed';
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = '#63b3ed';
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 7: Triangle Fortress - Three-sided fortress with laser arrays
+    if (level === 7) {
+      // Main triangle body
+      ctx.fillStyle = '#c05621';
+      ctx.beginPath();
+      ctx.moveTo(0, -70);
+      ctx.lineTo(70, 50);
+      ctx.lineTo(-70, 50);
+      ctx.closePath();
+      ctx.fill();
+
+      // Inner triangle
+      ctx.fillStyle = '#9c4221';
+      ctx.beginPath();
+      ctx.moveTo(0, -50);
+      ctx.lineTo(50, 35);
+      ctx.lineTo(-50, 35);
+      ctx.closePath();
+      ctx.fill();
+
+      // Laser arrays on each edge
+      ctx.fillStyle = '#f56565';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#f56565';
+      for (let i = 0; i < 3; i++) {
+        const angle = (i / 3) * Math.PI * 2 - Math.PI / 2;
+        const x = Math.cos(angle) * 45;
+        const y = Math.sin(angle) * 45;
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // Central core
+      ctx.fillStyle = '#fed7d7';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#fed7d7';
+      ctx.beginPath();
+      ctx.arc(0, 0, 25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 8: Spider Mech - Mechanical spider with laser legs
+    if (level === 8) {
+      // Central body
+      ctx.fillStyle = '#553c9a';
+      ctx.beginPath();
+      ctx.arc(0, 0, 45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Armor plating
+      ctx.fillStyle = '#6b46c1';
+      ctx.beginPath();
+      ctx.arc(0, 0, 35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Laser legs (8 legs)
+      ctx.strokeStyle = '#9f7aea';
+      ctx.lineWidth = 10;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = '#9f7aea';
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const x1 = Math.cos(angle) * 45;
+        const y1 = Math.sin(angle) * 45;
+        const x2 = Math.cos(angle) * 90;
+        const y2 = Math.sin(angle) * 90;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // Leg joints
+        ctx.fillStyle = '#d6bcfa';
+        ctx.beginPath();
+        ctx.arc(x2, y2, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // Core eye
+      ctx.fillStyle = '#f56565';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#f56565';
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 9: Ring Core - Rotating ring structure with laser emitters
+    if (level === 9) {
+      // Outer ring
+      ctx.strokeStyle = '#c53030';
+      ctx.lineWidth = 25;
+      ctx.beginPath();
+      ctx.arc(0, 0, 70, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Middle ring
+      ctx.strokeStyle = '#e53e3e';
+      ctx.lineWidth = 18;
+      ctx.beginPath();
+      ctx.arc(0, 0, 70, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Laser emitters around ring
+      ctx.fillStyle = '#0bc5ea';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#0bc5ea';
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x = Math.cos(angle) * 70;
+        const y = Math.sin(angle) * 70;
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // Central core
+      ctx.fillStyle = '#fff';
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = '#fff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 30, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner core detail
+      ctx.fillStyle = '#feb2b2';
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // Level 10: Final Demon - Demonic mechanical form with multiple laser systems
+    if (level === 10) {
+      // Main demon body
+      ctx.fillStyle = '#1a202c';
+      ctx.beginPath();
+      ctx.moveTo(0, -90);
+      ctx.lineTo(70, -50);
+      ctx.lineTo(50, 70);
+      ctx.lineTo(0, 90);
+      ctx.lineTo(-50, 70);
+      ctx.lineTo(-70, -50);
+      ctx.closePath();
+      ctx.fill();
+
+      // Demon armor
+      ctx.strokeStyle = '#742a2a';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      // Inner body
+      ctx.fillStyle = '#2d3748';
+      ctx.beginPath();
+      ctx.moveTo(0, -70);
+      ctx.lineTo(50, -35);
+      ctx.lineTo(35, 50);
+      ctx.lineTo(0, 70);
+      ctx.lineTo(-35, 50);
+      ctx.lineTo(-50, -35);
+      ctx.closePath();
+      ctx.fill();
+
+      // Demon eyes (laser emitters)
+      ctx.fillStyle = '#f56565';
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = '#f56565';
+      ctx.beginPath();
+      ctx.arc(-25, -30, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(25, -30, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Laser weapon mounts
+      ctx.fillStyle = '#0bc5ea';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#0bc5ea';
+      for (let i = -1; i <= 1; i += 2) {
+        ctx.fillRect(i * 55 - 4, 0, 8, 40);
+        ctx.beginPath();
+        ctx.arc(i * 55, -5, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // Central core
+      ctx.fillStyle = '#9f1239';
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = '#9f1239';
+      ctx.beginPath();
+      ctx.arc(0, 0, 25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Demon horns
+      ctx.fillStyle = '#742a2a';
+      ctx.beginPath();
+      ctx.moveTo(-40, -70);
+      ctx.lineTo(-50, -90);
+      ctx.lineTo(-35, -75);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(40, -70);
+      ctx.lineTo(50, -90);
+      ctx.lineTo(35, -75);
+      ctx.fill();
+
+      ctx.restore();
+      return canvas;
     }
 
     ctx.restore();

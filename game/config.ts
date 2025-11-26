@@ -196,7 +196,15 @@ export const BossConfig = {
         targetedShotSpeed: 0,
         hasLaser: false,
         weaponCount: 1,
-        score: 5000
+        score: 5000,
+        weapons: ['radial'],
+        movementPattern: 'sine',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'none',
+        laserDamage: 0,
+        laserCooldown: 0
     },
     2: {
         hp: 3000,
@@ -208,7 +216,15 @@ export const BossConfig = {
         targetedShotSpeed: 9,
         hasLaser: false,
         weaponCount: 1,
-        score: 10000
+        score: 10000,
+        weapons: ['radial', 'targeted'],
+        movementPattern: 'sine',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'none',
+        laserDamage: 0,
+        laserCooldown: 0
     },
     3: {
         hp: 4500,
@@ -220,7 +236,15 @@ export const BossConfig = {
         targetedShotSpeed: 10,
         hasLaser: false,
         weaponCount: 1,
-        score: 15000
+        score: 15000,
+        weapons: ['radial', 'targeted'],
+        movementPattern: 'figure8',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'none',
+        laserDamage: 0,
+        laserCooldown: 0
     },
     4: {
         hp: 6000,
@@ -232,7 +256,15 @@ export const BossConfig = {
         targetedShotSpeed: 11,
         hasLaser: false,
         weaponCount: 1,
-        score: 20000
+        score: 20000,
+        weapons: ['radial', 'targeted'],
+        movementPattern: 'figure8',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'none',
+        laserDamage: 0,
+        laserCooldown: 0
     },
     5: {
         hp: 7500,
@@ -244,7 +276,15 @@ export const BossConfig = {
         targetedShotSpeed: 12,
         hasLaser: false,
         weaponCount: 1,
-        score: 25000
+        score: 25000,
+        weapons: ['radial', 'targeted'],
+        movementPattern: 'figure8',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'none',
+        laserDamage: 0,
+        laserCooldown: 0
     },
     6: {
         hp: 9000,
@@ -256,7 +296,15 @@ export const BossConfig = {
         targetedShotSpeed: 13,
         hasLaser: true,
         weaponCount: 2,
-        score: 30000
+        score: 30000,
+        weapons: ['radial', 'targeted', 'laser'],
+        movementPattern: 'tracking',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'continuous',
+        laserDamage: 30,
+        laserCooldown: 3000
     },
     7: {
         hp: 10500,
@@ -268,7 +316,15 @@ export const BossConfig = {
         targetedShotSpeed: 14,
         hasLaser: true,
         weaponCount: 2,
-        score: 35000
+        score: 35000,
+        weapons: ['radial', 'targeted', 'laser'],
+        movementPattern: 'tracking',
+        spawnX: 'random',
+        wingmenCount: 0,
+        wingmenType: 0,
+        laserType: 'continuous',
+        laserDamage: 35,
+        laserCooldown: 2800
     },
     8: {
         hp: 12000,
@@ -280,7 +336,15 @@ export const BossConfig = {
         targetedShotSpeed: 15,
         hasLaser: true,
         weaponCount: 2,
-        score: 40000
+        score: 40000,
+        weapons: ['radial', 'targeted', 'laser', 'spread'],
+        movementPattern: 'aggressive',
+        spawnX: 'random',
+        wingmenCount: 1,
+        wingmenType: 5,
+        laserType: 'pulsed',
+        laserDamage: 40,
+        laserCooldown: 2500
     },
     9: {
         hp: 13500,
@@ -292,7 +356,15 @@ export const BossConfig = {
         targetedShotSpeed: 16,
         hasLaser: true,
         weaponCount: 3,
-        score: 45000
+        score: 45000,
+        weapons: ['radial', 'targeted', 'laser', 'spread', 'homing'],
+        movementPattern: 'aggressive',
+        spawnX: 'random',
+        wingmenCount: 2,
+        wingmenType: 5,
+        laserType: 'pulsed',
+        laserDamage: 45,
+        laserCooldown: 2200
     },
     10: {
         hp: 15000,
@@ -304,6 +376,14 @@ export const BossConfig = {
         targetedShotSpeed: 17,
         hasLaser: true,
         weaponCount: 3,
-        score: 50000
+        score: 50000,
+        weapons: ['radial', 'targeted', 'laser', 'spread', 'homing'],
+        movementPattern: 'aggressive',
+        spawnX: 'random',
+        wingmenCount: 2,
+        wingmenType: 6,
+        laserType: 'pulsed',
+        laserDamage: 50,
+        laserCooldown: 2000
     }
 };

@@ -19,8 +19,8 @@ export class RenderSystem {
         this.sprites['player'] = this.spriteGen.generatePlayer();
         this.sprites['option'] = this.spriteGen.generateOption();
 
-        // Enemies (Types 0-4)
-        for (let i = 0; i <= 4; i++) {
+        // Enemies (Types 0-6)
+        for (let i = 0; i <= 6; i++) {
             this.sprites[`enemy_${i}`] = this.spriteGen.generateEnemy(i);
         }
 
@@ -31,17 +31,17 @@ export class RenderSystem {
         this.sprites['bullet_wave'] = this.spriteGen.generateBullet('wave');
         this.sprites['bullet_plasma'] = this.spriteGen.generateBullet('plasma');
         this.sprites['bullet_enemy'] = this.spriteGen.generateBullet('enemy_orb');
-        this.sprites['bullet_tesla'] = this.spriteGen.generateBullet('laser'); // Reuse/Placeholder
-        this.sprites['bullet_magma'] = this.spriteGen.generateBullet('vulcan'); // Reuse/Placeholder
-        this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet('missile'); // Reuse/Placeholder
+        this.sprites['bullet_tesla'] = this.spriteGen.generateBullet('tesla');
+        this.sprites['bullet_magma'] = this.spriteGen.generateBullet('magma');
+        this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet('shuriken');
 
-        // Powerups (Types 0-7)
-        for (let i = 0; i <= 10; i++) { // Extended to 10
+        // Powerups (Types 0-10)
+        for (let i = 0; i <= 10; i++) {
             this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
         }
 
-        // Bosses
-        for (let i = 1; i <= 5; i++) {
+        // Bosses (Levels 1-10)
+        for (let i = 1; i <= 10; i++) {
             this.sprites[`boss_${i}`] = this.spriteGen.generateBoss(i);
         }
     }
@@ -63,6 +63,7 @@ export class RenderSystem {
         options: Entity[],
         enemies: Entity[],
         boss: Entity | null,
+        bossWingmen: Entity[],
         bullets: Entity[],
         enemyBullets: Entity[],
         particles: Particle[],
@@ -140,6 +141,7 @@ export class RenderSystem {
         powerups.forEach(p => this.drawEntity(p));
         enemies.forEach(e => this.drawEntity(e));
         if (boss) this.drawEntity(boss);
+        bossWingmen.forEach(w => this.drawEntity(w));
         bullets.forEach(b => this.drawEntity(b));
         enemyBullets.forEach(b => this.drawEntity(b));
 

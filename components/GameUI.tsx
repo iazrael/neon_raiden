@@ -11,9 +11,11 @@ interface GameUIProps {
   onStart: () => void;
   onRestart: () => void;
   onUseBomb?: () => void;
+  showLevelTransition?: boolean;
+  levelTransitionTimer?: number;
 }
 
-export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs = 0, onStart, onRestart, onUseBomb }) => {
+export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs = 0, onStart, onRestart, onUseBomb, showLevelTransition = false, levelTransitionTimer = 0 }) => {
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 font-mono text-white select-none">
 
@@ -90,6 +92,21 @@ export const GameUI: React.FC<GameUIProps> = ({ state, score, level, hp, bombs =
           >
             Play Again
           </button>
+        </div>
+      )}
+
+      {/* Level Transition Overlay */}
+      {showLevelTransition && (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 backdrop-blur-sm"
+          style={{
+            opacity: levelTransitionTimer < 500 ? levelTransitionTimer / 500 :
+              levelTransitionTimer > 2500 ? (3000 - levelTransitionTimer) / 500 : 1
+          }}
+        >
+          <div className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-300 via-cyan-400 to-blue-600 tracking-wider drop-shadow-[0_0_30px_rgba(6,182,212,0.9)] animate-pulse">
+            STAGE {level}
+          </div>
         </div>
       )}
 

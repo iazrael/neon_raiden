@@ -36,6 +36,7 @@ export class GameEngine {
     powerups: Entity[] = [];
     meteors: { x: number, y: number, length: number, vx: number, vy: number }[] = [];
     boss: Entity | null = null;
+    bossWingmen: Entity[] = [];
 
     // Player Stats
     weaponType: WeaponType = WeaponType.VULCAN;
@@ -48,6 +49,11 @@ export class GameEngine {
     fireTimer: number = 0;
     meteorTimer: number = 0;
     screenShake: number = 0;
+    bossTransitionTimer: number = 0;
+
+    // Level transition
+    showLevelTransition: boolean = false;
+    levelTransitionTimer: number = 0;
 
     // Callbacks
     onScoreChange: (score: number) => void;
@@ -152,8 +158,12 @@ export class GameEngine {
         this.powerups = [];
         this.meteors = [];
         this.boss = null;
+        this.bossWingmen = [];
         this.levelProgress = 0;
         this.screenShake = 0;
+        this.showLevelTransition = false;
+        this.levelTransitionTimer = 0;
+        this.bossTransitionTimer = 0;
         this.audio.resume();
 
         this.onStateChange(this.state);
@@ -197,6 +207,15 @@ export class GameEngine {
             if (this.screenShake < 0.5) this.screenShake = 0;
         }
 
+        // Level transition UI
+        if (this.showLevelTransition) {
+            this.levelTransitionTimer += dt;
+            if (this.levelTransitionTimer > 3000) {
+                this.showLevelTransition = false;
+                this.levelTransitionTimer = 0;
+            }
+        }
+
         // Player Movement
         const speed = PlayerConfig.speed * timeScale;
         const kb = this.input.getKeyboardVector();
@@ -217,21 +236,6 @@ export class GameEngine {
         } else if (!this.input.touch.active) {
             this.player.vx *= 0.8;
         }
-
-        // Touch Logic (Re-implemented here using InputSystem state if possible, or just hack it)
-        // Since I moved the listener to InputSystem, I need to get the delta.
-        // I'll assume InputSystem is "dumb" and just holds state.
-        // But `touchmove` event is where delta happens.
-        // I'll add a hack: direct access to `input.touch` isn't enough for delta.
-        // I'll just use the `input` instance to add a listener? No.
-        // I'll just use the `input.touch` position to move player towards it? No, that's absolute.
-        // Original was relative.
-        // I'll leave touch for a moment and focus on the rest.
-        // (Self-correction: I should have designed InputSystem to return delta. I'll fix InputSystem in a follow up if needed.
-        // For now, I'll assume I can access `input.touch` and if I need delta I'm stuck.
-        // Actually, `InputSystem` as I wrote it doesn't expose delta.
-        // I'll add `touchDelta` to `InputSystem` in a quick edit later.
-        // For now, I'll proceed with `GameEngine` and assume `input.getTouchDelta()` exists and I'll add it.)
 
         // Boundary
         this.player.x = Math.max(32, Math.min(this.render.width - 32, this.player.x));
@@ -262,26 +266,35 @@ export class GameEngine {
         if (!this.boss) {
             this.levelProgress += 0.05 * timeScale;
             this.enemySpawnTimer += dt;
-            // Spawn Rate from Config?
-            // Config has baseSpawnRate etc.
-            // let's use a formula similar to original but using config values
-            // Original: max(300, 1500 - level * 200)
-            // Config: baseSpawnRate: 1500, reduction: 200
-            // I'll use that.
-            // But I need to import EnemyConfig or just let EnemySystem handle it?
-            // EnemySystem.spawnEnemy takes level.
-            // I'll handle timer here.
             const spawnRate = Math.max(300, 1500 - (this.level * 200));
             if (this.enemySpawnTimer > spawnRate) {
                 this.enemySys.spawnEnemy(this.level, this.enemies);
                 this.enemySpawnTimer = 0;
             }
 
-            if (this.levelProgress >= 100) {
+            // Spawn boss at 80% progress
+            if (this.levelProgress >= 80) {
                 this.spawnBoss();
             }
         } else {
+            // Continue spawning enemies for a short time after boss appears
+            if (this.bossTransitionTimer < 10000) {
+                this.bossTransitionTimer += dt;
+                this.enemySpawnTimer += dt;
+                const spawnRate = Math.max(800, 2000 - (this.level * 150));
+                if (this.enemySpawnTimer > spawnRate) {
+                    this.enemySys.spawnEnemy(this.level, this.enemies);
+                    this.enemySpawnTimer = 0;
+                }
+            }
+
             this.bossSys.update(this.boss, dt, timeScale, this.player, this.enemyBullets, this.level);
+
+            // Update wingmen
+            this.bossWingmen.forEach(wingman => {
+                wingman.x = this.boss!.x + (wingman.x - this.boss!.x) * 0.95;
+                wingman.y = this.boss!.y + 80;
+            });
         }
 
         // Meteors
@@ -298,7 +311,39 @@ export class GameEngine {
 
         // Updates
         this.updateEntities(this.bullets, timeScale, dt);
-        this.updateEntities(this.enemyBullets, timeScale, dt);
+
+        // Update enemy bullets with homing logic
+        this.enemyBullets.forEach(b => {
+            b.x += b.vx * timeScale;
+            b.y += b.vy * timeScale;
+
+            // Homing missile AI
+            if (b.state === 1) {
+                const dx = this.player.x - b.x;
+                const dy = this.player.y - b.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > 0) {
+                    const turnSpeed = 0.1;
+                    b.vx += (dx / dist) * turnSpeed;
+                    b.vy += (dy / dist) * turnSpeed;
+                    const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                    const maxSpeed = 6;
+                    if (speed > maxSpeed) {
+                        b.vx = (b.vx / speed) * maxSpeed;
+                        b.vy = (b.vy / speed) * maxSpeed;
+                    }
+                }
+            }
+
+            // Laser timer countdown
+            if (b.timer !== undefined) {
+                b.timer -= dt;
+                if (b.timer <= 0) {
+                    b.markedForDeletion = true;
+                }
+            }
+        });
+
         this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
         this.updateEntities(this.powerups, timeScale, dt);
 
@@ -323,6 +368,7 @@ export class GameEngine {
         this.bullets = this.bullets.filter(e => !e.markedForDeletion && e.y > -100);
         this.enemyBullets = this.enemyBullets.filter(e => !e.markedForDeletion && e.y < this.render.height + 50 && e.x > -50 && e.x < this.render.width + 50);
         this.enemies = this.enemies.filter(e => !e.markedForDeletion && e.y < this.render.height + 100);
+        this.bossWingmen = this.bossWingmen.filter(e => !e.markedForDeletion);
         this.powerups = this.powerups.filter(e => !e.markedForDeletion && e.y < this.render.height + 50);
 
         if (this.player.hp <= 0) {
@@ -336,11 +382,19 @@ export class GameEngine {
 
     spawnBoss() {
         this.boss = this.bossSys.spawn(this.level, this.render.sprites);
+        this.bossWingmen = this.bossSys.spawnWingmen(this.level, this.boss, this.render.sprites);
         this.screenShake = 20;
+        this.bossTransitionTimer = 0;
     }
 
     damageBoss(amount: number) {
         if (!this.boss) return;
+
+        // Boss can only take damage if all wingmen are destroyed
+        if (this.bossWingmen.length > 0) {
+            return;
+        }
+
         this.boss.hp -= amount;
         if (this.boss.hp <= 0 && !this.boss.markedForDeletion) {
             this.killBoss();
@@ -366,6 +420,7 @@ export class GameEngine {
         this.score += 5000 * this.level;
         this.onScoreChange(this.score);
         this.boss = null;
+        this.bossWingmen = [];
 
         setTimeout(() => {
             if (this.level < this.maxLevels) {
@@ -375,6 +430,10 @@ export class GameEngine {
                 this.player.hp = PlayerConfig.maxHp;
                 this.shield = PlayerConfig.maxShield;
                 this.onHpChange(this.player.hp);
+
+                // Show level transition UI
+                this.showLevelTransition = true;
+                this.levelTransitionTimer = 0;
             } else {
                 this.audio.playVictory();
                 this.state = GameState.VICTORY;
@@ -420,13 +479,21 @@ export class GameEngine {
                     this.handleBulletHit(b, e);
                 }
             });
+
+            // Bullets vs Wingmen
+            this.bossWingmen.forEach(wingman => {
+                if (this.isColliding(b, wingman)) {
+                    this.handleBulletHit(b, wingman);
+                }
+            });
+
             if (this.boss && this.isColliding(b, this.boss)) {
                 this.handleBulletHit(b, this.boss);
             }
         });
 
         // Enemy Stuff vs Player
-        [...this.enemyBullets, ...this.enemies].forEach(e => {
+        [...this.enemyBullets, ...this.enemies, ...this.bossWingmen].forEach(e => {
             if (this.isColliding(e, this.player)) {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
@@ -596,6 +663,7 @@ export class GameEngine {
             this.options,
             this.enemies,
             this.boss,
+            this.bossWingmen,
             this.bullets,
             this.enemyBullets,
             this.particles,
