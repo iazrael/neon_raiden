@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WeaponType } from '@/types';
-import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, ASSETS_BASE_PATH } from '@/game/config';
+import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, PlayerConfig, ASSETS_BASE_PATH } from '@/game/config';
 
 interface GalleryProps {
     onClose: () => void;
@@ -66,7 +66,11 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
 
     // Data Sources
     const fighters = [
-        { name: 'Neon Raiden', description: 'Advanced prototype fighter with adaptable weapon systems.', stats: { hp: 100, speed: 'High' } }
+        {
+            name: 'Neon Raiden',
+            description: 'Advanced prototype fighter with adaptable weapon systems.',
+            config: PlayerConfig
+        }
     ];
 
     const weapons = Object.entries(WeaponConfig).map(([type, config]) => ({
@@ -358,29 +362,147 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                             ))}
                                             {selectedItem.config && (
                                                 <>
-                                                    {selectedItem.config.baseDamage && (
-                                                        <div className="flex justify-between border-b border-gray-800 py-2">
-                                                            <span className="text-gray-500 text-xs">DAMAGE</span>
-                                                            <span className="text-gray-300 font-semibold">{selectedItem.config.baseDamage}</span>
-                                                        </div>
+                                                    {/* Fighter Stats */}
+                                                    {activeTab === 'FIGHTERS' && selectedItem.config && (
+                                                        <>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">INITIAL HP</span>
+                                                                <span className="text-cyan-300 font-semibold">{selectedItem.config.initialHp}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">MAX HP</span>
+                                                                <span className="text-cyan-300 font-semibold">{selectedItem.config.maxHp}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SPEED</span>
+                                                                <span className="text-green-300 font-semibold">{selectedItem.config.speed}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">INITIAL BOMBS</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.initialBombs}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">MAX BOMBS</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.maxBombs}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">MAX SHIELD</span>
+                                                                <span className="text-blue-300 font-semibold">{selectedItem.config.maxShield}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">WIDTH</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.width}px</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">HEIGHT</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.height}px</span>
+                                                            </div>
+                                                        </>
                                                     )}
-                                                    {selectedItem.config.baseHp && (
-                                                        <div className="flex justify-between border-b border-gray-800 py-2">
-                                                            <span className="text-gray-500 text-xs">HP</span>
-                                                            <span className="text-gray-300 font-semibold">{selectedItem.config.baseHp}</span>
-                                                        </div>
+                                                    {/* Weapon Stats */}
+                                                    {activeTab === 'ARMORY' && (
+                                                        <>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">BASE DMG</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.baseDamage}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">DMG/LV</span>
+                                                                <span className="text-yellow-300 font-semibold">+{selectedItem.config.damagePerLevel}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">BULLET SPD</span>
+                                                                <span className="text-cyan-300 font-semibold">{selectedItem.config.speed}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">FIRE RATE</span>
+                                                                <span className="text-cyan-300 font-semibold">{selectedItem.config.baseFireRate}ms</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">RATE/LV</span>
+                                                                <span className="text-cyan-300 font-semibold">-{selectedItem.config.ratePerLevel}ms</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SIZE</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.width}×{selectedItem.config.height}</span>
+                                                            </div>
+                                                        </>
                                                     )}
-                                                    {selectedItem.config.hp && (
-                                                        <div className="flex justify-between border-b border-gray-800 py-2">
-                                                            <span className="text-gray-500 text-xs">HP</span>
-                                                            <span className="text-gray-300 font-semibold">{selectedItem.config.hp}</span>
-                                                        </div>
+                                                    {/* Enemy Stats */}
+                                                    {activeTab === 'BESTIARY' && (
+                                                        <>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">BASE HP</span>
+                                                                <span className="text-red-300 font-semibold">{selectedItem.config.baseHp}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">HP/LV</span>
+                                                                <span className="text-red-300 font-semibold">+{selectedItem.config.hpPerLevel}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">BASE SPD</span>
+                                                                <span className="text-cyan-300 font-semibold">{selectedItem.config.baseSpeed}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SPD/LV</span>
+                                                                <span className="text-cyan-300 font-semibold">+{selectedItem.config.speedPerLevel}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SIZE</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.width}×{selectedItem.config.height}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SCORE</span>
+                                                                <span className="text-green-300 font-semibold">{selectedItem.config.score}</span>
+                                                            </div>
+                                                        </>
                                                     )}
-                                                    {selectedItem.config.speed && (
-                                                        <div className="flex justify-between border-b border-gray-800 py-2">
-                                                            <span className="text-gray-500 text-xs">SPEED</span>
-                                                            <span className="text-gray-300 font-semibold">{selectedItem.config.speed}</span>
-                                                        </div>
+                                                    {/* Boss Stats */}
+                                                    {activeTab === 'BOSSES' && (
+                                                        <>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">HP</span>
+                                                                <span className="text-purple-300 font-semibold">{selectedItem.config.hp}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SPEED</span>
+                                                                <span className="text-cyan-300 font-semibold">{selectedItem.config.speed}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">BULLET CNT</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.bulletCount}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">BULLET SPD</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.bulletSpeed}</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">FIRE RATE</span>
+                                                                <span className="text-yellow-300 font-semibold">{(selectedItem.config.fireRate * 100).toFixed(1)}%</span>
+                                                            </div>
+                                                            <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                <span className="text-gray-500 text-xs">SCORE</span>
+                                                                <span className="text-green-300 font-semibold">{selectedItem.config.score}</span>
+                                                            </div>
+                                                            {selectedItem.config.hasLaser && (
+                                                                <>
+                                                                    <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                        <span className="text-gray-500 text-xs">LASER DMG</span>
+                                                                        <span className="text-red-300 font-semibold">{selectedItem.config.laserDamage}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                        <span className="text-gray-500 text-xs">LASER CD</span>
+                                                                        <span className="text-red-300 font-semibold">{selectedItem.config.laserCooldown}ms</span>
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                            {selectedItem.config.wingmenCount > 0 && (
+                                                                <div className="flex justify-between border-b border-gray-800 py-2">
+                                                                    <span className="text-gray-500 text-xs">WINGMEN</span>
+                                                                    <span className="text-blue-300 font-semibold">{selectedItem.config.wingmenCount}</span>
+                                                                </div>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </>
                                             )}

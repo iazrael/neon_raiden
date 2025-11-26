@@ -90,7 +90,7 @@ export const PlayerConfig = {
     initialHp: 100,     // 初始生命值
     maxHp: 100,         // 最大生命值
     initialBombs: 3,    // 初始炸弹数量
-    maxBombs: 6,        // 最大炸弹数量
+    maxBombs: 9,        // 最大炸弹数量
     maxShield: 50,      // 最大护盾值
     color: '#00ffff',   // 显示颜色（青色）
     hitboxShrink: 0,    // 碰撞箱缩小（预留功能）
