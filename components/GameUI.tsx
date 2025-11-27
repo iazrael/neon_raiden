@@ -39,6 +39,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   onBackToMenu,
 }) => {
   const bombButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [showExitDialog, setShowExitDialog] = React.useState(false);
 
   const handleBombClick = () => {
     if (bombButtonRef.current && onUseBomb) {
@@ -81,16 +82,14 @@ export const GameUI: React.FC<GameUIProps> = ({
         </div>
       </div>
 
+
       {/* Exit Button (Top Right, below HUD) */}
       {state === GameState.PLAYING && (
         <div className="absolute top-[max(4rem,calc(env(safe-area-inset-top)+3rem))] right-4 pointer-events-auto z-30">
           <button
             onClick={() => {
               playClick?.('cancel');
-              // Confirm exit? For now direct exit as requested "Exit button"
-              if (confirm("Abort mission and return to base?")) {
-                onBackToMenu?.();
-              }
+              setShowExitDialog(true);
             }}
             className="w-10 h-10 rounded-full border border-gray-600 bg-gray-900/50 text-gray-400 hover:text-white hover:bg-red-900/50 hover:border-red-500 flex items-center justify-center transition-all backdrop-blur-sm"
             title="Abort Mission"
@@ -98,6 +97,47 @@ export const GameUI: React.FC<GameUIProps> = ({
             <span className="text-xl">✕</span>
           </button>
         </div>
+      )}
+
+      {/* Exit Confirmation Dialog */}
+      {showExitDialog && state === GameState.PLAYING && (
+        <>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40 pointer-events-auto" onClick={() => setShowExitDialog(false)} />
+
+          {/* Dialog */}
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="bg-gradient-to-b from-gray-900 to-black border-2 border-red-500/50 rounded-lg p-6 max-w-sm mx-4 shadow-[0_0_30px_rgba(239,68,68,0.5)] pointer-events-auto animate-[scale-in_0.2s_ease-out]">
+              <div className="text-center">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h3 className="text-xl font-bold text-red-400 mb-2 tracking-wider">ABORT MISSION?</h3>
+                <p className="text-gray-400 text-sm mb-6">All progress will be lost. Return to base?</p>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      playClick?.('cancel');
+                      setShowExitDialog(false);
+                    }}
+                    className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded border border-gray-600 transition-all active:scale-95"
+                  >
+                    CONTINUE
+                  </button>
+                  <button
+                    onClick={() => {
+                      playClick?.('confirm');
+                      setShowExitDialog(false);
+                      onBackToMenu?.();
+                    }}
+                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded border border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95"
+                  >
+                    ABORT
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Bomb Button (Bottom Right) */}

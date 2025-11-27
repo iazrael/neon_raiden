@@ -19,6 +19,7 @@ function App() {
   const [showLevelTransition, setShowLevelTransition] = useState(false);
   const [levelTransitionTimer, setLevelTransitionTimer] = useState(0);
   const [maxLevelReached, setMaxLevelReached] = useState(1);
+  const [stateBeforeGallery, setStateBeforeGallery] = useState<GameState>(GameState.MENU);
 
   useEffect(() => {
     // Preload assets
@@ -94,13 +95,23 @@ function App() {
         levelTransitionTimer={levelTransitionTimer}
         maxLevelReached={maxLevelReached}
         onOpenGallery={() => {
+          setStateBeforeGallery(gameState);
+          if (gameState === GameState.PLAYING) {
+            engineRef.current?.pause();
+          }
           setGameState(GameState.GALLERY);
         }}
         onCloseGallery={() => {
-          setGameState(GameState.MENU);
+          if (stateBeforeGallery === GameState.PLAYING) {
+            engineRef.current?.resume();
+          }
+          setGameState(stateBeforeGallery);
         }}
         playClick={playClick}
         onBackToMenu={() => {
+          if (gameState === GameState.PLAYING) {
+            engineRef.current?.resume(); // Resume if paused
+          }
           setGameState(GameState.MENU);
         }}
       />

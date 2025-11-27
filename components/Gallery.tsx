@@ -290,7 +290,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
     };
 
     return (
-        <div className="absolute inset-0 z-50 bg-black/95 text-white flex flex-col font-mono backdrop-blur-xl pointer-events-auto">
+        <div className="absolute inset-0 z-50 bg-black/95 text-white flex flex-col font-mono backdrop-blur-xl pointer-events-auto pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
             {/* Header */}
             <div className="p-3 sm:p-4 border-b border-gray-800 flex justify-between items-center bg-black/50 flex-shrink-0">
                 <h2 className="text-lg sm:text-2xl font-bold text-cyan-400 tracking-widest flex items-center gap-1 sm:gap-2 flex-1 min-w-0">

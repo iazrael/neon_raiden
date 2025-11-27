@@ -44,6 +44,12 @@ export class AudioSystem {
     }
   }
 
+  pause() {
+    if (this.ctx && this.ctx.state === 'running') {
+      this.ctx.suspend().catch(e => console.warn("Audio pause failed", e));
+    }
+  }
+
   playClick(type: 'default' | 'confirm' | 'cancel' | 'menu' = 'default') {
     if (!this.ctx || !this.masterGain) return;
     const osc = this.ctx.createOscillator();
@@ -59,7 +65,7 @@ export class AudioSystem {
       osc.frequency.setValueAtTime(800, now);
       osc.frequency.exponentialRampToValueAtTime(1600, now + 0.1);
 
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.3, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
 
       osc.start(now);
@@ -70,7 +76,7 @@ export class AudioSystem {
       osc.frequency.setValueAtTime(600, now);
       osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
 
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.3, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
 
       osc.start(now);
@@ -80,7 +86,7 @@ export class AudioSystem {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(1000, now);
 
-      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.setValueAtTime(0.15, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
 
       osc.start(now);
@@ -91,7 +97,7 @@ export class AudioSystem {
       osc.frequency.setValueAtTime(800, now);
       osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
 
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.3, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
 
       osc.start(now);

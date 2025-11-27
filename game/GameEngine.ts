@@ -222,6 +222,22 @@ export class GameEngine {
         }
     }
 
+    pause() {
+        if (this.state === GameState.PLAYING) {
+            this.state = GameState.PAUSED;
+            // Suspend audio context to stop all sounds
+            this.audio.pause();
+        }
+    }
+
+    resume() {
+        if (this.state === GameState.PAUSED) {
+            this.state = GameState.PLAYING;
+            // Resume audio context
+            this.audio.resume();
+        }
+    }
+
     update(dt: number) {
         if (this.state !== GameState.PLAYING) return;
 
