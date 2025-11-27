@@ -49,12 +49,12 @@ export class BossSystem {
 
         // Apply hitbox scaling for more precise collision detection
         const hitboxScale = config.hitboxScale || 1.0;
-
+        console.log(`Boss hitbox scale: ${config.size.width}x${config.size.height}`);
         return {
             x: spawnX,
             y: -150,
-            width: width * config.size * hitboxScale,
-            height: height * config.size * hitboxScale,
+            width: width * config.size.width * hitboxScale,
+            height: height * config.size.height * hitboxScale,
             vx: 0,
             vy: config.speed,
             hp: hp,
