@@ -1,13 +1,10 @@
 // Service Worker缓存配置
-// CACHE_NAME会在Vite构建时根据package.json中的版本号自动注入
+// CACHE_NAME和ASSETS_TO_CACHE会在Vite构建时自动注入
+// CACHE_NAME: 基于版本号和文件内容哈希生成，确保文件变更时缓存更新
+// ASSETS_TO_CACHE: 自动扫描public目录下的所有文件
 const CACHE_NAME = '__APP_CACHE_NAME__';
-const ASSETS_TO_CACHE = [
-    './',
-    './index.html',
-    './favicon.svg',
-    './logo.svg',
-    './manifest.json',
-];
+const ASSETS_TO_CACHE = __ASSETS_TO_CACHE__;
+
 
 // 安装Service Worker
 // 当CACHE_NAME版本号更新时，会自动建立新缓存
