@@ -109,11 +109,11 @@ function App() {
         }}
         playClick={playClick}
         onBackToMenu={() => {
-          if (gameState === GameState.PLAYING) {
-            engineRef.current?.resume(); // Resume if paused
-          }
+          engineRef.current?.stop();
           setGameState(GameState.MENU);
         }}
+        onPause={() => engineRef.current?.pause()}
+        onResume={() => engineRef.current?.resume()}
       />
     </div>
   );

@@ -19,6 +19,8 @@ interface GameUIProps {
   onCloseGallery?: () => void;
   playClick?: (type?: 'default' | 'confirm' | 'cancel' | 'menu') => void;
   onBackToMenu?: () => void;
+  onPause?: () => void;
+  onResume?: () => void;
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -37,6 +39,8 @@ export const GameUI: React.FC<GameUIProps> = ({
   onCloseGallery,
   playClick,
   onBackToMenu,
+  onPause,
+  onResume,
 }) => {
   const bombButtonRef = React.useRef<HTMLButtonElement>(null);
   const [showExitDialog, setShowExitDialog] = React.useState(false);
@@ -89,6 +93,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           <button
             onClick={() => {
               playClick?.('cancel');
+              onPause?.();
               setShowExitDialog(true);
             }}
             className="w-10 h-10 rounded-full border border-gray-600 bg-gray-900/50 text-gray-400 hover:text-white hover:bg-red-900/50 hover:border-red-500 flex items-center justify-center transition-all backdrop-blur-sm"
@@ -103,7 +108,10 @@ export const GameUI: React.FC<GameUIProps> = ({
       {showExitDialog && state === GameState.PLAYING && (
         <>
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40 pointer-events-auto" onClick={() => setShowExitDialog(false)} />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40 pointer-events-auto" onClick={() => {
+            setShowExitDialog(false);
+            onResume?.();
+          }} />
 
           {/* Dialog */}
           <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
@@ -117,6 +125,7 @@ export const GameUI: React.FC<GameUIProps> = ({
                   <button
                     onClick={() => {
                       playClick?.('cancel');
+                      onResume?.();
                       setShowExitDialog(false);
                     }}
                     className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded border border-gray-600 transition-all active:scale-95"

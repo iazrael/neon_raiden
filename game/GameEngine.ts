@@ -238,6 +238,12 @@ export class GameEngine {
         }
     }
 
+    stop() {
+        this.state = GameState.MENU;
+        this.audio.pause();
+        this.onStateChange(this.state);
+    }
+
     update(dt: number) {
         if (this.state !== GameState.PLAYING) return;
 
