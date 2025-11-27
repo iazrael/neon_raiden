@@ -125,32 +125,34 @@ export class RenderSystem {
             this.ctx.stroke();
         });
 
-        if (gameState !== GameState.GAME_OVER) {
-            this.drawEntity(player, weaponLevel);
-            // Draw Shield
-            if (shield > 0) {
-                this.ctx.save();
-                this.ctx.translate(player.x, player.y);
-                this.ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(1, shield / 50)})`;
-                this.ctx.lineWidth = 3;
-                this.ctx.shadowBlur = 10;
-                this.ctx.shadowColor = '#00ffff';
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
-                this.ctx.stroke();
-                this.ctx.restore();
+        if (gameState !== GameState.MENU) {
+            if (gameState !== GameState.GAME_OVER) {
+                this.drawEntity(player, weaponLevel);
+                // Draw Shield
+                if (shield > 0) {
+                    this.ctx.save();
+                    this.ctx.translate(player.x, player.y);
+                    this.ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(1, shield / 50)})`;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowColor = '#00ffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.restore();
+                }
+
+                // Draw Options
+                options.forEach(opt => this.drawEntity(opt));
             }
 
-            // Draw Options
-            options.forEach(opt => this.drawEntity(opt));
+            powerups.forEach(p => this.drawEntity(p));
+            enemies.forEach(e => this.drawEntity(e));
+            if (boss) this.drawEntity(boss);
+            bossWingmen.forEach(w => this.drawEntity(w));
+            bullets.forEach(b => this.drawEntity(b));
+            enemyBullets.forEach(b => this.drawEntity(b));
         }
-
-        powerups.forEach(p => this.drawEntity(p));
-        enemies.forEach(e => this.drawEntity(e));
-        if (boss) this.drawEntity(boss);
-        bossWingmen.forEach(w => this.drawEntity(w));
-        bullets.forEach(b => this.drawEntity(b));
-        enemyBullets.forEach(b => this.drawEntity(b));
 
         // Particles
         this.ctx.globalCompositeOperation = 'lighter';

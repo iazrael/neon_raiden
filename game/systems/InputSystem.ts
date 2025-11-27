@@ -24,10 +24,15 @@ export class InputSystem {
 
         // Mouse Movement (treated as direct position for now, or we can ignore if we want pure keyboard/touch)
         // The original game used mousemove to set player position directly.
-        window.addEventListener('mousemove', (e) => {
-            this.touch.x = e.clientX;
-            this.touch.y = e.clientY;
-            if (this.onMouseMove) this.onMouseMove(e.clientX, e.clientY);
+        // Mouse Movement (treated as direct position for now, or we can ignore if we want pure keyboard/touch)
+        // The original game used mousemove to set player position directly.
+        this.canvas.addEventListener('mousemove', (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            this.touch.x = x;
+            this.touch.y = y;
+            if (this.onMouseMove) this.onMouseMove(x, y);
         });
 
         this.canvas.addEventListener('mousedown', () => {

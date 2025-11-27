@@ -239,7 +239,7 @@ export class GameEngine {
     }
 
     stop() {
-        this.state = GameState.MENU;
+        this.state = GameState.GAME_OVER;
         this.audio.pause();
         this.onStateChange(this.state);
     }
