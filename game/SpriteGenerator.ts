@@ -42,8 +42,7 @@ export class SpriteGenerator {
 
     // 生成 Boss - Load from external SVG files
     generateBoss(config: BossEntity): HTMLImageElement {
-        const size = 160 + (config.level * 20); // FIXME: 这里的尺寸怎么按照等级来的
-        return this.loadSVG(`${ASSETS_BASE_PATH}bosses/${config.sprite}.svg`, size, size);
+        return this.loadSVG(`${ASSETS_BASE_PATH}bosses/${config.sprite}.svg`, config.size.width, config.size.height);
     }
 
     // 生成子弹

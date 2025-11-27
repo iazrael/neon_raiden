@@ -237,7 +237,7 @@ export interface BossEntity extends BaseEntityMeta {
     level: number;              // 关卡等级
     hp: number;                 // 生命值
     speed: number;              // 移动速度
-    size: number;               // 体积缩放
+    size: SizeConfig;           // 体积缩放
     score: number;              // 击杀得分
     weapons: BossWeaponType[];  // 武器类型列表
     sprite: string;             // 精灵图名称
