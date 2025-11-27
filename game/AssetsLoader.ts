@@ -1,4 +1,4 @@
-import { ASSETS_BASE_PATH, WeaponConfig, EnemyBulletConfig, EnemyConfig } from './config';
+import { ASSETS_BASE_PATH, EnemyConfig, BossConfig, BulletConfigs } from './config';
 
 export class AssetsLoader {
     private static cache: Map<string, HTMLImageElement> = new Map();
@@ -31,25 +31,20 @@ export class AssetsLoader {
         load(`${ASSETS_BASE_PATH}fighters/option.svg`);
 
         // Enemies (0-10: all enemy types)
-        // 遍历 EnemyConfig.types
-        Object.keys(EnemyConfig.types).forEach(type => {
-            load(`${ASSETS_BASE_PATH}enemies/enemy_${type}.svg`);
+        // 遍历 EnemyConfig
+        Object.values(EnemyConfig).forEach(config => {
+            load(`${ASSETS_BASE_PATH}enemies/${config.sprite}.svg`);
         });
 
-        // Bullets - Player weapons
-        Object.values(WeaponConfig).forEach(config => {
-            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
-        });
-
-        // Bullets - Enemy bullets
-        Object.values(EnemyBulletConfig).forEach(config => {
+        // Bullets
+        Object.values(BulletConfigs).forEach(config => {
             load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
         });
 
         // Bosses
-        for (let i = 1; i <= 10; i++) {
-            load(`${ASSETS_BASE_PATH}bosses/boss_${i}.svg`);
-        }
+        Object.values(BossConfig).forEach(config => {
+            load(`${ASSETS_BASE_PATH}bosses/${config.sprite}.svg`);
+        });
 
         await Promise.all(promises);
         console.log('All assets preloaded');

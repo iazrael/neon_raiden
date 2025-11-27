@@ -1,5 +1,4 @@
-import { WeaponType } from '@/types';
-import { EnemyType } from '@/game/config';
+import { WeaponType, EnemyType } from '@/types';
 
 /**
  * 图鉴解锁管理系统

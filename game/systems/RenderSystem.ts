@@ -1,6 +1,6 @@
 import { SpriteGenerator } from '@/game/SpriteGenerator';
-import { SpriteMap, Entity, Particle, Shockwave, GameState, BulletType } from '@/types';
-import { EnemyConfig } from '../config';
+import { SpriteMap, Entity, Particle, Shockwave, GameState, BulletType, EnemyType, PowerupType, WeaponType, EntityType } from '@/types';
+import { BossConfig, EnemyConfig } from '../config';
 
 export class RenderSystem {
     ctx: CanvasRenderingContext2D;
@@ -20,36 +20,25 @@ export class RenderSystem {
         this.sprites['player'] = this.spriteGen.generatePlayer();
         this.sprites['option'] = this.spriteGen.generateOption();
 
-        // Enemies (Types 0-10: all enemy types)
-        Object.keys(EnemyConfig.types).forEach(type => {
-            this.sprites[`enemy_${type}`] = this.spriteGen.generateEnemy(parseInt(type));
+        // Enemies
+        Object.values(EnemyConfig).forEach(config => {
+            this.sprites[`enemy_${config.type}`] = this.spriteGen.generateEnemy(config);
         });
 
         // Bullets
-        this.sprites['bullet_vulcan'] = this.spriteGen.generateBullet(BulletType.VULCAN);
-        this.sprites['bullet_laser'] = this.spriteGen.generateBullet(BulletType.LASER);
-        this.sprites['bullet_missile'] = this.spriteGen.generateBullet(BulletType.MISSILE);
-        this.sprites['bullet_wave'] = this.spriteGen.generateBullet(BulletType.WAVE);
-        this.sprites['bullet_plasma'] = this.spriteGen.generateBullet(BulletType.PLASMA);
-        this.sprites['bullet_enemy'] = this.spriteGen.generateBullet(BulletType.ENEMY_ORB);
-        this.sprites['bullet_tesla'] = this.spriteGen.generateBullet(BulletType.TESLA);
-        this.sprites['bullet_magma'] = this.spriteGen.generateBullet(BulletType.MAGMA);
-        this.sprites['bullet_shuriken'] = this.spriteGen.generateBullet(BulletType.SHURIKEN);
+        Object.values(BulletType).forEach(type => {
+            this.sprites[`bullet_${type}`] = this.spriteGen.generateBullet(type);
+        })
 
-        // Powerups (Types 0-7 are weapons, 100-103 are special powerups)
-        // Powerups are still generated as Canvas because they combine dynamic text/icons
-        for (let i = 0; i <= 7; i++) {
-            this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
-        }
-        // Special powerups
-        for (let i = 100; i <= 103; i++) {
-            this.sprites[`powerup_${i}`] = this.spriteGen.generatePowerup(i);
-        }
+        // Powerups
+        Object.values(PowerupType).forEach(type => {
+            this.sprites[`powerup_${type}`] = this.spriteGen.generatePowerup(type);
+        });
 
         // Bosses (Levels 1-10)
-        for (let i = 1; i <= 10; i++) {
-            this.sprites[`boss_${i}`] = this.spriteGen.generateBoss(i);
-        }
+        Object.values(BossConfig).forEach(config => {
+            this.sprites[`boss_${config.type}`] = this.spriteGen.generateBoss(config);
+        });
     }
 
     resize(width: number, height: number) {
@@ -186,7 +175,7 @@ export class RenderSystem {
         this.ctx.save();
         this.ctx.translate(Math.round(e.x), Math.round(e.y));
 
-        if (e.type === 'player') {
+        if (e.type === EntityType.PLAYER) {
             const bankAngle = Math.max(-0.3, Math.min(0.3, (e.vx || 0) * 0.05));
             this.ctx.rotate(bankAngle);
 
@@ -235,11 +224,12 @@ export class RenderSystem {
                 this.ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
             }
         } else {
+            // console.warn(`Unknown sprite key: ${e.spriteKey}`,e);
             this.ctx.fillStyle = e.color;
             this.ctx.fillRect(-e.width / 2, -e.height / 2, e.width, e.height);
         }
 
-        if (e.type === 'boss') {
+        if (e.type === EntityType.BOSS) {
             this.ctx.rotate(Math.PI);
             this.ctx.fillStyle = 'rgba(255,0,0,0.5)';
             this.ctx.fillRect(-50, 0, 100, 6);

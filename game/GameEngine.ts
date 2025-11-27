@@ -1,6 +1,6 @@
 import { AudioSystem } from './AudioSystem';
-import { GameState, WeaponType, Particle, Shockwave, Entity } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupType, PowerupEffects, PowerupDropConfig } from './config';
+import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType } from '@/types';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -140,13 +140,13 @@ export class GameEngine {
         return {
             x: this.render.width / 2,
             y: this.render.height - 100,
-            width: PlayerConfig.width,
-            height: PlayerConfig.height,
+            width: PlayerConfig.size.width,
+            height: PlayerConfig.size.height,
             vx: 0,
             vy: 0,
             hp: PlayerConfig.initialHp,
             maxHp: PlayerConfig.maxHp,
-            type: 'player',
+            type: EntityType.PLAYER,
             color: PlayerConfig.color,
             markedForDeletion: false,
             spriteKey: 'player'
@@ -212,7 +212,7 @@ export class GameEngine {
                 this.createExplosion(e.x, e.y, 'large', e.color);
                 e.hp = 0;
                 e.markedForDeletion = true;
-                this.score += 100;
+                this.score += EnemyConfig[e.subType]?.score || 100;
             });
             this.onScoreChange(this.score);
 
@@ -471,7 +471,7 @@ export class GameEngine {
             }, i * 100);
         }
         this.audio.playExplosion('large');
-        this.score += 5000 * this.level;
+        this.score += BossConfig[this.boss.subType]?.score || (5000 * this.level);
         this.onScoreChange(this.score);
 
         // Unlock boss when defeated
@@ -581,9 +581,9 @@ export class GameEngine {
             if (this.isColliding(p, this.player)) {
                 p.markedForDeletion = true;
                 this.audio.playPowerUp();
-                this.score += 500;
+                this.score += 100;
                 this.onScoreChange(this.score);
-                this.applyPowerup(p.subType || 0);
+                this.applyPowerup(p.subType as PowerupType);
             }
         });
     }
@@ -629,14 +629,14 @@ export class GameEngine {
 
     killEnemy(e: Entity) {
         e.markedForDeletion = true;
-        this.score += 100 * ((e.subType || 0) + 1);
+        this.score += EnemyConfig[e.subType]?.score || 100;
         this.onScoreChange(this.score);
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');
 
         // Unlock enemy when defeated
         if (e.subType !== undefined) {
-            unlockEnemy(e.subType);
+            unlockEnemy(e.subType as EnemyType);
         }
 
         const dropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
@@ -661,7 +661,7 @@ export class GameEngine {
         });
     }
 
-    applyPowerup(type: number) {
+    applyPowerup(type: PowerupType) {
         const effects = PowerupEffects;
 
         switch (type) {
@@ -700,7 +700,7 @@ export class GameEngine {
                         vy: 0,
                         hp: 1,
                         maxHp: 1,
-                        type: 'option',
+                        type: EntityType.OPTION,
                         color: '#00ffff',
                         markedForDeletion: false,
                         spriteKey: 'option'
@@ -710,7 +710,7 @@ export class GameEngine {
 
             default:
                 // Weapon-specific powerups
-                const weaponType = effects.weaponTypeMap[type as keyof typeof effects.weaponTypeMap];
+                const weaponType = effects.weaponTypeMap[type];
                 if (weaponType !== undefined && weaponType !== null) {
                     // Unlock weapon when picked up
                     unlockWeapon(weaponType);
@@ -733,7 +733,7 @@ export class GameEngine {
 
         this.powerups.push({
             x, y, width: 30, height: 30, vx: 0, vy: 2, hp: 1, maxHp: 1,
-            type: 'powerup', subType: type, color: '#fff', markedForDeletion: false,
+            type: EntityType.POWERUP, subType: type, color: '#fff', markedForDeletion: false,
             spriteKey: `powerup_${type}`
         });
     }

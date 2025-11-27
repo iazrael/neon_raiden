@@ -1,5 +1,5 @@
-import { WeaponType, Entity } from '@/types';
-import { WeaponConfig, WEAPON_NAMES, WeaponUpgradeConfig } from '@/game/config';
+import { WeaponType, Entity, EntityType } from '@/types';
+import { WeaponConfig, WeaponUpgradeConfig } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
 
@@ -31,7 +31,7 @@ export class WeaponSystem {
             bullets.push({
                 x, y, width: w, height: h, vx, vy,
                 hp: type === WeaponType.WAVE || type === WeaponType.LASER ? 999 : 1,
-                maxHp: 1, type: 'bullet', color: config.color, markedForDeletion: false,
+                maxHp: 1, type: EntityType.BULLET, color: config.color, markedForDeletion: false,
                 spriteKey: sprite, damage: dmg
             });
         };
@@ -43,22 +43,22 @@ export class WeaponSystem {
 
             for (let i = 0; i < count; i++) {
                 const angle = (i - (count - 1) / 2) * 0.1; // Tighter spread
-                spawn(player.x, player.y - 20, Math.sin(angle) * 10, -config.speed, damage, weaponType, config.sprite, config.width, config.height);
+                spawn(player.x, player.y - 20, Math.sin(angle) * 10, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
             }
         } else if (weaponType === WeaponType.LASER) {
             // 使用配置中的宽度和光束数量
-            const w = config.width + (upgradeConfig.bulletWidth || 0);
+            const w = config.bullet.size.width + (upgradeConfig.bulletWidth || 0);
             const beamCount = upgradeConfig.beamCount || 1;
 
             if (beamCount === 1) {
-                spawn(player.x, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w, config.height);
+                spawn(player.x, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w, config.bullet.size.height);
             } else if (beamCount === 2) {
-                spawn(player.x - 15, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w * 0.8, config.height);
-                spawn(player.x + 15, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w * 0.8, config.height);
+                spawn(player.x - 15, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w * 0.8, config.bullet.size.height);
+                spawn(player.x + 15, player.y - 30, 0, -config.speed, damage, weaponType, config.sprite, w * 0.8, config.bullet.size.height);
             } else {
-                spawn(player.x, player.y - 35, 0, -config.speed, damage, weaponType, config.sprite, w, config.height + 10);
-                spawn(player.x - 25, player.y - 30, -1, -config.speed + 1, damage, weaponType, config.sprite, w * 0.7, config.height);
-                spawn(player.x + 25, player.y - 30, 1, -config.speed + 1, damage, weaponType, config.sprite, w * 0.7, config.height);
+                spawn(player.x, player.y - 35, 0, -config.speed, damage, weaponType, config.sprite, w, config.bullet.size.height + 10);
+                spawn(player.x - 25, player.y - 30, -1, -config.speed + 1, damage, weaponType, config.sprite, w * 0.7, config.bullet.size.height);
+                spawn(player.x + 25, player.y - 30, 1, -config.speed + 1, damage, weaponType, config.sprite, w * 0.7, config.bullet.size.height);
             }
 
         } else if (weaponType === WeaponType.MISSILE) {
@@ -67,16 +67,16 @@ export class WeaponSystem {
 
             for (let i = 0; i < count; i++) {
                 const offsetX = (i - (count - 1) / 2) * 15;
-                spawn(player.x + offsetX, player.y, (i - (count - 1) / 2) * 0.5, -config.speed, damage, weaponType, config.sprite, config.width, config.height);
+                spawn(player.x + offsetX, player.y, (i - (count - 1) / 2) * 0.5, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
             }
         } else if (weaponType === WeaponType.WAVE) {
             // 使用配置中的宽度增量
-            const width = config.width + (upgradeConfig.bulletWidth || 0);
-            spawn(player.x, player.y - 40, 0, -config.speed, damage, weaponType, config.sprite, width, config.height);
+            const width = config.bullet.size.width + (upgradeConfig.bulletWidth || 0);
+            spawn(player.x, player.y - 40, 0, -config.speed, damage, weaponType, config.sprite, width, config.bullet.size.height);
         } else if (weaponType === WeaponType.PLASMA) {
             // 使用配置中的尺寸增量
-            const width = config.width + (upgradeConfig.bulletWidth || 0);
-            const height = config.height + (upgradeConfig.bulletHeight || 0);
+            const width = config.bullet.size.width + (upgradeConfig.bulletWidth || 0);
+            const height = config.bullet.size.height + (upgradeConfig.bulletHeight || 0);
             spawn(player.x, player.y - 40, 0, -config.speed, damage, weaponType, config.sprite, width, height);
         } else if (weaponType === WeaponType.TESLA) {
             // Auto-lock to nearest enemy
@@ -93,9 +93,9 @@ export class WeaponSystem {
             if (target) {
                 const t = target as Entity; // TS check
                 const angle = Math.atan2(t.y - player.y, t.x - player.x);
-                spawn(player.x, player.y - 20, Math.cos(angle) * config.speed, Math.sin(angle) * config.speed, damage, weaponType, config.sprite, config.width, config.height);
+                spawn(player.x, player.y - 20, Math.cos(angle) * config.speed, Math.sin(angle) * config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
             } else {
-                spawn(player.x, player.y - 20, 0, -config.speed, damage, weaponType, config.sprite, config.width, config.height);
+                spawn(player.x, player.y - 20, 0, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
             }
         } else if (weaponType === WeaponType.MAGMA) {
             // 使用配置中的子弹数量
@@ -103,14 +103,14 @@ export class WeaponSystem {
             for (let i = 0; i < count; i++) {
                 const angle = (Math.random() - 0.5) * 0.5 - 1.57; // Upward cone
                 const speed = config.speed + Math.random() * 5;
-                spawn(player.x, player.y - 20, Math.cos(angle) * speed, Math.sin(angle) * speed, damage, weaponType, config.sprite, config.width, config.height);
+                spawn(player.x, player.y - 20, Math.cos(angle) * speed, Math.sin(angle) * speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
             }
         } else if (weaponType === WeaponType.SHURIKEN) {
             // 使用配置中的子弹数量
             const count = upgradeConfig.bulletCount || 2;
             for (let i = 0; i < count; i++) {
                 const angle = -1.57 + (i - (count - 1) / 2) * 0.5;
-                spawn(player.x, player.y - 20, Math.cos(angle) * config.speed, Math.sin(angle) * config.speed, damage, weaponType, config.sprite, config.width, config.height);
+                spawn(player.x, player.y - 20, Math.cos(angle) * config.speed, Math.sin(angle) * config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
             }
         }
 

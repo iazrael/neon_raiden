@@ -1,5 +1,5 @@
-import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES, EnemyBulletConfig, EnemyConfig, EnemyType } from '@/game/config';
-import { BulletType, WeaponType, EnemyBulletType } from '@/types';
+import { ASSETS_BASE_PATH, WeaponConfig, BulletConfigs } from '@/game/config';
+import { BulletType, WeaponType, PowerupType, EnemyEntity, BossEntity } from '@/types';
 import { AssetsLoader } from './AssetsLoader';
 
 export class SpriteGenerator {
@@ -36,19 +36,14 @@ export class SpriteGenerator {
     }
 
     // 生成敌人
-    generateEnemy(type: number): HTMLImageElement {
-        let size = 48;
-        const config = EnemyConfig.types[type as EnemyType];
-        if (config) {
-            size = Math.max(config.width, config.height);
-        }
-        return this.loadSVG(`${ASSETS_BASE_PATH}enemies/enemy_${type}.svg`, size, size);
+    generateEnemy(config: EnemyEntity): HTMLImageElement {
+        return this.loadSVG(`${ASSETS_BASE_PATH}enemies/${config.sprite}.svg`, config.size.width, config.size.height);
     }
 
     // 生成 Boss - Load from external SVG files
-    generateBoss(level: number): HTMLImageElement {
-        const size = 160 + (level * 20);
-        return this.loadSVG(`${ASSETS_BASE_PATH}bosses/boss_${level}.svg`, size, size);
+    generateBoss(config: BossEntity): HTMLImageElement {
+        const size = 160 + (config.level * 20); // FIXME: 这里的尺寸怎么按照等级来的
+        return this.loadSVG(`${ASSETS_BASE_PATH}bosses/${config.sprite}.svg`, size, size);
     }
 
     // 生成子弹
@@ -57,51 +52,41 @@ export class SpriteGenerator {
         let h = 32;
         let spriteName = `bullet_${type}`;
 
-        // 玩家武器子弹
-        const weaponType = BulletToWeaponMap[type];
-        if (weaponType !== undefined) {
-            const config = WeaponConfig[weaponType];
-            w = config.width;
-            h = config.height;
+        const config = BulletConfigs[type]
+        if (config) {
+            w = config.size.width;
+            h = config.size.height;
             spriteName = config.sprite;
         }
-        // 敌人子弹
-        else if (Object.values(EnemyBulletType).includes(type as any)) {
-            const config = EnemyBulletConfig[type as unknown as EnemyBulletType];
-            if (config) {
-                w = config.width;
-                h = config.height;
-                spriteName = config.sprite;
-            }
-        }
-
         return this.loadSVG(`${ASSETS_BASE_PATH}bullets/${spriteName}.svg`, w, h);
     }
 
     // 生成掉落物，现在包含内部图标
-    generatePowerup(type: number): HTMLCanvasElement {
+    generatePowerup(type: PowerupType): HTMLCanvasElement {
         const { canvas, ctx } = this.createCanvas(40, 40);
 
         let iconSrc = '';
         let label = '';
         let color = '#fff';
 
-        // PowerupType: 0-7 are weapon types (VULCAN, LASER, MISSILE, WAVE, PLASMA, TESLA, MAGMA, SHURIKEN)
-        // PowerupType: 100=POWER, 101=HP, 102=BOMB, 103=OPTION
-        if (type >= 0 && type <= 7) {
-            // Weapon powerups - use bullet sprite and weapon color
-            const weaponType = PowerupToWeaponMap[type]
-            const weaponName = WEAPON_NAMES[weaponType]
-            const weaponConfig = WeaponConfig[weaponType];
-            color = weaponConfig.color;  // Use weapon's color for the border
-            iconSrc = `${ASSETS_BASE_PATH}bullets/bullet_${weaponName}.svg`;
+        // Check if it's a weapon powerup
+        // PowerupType strings for weapons match WeaponType strings
+        const weaponType = type as unknown as WeaponType;
+        const weaponConfig = WeaponConfig[weaponType];
+
+        if (weaponConfig) {
+            // Weapon powerups
+            color = weaponConfig.color;
+            // Use bullet sprite as icon
+            const spriteName = weaponConfig.sprite;
+            iconSrc = `${ASSETS_BASE_PATH}bullets/${spriteName}.svg`;
         } else {
             // Special powerups
             switch (type) {
-                case 100: color = '#ecc94b'; label = 'P'; break; // POWER
-                case 101: color = '#48bb78'; label = 'H'; break; // HP
-                case 102: color = '#f56565'; label = 'B'; break; // BOMB
-                case 103: color = '#a0aec0'; label = 'O'; break; // OPTION
+                case PowerupType.POWER: color = '#ecc94b'; label = 'P'; break; // POWER
+                case PowerupType.HP: color = '#48bb78'; label = 'H'; break; // HP
+                case PowerupType.BOMB: color = '#f56565'; label = 'B'; break; // BOMB
+                case PowerupType.OPTION: color = '#a0aec0'; label = 'O'; break; // OPTION
             }
         }
 
@@ -125,11 +110,9 @@ export class SpriteGenerator {
             let originalWidth = 24;
             let originalHeight = 24;
 
-            if (PowerupToWeaponMap[type] !== undefined) {
-                const weaponType = PowerupToWeaponMap[type];
-                const config = WeaponConfig[weaponType];
-                originalWidth = config.width;
-                originalHeight = config.height;
+            if (weaponConfig && weaponConfig.bullet) {
+                originalWidth = weaponConfig.bullet.size.width;
+                originalHeight = weaponConfig.bullet.size.height;
             }
 
             // Calculate scaling to fit within 24x24 while preserving aspect ratio
