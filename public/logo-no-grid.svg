@@ -1,4 +1,4 @@
-<svg width="32" height="32" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
       .neon-glow {
@@ -7,24 +7,8 @@
       .neon-purple {
         filter: drop-shadow(0 0 8px #ff00ff) drop-shadow(0 0 16px #ff00ff);
       }
-      .background {
-        fill: #0a0a0a;
-      }
     </style>
   </defs>
-  
-  <!-- Background -->
-  <rect width="512" height="512" class="background"/>
-  
-  <!-- Grid Pattern -->
-  <g stroke="#00ff88" stroke-width="1" opacity="0.1">
-    <line x1="0" y1="128" x2="512" y2="128"/>
-    <line x1="0" y1="256" x2="512" y2="256"/>
-    <line x1="0" y1="384" x2="512" y2="384"/>
-    <line x1="128" y1="0" x2="128" y2="512"/>
-    <line x1="256" y1="0" x2="256" y2="512"/>
-    <line x1="384" y1="0" x2="384" y2="512"/>
-  </g>
   
   <!-- Main Raiden Symbol - Stylized Thunder/Lightning -->
   <g class="neon-glow">
@@ -44,5 +28,6 @@
     <circle cx="256" cy="256" r="20" fill="#00ff88"/>
     <circle cx="256" cy="256" r="30" fill="none" stroke="#00ff88" stroke-width="3"/>
   </g>
+  
   
 </svg>

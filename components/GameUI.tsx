@@ -172,35 +172,57 @@ export const GameUI: React.FC<GameUIProps> = ({
       {/* Menus - Pointer events allowed */}
       {state === GameState.MENU && (
         <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center pointer-events-auto z-20 backdrop-blur-sm pt-[env(safe-area-inset-top)]">
-          <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-400 to-blue-600 mb-2 tracking-tighter drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] text-center">
-            NEON
-            <br />
-            RAIDEN
-          </h1>
-          <p className="mb-8 text-cyan-200 text-center text-sm px-4 uppercase tracking-[0.2em] animate-pulse">
-            System Online // Awaiting Pilot
-          </p>
-          <button
-            onClick={() => {
-              playClick?.('confirm');
-              onStart();
-            }}
-            className="px-10 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-none border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-pulse active:scale-95 transition-transform skew-x-[-10deg]"
-          >
-            START MISSION
-          </button>
+          {/* 标题和Logo - 响应式布局，移动端垂直排列 */}
+          <div className="flex flex-col items-center mb-6 w-full max-w-lg px-4">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] text-center w-full">
+              {/* 移动端：标题与Logo重叠效果 | 桌面端：水平排列 */}
+              <div className="relative flex flex-col items-center justify-center md:flex md:flex-row w-full">
+                {/* NEON - 从中心点往左上偏移 - 使用蓝色到青色渐变 */}
+                <span className="text-5xl sm:text-6xl md:text-7xl font-bold bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 bg-clip-text text-transparent tracking-wider md:text-center absolute left-1/2 top-1/2 -translate-x-[110%] -translate-y-[100%] md:static md:translate-x-0 md:translate-y-0 block z-10">NEON</span>
 
-          <button
-            onClick={() => {
-              playClick?.('menu');
-              onOpenGallery?.();
-            }}
-            className="mt-4 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-none border border-gray-600 shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-transform skew-x-[-10deg] text-sm tracking-widest"
-          >
-            LIBRARY
-          </button>
+                {/* Logo - 居中显示，作为背景元素 */}
+                <img
+                  src="./logo-no-grid.svg"
+                  alt="Neon Raiden Logo"
+                  className="w-24 h-24 sm:w-28 sm:h-28 md:w-24 md:h-24 mx-auto z-0 opacity-80"
+                />
 
-          <div className="mt-8 text-xs text-cyan-500/50 tracking-widest font-mono">
+                {/* RAIDEN - 从中心点往右下偏移 - 使用青色到紫色渐变 */}
+                <span className="text-5xl sm:text-6xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent tracking-wider md:text-center absolute left-1/2 top-1/2 translate-x-[-25%] translate-y-[20%] md:static md:translate-x-0 md:translate-y-0 block z-10">RAIDEN</span>
+              </div>
+            </h1>
+
+            {/* 状态文本 */}
+            <p className="text-cyan-200 text-center text-xs sm:text-sm px-4 uppercase tracking-[0.2em] animate-pulse">
+              System Online // Awaiting Pilot
+            </p>
+          </div>
+
+          {/* 按钮组 */}
+          <div className="flex flex-col items-center w-full">
+            <button
+              onClick={() => {
+                playClick?.('confirm');
+                onStart();
+              }}
+              className="px-10 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-none border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-pulse active:scale-95 transition-transform skew-x-[-10deg]"
+            >
+              START MISSION
+            </button>
+
+            <button
+              onClick={() => {
+                playClick?.('menu');
+                onOpenGallery?.();
+              }}
+              className="mt-4 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-none border border-gray-600 shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-transform skew-x-[-10deg] text-sm tracking-widest"
+            >
+              LIBRARY
+            </button>
+          </div>
+
+          {/* 版本信息 */}
+          <div className="mt-12 text-xs text-cyan-500/50 tracking-widest font-mono">
             {getVersion()}
           </div>
         </div>

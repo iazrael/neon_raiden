@@ -6,6 +6,63 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Neon Raiden - Loading</title>
+    
+    <!-- iOS 启动屏支持 -->
+    <!-- 请确保在public/assets文件夹中准备相应的PNG图片 -->
+    <!-- iPhone SE (1st generation) and iPhone 8 -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" 
+          href="assets/splash-iphone8.png">
+    
+    <!-- iPhone 8 Plus -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone8plus.png">
+    
+    <!-- iPhone X, XS, 11 Pro -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphonex.png">
+    
+    <!-- iPhone XR, 11 -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" 
+          href="assets/splash-iphonexr.png">
+    
+    <!-- iPhone XS Max, 11 Pro Max -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone11promax.png">
+    
+    <!-- iPhone 12, 12 Pro, 13, 13 Pro -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone12.png">
+    
+    <!-- iPhone 12 Mini, 13 Mini -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone12mini.png">
+    
+    <!-- iPhone 12 Pro Max, 13 Pro Max, 14 Plus -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone12promax.png">
+    
+    <!-- iPhone 14, 15 -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone14.png">
+    
+    <!-- iPhone 14 Pro, 15 Pro -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone14pro.png">
+    
+    <!-- iPhone 14 Pro Max, 15 Pro Max -->
+    <link rel="apple-touch-startup-image" 
+          media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" 
+          href="assets/splash-iphone14promax.png">
     <style>
         * {
             margin: 0;
@@ -113,7 +170,8 @@
     </style>
 </head>
 
-<body>
+<!-- 内联背景色样式，避免加载延迟时出现白屏 -->
+<body style="background-color: #0a0a0a;">
     <div class="grid-bg"></div>
     <div class="splash-container">
         <svg class="logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
@@ -138,7 +196,112 @@
         <div class="loading-bar">
             <div class="loading-progress"></div>
         </div>
+        
+        <!-- 跳过按钮 -->
+        <div class="skip-button">跳过</div>
     </div>
+    
+    <style>
+        /* 跳过按钮样式 */
+        .skip-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* 延迟显示跳过按钮，避免用户立即跳过 */
+        .skip-button.show {
+            opacity: 1;
+        }
+        
+        .skip-button:hover {
+            background-color: rgba(0, 255, 136, 0.2);
+            text-shadow: 0 0 10px #00ff88;
+        }
+    </style>
+    
+    <!-- 智能启动屏脚本 -->
+    <script>
+        // 最小显示时间（毫秒）- 确保用户至少能看到品牌标识
+        const minDisplayTime = 1000;
+        
+        // 跳过按钮显示时间（毫秒）
+        const skipButtonDelay = 1500;
+        
+        // 是否已导航标志
+        let hasNavigated = false;
+        
+        // 导航到主应用的函数
+        function navigateToApp() {
+            if (hasNavigated) return; // 防止重复导航
+            
+            hasNavigated = true;
+            
+            // 检查是否有查询参数需要保留
+            const urlParams = new URLSearchParams(window.location.search);
+            let targetUrl = '../'; // 主应用页面的路径
+            
+            // 如果有查询参数，将其添加到目标URL
+            if (urlParams.toString()) {
+                targetUrl += '?' + urlParams.toString();
+            }
+            
+            // 添加一个简短的淡出动画
+            document.body.style.transition = 'opacity 0.3s ease';
+            document.body.style.opacity = '0';
+            
+            // 动画结束后导航
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 300);
+        }
+        
+        // 显示跳过按钮
+        setTimeout(() => {
+            const skipButton = document.querySelector('.skip-button');
+            skipButton.classList.add('show');
+            
+            // 添加点击事件
+            skipButton.addEventListener('click', navigateToApp);
+        }, skipButtonDelay);
+        
+        // 设置最小显示时间
+        setTimeout(() => {
+            // 尝试预加载主应用关键资源
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = '../';
+            document.head.appendChild(link);
+            
+            // 此时允许导航，但会由资源加载状态决定实际导航时机
+            // 对于简单应用，可以直接导航
+            // 对于复杂应用，可以检查资源加载状态
+            
+            // 在这个简单实现中，我们在最小显示时间后直接导航
+            // 在实际应用中，你可以替换为资源加载检查
+            navigateToApp();
+        }, minDisplayTime);
+        
+        // 允许用户按任意键跳过
+        document.addEventListener('keydown', navigateToApp);
+        
+        // 允许用户点击屏幕任意位置跳过（除了跳过按钮本身）
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.skip-button')) {
+                navigateToApp();
+            }
+        });
+    </script>
 </body>
 
 </html>
