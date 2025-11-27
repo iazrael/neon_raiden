@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AssetsLoader } from '@/game/AssetsLoader';
-import { WeaponType } from '@/types';
-import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, PlayerConfig, ASSETS_BASE_PATH, BossWeaponNames, WingmenNames } from '@/game/config';
+import { WeaponType, EnemyType, BossType, BossWeaponType } from '@/types';
+import { WeaponConfig, EnemyConfig, BossConfig, PlayerConfig, ASSETS_BASE_PATH, BossWeaponConfig } from '@/game/config';
 import { isWeaponUnlocked, isEnemyUnlocked, isBossUnlocked } from '@/game/unlockedItems';
 
 interface GalleryProps {
@@ -78,16 +78,10 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
     }, []);
 
     const getSpriteSrc = (item: any, tab: Tab): string => {
-        if (tab === 'FIGHTERS') return `${ASSETS_BASE_PATH}fighters/player.svg`;
-        if (tab === 'ARMORY') {
-            const config = WeaponConfig[item.type as WeaponType];
-            if (config) {
-                // Map weapon type to bullet SVG
-                return `${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`;
-            }
-        }
-        if (tab === 'BESTIARY') return `${ASSETS_BASE_PATH}enemies/enemy_${item.type}.svg`;
-        if (tab === 'BOSSES') return `${ASSETS_BASE_PATH}bosses/boss_${item.level}.svg`;
+        if (tab === 'FIGHTERS') return `${ASSETS_BASE_PATH}fighters/${item.config.sprite}.svg`;
+        if (tab === 'ARMORY') return `${ASSETS_BASE_PATH}bullets/${item.config.sprite}.svg`;
+        if (tab === 'BESTIARY') return `${ASSETS_BASE_PATH}enemies/${item.config.sprite}.svg`;
+        if (tab === 'BOSSES') return `${ASSETS_BASE_PATH}bosses/${item.config.sprite}.svg`;
         return '';
     };
 
@@ -96,45 +90,41 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
     // Data Sources
     const fighters = [
         {
-            name: 'Neon Raiden',
+            name: PlayerConfig.name,
             chineseName: PlayerConfig.chineseName,
-            description: 'Advanced prototype fighter with adaptable weapon systems.',
-            chineseDescription: PlayerConfig.chineseDescription,
+            chineseDescription: PlayerConfig.describe,
             config: PlayerConfig
         }
     ];
 
-    const weapons = Object.entries(WeaponConfig).map(([type, config]) => ({
-        type: parseInt(type),
-        name: WeaponType[parseInt(type)],
-        chineseName: config.chineseName || WeaponType[parseInt(type)],
-        description: `Base Damage: ${config.baseDamage}`,
-        chineseDescription: config.chineseDescription || '',
+    const weapons = Object.values(WeaponConfig).map((config) => ({
+        type: config.type,
+        name: config.name,
+        chineseName: config.chineseName,
+        chineseDescription: config.describe,
         config,
-        isUnlocked: isWeaponUnlocked(parseInt(type) as WeaponType)
+        isUnlocked: isWeaponUnlocked(config.type)
     }));
 
-    const enemies = Object.entries(EnemyConfig.types).map(([type, config]) => ({
-        type: parseInt(type),
-        name: EnemyType[parseInt(type)],
-        chineseName: config.chineseName || EnemyType[parseInt(type)],
-        description: `Base HP: ${config.baseHp}`,
-        chineseDescription: config.chineseDescription || '',
+    const enemies = Object.values(EnemyConfig).map((config) => ({
+        type: config.type,
+        name: config.name,
+        chineseName: config.chineseName,
+        chineseDescription: config.describe,
         config,
-        isUnlocked: isEnemyUnlocked(parseInt(type) as EnemyType)
+        isUnlocked: isEnemyUnlocked(config.type)
     }));
 
     const bosses = Object.values(BossConfig).map((config) => ({
-        name: Object.keys(BossName)[config.level - 1], // Rough mapping
-        chineseName: config.chineseName || Object.keys(BossName)[config.level - 1],
-        description: `HP: ${config.hp}`,
-        chineseDescription: config.chineseDescription || '',
+        name: config.name,
+        chineseName: config.chineseName,
+        chineseDescription: config.describe,
         level: config.level,
         config,
         isUnlocked: isBossUnlocked(config.level),
         weapons: config.weapons || [],
-        wingmenCount: config.wingmenCount || 0,
-        wingmenType: config.wingmenType || 0
+        wingmenCount: config.wingmen ? config.wingmen.count : 0,
+        wingmenType: config.wingmen ? config.wingmen.type : ''
     }));
 
     const renderContent = () => {
@@ -441,11 +431,11 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">WIDTH</span>
-                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.width}px</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.size.width}</span>
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">HEIGHT</span>
-                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.height}px</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.size.height}</span>
                                                             </div>
                                                         </>
                                                     )}
@@ -474,7 +464,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">SIZE</span>
-                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.width}×{selectedItem.config.height}</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.bullet.size.width}×{selectedItem.config.bullet.size.height}</span>
                                                             </div>
                                                         </>
                                                     )}
@@ -499,7 +489,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">SIZE</span>
-                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.width}×{selectedItem.config.height}</span>
+                                                                <span className="text-gray-300 font-semibold">{selectedItem.config.size.width}×{selectedItem.config.size.height}</span>
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">SCORE</span>
@@ -520,29 +510,29 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">BULLET CNT</span>
-                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.bulletCount}</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.weaponConfigs.bulletCount}</span>
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">BULLET SPD</span>
-                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.bulletSpeed}</span>
+                                                                <span className="text-yellow-300 font-semibold">{selectedItem.config.weaponConfigs.bulletSpeed}</span>
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">FIRE RATE</span>
-                                                                <span className="text-yellow-300 font-semibold">{(selectedItem.config.fireRate * 100).toFixed(1)}%</span>
+                                                                <span className="text-yellow-300 font-semibold">{(selectedItem.config.weaponConfigs.fireRate * 100).toFixed(1)}%</span>
                                                             </div>
                                                             <div className="flex justify-between border-b border-gray-800 py-2">
                                                                 <span className="text-gray-500 text-xs">SCORE</span>
                                                                 <span className="text-green-300 font-semibold">{selectedItem.config.score}</span>
                                                             </div>
-                                                            {selectedItem.config.hasLaser && (
+                                                            {selectedItem.config.laser && selectedItem.config.laser.type !== 'none' && (
                                                                 <>
                                                                     <div className="flex justify-between border-b border-gray-800 py-2">
                                                                         <span className="text-gray-500 text-xs">LASER DMG</span>
-                                                                        <span className="text-red-300 font-semibold">{selectedItem.config.laserDamage}</span>
+                                                                        <span className="text-red-300 font-semibold">{selectedItem.config.laser.damage}</span>
                                                                     </div>
                                                                     <div className="flex justify-between border-b border-gray-800 py-2">
                                                                         <span className="text-gray-500 text-xs">LASER CD</span>
-                                                                        <span className="text-red-300 font-semibold">{selectedItem.config.laserCooldown}ms</span>
+                                                                        <span className="text-red-300 font-semibold">{selectedItem.config.laser.cooldown}ms</span>
                                                                     </div>
                                                                 </>
                                                             )}
@@ -552,9 +542,9 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                                     <div className="col-span-2 border-b border-gray-800 py-2 mt-2 mb-2">
                                                                         <span className="text-gray-500 text-xs uppercase">WEAPONS</span>
                                                                         <div className="flex flex-wrap gap-2 mt-2">
-                                                                            {selectedItem.weapons.map((weapon: string, idx: number) => (
+                                                                            {selectedItem.weapons.map((weapon: BossWeaponType, idx: number) => (
                                                                                 <span key={idx} className="px-2 py-1 bg-yellow-500/20 border border-yellow-500/50 rounded text-yellow-300 text-xs">
-                                                                                    {BossWeaponNames[weapon as keyof typeof BossWeaponNames] || weapon}
+                                                                                    {BossWeaponConfig[weapon]?.name || weapon}
                                                                                 </span>
                                                                             ))}
                                                                         </div>
@@ -567,7 +557,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                                                     <div className="col-span-2 border-b border-gray-800 py-2">
                                                                         <span className="text-gray-500 text-xs uppercase">WINGMENS</span>
                                                                         <div className="mt-2 flex items-center justify-between">
-                                                                            <span className="text-blue-300 font-semibold">{WingmenNames[selectedItem.wingmenType] || '未知'} × {selectedItem.wingmenCount}</span>
+                                                                            <span className="text-blue-300 font-semibold">{EnemyConfig[selectedItem.wingmenType]?.name || selectedItem.wingmenType} × {selectedItem.wingmenCount}</span>
                                                                         </div>
                                                                     </div>
                                                                 </>

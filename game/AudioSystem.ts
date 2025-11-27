@@ -1,5 +1,4 @@
 import { WeaponType } from '@/types';
-import { WEAPON_NAMES } from './config';
 
 export class AudioSystem {
   private ctx: AudioContext | null = null;

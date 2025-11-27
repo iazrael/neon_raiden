@@ -23,6 +23,7 @@
                 "./*"
             ]
         },
+        "sourceMap": true,
         "allowImportingTsExtensions": true,
         "noEmit": true
     }

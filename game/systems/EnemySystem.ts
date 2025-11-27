@@ -1,5 +1,5 @@
-import { Entity, WeaponType } from '@/types';
-import { EnemyConfig, EnemySpawnWeights } from '@/game/config';
+import { Entity, WeaponType, EnemyType, BulletType, EntityType } from '@/types';
+import { BulletConfigs, EnemyCommonConfig, EnemyConfig, EnemySpawnWeights } from '@/game/config';
 import { AudioSystem } from '@/game/AudioSystem';
 
 export class EnemySystem {
@@ -27,32 +27,31 @@ export class EnemySystem {
         const totalWeight = weightEntries.reduce((sum, [_, weight]) => sum + weight, 0);
 
         let random = Math.random() * totalWeight;
-        let type = 0;
+        let type: EnemyType = EnemyType.NORMAL;
 
         for (const [typeStr, weight] of weightEntries) {
             random -= weight;
             if (random <= 0) {
-                type = parseInt(typeStr);
+                type = typeStr as EnemyType;
                 break;
             }
         }
 
-        // @ts-ignore
-        const config = EnemyConfig.types[type];
+        const config = EnemyConfig[type];
 
         // Elite Chance
-        const isElite = Math.random() < EnemyConfig.eliteChance;
+        const isElite = Math.random() < EnemyCommonConfig.eliteChance;
 
         let enemy: Entity = {
             x,
             y: -50,
-            width: config.width,
-            height: config.height,
+            width: config.size.width,
+            height: config.size.height,
             vx: 0,
             vy: config.baseSpeed + (level * config.speedPerLevel),
             hp: config.baseHp + (level * config.hpPerLevel),
             maxHp: config.baseHp + (level * config.hpPerLevel), // Initial MaxHP
-            type: 'enemy',
+            type: EntityType.ENEMY,
             subType: type,
             color: '#ff0000',
             markedForDeletion: false,
@@ -64,15 +63,15 @@ export class EnemySystem {
         };
 
         // Specific overrides if needed (e.g. random VX for fast enemies)
-        if (type === 1) { // Fast
+        if (type === EnemyType.FAST) { // Fast
             enemy.vx = (Math.random() - 0.5) * 6;
         }
 
         // Apply Elite Stats
         if (isElite) {
-            enemy.width *= EnemyConfig.eliteSizeMultiplier;
-            enemy.height *= EnemyConfig.eliteSizeMultiplier;
-            enemy.hp *= EnemyConfig.eliteHpMultiplier;
+            enemy.width *= EnemyCommonConfig.eliteSizeMultiplier;
+            enemy.height *= EnemyCommonConfig.eliteSizeMultiplier;
+            enemy.hp *= EnemyCommonConfig.eliteHpMultiplier;
             enemy.maxHp = enemy.hp;
         }
 
@@ -85,7 +84,7 @@ export class EnemySystem {
             e.y += e.vy * timeScale;
 
             // Kamikaze AI
-            if (e.subType === 3) {
+            if (e.subType === EnemyType.KAMIKAZE) {
                 if (e.y < player.y) {
                     const dx = player.x - e.x;
                     e.vx = (dx > 0 ? 1 : -1) * 2;
@@ -93,7 +92,7 @@ export class EnemySystem {
             }
 
             // Type 5: Laser Interceptor AI
-            if (e.subType === 5) {
+            if (e.subType === EnemyType.LASER_INTERCEPTOR) {
                 if (e.state === 0) { // Entering
                     if (e.y > 150) {
                         e.state = 1; // Hover
@@ -113,7 +112,7 @@ export class EnemySystem {
                         enemyBullets.push({
                             x: e.x, y: e.y + 30, width: 10, height: 800,
                             vx: 0, vy: 20,
-                            hp: 999, maxHp: 999, type: 'bullet', color: '#f0f', markedForDeletion: false, spriteKey: 'bullet_laser',
+                            hp: 999, maxHp: 999, type: EntityType.BULLET, color: '#f0f', markedForDeletion: false, spriteKey: 'bullet_laser',
                             damage: 30
                         });
                     }
@@ -126,53 +125,47 @@ export class EnemySystem {
             }
 
             // Type 6: Mine Layer AI
-            if (e.subType === 6) {
+            if (e.subType === EnemyType.MINE_LAYER) {
                 e.timer = (e.timer || 0) + dt;
                 if (e.timer > 1500) {
                     e.timer = 0;
                     // Drop Mine
+                    // FIXME: 这里的尺寸要用 BulletConfig的
+                    const bulletConfig = BulletConfigs[BulletType.ENEMY_HEAVY];
                     enemyBullets.push({
-                        x: e.x, y: e.y, width: 24, height: 24,
+                        x: e.x, y: e.y, width: bulletConfig.size.width, height: bulletConfig.size.height,
                         vx: 0, vy: 0, // Static mine
-                        hp: 1, maxHp: 1, type: 'bullet', color: '#ff0', markedForDeletion: false, spriteKey: 'bullet_enemy',
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
                         damage: 25
                     });
                 }
             }
 
             // Elite Gunboat Firing
-            if (e.subType === 4 && Math.random() < 0.02 * timeScale) {
+            if (e.subType === EnemyType.ELITE_GUNBOAT && Math.random() < 0.02 * timeScale) {
                 const dx = player.x - e.x;
                 const dy = player.y - e.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
+                const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
                 enemyBullets.push({
-                    x: e.x, y: e.y + 20, width: 12, height: 12,
+                    x: e.x, y: e.y + 20, width: bulletConfig.size.width, height: bulletConfig.size.height,
                     vx: (dx / dist) * 4, vy: (dy / dist) * 4,
-                    hp: 1, maxHp: 1, type: 'bullet', color: '#ff0', markedForDeletion: false, spriteKey: 'bullet_enemy'
+                    hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
                 });
             }
 
 
             // General Enemy firing (Reduced for specialized types)
-            if (e.subType !== 5 && e.subType !== 6) {
-                // @ts-ignore
-                const enemyConfig = EnemyConfig.types[e.subType || 0];
-                const shootFreq = enemyConfig.shootFrequency || 0.005;
+            if (e.subType !== EnemyType.LASER_INTERCEPTOR && e.subType !== EnemyType.MINE_LAYER) {
+                const enemyConfig = EnemyConfig[e.subType as EnemyType];
+                const shootFreq = enemyConfig?.shootFrequency || 0.005;
 
                 if (Math.random() < shootFreq * timeScale) {
+                    const bulletConfig = BulletConfigs[BulletType.ENEMY_ORB];
                     enemyBullets.push({
-                        x: e.x,
-                        y: e.y + e.height / 2,
-                        width: 12,
-                        height: 12,
-                        vx: 0,
-                        vy: 5,
-                        hp: 1,
-                        maxHp: 1,
-                        type: 'bullet',
-                        color: '#ff9999',
-                        markedForDeletion: false,
-                        spriteKey: 'bullet_enemy'
+                        x: e.x, y: e.y + e.height / 2, width: bulletConfig.size.width, height: bulletConfig.size.height,
+                        vx: 0, vy: 5, hp: 1, maxHp: 1,
+                        type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
                     });
                 }
             }

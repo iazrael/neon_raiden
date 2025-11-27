@@ -1,79 +1,26 @@
-import { WeaponType, BulletType, EnemyBulletType } from '@/types';
+import {
+    WeaponType,
+    BulletType,
+    EnemyType,
+    BossType,
+    EnemyBulletType,
+    BossWeaponType,
+    PowerupType,
+    FighterType,
+    FighterEntity,
+    WeaponEntity,
+    BulletEntity,
+    EnemyEntity,
+    BossEntity,
+    WeaponUpgradeEnhancements,
+    BossMovementPattern,
+    BossSpawnPosition,
+    BossWeaponEntity
+} from '@/types';
 
-// ==================== 道具类型枚举 ====================
-// Powerup types enumeration for better readability
-export enum PowerupType {
-    // Weapon Types (Directly mapped to WeaponType 0-7)
-    VULCAN = 0,     // 散弹武器
-    LASER = 1,      // 激光武器
-    MISSILE = 2,    // 跟踪导弹
-    WAVE = 3,       // 波动炮
-    PLASMA = 4,     // 等离子炮
-    TESLA = 5,      // 电磁炮
-    MAGMA = 6,      // 熔岩炮
-    SHURIKEN = 7,   // 手里剑
+// Re-export types for backward compatibility
+export { EnemyType, PowerupType, BossWeaponType };
 
-    // Special Powerups (Start from 100)
-    POWER = 100,    // 武器能量提升
-    HP = 101,       // 生命值恢复
-    BOMB = 102,     // 炸弹
-    OPTION = 103    // 僚机
-}
-
-// ==================== 敌人类型枚举 ====================
-// Enemy types enumeration for better readability
-export enum EnemyType {
-    NORMAL = 0,             // 普通敌人 - Scout (红色无人机)
-    FAST = 1,               // 快速移动 - Wing (紫色飞翼)
-    TANK = 2,               // 坦克型 - Tank (绿色重坦)
-    KAMIKAZE = 3,           // 神风特攻 - Kamikaze (橙色尖刺，自爆机)
-    ELITE_GUNBOAT = 4,      // 精英炮艇 - Gunboat (蓝色炮舰)
-    LASER_INTERCEPTOR = 5,  // 激光拦截机 - Interceptor (白色/青色)
-    MINE_LAYER = 6,         // 布雷机 - Layer (深灰/黄色)
-    PULSAR = 7,             // 脉冲机 - Pulsar (高攻速高速低血低伤)
-    FORTRESS = 8,           // 堡垒机 - Fortress (高血高伤低速低攻速)
-    STALKER = 9,            // 追踪机 - Stalker (高攻高移低血低攻速)
-    BARRAGE = 10            // 弹幕机 - Barrage (高血高攻速低速低伤)
-}
-
-// ==================== 类型映射 ====================
-// BulletType to WeaponType mapping for sprite generation
-export const BulletToWeaponMap: { [key in BulletType]?: WeaponType } = {
-    [BulletType.VULCAN]: WeaponType.VULCAN,
-    [BulletType.LASER]: WeaponType.LASER,
-    [BulletType.MISSILE]: WeaponType.MISSILE,
-    [BulletType.WAVE]: WeaponType.WAVE,
-    [BulletType.PLASMA]: WeaponType.PLASMA,
-    [BulletType.TESLA]: WeaponType.TESLA,
-    [BulletType.MAGMA]: WeaponType.MAGMA,
-    [BulletType.SHURIKEN]: WeaponType.SHURIKEN,
-};
-
-// PowerupType to WeaponType mapping for powerup icons
-// PowerupType to WeaponType mapping for powerup icons
-// Now much simpler as weapon powerups match WeaponType values
-export const PowerupToWeaponMap: { [key: number]: WeaponType } = {
-    [PowerupType.VULCAN]: WeaponType.VULCAN,
-    [PowerupType.LASER]: WeaponType.LASER,
-    [PowerupType.MISSILE]: WeaponType.MISSILE,
-    [PowerupType.WAVE]: WeaponType.WAVE,
-    [PowerupType.PLASMA]: WeaponType.PLASMA,
-    [PowerupType.TESLA]: WeaponType.TESLA,
-    [PowerupType.MAGMA]: WeaponType.MAGMA,
-    [PowerupType.SHURIKEN]: WeaponType.SHURIKEN
-};
-
-// Weapon Names Map for Audio and UI
-export const WEAPON_NAMES: { [key in WeaponType]: string } = {
-    [WeaponType.VULCAN]: 'vulcan',
-    [WeaponType.LASER]: 'laser',
-    [WeaponType.MISSILE]: 'missile',
-    [WeaponType.WAVE]: 'wave',
-    [WeaponType.PLASMA]: 'plasma',
-    [WeaponType.TESLA]: 'tesla',
-    [WeaponType.MAGMA]: 'magma',
-    [WeaponType.SHURIKEN]: 'shuriken'
-};
 
 // ==================== 游戏基础配置 ====================
 export const GameConfig = {
@@ -87,174 +34,303 @@ export const GameConfig = {
 export const ASSETS_BASE_PATH = './assets/sprites/';
 
 // ==================== 玩家配置 ====================
-export const PlayerConfig = {
+export const PlayerConfig: FighterEntity = {
+    type: FighterType.PLAYER,
+    id: 'player',
+    name: 'Neon Raiden',
     chineseName: '霓虹雷电',
-    chineseDescription: '高级原型战斗机，配备自适应武器系统，速度快、护盾强大，是抵挡敌人进攻的最后防线。',
-    speed: 7,           // 移动速度
-    width: 48,          // 碰撞箱宽度
-    height: 48,         // 碰撞箱高度
-    initialHp: 100,     // 初始生命值
-    maxHp: 100,         // 最大生命值
-    initialBombs: 3,    // 初始炸弹数量
-    maxBombs: 9,        // 最大炸弹数量
-    maxShield: 50,      // 最大护盾值
-    color: '#00ffff',   // 显示颜色（青色）
-    hitboxShrink: 0,    // 碰撞箱缩小（预留功能）
+    describe: '高级原型战斗机，配备自适应武器系统，速度快、护盾强大，是抵挡敌人进攻的最后防线。',
+    color: '#00ffff',
+    sprite: 'player',
+    size: {
+        width: 48,
+        height: 48
+    },
+    speed: 7,
+    initialHp: 100,
+    maxHp: 100,
+    initialBombs: 3,
+    maxBombs: 9,
+    maxShield: 50,
+    hitboxShrink: 0
+};
+
+// ==================== 子弹配置 ====================
+// 玩家武器子弹配置
+export const BulletConfigs: Record<BulletType, BulletEntity> = {
+    [BulletType.VULCAN]: {
+        type: BulletType.VULCAN,
+        id: 'bullet_vulcan',
+        name: 'Vulcan Bullet',
+        chineseName: '散弹',
+        describe: '扇形发射的基础子弹',
+        color: '#fff',
+        size: { width: 10, height: 20 },
+        sprite: 'bullet_vulcan'
+    },
+    [BulletType.LASER]: {
+        type: BulletType.LASER,
+        id: 'bullet_laser',
+        name: 'Laser Beam',
+        chineseName: '激光束',
+        describe: '高能激光束，可穿透敌人',
+        color: '#f0f',
+        size: { width: 8, height: 50 },
+        sprite: 'bullet_laser'
+    },
+    [BulletType.MISSILE]: {
+        type: BulletType.MISSILE,
+        id: 'bullet_missile',
+        name: 'Homing Missile',
+        chineseName: '追踪导弹',
+        describe: '自动追踪敌人的智能导弹',
+        color: '#f00',
+        size: { width: 16, height: 32 },
+        sprite: 'bullet_missile'
+    },
+    [BulletType.WAVE]: {
+        type: BulletType.WAVE,
+        id: 'bullet_wave',
+        name: 'Wave Cannon',
+        chineseName: '波动炮',
+        describe: '宽幅能量波，可穿透敌人',
+        color: '#0ff',
+        size: { width: 60, height: 24 },
+        sprite: 'bullet_wave'
+    },
+    [BulletType.PLASMA]: {
+        type: BulletType.PLASMA,
+        id: 'bullet_plasma',
+        name: 'Plasma Orb',
+        chineseName: '等离子球',
+        describe: '高能等离子球，触发爆炸产生范围伤害',
+        color: '#ed64a6',
+        size: { width: 32, height: 32 },
+        sprite: 'bullet_plasma'
+    },
+    [BulletType.TESLA]: {
+        type: BulletType.TESLA,
+        id: 'bullet_tesla',
+        name: 'Tesla Bolt',
+        chineseName: '电磁脉冲',
+        describe: '电磁脉冲，支持连锁攻击',
+        color: '#ccf',
+        size: { width: 16, height: 64 },
+        sprite: 'bullet_tesla'
+    },
+    [BulletType.MAGMA]: {
+        type: BulletType.MAGMA,
+        id: 'bullet_magma',
+        name: 'Magma Burst',
+        chineseName: '熔岩弹',
+        describe: '炽热的熔岩弹，命中后产生灼烧效果',
+        color: '#f60',
+        size: { width: 24, height: 24 },
+        sprite: 'bullet_magma'
+    },
+    [BulletType.SHURIKEN]: {
+        type: BulletType.SHURIKEN,
+        id: 'bullet_shuriken',
+        name: 'Shuriken',
+        chineseName: '手里剑',
+        describe: '可反弹的飞镖',
+        color: '#ccc',
+        size: { width: 24, height: 24 },
+        sprite: 'bullet_shuriken'
+    },
+    // 敌人子弹
+    [BulletType.ENEMY_ORB]: {
+        type: BulletType.ENEMY_ORB,
+        id: 'bullet_enemy_orb',
+        name: 'Enemy Orb',
+        chineseName: '敌人能量球',
+        describe: '普通敌人发射的能量球',
+        color: '#ff9999',
+        size: { width: 14, height: 14 },
+        sprite: 'bullet_enemy_orb'
+    },
+    [BulletType.ENEMY_BEAM]: {
+        type: BulletType.ENEMY_BEAM,
+        id: 'bullet_enemy_beam',
+        name: 'Enemy Beam',
+        chineseName: '敌人光束',
+        describe: '敌人发射的光束弹',
+        color: '#f97316',
+        size: { width: 12, height: 32 },
+        sprite: 'bullet_enemy_beam'
+    },
+    [BulletType.ENEMY_RAPID]: {
+        type: BulletType.ENEMY_RAPID,
+        id: 'bullet_enemy_rapid',
+        name: 'Enemy Rapid',
+        chineseName: '敌人快速弹',
+        describe: '敌人发射的快速弹',
+        color: '#ecc94b',
+        size: { width: 10, height: 20 },
+        sprite: 'bullet_enemy_rapid'
+    },
+    [BulletType.ENEMY_HEAVY]: {
+        type: BulletType.ENEMY_HEAVY,
+        id: 'bullet_enemy_heavy',
+        name: 'Enemy Heavy',
+        chineseName: '敌人重型弹',
+        describe: '敌人发射的重型弹',
+        color: '#9f7aea',
+        size: { width: 28, height: 28 },
+        sprite: 'bullet_enemy_heavy'
+    },
+    [BulletType.ENEMY_HOMING]: {
+        type: BulletType.ENEMY_HOMING,
+        id: 'bullet_enemy_homing',
+        name: 'Enemy Homing',
+        chineseName: '敌人追踪弹',
+        describe: '敌人发射的追踪弹',
+        color: '#48bb78',
+        size: { width: 16, height: 16 },
+        sprite: 'bullet_enemy_homing'
+    },
+    [BulletType.ENEMY_SPIRAL]: {
+        type: BulletType.ENEMY_SPIRAL,
+        id: 'bullet_enemy_spiral',
+        name: 'Enemy Spiral',
+        chineseName: '敌人螺旋弹',
+        describe: '敌人发射的螺旋弹',
+        color: '#4299e1',
+        size: { width: 14, height: 14 },
+        sprite: 'bullet_enemy_spiral'
+    }
 };
 
 // ==================== 武器配置 ====================
-export const WeaponConfig = {
-    // VULCAN - 散弹（黄色）
-    // 特性：扇形发射，子弹分裂（1→3→5→7）
-    // 升级：等级1-2(1发)，3-5(3发)，6-8(5发)，9-10(7发)
+export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
     [WeaponType.VULCAN]: {
+        type: WeaponType.VULCAN,
+        id: 'weapon_vulcan',
+        name: 'Vulcan Gun',
         chineseName: '散弹枪',
-        chineseDescription: '扇形发射的经典近距离武器，子弹密度随等级提升而增加。火力覆盖广泛但威力一般。',
-        baseDamage: 10,         // 基础伤害
-        damagePerLevel: 3,      // 每级伤害增长
-        speed: 15,              // 子弹速度
-        baseFireRate: 100,      // 基础射速（毫秒）
-        ratePerLevel: 2,        // 每级射速提升（毫秒减少）
-        width: 10,              // 子弹宽度
-        height: 20,             // 子弹高度
-        color: '#fff',          // 子弹颜色
-        sprite: 'bullet_vulcan' // 精灵图名称
+        describe: '扇形发射的经典近距离武器，子弹密度随等级提升而增加。火力覆盖广泛但威力一般。',
+        color: '#fff',
+        baseDamage: 10,
+        damagePerLevel: 3,
+        speed: 15,
+        baseFireRate: 100,
+        ratePerLevel: 2,
+        bullet: BulletConfigs[BulletType.VULCAN],
+        sprite: 'bullet_vulcan'
     },
-    // LASER - 激光（青色）
-    // 特性：笔直高能激光，可穿透
-    // 升级：等级1-4(单光束)，5-7(双光束)，8-10(三光束)
     [WeaponType.LASER]: {
+        type: WeaponType.LASER,
+        id: 'weapon_laser',
+        name: 'Laser Cannon',
         chineseName: '激光炮',
-        chineseDescription: '高能激光束，笔直射出可穿透敌人，威力稳定。高等级时可分裂成多道光束。',
-        baseDamage: 5,          // 基础伤害
-        damagePerLevel: 3,      // 每级伤害增长
-        speed: 25,              // 子弹速度
-        baseFireRate: 60,       // 基础射速（毫秒）
-        ratePerLevel: 0,        // 固定射速，不随等级变化
-        width: 8,               // 子弹基础宽度（随等级变粗）
-        height: 50,             // 子弹高度
-        color: '#f0f',          // 子弹颜色
-        sprite: 'bullet_laser'  // 精灵图名称
+        describe: '高能激光束，笔直射出可穿透敌人，威力稳定。高等级时可分裂成多道光束。',
+        color: '#f0f',
+        baseDamage: 5,
+        damagePerLevel: 3,
+        speed: 25,
+        baseFireRate: 60,
+        ratePerLevel: 0,
+        bullet: BulletConfigs[BulletType.LASER],
+        sprite: 'bullet_laser'
     },
-    // MISSILE - 导弹（紫色）
-    // 特性：跟踪导弹，自动追踪最近敌人
-    // 升级：等级1-2(2发)，3-5(4发)，6-8(6发)，9-10(8发)
     [WeaponType.MISSILE]: {
+        type: WeaponType.MISSILE,
+        id: 'weapon_missile',
+        name: 'Homing Missile',
         chineseName: '追踪导弹',
-        chineseDescription: '自动追踪敌人的智能导弹，发射数量随等级增加。威力强劲但射速较慢。',
-        baseDamage: 15,         // 基础伤害
-        damagePerLevel: 6,      // 每级伤害增长
-        speed: 12,              // 子弹速度
-        baseFireRate: 100,      // 基础射速（毫秒）
-        ratePerLevel: 2,        // 每级射速提升（毫秒减少）
-        width: 16,              // 子弹宽度
-        height: 32,             // 子弹高度
-        color: '#f00',          // 子弹颜色
-        sprite: 'bullet_missile' // 精灵图名称
+        describe: '自动追踪敌人的智能导弹，发射数量随等级增加。威力强劲但射速较慢。',
+        color: '#f00',
+        baseDamage: 15,
+        damagePerLevel: 6,
+        speed: 12,
+        baseFireRate: 100,
+        ratePerLevel: 2,
+        bullet: BulletConfigs[BulletType.MISSILE],
+        sprite: 'bullet_missile'
     },
-    // WAVE - 波动炮（蓝色）
-    // 特性：宽幅波动，可穿透，威力巨大但射速慢
-    // 升级：宽度92px→200px，射速330ms→150ms
     [WeaponType.WAVE]: {
+        type: WeaponType.WAVE,
+        id: 'weapon_wave',
+        name: 'Wave Cannon',
         chineseName: '波动炮',
-        chineseDescription: '宽幅能量波冲击，覆盖面积大可穿透敌人。威力极大但射速较慢，适合清场。',
-        baseDamage: 20,         // 基础伤害
-        damagePerLevel: 6,      // 每级伤害增长
-        speed: 15,              // 子弹速度
-        baseFireRate: 350,      // 基础射速（毫秒）
-        ratePerLevel: 20,       // 每级射速提升（毫秒减少）
-        width: 60,              // 子弹基础宽度（随等级变宽）
-        height: 24,             // 子弹高度
-        color: '#0ff',          // 子弹颜色
-        sprite: 'bullet_wave'   // 精灵图名称
+        describe: '宽幅能量波冲击，覆盖面积大可穿透敌人。威力极大但射速较慢，适合清场。',
+        color: '#0ff',
+        baseDamage: 20,
+        damagePerLevel: 6,
+        speed: 15,
+        baseFireRate: 350,
+        ratePerLevel: 20,
+        bullet: BulletConfigs[BulletType.WAVE],
+        sprite: 'bullet_wave'
     },
-    // PLASMA - 等离子炮（粉色）
-    // 特性：缓慢移动能量球，AOE爆炸伤害
-    // 升级：尺寸56×56→128×128，爆炸范围扩大
     [WeaponType.PLASMA]: {
+        type: WeaponType.PLASMA,
+        id: 'weapon_plasma',
+        name: 'Plasma Cannon',
         chineseName: '等离子炮',
-        chineseDescription: '高能等离子球，触发爆炸产生范围伤害。威力最强但射速最慢，稀有武器。',
-        baseDamage: 80,         // 基础伤害（单发最高）
-        damagePerLevel: 25,     // 每级伤害增长
-        speed: 8,               // 子弹速度（缓慢）
-        baseFireRate: 600,      // 基础射速（毫秒）
-        ratePerLevel: 50,       // 每级射速提升（毫秒减少）
-        width: 32,              // 子弹基础宽度（随等级变大）
-        height: 32,             // 子弹基础高度（随等级变大）
-        color: '#ed64a6',       // 子弹颜色
-        sprite: 'bullet_plasma' // 精灵图名称
+        describe: '高能等离子球，触发爆炸产生范围伤害。威力最强但射速最慢，稀有武器。',
+        color: '#ed64a6',
+        baseDamage: 80,
+        damagePerLevel: 25,
+        speed: 8,
+        baseFireRate: 600,
+        ratePerLevel: 50,
+        bullet: BulletConfigs[BulletType.PLASMA],
+        sprite: 'bullet_plasma'
     },
-    // TESLA - 电磁炮（淡蓝）
-    // 特性：自动锁定最近敌人，连锁攻击
-    // 升级：连锁范围扩大，伤害递增
     [WeaponType.TESLA]: {
+        type: WeaponType.TESLA,
+        id: 'weapon_tesla',
+        name: 'Tesla Coil',
         chineseName: '电磁炮',
-        chineseDescription: '释放电磁脉冲锁定敌人，支持连锁攻击。等级越高连锁范围越大威力越强。',
-        baseDamage: 15,         // 基础伤害
-        damagePerLevel: 4,      // 每级伤害增长
-        speed: 20,              // 子弹速度
-        baseFireRate: 200,      // 基础射速（毫秒）
-        ratePerLevel: 10,       // 每级射速提升（毫秒减少）
-        width: 16,              // 子弹宽度
-        height: 64,             // 子弹高度
-        color: '#ccf',          // 子弹颜色
-        sprite: 'bullet_tesla'  // 精灵图名称
+        describe: '释放电磁脉冲锁定敌人，支持连锁攻击。等级越高连锁范围越大威力越强。',
+        color: '#ccf',
+        baseDamage: 15,
+        damagePerLevel: 4,
+        speed: 20,
+        baseFireRate: 200,
+        ratePerLevel: 10,
+        bullet: BulletConfigs[BulletType.TESLA],
+        sprite: 'bullet_tesla'
     },
-    // MAGMA - 熔岩弹（橙红）
-    // 特性：锥形散射，持续灼烧伤害
-    // 升级：等级1-2(3发)，3-5(4发)，6-8(5发)，9-10(6发)
     [WeaponType.MAGMA]: {
+        type: WeaponType.MAGMA,
+        id: 'weapon_magma',
+        name: 'Magma Burst',
         chineseName: '熔岩弹',
-        chineseDescription: '锥形散射的炽热熔岩弹，命中后产生灼烧效果。覆盖面广但单发威力较弱。',
-        baseDamage: 8,          // 基础伤害
-        damagePerLevel: 2,      // 每级伤害增长
-        speed: 12,              // 子弹平均速度（有随机变化）
-        baseFireRate: 50,       // 基础射速（毫秒）
-        ratePerLevel: 0,        // 固定射速
-        width: 24,              // 子弹宽度
-        height: 24,             // 子弹高度
-        color: '#f60',          // 子弹颜色
-        sprite: 'bullet_magma'  // 精灵图名称
+        describe: '锥形散射的炽热熔岩弹，命中后产生灼烧效果。覆盖面广但单发威力较弱。',
+        color: '#f60',
+        baseDamage: 8,
+        damagePerLevel: 2,
+        speed: 12,
+        baseFireRate: 50,
+        ratePerLevel: 0,
+        bullet: BulletConfigs[BulletType.MAGMA],
+        sprite: 'bullet_magma'
     },
-    // SHURIKEN - 手里剑（银灰）
-    // 特性：扇形发射，可弹射反弹
-    // 升级：等级1-2(2发)，3-5(3发)，6-8(4发)，9-10(5发)
     [WeaponType.SHURIKEN]: {
+        type: WeaponType.SHURIKEN,
+        id: 'weapon_shuriken',
+        name: 'Shuriken',
         chineseName: '手里剑',
-        chineseDescription: '东方古老武器的现代版本，扇形发射可反弹。等级高时大范围覆盖地面。',
-        baseDamage: 12,         // 基础伤害
-        damagePerLevel: 3,      // 每级伤害增长
-        speed: 12,              // 子弹速度
-        baseFireRate: 400,      // 基础射速（毫秒）
-        ratePerLevel: 30,       // 每级射速提升（毫秒减少）
-        width: 24,              // 子弹宽度
-        height: 24,             // 子弹高度
-        color: '#ccc',          // 子弹颜色
-        sprite: 'bullet_shuriken' // 精灵图名称
+        describe: '东方古老武器的现代版本，扇形发射可反弹。等级高时大范围覆盖地面。',
+        color: '#ccc',
+        baseDamage: 12,
+        damagePerLevel: 3,
+        speed: 12,
+        baseFireRate: 400,
+        ratePerLevel: 30,
+        bullet: BulletConfigs[BulletType.SHURIKEN],
+        sprite: 'bullet_shuriken'
     }
 };
 
 // ==================== 武器升级配置 ====================
-// 定义武器升级时的增强效果
-export interface WeaponUpgradeEnhancements {
-    bulletCount?: number;      // 子弹数量
-    bulletWidth?: number;       // 子弹宽度增量
-    bulletHeight?: number;      // 子弹高度增量
-    beamCount?: number;         // 光束数量
-    spread?: number;            // 散射角度
-    offsetX?: number;           // X轴偏移
-    offsetY?: number;           // Y轴偏移
-    widthMultiplier?: number;   // 宽度倍数
-    heightMultiplier?: number;  // 高度倍数
-}
-
-// 武器升级配置 - 每种武器在不同等级下的增强效果
 export const WeaponUpgradeConfig: {
     [key in WeaponType]: {
         [level: number]: WeaponUpgradeEnhancements
     }
 } = {
-    // VULCAN - 散弹：子弹数量递增 1→3→5→7
     [WeaponType.VULCAN]: {
         1: { bulletCount: 1 },
         2: { bulletCount: 1 },
@@ -267,7 +343,6 @@ export const WeaponUpgradeConfig: {
         9: { bulletCount: 7 },
         10: { bulletCount: 7 }
     },
-    // LASER - 激光：宽度递增，光束数量增加
     [WeaponType.LASER]: {
         1: { bulletWidth: 1, beamCount: 1 },
         2: { bulletWidth: 2, beamCount: 1 },
@@ -280,7 +355,6 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 9, beamCount: 3 },
         10: { bulletWidth: 10, beamCount: 3 }
     },
-    // MISSILE - 导弹：数量递增 2→4→6→8
     [WeaponType.MISSILE]: {
         1: { bulletCount: 2 },
         2: { bulletCount: 2 },
@@ -293,7 +367,6 @@ export const WeaponUpgradeConfig: {
         9: { bulletCount: 8 },
         10: { bulletCount: 8 }
     },
-    // WAVE - 波动炮：宽度线性增长
     [WeaponType.WAVE]: {
         1: { bulletWidth: 12 },
         2: { bulletWidth: 24 },
@@ -306,7 +379,6 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 108 },
         10: { bulletWidth: 120 }
     },
-    // PLASMA - 等离子炮：尺寸线性增长
     [WeaponType.PLASMA]: {
         1: { bulletWidth: 8, bulletHeight: 8 },
         2: { bulletWidth: 16, bulletHeight: 16 },
@@ -319,20 +391,10 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 72, bulletHeight: 72 },
         10: { bulletWidth: 80, bulletHeight: 80 }
     },
-    // TESLA - 电磁炮：保持默认配置（锁定范围在代码中处理）
     [WeaponType.TESLA]: {
-        1: {},
-        2: {},
-        3: {},
-        4: {},
-        5: {},
-        6: {},
-        7: {},
-        8: {},
-        9: {},
-        10: {}
+        1: {}, 2: {}, 3: {}, 4: {}, 5: {},
+        6: {}, 7: {}, 8: {}, 9: {}, 10: {}
     },
-    // MAGMA - 熔岩炮：子弹数量递增
     [WeaponType.MAGMA]: {
         1: { bulletCount: 3 },
         2: { bulletCount: 3 },
@@ -345,7 +407,6 @@ export const WeaponUpgradeConfig: {
         9: { bulletCount: 6 },
         10: { bulletCount: 6 }
     },
-    // SHURIKEN - 手里剑：子弹数量递增
     [WeaponType.SHURIKEN]: {
         1: { bulletCount: 2 },
         2: { bulletCount: 2 },
@@ -361,273 +422,249 @@ export const WeaponUpgradeConfig: {
 };
 
 // ==================== 敌人子弹配置 ====================
-export const EnemyBulletConfig = {
-    // ENEMY_ORB - 敌人普通能量球（红色）
-    [EnemyBulletType.ORB]: {
-        width: 20,              // 子弹宽度
-        height: 20,             // 子弹高度
-        color: '#f56565',       // 子弹颜色（红色）
-        sprite: 'bullet_enemy_orb' // 精灵图名称
-    },
-    // ENEMY_BEAM - 敌人光束弹（橙色）
-    [EnemyBulletType.BEAM]: {
-        width: 12,              // 子弹宽度
-        height: 32,             // 子弹高度
-        color: '#f97316',       // 子弹颜色（橙色）
-        sprite: 'bullet_enemy_beam' // 精灵图名称
-    },
-    // ENEMY_RAPID - 敌人快速弹（黄色）
-    [EnemyBulletType.RAPID]: {
-        width: 10,
-        height: 20,
-        color: '#ecc94b',       // 黄色
-        sprite: 'bullet_enemy_rapid'
-    },
-    // ENEMY_HEAVY - 敌人重型弹（紫色）
-    [EnemyBulletType.HEAVY]: {
-        width: 28,
-        height: 28,
-        color: '#9f7aea',       // 紫色
-        sprite: 'bullet_enemy_heavy'
-    },
-    // ENEMY_HOMING - 敌人追踪弹（绿色）
-    [EnemyBulletType.HOMING]: {
-        width: 16,
-        height: 16,
-        color: '#48bb78',       // 绿色
-        sprite: 'bullet_enemy_homing'
-    },
-    // ENEMY_SPIRAL - 敌人螺旋弹（蓝色）
-    [EnemyBulletType.SPIRAL]: {
-        width: 14,
-        height: 14,
-        color: '#4299e1',       // 蓝色
-        sprite: 'bullet_enemy_spiral'
-    }
-};
 
 // ==================== 敌人生成权重配置 ====================
-// 按关卡配置敌人类型的生成权重 - 权重越高，生成概率越大
-export const EnemySpawnWeights = {
-    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3, [EnemyType.TANK]: 1, [EnemyType.PULSAR]: 1 },
-    2: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.PULSAR]: 5, [EnemyType.STALKER]: 1 },
-    3: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 10, [EnemyType.KAMIKAZE]: 2, [EnemyType.PULSAR]: 3, [EnemyType.STALKER]: 3, [EnemyType.FORTRESS]: 1 },
-    4: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 2, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 10, [EnemyType.STALKER]: 5, [EnemyType.FORTRESS]: 3, [EnemyType.BARRAGE]: 1 },
-    5: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 10, [EnemyType.FORTRESS]: 5, [EnemyType.BARRAGE]: 3 },
-    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 3, [EnemyType.LASER_INTERCEPTOR]: 10, [EnemyType.BARRAGE]: 5, [EnemyType.PULSAR]: 5 },
-    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 10, [EnemyType.STALKER]: 5 },
+export const EnemySpawnWeights: Record<number, Record<EnemyType, number>> = {
+    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3, [EnemyType.TANK]: 1, [EnemyType.PULSAR]: 1, [EnemyType.KAMIKAZE]: 0, [EnemyType.ELITE_GUNBOAT]: 0, [EnemyType.LASER_INTERCEPTOR]: 0, [EnemyType.MINE_LAYER]: 0, [EnemyType.FORTRESS]: 0, [EnemyType.STALKER]: 0, [EnemyType.BARRAGE]: 0 },
+    2: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.PULSAR]: 5, [EnemyType.STALKER]: 1, [EnemyType.KAMIKAZE]: 0, [EnemyType.ELITE_GUNBOAT]: 0, [EnemyType.LASER_INTERCEPTOR]: 0, [EnemyType.MINE_LAYER]: 0, [EnemyType.FORTRESS]: 0, [EnemyType.BARRAGE]: 0 },
+    3: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 10, [EnemyType.KAMIKAZE]: 2, [EnemyType.PULSAR]: 3, [EnemyType.STALKER]: 3, [EnemyType.FORTRESS]: 1, [EnemyType.ELITE_GUNBOAT]: 0, [EnemyType.LASER_INTERCEPTOR]: 0, [EnemyType.MINE_LAYER]: 0, [EnemyType.BARRAGE]: 0 },
+    4: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 2, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 10, [EnemyType.STALKER]: 5, [EnemyType.FORTRESS]: 3, [EnemyType.BARRAGE]: 1, [EnemyType.PULSAR]: 0, [EnemyType.ELITE_GUNBOAT]: 0, [EnemyType.LASER_INTERCEPTOR]: 0, [EnemyType.MINE_LAYER]: 0 },
+    5: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 10, [EnemyType.FORTRESS]: 5, [EnemyType.BARRAGE]: 3, [EnemyType.PULSAR]: 0, [EnemyType.STALKER]: 0, [EnemyType.LASER_INTERCEPTOR]: 0, [EnemyType.MINE_LAYER]: 0 },
+    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 3, [EnemyType.LASER_INTERCEPTOR]: 10, [EnemyType.BARRAGE]: 5, [EnemyType.PULSAR]: 5, [EnemyType.FORTRESS]: 0, [EnemyType.STALKER]: 0, [EnemyType.MINE_LAYER]: 0 },
+    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 10, [EnemyType.STALKER]: 5, [EnemyType.PULSAR]: 0, [EnemyType.FORTRESS]: 0, [EnemyType.BARRAGE]: 0 },
     8: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 8, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3, [EnemyType.PULSAR]: 5, [EnemyType.STALKER]: 5, [EnemyType.FORTRESS]: 5, [EnemyType.BARRAGE]: 5 },
     9: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 8, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3, [EnemyType.PULSAR]: 8, [EnemyType.STALKER]: 8, [EnemyType.FORTRESS]: 8, [EnemyType.BARRAGE]: 8 },
     10: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 9, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 5, [EnemyType.MINE_LAYER]: 4, [EnemyType.PULSAR]: 10, [EnemyType.STALKER]: 10, [EnemyType.FORTRESS]: 10, [EnemyType.BARRAGE]: 10 }
 };
 
 // ==================== 敌人配置 ====================
-export const EnemyConfig = {
-    baseSpawnRate: 1000,                // 基础生成间隔（毫秒） - 这里的数值越小，生成越快
-    spawnRateReductionPerLevel: 200,    // 每关生成间隔减少量（毫秒）
-    minSpawnRate: 300,                  // 最小生成间隔（毫秒）
-    eliteChance: 0.15,                  // 精英怪生成概率（15%）
-    eliteHpMultiplier: 3,               // 精英怪生命值倍率
-    eliteSizeMultiplier: 1.3,           // 精英怪体积倍率
-    enemyCountMultiplier: 1.15,         // 每关敌人数量增长倍率（15%）
-    types: {
-        // Scout - 红色无人机（普通敌人）
-        // 行为：缓慢直线飞行，偶尔发射子弹
-        [EnemyType.NORMAL]: {
-            chineseName: '红色无人机',
-            chineseDescription: '最基础的敌人单位，速度慢、血量低，是水送的得分来源。',
-            baseHp: 20,             // 基础生命值
-            hpPerLevel: 10,         // 每关生命值增长
-            baseSpeed: 2,           // 基础速度
-            speedPerLevel: 0.5,     // 每关速度增长
-            width: 40,              // 宽度
-            height: 40,             // 高度
-            score: 100              // 击杀得分
-        },
-        // Wing - 紫色飞翼（快速移动）
-        // 行为：快速折线移动，难以瞄准
-        [EnemyType.FAST]: {
-            chineseName: '紫色飞翼',
-            chineseDescription: '速度轻快的飞翼敌机，折线移动较难瞄准。虽然血量低但子弹轰炸强，带来麻烦。',
-            baseHp: 10,             // 基础生命值
-            hpPerLevel: 0,          // 生命值不随关卡增长
-            baseSpeed: 5,           // 基础速度
-            speedPerLevel: 1,       // 每关速度增长
-            width: 30,              // 宽度
-            height: 40,             // 高度
-            score: 200,             // 击杀得分
-            shootFrequency: 0.015   // 射击频率（提高）
-        },
-        // Tank - 绿色重坦（坦克型）
-        // 行为：移动缓慢，体积大，血厚
-        [EnemyType.TANK]: {
-            chineseName: '绿色重坦',
-            chineseDescription: '默无声息的重型坦克车，体积大血量厚，移动缓慢。是不容忽视的重大威胁。',
-            baseHp: 60,             // 基础生命值
-            hpPerLevel: 20,         // 每关生命值增长
-            baseSpeed: 1,           // 基础速度
-            speedPerLevel: 0,       // 速度不随关卡增长
-            width: 60,              // 宽度
-            height: 60,             // 高度
-            score: 300              // 击杀得分
-        },
-        // Kamikaze - 橙色尖刺（神风特攻）
-        // 行为：快速冲向玩家位置，不发射子弹（自爆机）
-        [EnemyType.KAMIKAZE]: {
-            chineseName: '橙色尖刺',
-            chineseDescription: '橙色尖刺形的尖兵机，速度最快直接冲撞。血量低但子弹轰炸强，带来残血。',
-            baseHp: 5,              // 基础生命值
-            hpPerLevel: 0,          // 生命值不随关卡增长
-            baseSpeed: 7,           // 基础速度
-            speedPerLevel: 0,       // 速度不随关卡增长
-            width: 30,              // 宽度
-            height: 30,             // 高度
-            score: 400,             // 击杀得分
-            shootFrequency: 0.02    // 射击频率（提高）
-        },
-        // Gunboat - 蓝色炮舰（精英炮艇）
-        // 行为：移动极慢，发射瞄准玩家的快速弹幕
-        [EnemyType.ELITE_GUNBOAT]: {
-            chineseName: '蓝色炮舰',
-            chineseDescription: '蓝色炮艇级、体积巨大血量厚。移动极慢但火力猛烈，是中低等级的大麻烦。',
-            baseHp: 150,            // 基础生命值
-            hpPerLevel: 30,         // 每关生命值增长
-            baseSpeed: 0.5,         // 基础速度
-            speedPerLevel: 0,       // 速度不随关卡增长
-            width: 70,              // 宽度
-            height: 50,             // 高度
-            score: 500              // 击杀得分
-        },
-        // Interceptor - 白色/青色（激光拦截机）
-        // 行为：移动到屏幕中段悬停，预警后发射贯穿激光
-        [EnemyType.LASER_INTERCEPTOR]: {
-            chineseName: '激光拦截机',
-            chineseDescription: '白色/青色的双翼拦截机。会在屏幕中段悬停，然后发射强大激光造成较高伤害。',
-            baseHp: 80,             // 基础生命值
-            hpPerLevel: 15,         // 每关生命值增长
-            baseSpeed: 4,           // 基础速度
-            speedPerLevel: 0,       // 速度不随关卡增长
-            width: 50,              // 宽度
-            height: 50,             // 高度
-            score: 600              // 击杀得分
-        },
-        // Layer - 深灰/黄色（布雷机）
-        // 行为：移动缓慢，在身后持续留下静止空雷
-        [EnemyType.MINE_LAYER]: {
-            chineseName: '布雷机',
-            chineseDescription: '深灰/黄色的布雷敌机。缓慢移动但持续留下静止空雷，是中后期关卡会遇到的障碍。',
-            baseHp: 120,            // 基础生命值
-            hpPerLevel: 20,         // 每关生命值增长
-            baseSpeed: 1.5,         // 基础速度
-            speedPerLevel: 0,       // 速度不随关卡增长
-            width: 60,              // 宽度
-            height: 40,             // 高度
-            score: 700              // 击杀得分
-        },
-        // Pulsar - 脉冲机 (高攻速高速低血低伤)
-        [EnemyType.PULSAR]: {
-            chineseName: '脉冲机',
-            chineseDescription: '高频发射脉冲弹的轻型战机。速度快射速高，但装甲薄弱。',
-            baseHp: 15,
-            hpPerLevel: 5,
-            baseSpeed: 6,
-            speedPerLevel: 0.5,
-            width: 32,
-            height: 32,
-            score: 250,
-            shootFrequency: 0.08
-        },
-        // Fortress - 堡垒机 (高血高伤低速低攻速)
-        [EnemyType.FORTRESS]: {
-            chineseName: '堡垒机',
-            chineseDescription: '重装甲空中堡垒，移动缓慢但火力威力巨大。',
-            baseHp: 200,
-            hpPerLevel: 40,
-            baseSpeed: 0.8,
-            speedPerLevel: 0,
-            width: 70,
-            height: 70,
-            score: 800,
-            shootFrequency: 0.02
-        },
-        // Stalker - 追踪机 (高攻高移低血低攻速)
-        [EnemyType.STALKER]: {
-            chineseName: '追踪机',
-            chineseDescription: '装备追踪系统的猎杀者，爆发伤害高且灵活，但持续作战能力弱。',
-            baseHp: 30,
-            hpPerLevel: 10,
-            baseSpeed: 5,
-            speedPerLevel: 0.5,
-            width: 36,
-            height: 36,
-            score: 350,
-            shootFrequency: 0.03
-        },
-        // Barrage - 弹幕机 (高血高攻速低速低伤)
-        [EnemyType.BARRAGE]: {
-            chineseName: '弹幕机',
-            chineseDescription: '专门用于制造弹幕压制的重型机，虽然单发伤害低但覆盖面极广。',
-            baseHp: 100,
-            hpPerLevel: 20,
-            baseSpeed: 1.2,
-            speedPerLevel: 0.1,
-            width: 50,
-            height: 50,
-            score: 600,
-            shootFrequency: 0.1
-        }
+
+export const EnemyCommonConfig = {
+    baseSpawnRate: 1000,
+    spawnRateReductionPerLevel: 200,
+    minSpawnRate: 300,
+    eliteChance: 0.15,
+    eliteHpMultiplier: 3,
+    eliteSizeMultiplier: 1.3,
+    enemyCountMultiplier: 1.15,
+};
+
+export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
+    [EnemyType.NORMAL]: {
+        type: EnemyType.NORMAL,
+        id: 'enemy_normal',
+        name: 'Scout',
+        chineseName: '红色无人机',
+        describe: '最基础的敌人单位，速度慢、血量低，是水送的得分来源。',
+        color: '#ff4444',
+        baseHp: 20,
+        hpPerLevel: 10,
+        baseSpeed: 2,
+        speedPerLevel: 0.5,
+        sprite: 'enemy_normal',
+        size: { width: 40, height: 40 },
+        score: 100
+    },
+    [EnemyType.FAST]: {
+        type: EnemyType.FAST,
+        id: 'enemy_fast',
+        name: 'Wing',
+        chineseName: '紫色飞翼',
+        describe: '速度轻快的飞翼敌机，折线移动较难瞄准。虽然血量低但子弹轰炸强，带来麻烦。',
+        color: '#aa44ff',
+        baseHp: 10,
+        hpPerLevel: 0,
+        baseSpeed: 8,
+        speedPerLevel: 0.5,
+        sprite: 'enemy_fast',
+        size: { width: 30, height: 40 },
+        score: 200,
+        shootFrequency: 0.015
+    },
+    [EnemyType.TANK]: {
+        type: EnemyType.TANK,
+        id: 'enemy_tank',
+        name: 'Tank',
+        chineseName: '绿色重坦',
+        describe: '默无声息的重型坦克车，体积大血量厚，移动缓慢。是不容忽视的重大威胁。',
+        color: '#44ff44',
+        baseHp: 60,
+        hpPerLevel: 20,
+        baseSpeed: 1,
+        speedPerLevel: 0,
+        sprite: 'enemy_tank',
+        size: { width: 60, height: 60 },
+        score: 300
+    },
+    [EnemyType.KAMIKAZE]: {
+        type: EnemyType.KAMIKAZE,
+        id: 'enemy_kamikaze',
+        name: 'Kamikaze',
+        chineseName: '橙色尖刺',
+        describe: '橙色尖刺形的尖兵机，速度最快直接冲撞。血量低但子弹轰炸强，带来残血。',
+        color: '#ffaa44',
+        baseHp: 5,
+        hpPerLevel: 0,
+        baseSpeed: 10,
+        speedPerLevel: 0.8,
+        sprite: 'enemy_kamikaze',
+        size: { width: 30, height: 30 },
+        score: 400,
+        shootFrequency: 0.02
+    },
+    [EnemyType.ELITE_GUNBOAT]: {
+        type: EnemyType.ELITE_GUNBOAT,
+        id: 'enemy_gunboat',
+        name: 'Gunboat',
+        chineseName: '蓝色炮舰',
+        describe: '蓝色炮艇级、体积巨大血量厚。移动极慢但火力猛烈，是中低等级的大麻烦。',
+        color: '#4444ff',
+        baseHp: 150,
+        hpPerLevel: 30,
+        baseSpeed: 0.5,
+        speedPerLevel: 0,
+        sprite: 'enemy_gunboat',
+        size: { width: 70, height: 50 },
+        score: 500
+    },
+    [EnemyType.LASER_INTERCEPTOR]: {
+        type: EnemyType.LASER_INTERCEPTOR,
+        id: 'enemy_interceptor',
+        name: 'Interceptor',
+        chineseName: '激光拦截机',
+        describe: '白色/青色的双翼拦截机。会在屏幕中段悬停，然后发射强大激光造成较高伤害。',
+        color: '#44ffff',
+        baseHp: 80,
+        hpPerLevel: 15,
+        baseSpeed: 4,
+        speedPerLevel: 0,
+        sprite: 'enemy_interceptor',
+        size: { width: 50, height: 50 },
+        score: 600
+    },
+    [EnemyType.MINE_LAYER]: {
+        type: EnemyType.MINE_LAYER,
+        id: 'enemy_layer',
+        name: 'Mine Layer',
+        chineseName: '布雷机',
+        describe: '深灰/黄色的布雷敌机。缓慢移动但持续留下静止空雷，是中后期关卡会遇到的障碍。',
+        color: '#aaaa44',
+        baseHp: 120,
+        hpPerLevel: 20,
+        baseSpeed: 1.5,
+        speedPerLevel: 0,
+        sprite: 'enemy_layer',
+        size: { width: 60, height: 40 },
+        score: 700
+    },
+    [EnemyType.PULSAR]: {
+        type: EnemyType.PULSAR,
+        id: 'enemy_pulsar',
+        name: 'Pulsar',
+        chineseName: '脉冲机',
+        describe: '高频发射脉冲弹的轻型战机。速度快射速高，但装甲薄弱。',
+        color: '#ff44ff',
+        baseHp: 15,
+        hpPerLevel: 5,
+        baseSpeed: 6,
+        speedPerLevel: 0.5,
+        sprite: 'enemy_pulsar',
+        size: { width: 32, height: 32 },
+        score: 250,
+        shootFrequency: 0.08
+    },
+    [EnemyType.FORTRESS]: {
+        type: EnemyType.FORTRESS,
+        id: 'enemy_fortress',
+        name: 'Fortress',
+        chineseName: '堡垒机',
+        describe: '重装甲空中堡垒，移动缓慢但火力威力巨大。',
+        color: '#666666',
+        baseHp: 200,
+        hpPerLevel: 40,
+        baseSpeed: 0.8,
+        speedPerLevel: 0,
+        sprite: 'enemy_fortress',
+        size: { width: 70, height: 70 },
+        score: 800,
+        shootFrequency: 0.02
+    },
+    [EnemyType.STALKER]: {
+        type: EnemyType.STALKER,
+        id: 'enemy_stalker',
+        name: 'Stalker',
+        chineseName: '追踪机',
+        describe: '装备追踪系统的猎杀者，爆发伤害高且灵活，但持续作战能力弱。',
+        color: '#ff8844',
+        baseHp: 30,
+        hpPerLevel: 10,
+        baseSpeed: 5,
+        speedPerLevel: 0.5,
+        sprite: 'enemy_stalker',
+        size: { width: 36, height: 36 },
+        score: 350,
+        shootFrequency: 0.03
+    },
+    [EnemyType.BARRAGE]: {
+        type: EnemyType.BARRAGE,
+        id: 'enemy_barrage',
+        name: 'Barrage',
+        chineseName: '弹幕机',
+        describe: '专门用于制造弹幕压制的重型机，虽然单发伤害低但覆盖面极广。',
+        color: '#8844ff',
+        baseHp: 100,
+        hpPerLevel: 20,
+        baseSpeed: 1.2,
+        speedPerLevel: 0.1,
+        sprite: 'enemy_barrage',
+        size: { width: 50, height: 50 },
+        score: 600,
+        shootFrequency: 0.1
     }
 };
 
-// ==================== 敌人掉落物配置 ====================
+
+// ==================== 道具掉落配置 ====================
 export const PowerupDropConfig = {
-    elitePowerupDropRate: 0.6,      // 精英怪掉落概率（60%）
-    normalPowerupDropRate: 0.1,     // 普通怪掉落概率（10%）
+    elitePowerupDropRate: 0.6,
+    normalPowerupDropRate: 0.1,
 };
 
-// ==================== 道具掉落概率配置 ====================
-// 击杀敌人有20%概率掉落道具，以下为各类道具的相对权重
-// 权重分配基于武器强度：强力武器（PLASMA、WAVE）较稀有，基础武器较常见
-export const PowerupDropRates = {
-    [PowerupType.POWER]: 0.20,      // 武器能量提升: 20%
-    [PowerupType.HP]: 0.18,         // 生命值恢复: 18%
-    [PowerupType.VULCAN]: 0.10,     // 散弹武器: 10%
-    [PowerupType.LASER]: 0.10,      // 激光武器: 10%
-    [PowerupType.MISSILE]: 0.10,    // 导弹: 10%
-    [PowerupType.SHURIKEN]: 0.08,   // 手里剑: 8%
-    [PowerupType.TESLA]: 0.08,      // 电磁炮: 8%
-    [PowerupType.MAGMA]: 0.08,      // 熔岩炮: 8%
-    [PowerupType.WAVE]: 0.04,       // 波动炮: 4%
-    [PowerupType.PLASMA]: 0.02,     // 等离子炮: 2%
-    [PowerupType.BOMB]: 0.01,       // 炸弹: 1%
-    [PowerupType.OPTION]: 0.01      // 僚机: 1%
+export const PowerupDropRates: Record<PowerupType, number> = {
+    [PowerupType.POWER]: 0.20,
+    [PowerupType.HP]: 0.18,
+    [PowerupType.VULCAN]: 0.10,
+    [PowerupType.LASER]: 0.10,
+    [PowerupType.MISSILE]: 0.10,
+    [PowerupType.SHURIKEN]: 0.08,
+    [PowerupType.TESLA]: 0.08,
+    [PowerupType.MAGMA]: 0.08,
+    [PowerupType.WAVE]: 0.04,
+    [PowerupType.PLASMA]: 0.02,
+    [PowerupType.BOMB]: 0.01,
+    [PowerupType.OPTION]: 0.01
 };
 
-// 根据掉落概率选择道具类型的辅助函数
-export function selectPowerupType(): number {
+export function selectPowerupType(): PowerupType {
     const r = Math.random();
     let cumulative = 0;
 
-    for (const typeStr in PowerupDropRates) {
-        const type = Number(typeStr);
-        cumulative += PowerupDropRates[type as keyof typeof PowerupDropRates];
+    for (const type of Object.values(PowerupType)) {
+        cumulative += PowerupDropRates[type];
         if (r < cumulative) {
             return type;
         }
     }
 
-    return PowerupType.POWER; // 默认返回武器能量提升
-};
+    return PowerupType.POWER;
+}
 
-// ==================== 道具效果配置 ====================
 export const PowerupEffects = {
-    maxWeaponLevel: 10,         // 武器最高等级
-    maxOptions: 3,              // 僚机最大数量
-    maxBombs: 6,                // 炸弹最大数量
-    hpRestoreAmount: 30,        // HP道具恢复量
-    shieldRestoreAmount: 25,    // 护盾恢复量
-
-    // 道具与武器类型映射
+    maxWeaponLevel: 10,
+    maxOptions: 3,
+    maxBombs: 6,
+    hpRestoreAmount: 30,
+    shieldRestoreAmount: 25,
     weaponTypeMap: {
         [PowerupType.POWER]: null,
         [PowerupType.HP]: null,
@@ -646,342 +683,402 @@ export const PowerupEffects = {
 
 // ==================== Boss生成时机配置 ====================
 export const BossSpawnConfig = {
-    minLevelDuration: 60,   // Boss生成前的最小关卡持续时间（秒）
-    minLevelProgress: 99    // Boss生成前的最小关卡进度（%）
+    minLevelDuration: 50,
+    minLevelProgress: 100
 };
 
-// ==================== Boss名称枚举 ====================
-export enum BossName {
-    GUARDIAN = 'GUARDIAN',           // 第1关 - 守护者
-    INTERCEPTOR = 'INTERCEPTOR',     // 第2关 - 拦截者
-    DESTROYER = 'DESTROYER',         // 第3关 - 毁灭者
-    ANNIHILATOR = 'ANNIHILATOR',     // 第4关 - 歼灭者
-    DOMINATOR = 'DOMINATOR',         // 第5关 - 主宰者
-    OVERLORD = 'OVERLORD',           // 第6关 - 霸主
-    TITAN = 'TITAN',                 // 第7关 - 泰坦
-    COLOSSUS = 'COLOSSUS',           // 第8关 - 巨像
-    LEVIATHAN = 'LEVIATHAN',         // 第9关 - 利维坦
-    APOCALYPSE = 'APOCALYPSE'        // 第10关 - 天启
-}
-
-// ==================== Boss武器类型枚举 ====================
-export enum BossWeaponType {
-    RADIAL = 'radial',       // 环形弹幕
-    TARGETED = 'targeted',   // 瞄准弹
-    SPREAD = 'spread',       // 扇形弹幕
-    HOMING = 'homing',       // 追踪导弹
-    LASER = 'laser'          // 激光
-}
-
-// Boss武器名称映射
-export const BossWeaponNames: { [key in BossWeaponType]: string } = {
-    [BossWeaponType.RADIAL]: '环形弹幕',
-    [BossWeaponType.TARGETED]: '瞄准弹',
-    [BossWeaponType.SPREAD]: '扇形弹幕',
-    [BossWeaponType.HOMING]: '追踪导弹',
-    [BossWeaponType.LASER]: '激光'
-};
-
-// 敌人类型中文名称映射（用于Boss僚机）
-export const WingmenNames: { [key: number]: string } = {
-    0: '红色无人机',
-    1: '紫色飞翼',
-    2: '绿色重坦',
-    3: '橙色尖刺',
-    4: '蓝色炮舰',
-    5: '激光拦截机',
-    6: '布雷机'
+// ==================== Boss武器配置 ====================
+export const BossWeaponConfig: Record<BossWeaponType, BossWeaponEntity> = {
+    [BossWeaponType.RADIAL]: {
+        type: BossWeaponType.RADIAL,
+        id: 'boss_weapon_radial',
+        name: 'Radial',
+        chineseName: '环形弹幕',
+        describe: '环形弹幕武器，快速密集的弹幕覆盖范围广。',
+        bulletSpeed: 3.0,
+        bulletCount: 8,
+        fireRate: 0.05,
+        cooldown: 0,
+        color: '#ff4444',
+    },
+    [BossWeaponType.TARGETED]: {
+        type: BossWeaponType.TARGETED,
+        id: 'boss_weapon_targeted',
+        name: 'Targeted',
+        chineseName: '瞄准弹',
+        describe: '瞄准弹武器，弹道会追踪目标造成持续伤害。',
+        bulletSpeed: 5.0,
+        bulletCount: 1,
+        fireRate: 0.05,
+        cooldown: 0,
+        color: '#ff8844',
+    },
+    [BossWeaponType.SPREAD]: {
+        type: BossWeaponType.SPREAD,
+        id: 'boss_weapon_spread',
+        name: 'Spread',
+        chineseName: '散射弹',
+        describe: '散射弹武器，弹道会向四周散射造成广泛伤害。',
+        bulletSpeed: 4.0,
+        bulletCount: 3,
+        fireRate: 0.05,
+        cooldown: 0,
+        color: '#44ff88',
+    },
+    [BossWeaponType.HOMING]: {
+        type: BossWeaponType.HOMING,
+        id: 'boss_weapon_homing',
+        name: 'Homing',
+        chineseName: '追击弹',
+        describe: '追击弹武器，弹道会追踪目标造成持续伤害。',
+        bulletSpeed: 4.0,
+        bulletCount: 2,
+        fireRate: 0.05,
+        cooldown: 0,
+        color: '#44ffff',
+    },
+    [BossWeaponType.LASER]: {
+        type: BossWeaponType.LASER,
+        id: 'boss_weapon_laser',
+        name: 'Laser',
+        chineseName: '激光',
+        describe: '激光武器，连续发射的激光对目标造成持续伤害。',
+        bulletSpeed: 2.0,
+        bulletCount: 1,
+        fireRate: 0.05,
+        cooldown: 0,
+        color: '#ff44ff',
+    },
 };
 
 // ==================== Boss配置 ====================
-export const BossConfig = {
-    // 第1关 - 守护者（无人机母舰）
-    // 特点：平衡型新手教学Boss
-    // 攻击模式：环形弹幕
-    // 移动模式：正弦波动
-    [BossName.GUARDIAN]: {
+export const BossConfig: Record<BossType, BossEntity> = {
+    [BossType.GUARDIAN]: {
+        type: BossType.GUARDIAN,
+        id: 'boss_guardian',
+        name: 'Guardian',
         chineseName: '守护者',
-        chineseDescription: '无人机母舰，第一个会遭遇的Boss。装备环形弹幕武器。平衡的攻防配置是学习的好机会。',
-        level: 1,                       // 关卡等级
-        hp: 1500,                       // 生命值（基准值）
-        speed: 1.2,                     // 移动速度
-        size: 0.8,                      // 体积缩放
-        bulletCount: 8,                 // 环形弹幕子弹数
-        bulletSpeed: 4.0,               // 子弹速度
-        fireRate: 0.06,                 // 开火频率（6%每帧，提升基础难度）
-        targetedShotSpeed: 0,           // 瞄准弹速度（0=无）
-        hasLaser: false,                // 是否具备激光
-        weaponCount: 1,                 // 武器系统数量
-        score: 5000,                    // 击杀得分
-        weapons: [BossWeaponType.RADIAL],            // 武器类型：环形弹幕
-        movementPattern: 'sine',        // 移动模式：正弦波动
-        spawnX: 'random',               // 生成位置：随机
-        wingmenCount: 0,                // 僚机数量
-        wingmenType: 0,                 // 僚机类型
-        laserType: 'none',              // 激光类型：无
-        laserDamage: 0,                 // 激光伤害
-        laserCooldown: 0,               // 激光冷却时间（毫秒）
-        hitboxScale: 0.8                // 碰撞箱缩放比例
-    },
-    // 第2关 - 拦截者（突击巡洋舰）
-    // 特点：高速低血，灵活骚扰型
-    // 攻击模式：环形弹幕 + 瞄准弹
-    // 移动模式：正弦波动
-    [BossName.INTERCEPTOR]: {
-        chineseName: '拦截者',
-        chineseDescription: '突击巡洋舰，速度轻快血量较低。装备环形弹幕、瞄准弹武器。攻击速度快需要提高警惕才能躲避。',
-        level: 2,
-        hp: 1400,                       // 较低血量
-        speed: 2.0,                     // 高速
+        describe: '无人机母舰，第一个会遭遇的Boss。装备环形弹幕武器。平衡的攻防配置是学习的好机会。',
+        color: '#4488ff',
+        level: 1,
+        hp: 1500,
+        speed: 1.2,
         size: 0.8,
-        bulletCount: 10,
-        bulletSpeed: 4.5,
-        fireRate: 0.08,                 // 高频率攻击
-        targetedShotSpeed: 8,           // 瞄准弹速度
-        hasLaser: false,
-        weaponCount: 1,
+        score: 5000,
+        sprite: 'boss_guardian',
+        weapons: [BossWeaponType.RADIAL],
+        weaponConfigs: {
+            bulletCount: 8,
+            bulletSpeed: 4.0,
+            fireRate: 0.06,
+            targetedShotSpeed: 0
+        },
+        movement: {
+            pattern: BossMovementPattern.SINE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.8
+    },
+    [BossType.INTERCEPTOR]: {
+        type: BossType.INTERCEPTOR,
+        id: 'boss_interceptor',
+        name: 'Interceptor',
+        chineseName: '拦截者',
+        describe: '突击巡洋舰，速度轻快血量较低。装备环形弹幕、瞄准弹武器。攻击速度快需要提高警惕才能躲避。',
+        color: '#ff4488',
+        level: 2,
+        hp: 1400,
+        speed: 2.0,
+        size: 0.8,
         score: 10000,
-        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED], // 武器类型：环形 + 瞄准
-        movementPattern: 'sine',
-        spawnX: 'random',
-        wingmenCount: 0,
-        wingmenType: 0,
-        laserType: 'none',
-        laserDamage: 0,
-        laserCooldown: 0,
-        hitboxScale: 0.8
-    },
-    // 第3关 - 毁灭者（重型战列舰）
-    // 特点：血厚攻击强，但速度慢，重型坂克
-    // 攻击模式：环形弹幕 + 瞄准弹
-    // 移动模式：8字盘旋
-    [BossName.DESTROYER]: {
-        chineseName: '毁灭者',
-        chineseDescription: '重型战列舰，血量可观。装备环形弹幕、瞄准弹武器。密集的攻击需要敏感期锐的反应能力。',
-        level: 3,
-        hp: 2400,                       // 高血量
-        speed: 0.8,                     // 低速
-        size: 0.85,
-        bulletCount: 16,                // 密集弹幕
-        bulletSpeed: 5.5,               // 高速子弹
-        fireRate: 0.04,                 // 低频高伤
-        targetedShotSpeed: 9,
-        hasLaser: false,
-        weaponCount: 1,
-        score: 15000,
+        sprite: 'boss_interceptor',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
-        movementPattern: 'figure8',     // 移动模式：8字盘旋
-        spawnX: 'random',
-        wingmenCount: 0,
-        wingmenType: 0,
-        laserType: 'none',
-        laserDamage: 0,
-        laserCooldown: 0,
+        weaponConfigs: {
+            bulletCount: 10,
+            bulletSpeed: 4.5,
+            fireRate: 0.08,
+            targetedShotSpeed: 8
+        },
+        movement: {
+            pattern: BossMovementPattern.SINE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
         hitboxScale: 0.8
     },
-    // 第4关 - 歼灭者（隐形战机）
-    // 特点：瞄准弹极快，精准狙击型，血量中等
-    // 攻击模式：环形弹幕 + 瞄准弹
-    // 移动模式：8字盘旋
-    [BossName.ANNIHILATOR]: {
+    [BossType.DESTROYER]: {
+        type: BossType.DESTROYER,
+        id: 'boss_destroyer',
+        name: 'Destroyer',
+        chineseName: '毁灭者',
+        describe: '重型战列舰，血量可观。装备环形弹幕、瞄准弹武器。密集的攻击需要敏感期锐的反应能力。',
+        color: '#44ff88',
+        level: 3,
+        hp: 2400,
+        speed: 0.8,
+        size: 0.85,
+        score: 15000,
+        sprite: 'boss_destroyer',
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
+        weaponConfigs: {
+            bulletCount: 16,
+            bulletSpeed: 5.5,
+            fireRate: 0.04,
+            targetedShotSpeed: 9
+        },
+        movement: {
+            pattern: BossMovementPattern.FIGURE_8,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.8
+    },
+    [BossType.ANNIHILATOR]: {
+        type: BossType.ANNIHILATOR,
+        id: 'boss_annihilator',
+        name: 'Annihilator',
         chineseName: '歼灭者',
-        chineseDescription: '隐形战机，射击速度快为其特点。装备环形弹幕、瞄准弹武器。密集攻击需要大量躲避和反应。',
+        describe: '隐形战机，射击速度快为其特点。装备环形弹幕、瞄准弹武器。密集攻击需要大量躲避和反应。',
+        color: '#ff8844',
         level: 4,
-        hp: 2000,                       // 中等血量
+        hp: 2000,
         speed: 1.5,
         size: 0.85,
-        bulletCount: 12,                // 较少环形弹
-        bulletSpeed: 5.0,
-        fireRate: 0.06,
-        targetedShotSpeed: 14,          // 极快瞄准弹
-        hasLaser: false,
-        weaponCount: 1,
         score: 20000,
+        sprite: 'boss_annihilator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
-        movementPattern: 'figure8',
-        spawnX: 'random',
-        wingmenCount: 0,
-        wingmenType: 0,
-        laserType: 'none',
-        laserDamage: 0,
-        laserCooldown: 0,
+        weaponConfigs: {
+            bulletCount: 12,
+            bulletSpeed: 5.0,
+            fireRate: 0.06,
+            targetedShotSpeed: 14
+        },
+        movement: {
+            pattern: BossMovementPattern.FIGURE_8,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
         hitboxScale: 0.8
     },
-    // 第5关 - 主宰者（能量要塞）
-    // 特点：弹幕密集覆盖型，高频攻击
-    // 攻击模式：环形弹幕 + 瞄准弹
-    // 移动模式：8字盘旋
-    [BossName.DOMINATOR]: {
+    [BossType.DOMINATOR]: {
+        type: BossType.DOMINATOR,
+        id: 'boss_dominator',
+        name: 'Dominator',
         chineseName: '主宰者',
-        chineseDescription: '能量要塞，弹幕最密集难以躲避。装备环形弹幕、瞄准弹武器。等级越高攻击越强，是中期的大麻烦。',
+        describe: '能量要塞，弹幕最密集难以躲避。装备环形弹幕、瞄准弹武器。等级越高攻击越强，是中期的大麻烦。',
+        color: '#8844ff',
         level: 5,
-        hp: 2800,                       // 中等血量
-        speed: 1.3,                     // 中等偏慢
+        hp: 2800,
+        speed: 1.3,
         size: 0.9,
-        bulletCount: 24,                // 密集弹幕
-        bulletSpeed: 5.0,
-        fireRate: 0.09,                 // 高频攻击
-        targetedShotSpeed: 10,
-        hasLaser: false,
-        weaponCount: 1,
         score: 25000,
+        sprite: 'boss_dominator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
-        movementPattern: 'figure8',
-        spawnX: 'random',
-        wingmenCount: 0,
-        wingmenType: 0,
-        laserType: 'none',
-        laserDamage: 0,
-        laserCooldown: 0,
+        weaponConfigs: {
+            bulletCount: 24,
+            bulletSpeed: 5.0,
+            fireRate: 0.09,
+            targetedShotSpeed: 10
+        },
+        movement: {
+            pattern: BossMovementPattern.FIGURE_8,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
         hitboxScale: 0.8
     },
-    // 第6关 - 霸主（双子舰）
-    // 特点：首个激光Boss，激光突破型
-    // 攻击模式：环形弹幕 + 瞄准弹 + 连续光束激光
-    // 移动模式：追踪模式
-    [BossName.OVERLORD]: {
+    [BossType.OVERLORD]: {
+        type: BossType.OVERLORD,
+        id: 'boss_overlord',
+        name: 'Overlord',
         chineseName: '霸主',
-        chineseDescription: '双子舰，首次提升激光攻击。装备环形弹幕、瞄准弹、连续激光武器。追踪你的位置然后画激光求救。',
+        describe: '双子舰，首次提升激光攻击。装备环形弹幕、瞄准弹、连续激光武器。追踪你的位置然后画激光求救。',
+        color: '#ff44ff',
         level: 6,
-        hp: 3200,                       // 中等血量
-        speed: 1.8,                     // 中快
+        hp: 3200,
+        speed: 1.8,
         size: 0.9,
-        bulletCount: 18,
-        bulletSpeed: 6.0,
-        fireRate: 0.07,
-        targetedShotSpeed: 10,
-        hasLaser: true,                 // 具备激光
-        weaponCount: 2,
         score: 30000,
-        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER], // 武器类型：环形 + 瞄准 + 激光
-        movementPattern: 'tracking',    // 移动模式：追踪
-        spawnX: 'random',
-        wingmenCount: 0,
-        wingmenType: 0,
-        laserType: 'continuous',        // 激光类型：连续光束
-        laserDamage: 35,                // 激光伤害
-        laserCooldown: 3000,            // 激光冷却时间3秒
-        hitboxScale: 0.8
-    },
-    // 第7关 - 泰坦（三角要塞）
-    // 特点：超高血量重装坦克型，速度慢
-    // 攻击模式：环形弹幕 + 瞄准弹 + 连续光束激光
-    // 移动模式：追踪模式
-    [BossName.TITAN]: {
-        chineseName: '泰坦',
-        chineseDescription: '三角要塞，血段你的第一道大关。装备环形弹幕、瞄准弹、连续激光武器。重装坦克的防御是你最强的寄望。',
-        level: 7,
-        hp: 5000,                       // 超高血量
-        speed: 1.0,                     // 慢速
-        size: 0.95,
-        bulletCount: 20,
-        bulletSpeed: 6.5,
-        fireRate: 0.065,                // 中低频
-        targetedShotSpeed: 11,
-        hasLaser: true,
-        weaponCount: 2,
-        score: 35000,
+        sprite: 'boss_overlord',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
-        movementPattern: 'tracking',
-        spawnX: 'random',
-        wingmenCount: 0,
-        wingmenType: 0,
-        laserType: 'continuous',
-        laserDamage: 30,                // 中等激光伤害
-        laserCooldown: 3500,            // 激光冷却时间3.5秒
+        weaponConfigs: {
+            bulletCount: 18,
+            bulletSpeed: 6.0,
+            fireRate: 0.07,
+            targetedShotSpeed: 10
+        },
+        movement: {
+            pattern: BossMovementPattern.TRACKING,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'continuous',
+            damage: 35,
+            cooldown: 3000
+        },
         hitboxScale: 0.8
     },
-    // 第8关 - 巨像（蛛型机甲）
-    // 特点：爆发刺客型，脉冲激光高爆发，血量较低速度快
-    // 攻击模式：环形弹幕 + 瞄准弹 + 脉冲激光 + 扇形弹幕
-    // 移动模式：激进模式（主动追踪）
-    // 僚机：1个激光拦截机
-    [BossName.COLOSSUS]: {
-        chineseName: '巨像',
-        chineseDescription: '蛛型机甲，爆发刺客型内下手。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕武器，配置1个激光拦截机僚机。脉冲激光是其主要威胁，需要全力象。',
-        level: 8,
-        hp: 4000,                       // 较低血量
-        speed: 2.2,                     // 高速
+    [BossType.TITAN]: {
+        type: BossType.TITAN,
+        id: 'boss_titan',
+        name: 'Titan',
+        chineseName: '泰坦',
+        describe: '三角要塞，血段你的第一道大关。装备环形弹幕、瞄准弹、连续激光武器。重装坦克的防御是你最强的寄望。',
+        color: '#44ff44',
+        level: 7,
+        hp: 5000,
+        speed: 1.0,
         size: 0.95,
-        bulletCount: 22,
-        bulletSpeed: 7.0,
-        fireRate: 0.08,                 // 中高频
-        targetedShotSpeed: 12,
-        hasLaser: true,
-        weaponCount: 2,
+        score: 35000,
+        sprite: 'boss_titan',
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
+        weaponConfigs: {
+            bulletCount: 20,
+            bulletSpeed: 6.5,
+            fireRate: 0.065,
+            targetedShotSpeed: 11
+        },
+        movement: {
+            pattern: BossMovementPattern.TRACKING,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'continuous',
+            damage: 30,
+            cooldown: 3500
+        },
+        hitboxScale: 0.8
+    },
+    [BossType.COLOSSUS]: {
+        type: BossType.COLOSSUS,
+        id: 'boss_colossus',
+        name: 'Colossus',
+        chineseName: '巨像',
+        describe: '蛛型机甲，爆发刺客型内下手。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕武器，配置1个激光拦截机僚机。脉冲激光是其主要威胁，需要全力象。',
+        color: '#ffff44',
+        level: 8,
+        hp: 4000,
+        speed: 2.2,
+        size: 0.95,
         score: 40000,
-        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD], // 武器类型：环形 + 瞄准 + 激光 + 扇形
-        movementPattern: 'aggressive',  // 移动模式：激进（追踪+俯冲）
-        spawnX: 'random',
-        wingmenCount: 1,                // 僚机数量：1个
-        wingmenType: 5,                 // 僚机类型：激光拦截机
-        laserType: 'pulsed',            // 激光类型：脉冲
-        laserDamage: 50,                // 激光伤害（单发10，5连发）
-        laserCooldown: 2500,            // 激光冷却时间2.5秒
+        sprite: 'boss_colossus',
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD],
+        weaponConfigs: {
+            bulletCount: 22,
+            bulletSpeed: 7.0,
+            fireRate: 0.08,
+            targetedShotSpeed: 12
+        },
+        movement: {
+            pattern: BossMovementPattern.AGGRESSIVE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'pulsed',
+            damage: 50,
+            cooldown: 2500
+        },
+        wingmen: {
+            count: 1,
+            type: EnemyType.LASER_INTERCEPTOR
+        },
         hitboxScale: 0.8
     },
-    // 第9关 - 利维坦（环形核心）
-    // 特点：全能战士型，追踪导弹+高频攻击
-    // 攻击模式：环形弹幕 + 瞄准弹 + 脉冲激光 + 扇形弹幕 + 追踪导弹
-    // 移动模式：激进模式
-    // 僚机：2个激光拦截机
-    [BossName.LEVIATHAN]: {
+    [BossType.LEVIATHAN]: {
+        type: BossType.LEVIATHAN,
+        id: 'boss_leviathan',
+        name: 'Leviathan',
         chineseName: '利维坦',
-        chineseDescription: '环形核心，全能战士不可谋下。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个激光拦截机僚机。那些会发动旁点的激光是你最大的敌手。',
+        describe: '环形核心，全能战士不可谋下。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个激光拦截机僚机。那些会发动旁点的激光是你最大的敌手。',
+        color: '#44ffff',
         level: 9,
-        hp: 6000,                       // 中上血量
-        speed: 1.6,                     // 中等速度
+        hp: 6000,
+        speed: 1.6,
         size: 1.0,
-        bulletCount: 26,
-        bulletSpeed: 7.5,
-        fireRate: 0.095,                // 高频攻击
-        targetedShotSpeed: 13,
-        hasLaser: true,
-        weaponCount: 3,
         score: 45000,
-        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING], // 武器类型：环形 + 瞄准 + 激光 + 扇形 + 追踪
-        movementPattern: 'aggressive',
-        spawnX: 'random',
-        wingmenCount: 2,                // 僚机数量：2个
-        wingmenType: 5,                 // 僚机类型：激光拦截机
-        laserType: 'pulsed',
-        laserDamage: 45,                // 激光伤害（单发9，5连发）
-        laserCooldown: 2200,            // 激光冷却时间2.2秒
+        sprite: 'boss_leviathan',
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
+        weaponConfigs: {
+            bulletCount: 26,
+            bulletSpeed: 7.5,
+            fireRate: 0.095,
+            targetedShotSpeed: 13
+        },
+        movement: {
+            pattern: BossMovementPattern.AGGRESSIVE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'pulsed',
+            damage: 45,
+            cooldown: 2200
+        },
+        wingmen: {
+            count: 2,
+            type: EnemyType.LASER_INTERCEPTOR
+        },
         hitboxScale: 0.8
     },
-    // 第10关 - 天启（最终恶魔）
-    // 特点：终极Boss，全面强化但不过分突兀
-    // 攻击模式：环形弹幕 + 瞄准弹 + 脉冲激光 + 扇形弹幕 + 追踪导弹
-    // 移动模式：激进模式
-    // 僚机：2个布雷机
-    [BossName.APOCALYPSE]: {
+    [BossType.APOCALYPSE]: {
+        type: BossType.APOCALYPSE,
+        id: 'boss_apocalypse',
+        name: 'Apocalypse',
         chineseName: '天启',
-        chineseDescription: '最终龙王，装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个布雷机僚机。五重弹幕与激光齐飞，僚机掩护下势不可挡。唯有掌握节奏、把握间隙，才能突破天启的绝望防线。',
+        describe: '最终龙王，装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个布雷机僚机。五重弹幕与激光齐飞，僚机掩护下势不可挡。唯有掌握节奏、把握间隙，才能突破天启的绝望防线。',
+        color: '#ff0000',
         level: 10,
-        hp: 10000,                      // 1.67倍增长（相比第9关）
-        speed: 2.3,                     // 高速
+        hp: 10000,
+        speed: 2.3,
         size: 1.0,
-        bulletCount: 30,
-        bulletSpeed: 8.0,
-        fireRate: 0.10,                 // 高频攻击
-        targetedShotSpeed: 15,
-        hasLaser: true,
-        weaponCount: 3,
         score: 50000,
+        sprite: 'boss_apocalypse',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
-        movementPattern: 'aggressive',
-        spawnX: 'random',
-        wingmenCount: 2,                // 僚机数量：2个
-        wingmenType: 6,                 // 僚机类型：布雷机
-        laserType: 'pulsed',
-        laserDamage: 55,                // 激光伤害（单发11，5连发）
-        laserCooldown: 2000,            // 激光冷却时间2秒
+        weaponConfigs: {
+            bulletCount: 30,
+            bulletSpeed: 8.0,
+            fireRate: 0.10,
+            targetedShotSpeed: 15
+        },
+        movement: {
+            pattern: BossMovementPattern.AGGRESSIVE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'pulsed',
+            damage: 55,
+            cooldown: 2000
+        },
+        wingmen: {
+            count: 2,
+            type: EnemyType.MINE_LAYER
+        },
         hitboxScale: 0.8
     }
 };
 
-// 根据关卡等级获取Boss配置的辅助函数
-export function getBossConfigByLevel(level: number) {
-    const bossEntry = Object.entries(BossConfig).find(([_, config]) => config.level === level);
-    return bossEntry ? bossEntry[1] : null;
+// 根据关卡等级获取Boss配置
+export function getBossConfigByLevel(level: number): BossEntity | null {
+    const bossEntry = Object.values(BossConfig).find((config) => config.level === level);
+    return bossEntry || null;
 }
