@@ -29,13 +29,21 @@ export enum BulletType {
   MAGMA = 'magma',          // 熔岩弹
   SHURIKEN = 'shuriken',    // 手里剑
   ENEMY_ORB = 'enemy_orb',  // 敌人普通弹
-  ENEMY_BEAM = 'enemy_beam' // 敌人光束
+  ENEMY_BEAM = 'enemy_beam', // 敌人光束
+  ENEMY_RAPID = 'enemy_rapid', // 敌人快速弹
+  ENEMY_HEAVY = 'enemy_heavy', // 敌人重型弹
+  ENEMY_HOMING = 'enemy_homing', // 敌人追踪弹
+  ENEMY_SPIRAL = 'enemy_spiral' // 敌人螺旋弹
 }
 
 // 敌人子弹类型枚举 - 独立管理，方便扩展
 export enum EnemyBulletType {
   ORB = 'enemy_orb',      // 普通能量球
-  BEAM = 'enemy_beam'     // 光束弹
+  BEAM = 'enemy_beam',    // 光束弹
+  RAPID = 'enemy_rapid',  // 快速弹
+  HEAVY = 'enemy_heavy',  // 重型弹
+  HOMING = 'enemy_homing', // 追踪弹
+  SPIRAL = 'enemy_spiral' // 螺旋弹
 }
 
 export interface Vector2D {

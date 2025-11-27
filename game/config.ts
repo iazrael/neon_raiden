@@ -29,7 +29,11 @@ export enum EnemyType {
     KAMIKAZE = 3,           // 神风特攻 - Kamikaze (橙色尖刺，自爆机)
     ELITE_GUNBOAT = 4,      // 精英炮艇 - Gunboat (蓝色炮舰)
     LASER_INTERCEPTOR = 5,  // 激光拦截机 - Interceptor (白色/青色)
-    MINE_LAYER = 6          // 布雷机 - Layer (深灰/黄色)
+    MINE_LAYER = 6,         // 布雷机 - Layer (深灰/黄色)
+    PULSAR = 7,             // 脉冲机 - Pulsar (高攻速高速低血低伤)
+    FORTRESS = 8,           // 堡垒机 - Fortress (高血高伤低速低攻速)
+    STALKER = 9,            // 追踪机 - Stalker (高攻高移低血低攻速)
+    BARRAGE = 10            // 弹幕机 - Barrage (高血高攻速低速低伤)
 }
 
 // ==================== 类型映射 ====================
@@ -245,27 +249,55 @@ export const EnemyBulletConfig = {
         height: 32,             // 子弹高度
         color: '#f97316',       // 子弹颜色（橙色）
         sprite: 'bullet_enemy_beam' // 精灵图名称
+    },
+    // ENEMY_RAPID - 敌人快速弹（黄色）
+    [EnemyBulletType.RAPID]: {
+        width: 10,
+        height: 20,
+        color: '#ecc94b',       // 黄色
+        sprite: 'bullet_enemy_rapid'
+    },
+    // ENEMY_HEAVY - 敌人重型弹（紫色）
+    [EnemyBulletType.HEAVY]: {
+        width: 28,
+        height: 28,
+        color: '#9f7aea',       // 紫色
+        sprite: 'bullet_enemy_heavy'
+    },
+    // ENEMY_HOMING - 敌人追踪弹（绿色）
+    [EnemyBulletType.HOMING]: {
+        width: 16,
+        height: 16,
+        color: '#48bb78',       // 绿色
+        sprite: 'bullet_enemy_homing'
+    },
+    // ENEMY_SPIRAL - 敌人螺旋弹（蓝色）
+    [EnemyBulletType.SPIRAL]: {
+        width: 14,
+        height: 14,
+        color: '#4299e1',       // 蓝色
+        sprite: 'bullet_enemy_spiral'
     }
 };
 
 // ==================== 敌人生成权重配置 ====================
 // 按关卡配置敌人类型的生成权重 - 权重越高，生成概率越大
 export const EnemySpawnWeights = {
-    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3, [EnemyType.TANK]: 1 },
-    2: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2 },
-    3: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 10, [EnemyType.KAMIKAZE]: 2 },
-    4: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 2, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 10 },
-    5: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 10 },
-    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 3, [EnemyType.LASER_INTERCEPTOR]: 10 },
-    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 10 },
-    8: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 8, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
-    9: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 8, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3 },
-    10: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 9, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 5, [EnemyType.MINE_LAYER]: 4 }
+    1: { [EnemyType.NORMAL]: 10, [EnemyType.FAST]: 3, [EnemyType.TANK]: 1, [EnemyType.PULSAR]: 1 },
+    2: { [EnemyType.NORMAL]: 3, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.PULSAR]: 5, [EnemyType.STALKER]: 1 },
+    3: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 10, [EnemyType.KAMIKAZE]: 2, [EnemyType.PULSAR]: 3, [EnemyType.STALKER]: 3, [EnemyType.FORTRESS]: 1 },
+    4: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 2, [EnemyType.TANK]: 3, [EnemyType.KAMIKAZE]: 10, [EnemyType.STALKER]: 5, [EnemyType.FORTRESS]: 3, [EnemyType.BARRAGE]: 1 },
+    5: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 10, [EnemyType.FORTRESS]: 5, [EnemyType.BARRAGE]: 3 },
+    6: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 3, [EnemyType.LASER_INTERCEPTOR]: 10, [EnemyType.BARRAGE]: 5, [EnemyType.PULSAR]: 5 },
+    7: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 3, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 3, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 3, [EnemyType.MINE_LAYER]: 10, [EnemyType.STALKER]: 5 },
+    8: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 10, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 8, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3, [EnemyType.PULSAR]: 5, [EnemyType.STALKER]: 5, [EnemyType.FORTRESS]: 5, [EnemyType.BARRAGE]: 5 },
+    9: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 8, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 4, [EnemyType.MINE_LAYER]: 3, [EnemyType.PULSAR]: 8, [EnemyType.STALKER]: 8, [EnemyType.FORTRESS]: 8, [EnemyType.BARRAGE]: 8 },
+    10: { [EnemyType.NORMAL]: 2, [EnemyType.FAST]: 9, [EnemyType.TANK]: 2, [EnemyType.KAMIKAZE]: 10, [EnemyType.ELITE_GUNBOAT]: 2, [EnemyType.LASER_INTERCEPTOR]: 5, [EnemyType.MINE_LAYER]: 4, [EnemyType.PULSAR]: 10, [EnemyType.STALKER]: 10, [EnemyType.FORTRESS]: 10, [EnemyType.BARRAGE]: 10 }
 };
 
 // ==================== 敌人配置 ====================
 export const EnemyConfig = {
-    baseSpawnRate: 1500,                // 基础生成间隔（毫秒）
+    baseSpawnRate: 1000,                // 基础生成间隔（毫秒） - 这里的数值越小，生成越快
     spawnRateReductionPerLevel: 200,    // 每关生成间隔减少量（毫秒）
     minSpawnRate: 300,                  // 最小生成间隔（毫秒）
     eliteChance: 0.15,                  // 精英怪生成概率（15%）
@@ -365,6 +397,58 @@ export const EnemyConfig = {
             width: 60,              // 宽度
             height: 40,             // 高度
             score: 700              // 击杀得分
+        },
+        // Pulsar - 脉冲机 (高攻速高速低血低伤)
+        [EnemyType.PULSAR]: {
+            chineseName: '脉冲机',
+            chineseDescription: '高频发射脉冲弹的轻型战机。速度快射速高，但装甲薄弱。',
+            baseHp: 15,
+            hpPerLevel: 5,
+            baseSpeed: 6,
+            speedPerLevel: 0.5,
+            width: 32,
+            height: 32,
+            score: 250,
+            shootFrequency: 0.08
+        },
+        // Fortress - 堡垒机 (高血高伤低速低攻速)
+        [EnemyType.FORTRESS]: {
+            chineseName: '堡垒机',
+            chineseDescription: '重装甲空中堡垒，移动缓慢但火力威力巨大。',
+            baseHp: 200,
+            hpPerLevel: 40,
+            baseSpeed: 0.8,
+            speedPerLevel: 0,
+            width: 70,
+            height: 70,
+            score: 800,
+            shootFrequency: 0.02
+        },
+        // Stalker - 追踪机 (高攻高移低血低攻速)
+        [EnemyType.STALKER]: {
+            chineseName: '追踪机',
+            chineseDescription: '装备追踪系统的猎杀者，爆发伤害高且灵活，但持续作战能力弱。',
+            baseHp: 30,
+            hpPerLevel: 10,
+            baseSpeed: 5,
+            speedPerLevel: 0.5,
+            width: 36,
+            height: 36,
+            score: 350,
+            shootFrequency: 0.03
+        },
+        // Barrage - 弹幕机 (高血高攻速低速低伤)
+        [EnemyType.BARRAGE]: {
+            chineseName: '弹幕机',
+            chineseDescription: '专门用于制造弹幕压制的重型机，虽然单发伤害低但覆盖面极广。',
+            baseHp: 100,
+            hpPerLevel: 20,
+            baseSpeed: 1.2,
+            speedPerLevel: 0.1,
+            width: 50,
+            height: 50,
+            score: 600,
+            shootFrequency: 0.1
         }
     }
 };

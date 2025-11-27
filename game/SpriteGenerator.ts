@@ -1,4 +1,4 @@
-import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES, EnemyBulletConfig } from '@/game/config';
+import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES, EnemyBulletConfig, EnemyConfig, EnemyType } from '@/game/config';
 import { BulletType, WeaponType, EnemyBulletType } from '@/types';
 import { AssetsLoader } from './AssetsLoader';
 
@@ -37,7 +37,11 @@ export class SpriteGenerator {
 
     // 生成敌人
     generateEnemy(type: number): HTMLImageElement {
-        const size = (type === 2 || type === 4 || type === 6) ? 80 : 48;
+        let size = 48;
+        const config = EnemyConfig.types[type as EnemyType];
+        if (config) {
+            size = Math.max(config.width, config.height);
+        }
         return this.loadSVG(`${ASSETS_BASE_PATH}enemies/enemy_${type}.svg`, size, size);
     }
 
@@ -62,17 +66,13 @@ export class SpriteGenerator {
             spriteName = config.sprite;
         }
         // 敌人子弹
-        else if (type === BulletType.ENEMY_ORB) {
-            const config = EnemyBulletConfig[EnemyBulletType.ORB];
-            w = config.width;
-            h = config.height;
-            spriteName = config.sprite;
-        }
-        else if (type === BulletType.ENEMY_BEAM) {
-            const config = EnemyBulletConfig[EnemyBulletType.BEAM];
-            w = config.width;
-            h = config.height;
-            spriteName = config.sprite;
+        else if (Object.values(EnemyBulletType).includes(type as any)) {
+            const config = EnemyBulletConfig[type as unknown as EnemyBulletType];
+            if (config) {
+                w = config.width;
+                h = config.height;
+                spriteName = config.sprite;
+            }
         }
 
         return this.loadSVG(`${ASSETS_BASE_PATH}bullets/${spriteName}.svg`, w, h);

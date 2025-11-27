@@ -1,0 +1,6 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Spiral: Blue, swirling -->
+  <circle cx="14" cy="14" r="12" fill="#4299E1"/>
+  <path d="M14 2C20.6274 2 26 7.37258 26 14C26 20.6274 20.6274 26 14 26C7.37258 26 2 20.6274 2 14" stroke="#BEE3F8" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="14" cy="14" r="6" fill="#EBF8FF"/>
+</svg>

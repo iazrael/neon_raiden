@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Stalker: High Speed, High Damage - Aggressive, forward-swept, green/hunter theme -->
+  <path d="M32 2L48 16L62 10L52 40L32 62L12 40L2 10L16 16L32 2Z" fill="#48BB78" stroke="#2F855A" stroke-width="2"/>
+  <path d="M32 20L42 30L32 50L22 30L32 20Z" fill="#22543D"/>
+  <circle cx="22" cy="30" r="3" fill="#9AE6B4"/>
+  <circle cx="42" cy="30" r="3" fill="#9AE6B4"/>
+  <path d="M32 2V20" stroke="#2F855A" stroke-width="2"/>
+</svg>
