@@ -1,4 +1,4 @@
-import { ASSETS_BASE_PATH, WeaponConfig, EnemyBulletConfig } from './config';
+import { ASSETS_BASE_PATH, WeaponConfig, EnemyBulletConfig, EnemyConfig } from './config';
 
 export class AssetsLoader {
     private static cache: Map<string, HTMLImageElement> = new Map();
@@ -30,10 +30,11 @@ export class AssetsLoader {
         load(`${ASSETS_BASE_PATH}fighters/player.svg`);
         load(`${ASSETS_BASE_PATH}fighters/option.svg`);
 
-        // Enemies
-        for (let i = 0; i <= 6; i++) {
-            load(`${ASSETS_BASE_PATH}enemies/enemy_${i}.svg`);
-        }
+        // Enemies (0-10: all enemy types)
+        // 遍历 EnemyConfig.types
+        Object.keys(EnemyConfig.types).forEach(type => {
+            load(`${ASSETS_BASE_PATH}enemies/enemy_${type}.svg`);
+        });
 
         // Bullets - Player weapons
         Object.values(WeaponConfig).forEach(config => {

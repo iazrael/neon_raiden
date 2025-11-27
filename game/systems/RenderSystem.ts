@@ -1,5 +1,6 @@
 import { SpriteGenerator } from '@/game/SpriteGenerator';
 import { SpriteMap, Entity, Particle, Shockwave, GameState, BulletType } from '@/types';
+import { EnemyConfig } from '../config';
 
 export class RenderSystem {
     ctx: CanvasRenderingContext2D;
@@ -19,10 +20,10 @@ export class RenderSystem {
         this.sprites['player'] = this.spriteGen.generatePlayer();
         this.sprites['option'] = this.spriteGen.generateOption();
 
-        // Enemies (Types 0-6)
-        for (let i = 0; i <= 6; i++) {
-            this.sprites[`enemy_${i}`] = this.spriteGen.generateEnemy(i);
-        }
+        // Enemies (Types 0-10: all enemy types)
+        Object.keys(EnemyConfig.types).forEach(type => {
+            this.sprites[`enemy_${type}`] = this.spriteGen.generateEnemy(parseInt(type));
+        });
 
         // Bullets
         this.sprites['bullet_vulcan'] = this.spriteGen.generateBullet(BulletType.VULCAN);
