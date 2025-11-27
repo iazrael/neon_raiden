@@ -214,7 +214,15 @@ export interface EnemyEntity extends BaseEntityMeta {
     size: SizeConfig;
     score: number;              // 击杀得分
     sprite: string;             // 精灵图名称
-    shootFrequency?: number;    // 射击频率（可选）
+    weapon: {
+        bulletType: EnemyBulletType; // 子弹类型
+        speed?: number;              // 子弹速度
+        damage?: number;             // 子弹伤害
+        frequency?: number;          // 子弹频率
+        interval?: number;           // 子弹间隔(间隔时间较长的用这个配置)
+        chargeTime?: number;     // 充能时间
+        cooldownTime?: number;   // 冷却时间
+    };
 }
 
 /**

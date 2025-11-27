@@ -463,7 +463,8 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         speedPerLevel: 0.5,
         sprite: 'enemy_normal',
         size: { width: 40, height: 40 },
-        score: 100
+        score: 100,
+        weapon: { bulletType: EnemyBulletType.ORB, frequency: 0.015 }
     },
     [EnemyType.FAST]: {
         type: EnemyType.FAST,
@@ -479,7 +480,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_fast',
         size: { width: 30, height: 40 },
         score: 200,
-        shootFrequency: 0.015
+        weapon: { bulletType: EnemyBulletType.ORB, frequency: 0.05 }
     },
     [EnemyType.TANK]: {
         type: EnemyType.TANK,
@@ -494,7 +495,8 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         speedPerLevel: 0,
         sprite: 'enemy_tank',
         size: { width: 60, height: 60 },
-        score: 300
+        score: 300,
+        weapon: { bulletType: EnemyBulletType.ORB, frequency: 0.015 }
     },
     [EnemyType.KAMIKAZE]: {
         type: EnemyType.KAMIKAZE,
@@ -510,7 +512,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_kamikaze',
         size: { width: 30, height: 30 },
         score: 400,
-        shootFrequency: 0.02
+        weapon: { bulletType: EnemyBulletType.ORB, frequency: 0.02 }
     },
     [EnemyType.ELITE_GUNBOAT]: {
         type: EnemyType.ELITE_GUNBOAT,
@@ -525,7 +527,8 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         speedPerLevel: 0,
         sprite: 'enemy_gunboat',
         size: { width: 70, height: 50 },
-        score: 500
+        score: 500,
+        weapon: { bulletType: EnemyBulletType.RAPID, frequency: 0.02 ,speed: 4},
     },
     [EnemyType.LASER_INTERCEPTOR]: {
         type: EnemyType.LASER_INTERCEPTOR,
@@ -540,7 +543,8 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         speedPerLevel: 0,
         sprite: 'enemy_interceptor',
         size: { width: 50, height: 50 },
-        score: 600
+        score: 600,
+        weapon: { bulletType: EnemyBulletType.BEAM, speed: 12, damage: 30, chargeTime: 2000, cooldownTime: 1000 }
     },
     [EnemyType.MINE_LAYER]: {
         type: EnemyType.MINE_LAYER,
@@ -555,7 +559,8 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         speedPerLevel: 0,
         sprite: 'enemy_layer',
         size: { width: 60, height: 40 },
-        score: 700
+        score: 700,
+        weapon: { bulletType: EnemyBulletType.HEAVY, interval: 1500, damage: 25 },
     },
     [EnemyType.PULSAR]: {
         type: EnemyType.PULSAR,
@@ -571,7 +576,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_pulsar',
         size: { width: 32, height: 32 },
         score: 250,
-        shootFrequency: 0.08
+        weapon: { bulletType: EnemyBulletType.RAPID, frequency: 0.08, speed: 6 },
     },
     [EnemyType.FORTRESS]: {
         type: EnemyType.FORTRESS,
@@ -587,7 +592,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_fortress',
         size: { width: 70, height: 70 },
         score: 800,
-        shootFrequency: 0.02
+        weapon: { bulletType: EnemyBulletType.ORB, frequency: 0.02 }
     },
     [EnemyType.STALKER]: {
         type: EnemyType.STALKER,
@@ -603,7 +608,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_stalker',
         size: { width: 36, height: 36 },
         score: 350,
-        shootFrequency: 0.03
+        weapon: { bulletType: EnemyBulletType.HOMING, frequency: 0.03, speed: 3 },
     },
     [EnemyType.BARRAGE]: {
         type: EnemyType.BARRAGE,
@@ -619,7 +624,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_barrage',
         size: { width: 50, height: 50 },
         score: 600,
-        shootFrequency: 0.1
+        weapon: { bulletType: EnemyBulletType.SPIRAL, frequency: 0.2, speed: 3 },
     }
 };
 

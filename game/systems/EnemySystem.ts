@@ -91,8 +91,14 @@ export class EnemySystem {
                 }
             }
 
-            // Type 5: Laser Interceptor AI
+            // Laser Interceptor - Special state machine firing
             if (e.subType === EnemyType.LASER_INTERCEPTOR) {
+                const config = EnemyConfig[EnemyType.LASER_INTERCEPTOR];
+                const chargeTime = config.weapon.chargeTime || 2000;
+                const cooldownTime = config.weapon.cooldownTime || 1000;
+                const bulletSpeed = config.weapon.speed || 12;
+                const bulletDamage = config.weapon.damage || 30;
+
                 if (e.state === 0) { // Entering
                     if (e.y > 150) {
                         e.state = 1; // Hover
@@ -104,7 +110,7 @@ export class EnemySystem {
                     // Bobbing
                     e.y += Math.sin(Date.now() / 500) * 0.5 * timeScale;
 
-                    if (e.timer > 2000) { // Fire after 2s
+                    if (e.timer > chargeTime) { // Fire after charge time
                         e.state = 2;
                         e.timer = 0;
                         // Fire Laser
@@ -116,28 +122,32 @@ export class EnemySystem {
                             width: bulletConfig.size.width,
                             height: bulletConfig.size.height,
                             vx: 0,
-                            vy: 12,
+                            vy: bulletSpeed,
                             hp: 999,
                             maxHp: 999,
                             type: EntityType.BULLET,
                             color: bulletConfig.color,
                             markedForDeletion: false,
                             spriteKey: bulletConfig.sprite,
-                            damage: 30
+                            damage: bulletDamage
                         });
                     }
                 } else if (e.state === 2) { // Cooldown / Leave
                     e.timer = (e.timer || 0) + dt;
-                    if (e.timer > 1000) {
+                    if (e.timer > cooldownTime) {
                         e.vy = 5; // Fly away
                     }
                 }
             }
 
-            // Type 6: Mine Layer AI
+            // Mine Layer - Special interval-based firing
             if (e.subType === EnemyType.MINE_LAYER) {
+                const config = EnemyConfig[EnemyType.MINE_LAYER];
+                const spawnInterval = config.weapon.interval || 1500;
+                const mineDamage = config.weapon.damage || 25;
+
                 e.timer = (e.timer || 0) + dt;
-                if (e.timer > 1500) {
+                if (e.timer > spawnInterval) {
                     e.timer = 0;
                     // Drop Mine
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_HEAVY];
@@ -148,77 +158,98 @@ export class EnemySystem {
                         height: bulletConfig.size.height,
                         vx: 0, vy: 0, // Static mine
                         hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
-                        damage: 25
+                        damage: mineDamage
                     });
                 }
             }
 
-            // Elite Gunboat Firing
-            if (e.subType === EnemyType.ELITE_GUNBOAT && Math.random() < 0.02 * timeScale) {
-                const dx = player.x - e.x;
-                const dy = player.y - e.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
-                enemyBullets.push({
-                    x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                    y: e.y + e.height,
-                    width: bulletConfig.size.width,
-                    height: bulletConfig.size.height,
-                    vx: (dx / dist) * 4, vy: (dy / dist) * 4,
-                    hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
-                });
+            // Elite Gunboat - Targeted rapid firing
+            if (e.subType === EnemyType.ELITE_GUNBOAT) {
+                const config = EnemyConfig[EnemyType.ELITE_GUNBOAT];
+                const shootFreq = config.weapon.frequency || 0.02;
+                const bulletSpeed = config.weapon.speed || 4;
+
+                if (Math.random() < shootFreq * timeScale) {
+                    const dx = player.x - e.x;
+                    const dy = player.y - e.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
+                    enemyBullets.push({
+                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
+                        y: e.y + e.height,
+                        width: bulletConfig.size.width,
+                        height: bulletConfig.size.height,
+                        vx: (dx / dist) * bulletSpeed, vy: (dy / dist) * bulletSpeed,
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                    });
+                }
             }
 
-            // Stalker Firing (Homing)
-            if (e.subType === EnemyType.STALKER && Math.random() < 0.015 * timeScale) {
-                const bulletConfig = BulletConfigs[BulletType.ENEMY_HOMING];
-                // Simple homing logic: fire towards player, actual homing might need bullet update logic support
-                // For now, just aim at player
-                const dx = player.x - e.x;
-                const dy = player.y - e.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+            // Stalker - Homing missile firing
+            if (e.subType === EnemyType.STALKER) {
+                const config = EnemyConfig[EnemyType.STALKER];
+                const shootFreq = config.weapon.frequency || 0.015;
+                const bulletSpeed = config.weapon.speed || 3;
 
-                enemyBullets.push({
-                    x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                    y: e.y + e.height,
-                    width: bulletConfig.size.width,
-                    height: bulletConfig.size.height,
-                    vx: (dx / dist) * 3, vy: (dy / dist) * 3,
-                    hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
-                });
+                if (Math.random() < shootFreq * timeScale) {
+                    const bulletConfig = BulletConfigs[BulletType.ENEMY_HOMING];
+                    const dx = player.x - e.x;
+                    const dy = player.y - e.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    enemyBullets.push({
+                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
+                        y: e.y + e.height,
+                        width: bulletConfig.size.width,
+                        height: bulletConfig.size.height,
+                        vx: (dx / dist) * bulletSpeed, vy: (dy / dist) * bulletSpeed,
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                    });
+                }
             }
 
-            // Barrage Firing (Spiral)
-            if (e.subType === EnemyType.BARRAGE && Math.random() < 0.03 * timeScale) {
-                const bulletConfig = BulletConfigs[BulletType.ENEMY_SPIRAL];
-                // Spiral pattern simulation: fire with rotating angle based on time
-                const angle = (Date.now() / 200) % (Math.PI * 2);
+            // Barrage - Spiral pattern firing
+            if (e.subType === EnemyType.BARRAGE) {
+                const config = EnemyConfig[EnemyType.BARRAGE];
+                const shootFreq = config.weapon.frequency || 0.03;
+                const bulletSpeed = config.weapon.speed || 3;
 
-                enemyBullets.push({
-                    x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                    y: e.y + e.height / 2,
-                    width: bulletConfig.size.width,
-                    height: bulletConfig.size.height,
-                    vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3 + 2, // +2 to ensure downward trend
-                    hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
-                });
+                if (Math.random() < shootFreq * timeScale) {
+                    const bulletConfig = BulletConfigs[BulletType.ENEMY_SPIRAL];
+                    // Spiral pattern simulation: fire with rotating angle based on time
+                    const angle = (Date.now() / 200) % (Math.PI * 2);
+
+                    enemyBullets.push({
+                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
+                        y: e.y + e.height / 2,
+                        width: bulletConfig.size.width,
+                        height: bulletConfig.size.height,
+                        vx: Math.cos(angle) * bulletSpeed, vy: Math.sin(angle) * bulletSpeed + 2, // +2 to ensure downward trend
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                    });
+                }
             }
 
-            // Pulsar Firing (Rapid)
-            if (e.subType === EnemyType.PULSAR && Math.random() < 0.05 * timeScale) {
-                const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
-                enemyBullets.push({
-                    x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                    y: e.y + e.height,
-                    width: bulletConfig.size.width,
-                    height: bulletConfig.size.height,
-                    vx: 0, vy: 6,
-                    hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
-                });
+            // Pulsar - High frequency rapid firing
+            if (e.subType === EnemyType.PULSAR) {
+                const config = EnemyConfig[EnemyType.PULSAR];
+                const shootFreq = config.weapon.frequency || 0.05;
+                const bulletSpeed = config.weapon.speed || 6;
+
+                if (Math.random() < shootFreq * timeScale) {
+                    const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
+                    enemyBullets.push({
+                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
+                        y: e.y + e.height,
+                        width: bulletConfig.size.width,
+                        height: bulletConfig.size.height,
+                        vx: 0, vy: bulletSpeed,
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                    });
+                }
             }
 
-
-            // General Enemy firing (Reduced for specialized types)
+            // General Enemy firing (for types without special behaviors)
             if (e.subType !== EnemyType.LASER_INTERCEPTOR &&
                 e.subType !== EnemyType.MINE_LAYER &&
                 e.subType !== EnemyType.ELITE_GUNBOAT &&
@@ -227,7 +258,7 @@ export class EnemySystem {
                 e.subType !== EnemyType.PULSAR) {
 
                 const enemyConfig = EnemyConfig[e.subType as EnemyType];
-                const shootFreq = enemyConfig?.shootFrequency || 0.005;
+                const shootFreq = enemyConfig.weapon.frequency || 0.05;
 
                 if (Math.random() < shootFreq * timeScale) {
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_ORB];
