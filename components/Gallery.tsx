@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AssetsLoader } from '@/game/AssetsLoader';
 import { WeaponType } from '@/types';
 import { WeaponConfig, EnemyConfig, BossConfig, BossName, EnemyType, PlayerConfig, ASSETS_BASE_PATH, BossWeaponNames, WingmenNames } from '@/game/config';
 import { isWeaponUnlocked, isEnemyUnlocked, isBossUnlocked } from '@/game/unlockedItems';
@@ -10,6 +11,33 @@ interface GalleryProps {
 }
 
 type Tab = 'FIGHTERS' | 'ARMORY' | 'BESTIARY' | 'BOSSES';
+
+// Helper component to render cached images
+const CachedImage: React.FC<{ src: string; alt: string; className: string }> = ({ src, alt, className }) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (!containerRef.current) return;
+
+        const cached = AssetsLoader.getAsset(src);
+        let img: HTMLImageElement;
+
+        if (cached) {
+            img = cached.cloneNode(true) as HTMLImageElement;
+        } else {
+            img = new Image();
+            img.src = src;
+        }
+
+        img.alt = alt;
+        img.className = className;
+
+        containerRef.current.innerHTML = '';
+        containerRef.current.appendChild(img);
+    }, [src, alt, className]);
+
+    return <div ref={containerRef} className="contents" />;
+};
 
 export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, playClick }) => {
     const [activeTab, setActiveTab] = useState<Tab>('FIGHTERS');
@@ -359,7 +387,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onClose, maxLevelReached, play
                                     <div className="w-32 h-32 sm:w-40 sm:h-40 border border-cyan-500/20 rounded-full flex items-center justify-center bg-black/50 mb-6 relative group flex-shrink-0">
                                         <div className="absolute inset-0 rounded-full border border-cyan-500/30 animate-[spin_10s_linear_infinite]"></div>
                                         <div className="absolute inset-2 rounded-full border border-cyan-500/10 animate-[spin_15s_linear_infinite_reverse]"></div>
-                                        <img
+                                        <CachedImage
                                             src={getSpriteSrc(selectedItem, activeTab)}
                                             alt={selectedItem.name}
                                             className="relative z-10 filter drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] group-hover:scale-110 transition-transform duration-500 w-28 h-28 sm:w-32 object-contain"

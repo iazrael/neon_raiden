@@ -1,0 +1,77 @@
+import { ASSETS_BASE_PATH, WeaponConfig, EnemyBulletConfig } from './config';
+
+export class AssetsLoader {
+    private static cache: Map<string, HTMLImageElement> = new Map();
+
+    // Preload all assets
+    static async preloadAssets(): Promise<void> {
+        const promises: Promise<void>[] = [];
+
+        const load = (src: string) => {
+            if (this.cache.has(src)) return;
+            const img = new Image();
+            img.src = src;
+            this.cache.set(src, img); // Cache immediately
+            const p = new Promise<void>((resolve, reject) => {
+                if (img.complete) {
+                    resolve();
+                } else {
+                    img.onload = () => resolve();
+                    img.onerror = () => {
+                        console.warn(`Failed to load asset: ${src}`);
+                        resolve();
+                    };
+                }
+            });
+            promises.push(p);
+        };
+
+        // Fighters
+        load(`${ASSETS_BASE_PATH}fighters/player.svg`);
+        load(`${ASSETS_BASE_PATH}fighters/option.svg`);
+
+        // Enemies
+        for (let i = 0; i <= 6; i++) {
+            load(`${ASSETS_BASE_PATH}enemies/enemy_${i}.svg`);
+        }
+
+        // Bullets - Player weapons
+        Object.values(WeaponConfig).forEach(config => {
+            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
+        });
+
+        // Bullets - Enemy bullets
+        Object.values(EnemyBulletConfig).forEach(config => {
+            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
+        });
+
+        // Bosses
+        for (let i = 1; i <= 10; i++) {
+            load(`${ASSETS_BASE_PATH}bosses/boss_${i}.svg`);
+        }
+
+        await Promise.all(promises);
+        console.log('All assets preloaded');
+    }
+
+    static getAsset(src: string): HTMLImageElement | undefined {
+        return this.cache.get(src);
+    }
+
+    static loadSVG(src: string, width: number, height: number): HTMLImageElement {
+        if (this.cache.has(src)) {
+            const cached = this.cache.get(src)!;
+            // Update display size properties just in case, though naturalWidth/Height are fixed
+            cached.width = width;
+            cached.height = height;
+            return cached;
+        }
+
+        const img = new Image();
+        img.width = width;
+        img.height = height;
+        img.src = src;
+        this.cache.set(src, img);
+        return img;
+    }
+}

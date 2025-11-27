@@ -11,7 +11,7 @@ interface GameUIProps {
   bombs?: number;
   onStart: () => void;
   onRestart: () => void;
-  onUseBomb?: () => void;
+  onUseBomb?: (x?: number, y?: number) => void;
   showLevelTransition?: boolean;
   levelTransitionTimer?: number;
   maxLevelReached?: number;
@@ -38,8 +38,21 @@ export const GameUI: React.FC<GameUIProps> = ({
   playClick,
   onBackToMenu,
 }) => {
+  const bombButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  const handleBombClick = () => {
+    if (bombButtonRef.current && onUseBomb) {
+      const rect = bombButtonRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      onUseBomb(centerX, centerY);
+    } else {
+      onUseBomb?.();
+    }
+  };
+
   return (
-    <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-safe font-mono text-white select-none">
+    <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] font-mono text-white select-none">
       {/* HUD - Always Visible during play */}
       <div className="flex justify-between items-start w-full z-10">
         <div>
@@ -48,6 +61,8 @@ export const GameUI: React.FC<GameUIProps> = ({
           </div>
           <div className="text-sm text-gray-300">LEVEL: {level}</div>
         </div>
+
+        {/* HP Bar */}
         <div className="flex flex-col items-end w-1/3">
           <div className="w-full bg-gray-800 h-4 rounded-full border border-gray-600 overflow-hidden relative">
             <div
@@ -66,6 +81,25 @@ export const GameUI: React.FC<GameUIProps> = ({
         </div>
       </div>
 
+      {/* Exit Button (Top Right, below HUD) */}
+      {state === GameState.PLAYING && (
+        <div className="absolute top-[max(4rem,calc(env(safe-area-inset-top)+3rem))] right-4 pointer-events-auto z-30">
+          <button
+            onClick={() => {
+              playClick?.('cancel');
+              // Confirm exit? For now direct exit as requested "Exit button"
+              if (confirm("Abort mission and return to base?")) {
+                onBackToMenu?.();
+              }
+            }}
+            className="w-10 h-10 rounded-full border border-gray-600 bg-gray-900/50 text-gray-400 hover:text-white hover:bg-red-900/50 hover:border-red-500 flex items-center justify-center transition-all backdrop-blur-sm"
+            title="Abort Mission"
+          >
+            <span className="text-xl">✕</span>
+          </button>
+        </div>
+      )}
+
       {/* Bomb Button (Bottom Right) */}
       {state === GameState.PLAYING && (
         <div className="absolute bottom-20 right-6 pointer-events-auto z-30 flex flex-col items-center gap-1 pb-safe">
@@ -73,7 +107,8 @@ export const GameUI: React.FC<GameUIProps> = ({
             BOMB x{bombs}
           </span>
           <button
-            onClick={onUseBomb}
+            ref={bombButtonRef}
+            onClick={handleBombClick}
             className={`w-20 h-20 rounded-full border-4 ${bombs > 0
               ? "border-red-500 bg-red-600/50 animate-pulse hover:bg-red-500/80 active:scale-95"
               : "border-gray-600 bg-gray-800/50 opacity-50"
@@ -87,7 +122,7 @@ export const GameUI: React.FC<GameUIProps> = ({
 
       {/* Menus - Pointer events allowed */}
       {state === GameState.MENU && (
-        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center pointer-events-auto z-20 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center pointer-events-auto z-20 backdrop-blur-sm pt-[env(safe-area-inset-top)]">
           <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-400 to-blue-600 mb-2 tracking-tighter drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] text-center">
             NEON
             <br />

@@ -67,8 +67,8 @@ function App() {
     engineRef.current?.startGame();
   };
 
-  const handleBomb = () => {
-    engineRef.current?.triggerBomb();
+  const handleBomb = (x?: number, y?: number) => {
+    engineRef.current?.triggerBomb(x, y);
   };
 
   const playClick = (type?: 'default' | 'confirm' | 'cancel' | 'menu') => {

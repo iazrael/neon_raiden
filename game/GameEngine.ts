@@ -120,7 +120,7 @@ export class GameEngine {
         }
         // Notify initial max level
         setTimeout(() => this.onMaxLevelChange(this.maxLevelReached), 0);
-        
+
         // Ensure first weapon is always available
         unlockWeapon(WeaponType.VULCAN);
     }
@@ -189,10 +189,19 @@ export class GameEngine {
         this.onBombChange(this.bombs);
     }
 
-    triggerBomb() {
+    triggerBomb(targetX?: number, targetY?: number) {
         if (this.bombs > 0 && this.state === GameState.PLAYING && this.player.hp > 0) {
             this.bombs--;
             this.onBombChange(this.bombs);
+
+            // Jump to target position if provided
+            if (targetX !== undefined && targetY !== undefined) {
+                this.player.x = Math.max(32, Math.min(this.render.width - 32, targetX));
+                this.player.y = Math.max(32, Math.min(this.render.height - 32, targetY));
+                // Reset velocity
+                this.player.vx = 0;
+                this.player.vy = 0;
+            }
 
             this.audio.playBomb();
             this.screenShake = 40;
@@ -442,10 +451,10 @@ export class GameEngine {
         this.audio.playExplosion('large');
         this.score += 5000 * this.level;
         this.onScoreChange(this.score);
-        
+
         // Unlock boss when defeated
         unlockBoss(bossLevel);
-        
+
         this.boss = null;
         this.bossWingmen = [];
         this.isLevelTransitioning = true; // Block new boss spawns
@@ -683,7 +692,7 @@ export class GameEngine {
                 if (weaponType !== undefined && weaponType !== null) {
                     // Unlock weapon when picked up
                     unlockWeapon(weaponType);
-                    
+
                     if (this.weaponType === weaponType) {
                         // Same weapon type - upgrade level
                         this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);

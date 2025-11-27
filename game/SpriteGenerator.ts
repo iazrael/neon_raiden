@@ -1,61 +1,16 @@
 import { ASSETS_BASE_PATH, WeaponConfig, BulletToWeaponMap, PowerupToWeaponMap, WEAPON_NAMES, EnemyBulletConfig } from '@/game/config';
 import { BulletType, WeaponType, EnemyBulletType } from '@/types';
+import { AssetsLoader } from './AssetsLoader';
 
 export class SpriteGenerator {
-    private static cache: Map<string, HTMLImageElement> = new Map();
-
-    // Preload all assets
+    // Delegate to AssetsLoader
     static async preloadAssets(): Promise<void> {
-        const promises: Promise<void>[] = [];
+        return AssetsLoader.preloadAssets();
+    }
 
-        const load = (src: string) => {
-            if (this.cache.has(src)) return;
-            const img = new Image();
-            img.src = src;
-            this.cache.set(src, img); // Cache immediately
-            const p = new Promise<void>((resolve, reject) => {
-                if (img.complete) {
-                    resolve();
-                } else {
-                    img.onload = () => resolve();
-                    img.onerror = () => {
-                        console.warn(`Failed to load asset: ${src}`);
-                        resolve();
-                    };
-                }
-            });
-            promises.push(p);
-        };
-
-        // Fighters
-        load(`${ASSETS_BASE_PATH}fighters/player.svg`);
-        load(`${ASSETS_BASE_PATH}fighters/option.svg`);
-
-        // Enemies
-        for (let i = 0; i <= 6; i++) {
-            load(`${ASSETS_BASE_PATH}enemies/enemy_${i}.svg`);
-        }
-
-        // Bullets - Player weapons
-        Object.values(WeaponConfig).forEach(config => {
-            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
-        });
-
-        // Bullets - Enemy bullets
-        Object.values(EnemyBulletConfig).forEach(config => {
-            load(`${ASSETS_BASE_PATH}bullets/${config.sprite}.svg`);
-        });
-
-        // Powerups
-        // load(`${ASSETS_BASE_PATH}powerups/powerup_bg.svg`); // Removed as we use canvas for bg
-
-        // Bosses
-        for (let i = 1; i <= 10; i++) {
-            load(`${ASSETS_BASE_PATH}bosses/boss_${i}.svg`);
-        }
-
-        await Promise.all(promises);
-        console.log('All assets preloaded');
+    // Get cached asset
+    static getAsset(src: string): HTMLImageElement | undefined {
+        return AssetsLoader.getAsset(src);
     }
 
     createCanvas(width: number, height: number): { canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D } {
@@ -67,32 +22,7 @@ export class SpriteGenerator {
     }
 
     private loadSVG(src: string, width: number, height: number): HTMLImageElement {
-        if (SpriteGenerator.cache.has(src)) {
-            const cached = SpriteGenerator.cache.get(src)!;
-            // Return a clone or the same instance?
-            // If we return the same instance, width/height might be overwritten if different sizes are requested for same src.
-            // But usually src maps to one size.
-            // However, to be safe, we can just return the cached image.
-            // Canvas drawImage works fine with same image instance.
-            // But we need to ensure width/height properties are set if they are used for layout.
-            // The cached image has naturalWidth/Height.
-            // The `width` and `height` properties on HTMLImageElement are display size.
-            // Let's update them just in case.
-            cached.width = width;
-            cached.height = height;
-            return cached;
-        }
-
-        const img = new Image();
-        img.width = width;
-        img.height = height;
-        img.src = src;
-        // Cache it immediately, though it might not be loaded yet.
-        // But better to cache loaded ones.
-        // If we use preloadAssets, they should be in cache.
-        // If not, we add to cache.
-        SpriteGenerator.cache.set(src, img);
-        return img;
+        return AssetsLoader.loadSVG(src, width, height);
     }
 
     // 生成玩家战机 (雷电风格)
