@@ -2,7 +2,7 @@
     "name": "霓电战记",
     "short_name": "霓电战记",
     "description": "A cyberpunk action game with neon aesthetics",
-    "start_url": "./splash-screen.html",
+    "start_url": "./",
     "scope": "./",
     "display": "standalone",
     "orientation": "portrait-primary",
