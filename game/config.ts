@@ -234,6 +234,132 @@ export const WeaponConfig = {
     }
 };
 
+// ==================== 武器升级配置 ====================
+// 定义武器升级时的增强效果
+export interface WeaponUpgradeEnhancements {
+    bulletCount?: number;      // 子弹数量
+    bulletWidth?: number;       // 子弹宽度增量
+    bulletHeight?: number;      // 子弹高度增量
+    beamCount?: number;         // 光束数量
+    spread?: number;            // 散射角度
+    offsetX?: number;           // X轴偏移
+    offsetY?: number;           // Y轴偏移
+    widthMultiplier?: number;   // 宽度倍数
+    heightMultiplier?: number;  // 高度倍数
+}
+
+// 武器升级配置 - 每种武器在不同等级下的增强效果
+export const WeaponUpgradeConfig: {
+    [key in WeaponType]: {
+        [level: number]: WeaponUpgradeEnhancements
+    }
+} = {
+    // VULCAN - 散弹：子弹数量递增 1→3→5→7
+    [WeaponType.VULCAN]: {
+        1: { bulletCount: 1 },
+        2: { bulletCount: 1 },
+        3: { bulletCount: 3 },
+        4: { bulletCount: 3 },
+        5: { bulletCount: 3 },
+        6: { bulletCount: 5 },
+        7: { bulletCount: 5 },
+        8: { bulletCount: 5 },
+        9: { bulletCount: 7 },
+        10: { bulletCount: 7 }
+    },
+    // LASER - 激光：宽度递增，光束数量增加
+    [WeaponType.LASER]: {
+        1: { bulletWidth: 1, beamCount: 1 },
+        2: { bulletWidth: 2, beamCount: 1 },
+        3: { bulletWidth: 3, beamCount: 1 },
+        4: { bulletWidth: 4, beamCount: 1 },
+        5: { bulletWidth: 5, beamCount: 2 },
+        6: { bulletWidth: 6, beamCount: 2 },
+        7: { bulletWidth: 7, beamCount: 2 },
+        8: { bulletWidth: 8, beamCount: 3 },
+        9: { bulletWidth: 9, beamCount: 3 },
+        10: { bulletWidth: 10, beamCount: 3 }
+    },
+    // MISSILE - 导弹：数量递增 2→4→6→8
+    [WeaponType.MISSILE]: {
+        1: { bulletCount: 2 },
+        2: { bulletCount: 2 },
+        3: { bulletCount: 4 },
+        4: { bulletCount: 4 },
+        5: { bulletCount: 4 },
+        6: { bulletCount: 6 },
+        7: { bulletCount: 6 },
+        8: { bulletCount: 6 },
+        9: { bulletCount: 8 },
+        10: { bulletCount: 8 }
+    },
+    // WAVE - 波动炮：宽度线性增长
+    [WeaponType.WAVE]: {
+        1: { bulletWidth: 12 },
+        2: { bulletWidth: 24 },
+        3: { bulletWidth: 36 },
+        4: { bulletWidth: 48 },
+        5: { bulletWidth: 60 },
+        6: { bulletWidth: 72 },
+        7: { bulletWidth: 84 },
+        8: { bulletWidth: 96 },
+        9: { bulletWidth: 108 },
+        10: { bulletWidth: 120 }
+    },
+    // PLASMA - 等离子炮：尺寸线性增长
+    [WeaponType.PLASMA]: {
+        1: { bulletWidth: 8, bulletHeight: 8 },
+        2: { bulletWidth: 16, bulletHeight: 16 },
+        3: { bulletWidth: 24, bulletHeight: 24 },
+        4: { bulletWidth: 32, bulletHeight: 32 },
+        5: { bulletWidth: 40, bulletHeight: 40 },
+        6: { bulletWidth: 48, bulletHeight: 48 },
+        7: { bulletWidth: 56, bulletHeight: 56 },
+        8: { bulletWidth: 64, bulletHeight: 64 },
+        9: { bulletWidth: 72, bulletHeight: 72 },
+        10: { bulletWidth: 80, bulletHeight: 80 }
+    },
+    // TESLA - 电磁炮：保持默认配置（锁定范围在代码中处理）
+    [WeaponType.TESLA]: {
+        1: {},
+        2: {},
+        3: {},
+        4: {},
+        5: {},
+        6: {},
+        7: {},
+        8: {},
+        9: {},
+        10: {}
+    },
+    // MAGMA - 熔岩炮：子弹数量递增
+    [WeaponType.MAGMA]: {
+        1: { bulletCount: 3 },
+        2: { bulletCount: 3 },
+        3: { bulletCount: 4 },
+        4: { bulletCount: 4 },
+        5: { bulletCount: 4 },
+        6: { bulletCount: 5 },
+        7: { bulletCount: 5 },
+        8: { bulletCount: 5 },
+        9: { bulletCount: 6 },
+        10: { bulletCount: 6 }
+    },
+    // SHURIKEN - 手里剑：子弹数量递增
+    [WeaponType.SHURIKEN]: {
+        1: { bulletCount: 2 },
+        2: { bulletCount: 2 },
+        3: { bulletCount: 3 },
+        4: { bulletCount: 3 },
+        5: { bulletCount: 3 },
+        6: { bulletCount: 4 },
+        7: { bulletCount: 4 },
+        8: { bulletCount: 4 },
+        9: { bulletCount: 5 },
+        10: { bulletCount: 5 }
+    }
+};
+
 // ==================== 敌人子弹配置 ====================
 export const EnemyBulletConfig = {
     // ENEMY_ORB - 敌人普通能量球（红色）
