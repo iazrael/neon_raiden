@@ -31,6 +31,12 @@ function App() {
     // Preload assets
     SpriteGenerator.preloadAssets();
 
+    // 隐藏加载指示器
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+      loadingIndicator.style.display = 'none';
+    }
+
     if (!canvasRef.current) return;
 
     // Initialize Engine
