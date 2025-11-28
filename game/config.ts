@@ -454,6 +454,9 @@ export const EnemyCommonConfig = {
     eliteChance: 0.15,
     eliteHpMultiplier: 3,
     eliteSizeMultiplier: 1.3,
+    eliteScoreMultiplier: 3,
+    eliteDamageMultiplier: 1.5,
+    eliteFireRateMultiplier: 1.5,
     enemyCountMultiplier: 1.15,
 };
 
@@ -641,6 +644,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
 export const PowerupDropConfig = {
     elitePowerupDropRate: 0.6,
     normalPowerupDropRate: 0.1,
+    bossDropRate: 1.0,
 };
 
 export const PowerupDropRates: Record<PowerupType, number> = {

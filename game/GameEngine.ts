@@ -1,6 +1,6 @@
 import { AudioSystem } from './AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -507,6 +507,11 @@ export class GameEngine {
         this.score += BossConfig[this.boss.subType]?.score || (5000 * this.level);
         this.onScoreChange(this.score);
 
+        // Boss guaranteed drop
+        if (Math.random() < PowerupDropConfig.bossDropRate) {
+            this.spawnPowerup(bx, by);
+        }
+
         // Unlock boss when defeated
         unlockBoss(bossLevel);
 
@@ -703,7 +708,8 @@ export class GameEngine {
 
     killEnemy(e: Entity) {
         e.markedForDeletion = true;
-        this.score += EnemyConfig[e.subType]?.score || 100;
+        const baseScore = EnemyConfig[e.subType]?.score || 100;
+        this.score += baseScore * (e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1);
         this.onScoreChange(this.score);
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');

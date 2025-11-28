@@ -247,7 +247,7 @@ export const GameUI: React.FC<GameUIProps> = ({
               playClick?.('cancel');
               onBackToMenu?.();
             }}
-            className="mt-4 px-6 py-2 bg-transparent text-red-400 font-bold border border-red-900/50 hover:bg-red-900/20 hover:border-red-500 rounded transition-all uppercase tracking-widest text-sm"
+            className="mt-4 px-6 py-2 bg-gray-900 text-red-400 font-bold border border-red-500/50 hover:bg-red-900/40 hover:border-red-400 hover:text-red-300 rounded transition-all uppercase tracking-widest text-sm shadow-lg"
           >
             Return to Home
           </button>

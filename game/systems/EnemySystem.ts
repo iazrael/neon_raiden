@@ -94,10 +94,10 @@ export class EnemySystem {
             // Laser Interceptor - Special state machine firing
             if (e.subType === EnemyType.LASER_INTERCEPTOR) {
                 const config = EnemyConfig[EnemyType.LASER_INTERCEPTOR];
-                const chargeTime = config.weapon.chargeTime || 2000;
-                const cooldownTime = config.weapon.cooldownTime || 1000;
+                const chargeTime = (config.weapon.chargeTime || 2000) / (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
+                const cooldownTime = (config.weapon.cooldownTime || 1000) / (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
                 const bulletSpeed = config.weapon.speed || 12;
-                const bulletDamage = config.weapon.damage || 30;
+                const bulletDamage = (config.weapon.damage || 30) * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1);
 
                 if (e.state === 0) { // Entering
                     if (e.y > 150) {
@@ -143,8 +143,8 @@ export class EnemySystem {
             // Mine Layer - Special interval-based firing
             if (e.subType === EnemyType.MINE_LAYER) {
                 const config = EnemyConfig[EnemyType.MINE_LAYER];
-                const spawnInterval = config.weapon.interval || 1500;
-                const mineDamage = config.weapon.damage || 25;
+                const spawnInterval = (config.weapon.interval || 1500) / (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
+                const mineDamage = (config.weapon.damage || 25) * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1);
 
                 e.timer = (e.timer || 0) + dt;
                 if (e.timer > spawnInterval) {
@@ -166,7 +166,7 @@ export class EnemySystem {
             // Elite Gunboat - Targeted rapid firing
             if (e.subType === EnemyType.ELITE_GUNBOAT) {
                 const config = EnemyConfig[EnemyType.ELITE_GUNBOAT];
-                const shootFreq = config.weapon.frequency || 0.02;
+                const shootFreq = (config.weapon.frequency || 0.02) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
                 const bulletSpeed = config.weapon.speed || 4;
 
                 if (Math.random() < shootFreq * timeScale) {
@@ -180,7 +180,8 @@ export class EnemySystem {
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: (dx / dist) * bulletSpeed, vy: (dy / dist) * bulletSpeed,
-                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
+                        damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1)
                     });
                 }
             }
@@ -188,7 +189,7 @@ export class EnemySystem {
             // Stalker - Homing missile firing
             if (e.subType === EnemyType.STALKER) {
                 const config = EnemyConfig[EnemyType.STALKER];
-                const shootFreq = config.weapon.frequency || 0.015;
+                const shootFreq = (config.weapon.frequency || 0.015) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
                 const bulletSpeed = config.weapon.speed || 3;
 
                 if (Math.random() < shootFreq * timeScale) {
@@ -211,7 +212,7 @@ export class EnemySystem {
             // Barrage - Spiral pattern firing
             if (e.subType === EnemyType.BARRAGE) {
                 const config = EnemyConfig[EnemyType.BARRAGE];
-                const shootFreq = config.weapon.frequency || 0.03;
+                const shootFreq = (config.weapon.frequency || 0.03) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
                 const bulletSpeed = config.weapon.speed || 3;
 
                 if (Math.random() < shootFreq * timeScale) {
@@ -225,7 +226,8 @@ export class EnemySystem {
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: Math.cos(angle) * bulletSpeed, vy: Math.sin(angle) * bulletSpeed + 2, // +2 to ensure downward trend
-                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
+                        damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1)
                     });
                 }
             }
@@ -233,7 +235,7 @@ export class EnemySystem {
             // Pulsar - High frequency rapid firing
             if (e.subType === EnemyType.PULSAR) {
                 const config = EnemyConfig[EnemyType.PULSAR];
-                const shootFreq = config.weapon.frequency || 0.05;
+                const shootFreq = (config.weapon.frequency || 0.05) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
                 const bulletSpeed = config.weapon.speed || 6;
 
                 if (Math.random() < shootFreq * timeScale) {
@@ -244,7 +246,8 @@ export class EnemySystem {
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: 0, vy: bulletSpeed,
-                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
+                        damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1)
                     });
                 }
             }
@@ -258,7 +261,7 @@ export class EnemySystem {
                 e.subType !== EnemyType.PULSAR) {
 
                 const enemyConfig = EnemyConfig[e.subType as EnemyType];
-                const shootFreq = enemyConfig.weapon.frequency || 0.05;
+                const shootFreq = (enemyConfig.weapon.frequency || 0.05) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
 
                 if (Math.random() < shootFreq * timeScale) {
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_ORB];
@@ -268,7 +271,8 @@ export class EnemySystem {
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: 0, vy: 5, hp: 1, maxHp: 1,
-                        type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                        type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
+                        damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1)
                     });
                 }
             }
