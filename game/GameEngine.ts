@@ -7,6 +7,7 @@ import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
+import { WeaponSynergySystem, SynergyTriggerContext } from './systems/WeaponSynergySystem';
 import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
 
 export class GameEngine {
@@ -20,6 +21,7 @@ export class GameEngine {
     enemySys: EnemySystem;
     bossSys: BossSystem;
     comboSys: ComboSystem; // P2 Combo System
+    synergySys: WeaponSynergySystem; // P2 Weapon Synergy System
 
     // Game State
     state: GameState = GameState.MENU;
@@ -44,6 +46,7 @@ export class GameEngine {
 
     // Player Stats
     weaponType: WeaponType = WeaponType.VULCAN;
+    secondaryWeapon: WeaponType | null = null; // P2 Secondary weapon for synergy
     weaponLevel: number = 1;
     bombs: number = PlayerConfig.initialBombs;
     shield: number = 0;
@@ -104,6 +107,7 @@ export class GameEngine {
         this.enemySys = new EnemySystem(this.audio, canvas.width, canvas.height);
         this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height);
         this.comboSys = new ComboSystem(undefined, (state) => this.onComboChange(state)); // P2 Combo System
+        this.synergySys = new WeaponSynergySystem(); // P2 Weapon Synergy System
 
         // Bind Input Actions
         this.input.onAction = (action) => {
@@ -172,6 +176,7 @@ export class GameEngine {
         this.level = 1;
         this.weaponLevel = 1;
         this.weaponType = WeaponType.VULCAN;
+        this.secondaryWeapon = null; // P2 Reset secondary weapon
         this.bombs = PlayerConfig.initialBombs;
         this.shield = 0;
 
@@ -736,7 +741,54 @@ export class GameEngine {
 
         // P2 Apply combo damage multiplier
         const comboDamageMultiplier = this.comboSys.getDamageMultiplier();
-        const finalDamage = (b.damage || 10) * comboDamageMultiplier;
+        let finalDamage = (b.damage || 10) * comboDamageMultiplier;
+        
+        // P2 Try to trigger weapon synergies
+        const synergyContext: SynergyTriggerContext = {
+            weaponType: b.weaponType || this.weaponType,
+            bulletX: b.x,
+            bulletY: b.y,
+            targetEnemy: target,
+            enemies: this.enemies,
+            player: this.player
+        };
+        const synergyResults = this.synergySys.tryTriggerSynergies(synergyContext);
+        
+        // Apply synergy effects
+        synergyResults.forEach(result => {
+            if (result.effect === 'chain_lightning') {
+                // LASER+TESLA: Spawn chain lightning
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 15;
+                this.bullets.push({
+                    x: target.x,
+                    y: target.y,
+                    width: 8,
+                    height: 8,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    hp: 1,
+                    maxHp: 1,
+                    type: EntityType.BULLET,
+                    color: result.color,
+                    markedForDeletion: false,
+                    spriteKey: 'bullet',
+                    damage: 25,
+                    chainCount: 2,
+                    chainRange: 120,
+                    weaponType: WeaponType.TESLA
+                });
+                this.createExplosion(target.x, target.y, 'small', result.color);
+            } else if (result.effect === 'damage_boost') {
+                // WAVE+PLASMA or MISSILE+VULCAN: Apply damage multiplier
+                finalDamage *= result.multiplier || 1.0;
+            } else if (result.effect === 'burn') {
+                // MAGMA+SHURIKEN: Apply burn DOT (simplified: instant extra damage)
+                target.hp -= 30; // Burn damage
+                this.createExplosion(target.x, target.y, 'small', result.color);
+            }
+        });
+        
         target.hp -= finalDamage;
         this.audio.playHit();
 
@@ -790,6 +842,35 @@ export class GameEngine {
         this.audio.playExplosion('large');
 
         const range = 100 + (this.weaponLevel * 15);
+        
+        // P2 Check for TESLA+PLASMA synergy (Plasma Storm)
+        const affectedEnemies = this.synergySys.triggerPlasmaStorm(x, y, range, this.enemies);
+        
+        if (affectedEnemies.length > 0) {
+            // Generate lightning bolts to affected enemies
+            affectedEnemies.forEach(e => {
+                const angle = Math.atan2(e.y - y, e.x - x);
+                const speed = 18;
+                this.bullets.push({
+                    x: x,
+                    y: y,
+                    width: 10,
+                    height: 10,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    hp: 1,
+                    maxHp: 1,
+                    type: EntityType.BULLET,
+                    color: '#a855f7',
+                    markedForDeletion: false,
+                    spriteKey: 'bullet',
+                    damage: 40,
+                    weaponType: WeaponType.TESLA
+                });
+            });
+            this.createExplosion(x, y, 'large', '#a855f7');
+        }
+        
         this.enemies.forEach(e => {
             if (Math.hypot(e.x - x, e.y - y) < range) {
                 e.hp -= 50;
@@ -858,10 +939,25 @@ export class GameEngine {
                     if (this.weaponType === weaponType) {
                         // Same weapon type - upgrade level
                         this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
+                    } else if (this.secondaryWeapon === weaponType) {
+                        // Secondary weapon - upgrade or switch
+                        this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
                     } else {
-                        // Different weapon type - switch weapon
-                        this.weaponType = weaponType;
-                        this.weaponLevel = 1;
+                        // P2 New weapon - set as secondary if no secondary exists
+                        if (this.secondaryWeapon === null) {
+                            this.secondaryWeapon = weaponType;
+                        } else {
+                            // Switch primary weapon
+                            this.secondaryWeapon = this.weaponType;
+                            this.weaponType = weaponType;
+                            this.weaponLevel = 1;
+                        }
+                        
+                        // P2 Update synergy system with equipped weapons
+                        const equippedWeapons = this.secondaryWeapon 
+                            ? [this.weaponType, this.secondaryWeapon] 
+                            : [this.weaponType];
+                        this.synergySys.updateEquippedWeapons(equippedWeapons);
                     }
                 }
                 break;

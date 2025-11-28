@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GameEngine } from './game/GameEngine';
 import { GameUI } from './components/GameUI';
-import { GameState } from './types';
+import { GameState, WeaponType } from './types';
 import type { ComboState } from './game/systems/ComboSystem';
+import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
 import { SpriteGenerator } from './game/SpriteGenerator';
 
@@ -22,6 +23,9 @@ function App() {
   const [stateBeforeGallery, setStateBeforeGallery] = useState<GameState>(GameState.MENU);
   const [showBossWarning, setShowBossWarning] = useState(false);
   const [comboState, setComboState] = useState<ComboState>({ count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false }); // P2 Combo
+  const [activeSynergies, setActiveSynergies] = useState<SynergyConfig[]>([]); // P2 Weapon Synergy
+  const [weaponType, setWeaponType] = useState<WeaponType>(WeaponType.VULCAN); // P2 Current weapon
+  const [secondaryWeapon, setSecondaryWeapon] = useState<WeaponType | null>(null); // P2 Secondary weapon
 
   useEffect(() => {
     // Preload assets
@@ -56,6 +60,11 @@ function App() {
       // Sync level transition state
       setShowLevelTransition(engine.showLevelTransition);
       setLevelTransitionTimer(engine.levelTransitionTimer);
+      
+      // P2 Sync weapon synergy state
+      setActiveSynergies(engine.synergySys.getActiveSynergies());
+      setWeaponType(engine.weaponType);
+      setSecondaryWeapon(engine.secondaryWeapon);
 
       animationId = requestAnimationFrame(loop);
     };
@@ -100,6 +109,9 @@ function App() {
         maxLevelReached={maxLevelReached}
         showBossWarning={showBossWarning}
         comboState={comboState}
+        activeSynergies={activeSynergies}
+        weaponType={weaponType}
+        secondaryWeapon={secondaryWeapon}
         onOpenGallery={() => {
           setStateBeforeGallery(gameState);
           if (gameState === GameState.PLAYING) {

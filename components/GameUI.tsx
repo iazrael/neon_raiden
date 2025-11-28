@@ -1,8 +1,9 @@
 import React from "react";
-import { GameState } from "@/types";
+import { GameState, WeaponType } from "@/types";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
+import type { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
 
 interface GameUIProps {
   state: GameState;
@@ -24,6 +25,9 @@ interface GameUIProps {
   onResume?: () => void;
   showBossWarning?: boolean;
   comboState?: ComboState; // P2 Combo system
+  activeSynergies?: SynergyConfig[]; // P2 Weapon Synergy
+  weaponType?: WeaponType; // P2 Current weapon
+  secondaryWeapon?: WeaponType | null; // P2 Secondary weapon
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -46,6 +50,9 @@ export const GameUI: React.FC<GameUIProps> = ({
   onResume,
   showBossWarning = false,
   comboState, // P2 Combo system
+  activeSynergies = [], // P2 Weapon Synergy
+  weaponType,
+  secondaryWeapon,
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
@@ -63,6 +70,39 @@ export const GameUI: React.FC<GameUIProps> = ({
             SCORE: {score.toString().padStart(6, "0")}
           </div>
           <div className="text-sm text-gray-300">LEVEL: {level}</div>
+          
+          {/* P2 Weapon Status & Active Synergies */}
+          {state === GameState.PLAYING && weaponType && (
+            <div className="mt-2 flex flex-col gap-1">
+              {/* Equipped Weapons */}
+              <div className="text-xs text-gray-400">
+                <span className="text-cyan-400 font-bold">{weaponType}</span>
+                {secondaryWeapon && (
+                  <span className="text-purple-400"> + {secondaryWeapon}</span>
+                )}
+              </div>
+              
+              {/* Active Synergies */}
+              {activeSynergies.length > 0 && (
+                <div className="flex flex-col gap-0.5">
+                  {activeSynergies.map(synergy => (
+                    <div 
+                      key={synergy.type}
+                      className="text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1"
+                      style={{ 
+                        borderColor: synergy.color,
+                        backgroundColor: `${synergy.color}20`,
+                        color: synergy.color
+                      }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: synergy.color }} />
+                      <span className="font-bold tracking-wider">{synergy.chineseName}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* HP Bar */}
