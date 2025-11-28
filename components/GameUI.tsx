@@ -178,7 +178,7 @@ export const GameUI: React.FC<GameUIProps> = ({
 
       {/* Exit Button (Top Right, below HUD) */}
       {state === GameState.PLAYING && (
-        <div className="absolute top-[max(4rem,calc(env(safe-area-inset-top)+3rem))] right-4 pointer-events-auto z-30">
+        <div className="absolute top-[max(3rem,calc(env(safe-area-inset-top)+2rem))] right-4 pointer-events-auto z-30">
           <button
             onClick={() => {
               playClick?.('cancel');
