@@ -51,6 +51,7 @@ export class GameEngine {
     meteors: { x: number, y: number, length: number, vx: number, vy: number }[] = [];
     boss: Entity | null = null;
     bossWingmen: Entity[] = [];
+    plasmaExplosions: { x: number, y: number, range: number, life: number }[] = [];
 
     // Player Stats
     weaponType: WeaponType = WeaponType.VULCAN;
@@ -609,6 +610,11 @@ export class GameEngine {
         });
         this.shockwaves = this.shockwaves.filter(s => s.life > 0);
 
+        this.plasmaExplosions.forEach(p => {
+            p.life -= dt;
+        });
+        this.plasmaExplosions = this.plasmaExplosions.filter(p => p.life > 0);
+
         this.checkCollisions();
 
         // Clean up
@@ -911,7 +917,8 @@ export class GameEngine {
             bulletY: b.y,
             targetEnemy: target,
             enemies: this.enemies,
-            player: this.player
+            player: this.player,
+            plasmaExplosions: this.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range }))
         };
         const synergyResults = this.synergySys.tryTriggerSynergies(synergyContext);
 
@@ -1010,6 +1017,8 @@ export class GameEngine {
         this.audio.playExplosion(ExplosionSize.LARGE);
 
         const range = 100 + (this.weaponLevel * 15);
+
+        this.plasmaExplosions.push({ x, y, range, life: 1200 });
 
         // P2 Check for TESLA+PLASMA synergy (Plasma Storm)
         const affectedEnemies = this.synergySys.triggerPlasmaStorm(x, y, range, this.enemies);

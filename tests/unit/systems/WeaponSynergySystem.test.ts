@@ -1,5 +1,5 @@
 import { WeaponSynergySystem, SynergyType, SYNERGY_CONFIGS } from '@/game/systems/WeaponSynergySystem';
-import { WeaponType, Entity, EntityType } from '@/types';
+import { WeaponType, Entity } from '@/types';
 
 describe('WeaponSynergySystem', () => {
   let weaponSynergySystem: WeaponSynergySystem;
@@ -168,7 +168,7 @@ describe('WeaponSynergySystem', () => {
       jest.spyOn(global.Math, 'random').mockRestore();
     });
 
-    it('should trigger WAVE_PLASMA synergy', () => {
+    it('should trigger WAVE_PLASMA synergy when bullet is inside explosion zone', () => {
       // 激活组合技
       (weaponSynergySystem as any).activeSynergies.add(SynergyType.WAVE_PLASMA);
       
@@ -178,7 +178,8 @@ describe('WeaponSynergySystem', () => {
         bulletY: 100,
         targetEnemy: {} as Entity,
         enemies: [],
-        player: {} as Entity
+        player: {} as Entity,
+        plasmaExplosions: [{ x: 100, y: 100, range: 200 }]
       };
       
       const results = weaponSynergySystem.tryTriggerSynergies(context);
@@ -235,11 +236,11 @@ describe('WeaponSynergySystem', () => {
 
   describe('triggerPlasmaStorm', () => {
     it('should not trigger plasma storm when synergy is not active', () => {
-      const lightningBullets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 100, []);
-      expect(lightningBullets).toEqual([]);
+      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 100, []);
+      expect(targets).toEqual([]);
     });
 
-    it('should trigger plasma storm and generate lightning bullets', () => {
+    it('should trigger plasma storm and return up to 3 enemies in range', () => {
       // 激活组合技
       (weaponSynergySystem as any).activeSynergies.add(SynergyType.TESLA_PLASMA);
       
@@ -249,24 +250,21 @@ describe('WeaponSynergySystem', () => {
         { x: 500, y: 300, markedForDeletion: false } as Entity
       ];
       
-      const lightningBullets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 150, enemies);
+      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 150, enemies);
       
-      // 应该生成最多3个闪电子弹
-      expect(lightningBullets.length).toBeGreaterThanOrEqual(1);
-      expect(lightningBullets.length).toBeLessThanOrEqual(3);
+      // 应该返回最多3个目标敌人
+      expect(targets.length).toBeGreaterThanOrEqual(1);
+      expect(targets.length).toBeLessThanOrEqual(3);
       
-      // 检查生成的子弹属性
-      if (lightningBullets.length > 0) {
-        const bullet = lightningBullets[0];
-        expect(bullet.type).toBe(EntityType.BULLET);
-        expect(bullet.weaponType).toBe(WeaponType.TESLA);
-        expect(bullet.damage).toBe(25);
-        expect(bullet.chainCount).toBe(1);
-        expect(bullet.chainRange).toBe(150);
-      }
+      // 返回的目标应为输入敌人子集且在范围内
+      targets.forEach(t => {
+        expect(enemies.includes(t)).toBe(true);
+        const dist = Math.hypot(t.x - 400, t.y - 300);
+        expect(dist).toBeLessThan(150);
+      });
     });
 
-    it('should not generate lightning bullets for enemies outside explosion range', () => {
+    it('should not include enemies outside explosion range', () => {
       // 激活组合技
       (weaponSynergySystem as any).activeSynergies.add(SynergyType.TESLA_PLASMA);
       
@@ -274,13 +272,13 @@ describe('WeaponSynergySystem', () => {
         { x: 600, y: 500, markedForDeletion: false } as Entity // 在爆炸范围外
       ];
       
-      const lightningBullets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 100, enemies);
+      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 100, enemies);
       
-      // 应该不生成闪电子弹
-      expect(lightningBullets).toEqual([]);
+      // 应该不返回目标
+      expect(targets).toEqual([]);
     });
 
-    it('should not generate lightning bullets for marked for deletion enemies', () => {
+    it('should not include marked for deletion enemies', () => {
       // 激活组合技
       (weaponSynergySystem as any).activeSynergies.add(SynergyType.TESLA_PLASMA);
       
@@ -288,10 +286,10 @@ describe('WeaponSynergySystem', () => {
         { x: 450, y: 350, markedForDeletion: true } as Entity // 标记为删除
       ];
       
-      const lightningBullets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 150, enemies);
+      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 150, enemies);
       
-      // 应该不生成闪电子弹
-      expect(lightningBullets).toEqual([]);
+      // 应该不返回目标
+      expect(targets).toEqual([]);
     });
   });
 });

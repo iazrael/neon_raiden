@@ -48,6 +48,8 @@ export interface SynergyTriggerContext {
     enemies: Entity[];
     /** 玩家实体(用于计算位置等) */
     player: Entity;
+    /** PLASMA爆炸区域 */
+    plasmaExplosions?: { x: number; y: number; range: number }[];
 }
 
 // 组合技配置表
@@ -204,16 +206,17 @@ export class WeaponSynergySystem {
         // WAVE + PLASMA: 能量共鸣
         if (this.isSynergyActive(SynergyType.WAVE_PLASMA) &&
             bulletWeapon === WeaponType.WAVE) {
-            // 检查WAVE子弹是否穿过PLASMA爆炸区
-            // 这需要在GameEngine中跟踪PLASMA爆炸位置和时间
-            // 此处返回标记,由调用方判断并应用伤害加成
-            results.push({
-                type: SynergyType.WAVE_PLASMA,
-                effect: 'damage_boost',
-                value: 1.5, // 伤害×1.5
-                color: SYNERGY_CONFIGS[SynergyType.WAVE_PLASMA].color,
-                multiplier: 1.5
-            });
+            const zones = context.plasmaExplosions || [];
+            const inZone = zones.some(z => Math.hypot(context.bulletX - z.x, context.bulletY - z.y) < z.range);
+            if (inZone) {
+                results.push({
+                    type: SynergyType.WAVE_PLASMA,
+                    effect: 'damage_boost',
+                    value: 1.5,
+                    color: SYNERGY_CONFIGS[SynergyType.WAVE_PLASMA].color,
+                    multiplier: 1.5
+                });
+            }
         }
 
         // MISSILE + VULCAN: 弹幕覆盖
@@ -266,45 +269,19 @@ export class WeaponSynergySystem {
             return [];
         }
 
-        const lightningBullets: Entity[] = [];
-        let lightningCount = 0;
-        const maxLightning = 3;
-
-        // 在爆炸范围内随机找3个敌人发射闪电
+        const maxTargets = 3;
         const enemiesInRange = enemies.filter(e => {
             const dist = Math.hypot(e.x - explosionX, e.y - explosionY);
             return dist < explosionRange && !e.markedForDeletion;
         });
 
-        // 随机选择最多3个敌人
         const shuffled = [...enemiesInRange].sort(() => Math.random() - 0.5);
-        for (let i = 0; i < Math.min(maxLightning, shuffled.length); i++) {
-            const target = shuffled[i];
-            const angle = Math.atan2(target.y - explosionY, target.x - explosionX);
-
-            lightningBullets.push({
-                x: explosionX,
-                y: explosionY,
-                width: 16,
-                height: 64,
-                vx: Math.cos(angle) * 20,
-                vy: Math.sin(angle) * 20,
-                hp: 1,
-                maxHp: 1,
-                type: EntityType.BULLET,
-                color: SYNERGY_CONFIGS[SynergyType.TESLA_PLASMA].color,
-                markedForDeletion: false,
-                spriteKey: 'bullet_tesla',
-                damage: 25, // 风暴闪电伤害
-                weaponType: WeaponType.TESLA,
-                chainCount: 1, // 可以继续连锁1次
-                chainRange: 150
-            });
-
-            lightningCount++;
+        const targets: Entity[] = [];
+        for (let i = 0; i < Math.min(maxTargets, shuffled.length); i++) {
+            targets.push(shuffled[i]);
         }
 
-        return lightningBullets;
+        return targets;
     }
 }
 
