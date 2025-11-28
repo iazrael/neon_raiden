@@ -195,7 +195,7 @@ export class RenderSystem {
             this.ctx.translate(this.width / 2, this.height / 2);
             this.ctx.scale(scale, scale);
 
-            this.ctx.fillText('BOSS DEFEATED', 0, 0);
+            this.ctx.fillText('DEFEATED', 0, 0);
             this.ctx.restore();
         }
 

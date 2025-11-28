@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GameEngine } from './game/GameEngine';
 import { GameUI } from './components/GameUI';
-import { GameState, WeaponType } from './types';
+import { GameState, WeaponType, ClickType } from './types';
 import type { ComboState } from './game/systems/ComboSystem';
 import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
@@ -66,7 +66,7 @@ function App() {
       // Sync level transition state
       setShowLevelTransition(engine.showLevelTransition);
       setLevelTransitionTimer(engine.levelTransitionTimer);
-      
+
       // P2 Sync weapon synergy state
       setActiveSynergies(engine.synergySys.getActiveSynergies());
       setWeaponType(engine.weaponType);
@@ -91,7 +91,7 @@ function App() {
     engineRef.current?.triggerBomb(x, y);
   };
 
-  const playClick = (type?: 'default' | 'confirm' | 'cancel' | 'menu') => {
+  const playClick = (type: ClickType = ClickType.DEFAULT) => {
     engineRef.current?.audio.playClick(type);
   };
 

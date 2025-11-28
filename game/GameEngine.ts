@@ -1,5 +1,5 @@
 import { AudioSystem } from './AudioSystem';
-import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType } from '@/types';
+import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize } from '@/types';
 import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
@@ -259,7 +259,7 @@ export class GameEngine {
 
             this.enemyBullets = [];
             this.enemies.forEach(e => {
-                this.createExplosion(e.x, e.y, 'large', e.color);
+                this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.color);
                 e.hp = 0;
                 e.markedForDeletion = true;
                 this.score += EnemyConfig[e.subType]?.score || 100;
@@ -594,8 +594,8 @@ export class GameEngine {
         this.powerups = this.powerups.filter(e => !e.markedForDeletion && e.y < this.render.height + 50);
 
         if (this.player.hp <= 0) {
-            this.createExplosion(this.player.x, this.player.y, 'large', '#00ffff');
-            this.audio.playExplosion('large');
+            this.createExplosion(this.player.x, this.player.y, ExplosionSize.LARGE, '#00ffff');
+            this.audio.playExplosion(ExplosionSize.LARGE);
             this.audio.playDefeat();
             this.state = GameState.GAME_OVER;
             this.onStateChange(this.state);
@@ -639,17 +639,17 @@ export class GameEngine {
         const by = this.boss.y;
         const bossLevel = this.level;
 
-        this.createExplosion(bx, by, 'large', '#ffffff');
+        this.createExplosion(bx, by, ExplosionSize.LARGE, '#ffffff');
         this.addShockwave(bx, by);
         this.screenShake = 30;
 
         for (let i = 0; i < 15; i++) {
             setTimeout(() => {
                 if (this.state === GameState.VICTORY) return;
-                this.createExplosion(bx + (Math.random() - 0.5) * 150, by + (Math.random() - 0.5) * 150, 'large', '#fff');
+                this.createExplosion(bx + (Math.random() - 0.5) * 150, by + (Math.random() - 0.5) * 150, ExplosionSize.LARGE, '#fff');
             }, i * 100);
         }
-        this.audio.playExplosion('large');
+        this.audio.playExplosion(ExplosionSize.LARGE);
         this.audio.playBossDefeat(); // Play victory fanfare
         this.showBossDefeatAnimation = true;
         this.bossDefeatTimer = 3000; // Show for 3 seconds
@@ -744,7 +744,7 @@ export class GameEngine {
                 if (this.isColliding(b, obstacle)) {
                     b.markedForDeletion = true;
                     this.envSys.damageObstacle(obstacle, b.damage || 10);
-                    this.createExplosion(b.x, b.y, 'small', '#888888');
+                    this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#888888');
                     blockedByObstacle = true;
                 }
             });
@@ -780,7 +780,7 @@ export class GameEngine {
                 obstacles.forEach(obstacle => {
                     if (this.isColliding(e, obstacle)) {
                         e.markedForDeletion = true;
-                        this.createExplosion(e.x, e.y, 'small', '#888888');
+                        this.createExplosion(e.x, e.y, ExplosionSize.SMALL, '#888888');
                     }
                 });
             }
@@ -789,7 +789,7 @@ export class GameEngine {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
                 this.takeDamage(10);
-                this.createExplosion(this.player.x, this.player.y, 'small', '#00ffff');
+                this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
             }
         });
 
@@ -914,14 +914,14 @@ export class GameEngine {
                     chainRange: 120,
                     weaponType: WeaponType.TESLA
                 });
-                this.createExplosion(target.x, target.y, 'small', result.color);
+                this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
             } else if (result.effect === 'damage_boost') {
                 // WAVE+PLASMA or MISSILE+VULCAN: Apply damage multiplier
                 finalDamage *= result.multiplier || 1.0;
             } else if (result.effect === 'burn') {
                 // MAGMA+SHURIKEN: Apply burn DOT (simplified: instant extra damage)
                 target.hp -= 30; // Burn damage
-                this.createExplosion(target.x, target.y, 'small', result.color);
+                this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
             }
         });
 
@@ -935,7 +935,7 @@ export class GameEngine {
                 this.killEnemy(target);
             }
         } else if (b.type !== 'bullet' || b.weaponType !== WeaponType.PLASMA) {
-            this.createExplosion(b.x, b.y, 'small', '#ffe066');
+            this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ffe066');
         }
     }
 
@@ -955,8 +955,8 @@ export class GameEngine {
 
         this.score += finalScore;
         this.onScoreChange(this.score);
-        this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
-        this.audio.playExplosion('small');
+        this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.type === 'enemy' ? '#c53030' : '#fff');
+        this.audio.playExplosion(ExplosionSize.SMALL);
 
         // P2 Visual feedback for combo level up
         if (leveledUp) {
@@ -979,10 +979,10 @@ export class GameEngine {
     }
 
     createPlasmaExplosion(x: number, y: number) {
-        this.createExplosion(x, y, 'large', '#ed64a6');
+        this.createExplosion(x, y, ExplosionSize.LARGE, '#ed64a6');
         this.addShockwave(x, y, '#ed64a6');
         this.screenShake = 15;
-        this.audio.playExplosion('large');
+        this.audio.playExplosion(ExplosionSize.LARGE);
 
         const range = 100 + (this.weaponLevel * 15);
 
@@ -1011,7 +1011,7 @@ export class GameEngine {
                     weaponType: WeaponType.TESLA
                 });
             });
-            this.createExplosion(x, y, 'large', '#a855f7');
+            this.createExplosion(x, y, ExplosionSize.LARGE, '#a855f7');
         }
 
         this.enemies.forEach(e => {
@@ -1124,17 +1124,17 @@ export class GameEngine {
         });
     }
 
-    createExplosion(x: number, y: number, size: 'small' | 'large', color: string) {
-        const count = size === 'small' ? 8 : 30;
+    createExplosion(x: number, y: number, size: ExplosionSize, color: string) {
+        const count = size === ExplosionSize.SMALL ? 8 : 30;
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * (size === 'small' ? 4 : 10);
+            const speed = Math.random() * (size === ExplosionSize.SMALL ? 4 : 10);
             this.particles.push({
                 x, y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
-                life: size === 'small' ? 300 : 800,
-                maxLife: size === 'small' ? 300 : 800,
+                life: size === ExplosionSize.SMALL ? 300 : 800,
+                maxLife: size === ExplosionSize.SMALL ? 300 : 800,
                 color: color,
                 size: Math.random() * 4 + 2,
                 type: 'spark'

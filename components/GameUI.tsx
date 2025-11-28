@@ -1,5 +1,5 @@
 import React from "react";
-import { GameState, WeaponType } from "@/types";
+import { GameState, WeaponType, ClickType } from "@/types";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
@@ -19,7 +19,7 @@ interface GameUIProps {
   maxLevelReached?: number;
   onOpenGallery?: () => void;
   onCloseGallery?: () => void;
-  playClick?: (type?: 'default' | 'confirm' | 'cancel' | 'menu') => void;
+  playClick?: (type?: ClickType) => void;
   onBackToMenu?: () => void;
   onPause?: () => void;
   onResume?: () => void;
@@ -181,7 +181,7 @@ export const GameUI: React.FC<GameUIProps> = ({
         <div className="absolute top-[max(3rem,calc(env(safe-area-inset-top)+2rem))] right-4 pointer-events-auto z-30">
           <button
             onClick={() => {
-              playClick?.('cancel');
+              playClick?.(ClickType.CANCEL);
               onPause?.();
               setShowExitDialog(true);
             }}
@@ -213,7 +213,7 @@ export const GameUI: React.FC<GameUIProps> = ({
                 <div className="flex gap-3">
                   <button
                     onClick={() => {
-                      playClick?.('cancel');
+                      playClick?.(ClickType.CANCEL);
                       onResume?.();
                       setShowExitDialog(false);
                     }}
@@ -223,7 +223,7 @@ export const GameUI: React.FC<GameUIProps> = ({
                   </button>
                   <button
                     onClick={() => {
-                      playClick?.('confirm');
+                      playClick?.(ClickType.CONFIRM);
                       setShowExitDialog(false);
                       onBackToMenu?.();
                     }}
@@ -290,7 +290,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="flex flex-col items-center w-full">
             <button
               onClick={() => {
-                playClick?.('confirm');
+                playClick?.(ClickType.CONFIRM);
                 onStart();
               }}
               className="px-10 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-none border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-pulse active:scale-95 transition-transform skew-x-[-10deg]"
@@ -300,7 +300,7 @@ export const GameUI: React.FC<GameUIProps> = ({
 
             <button
               onClick={() => {
-                playClick?.('menu');
+                playClick?.(ClickType.MENU);
                 onOpenGallery?.();
               }}
               className="mt-4 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-none border border-gray-600 shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-transform skew-x-[-10deg] text-sm tracking-widest"
@@ -330,7 +330,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           </div>
           <button
             onClick={() => {
-              playClick?.('confirm');
+              playClick?.(ClickType.CONFIRM);
               onRestart();
             }}
             className="px-8 py-3 bg-white text-red-900 font-bold rounded hover:bg-gray-200 active:scale-95 transition-transform uppercase tracking-widest"
@@ -340,7 +340,7 @@ export const GameUI: React.FC<GameUIProps> = ({
 
           <button
             onClick={() => {
-              playClick?.('cancel');
+              playClick?.(ClickType.CANCEL);
               onBackToMenu?.();
             }}
             className="mt-4 px-6 py-2 bg-gray-900 text-red-400 font-bold border border-red-500/50 hover:bg-red-900/40 hover:border-red-400 hover:text-red-300 rounded transition-all uppercase tracking-widest text-sm shadow-lg"
@@ -363,7 +363,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           </div>
           <button
             onClick={() => {
-              playClick?.('confirm');
+              playClick?.(ClickType.CONFIRM);
               onRestart();
             }}
             className="px-8 py-3 bg-yellow-400 text-black font-bold rounded hover:bg-yellow-300 active:scale-95 transition-transform uppercase tracking-widest"
@@ -408,10 +408,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           `}</style>
           <div className="text-center">
             <div className="text-6xl md:text-8xl font-black text-red-500 tracking-widest drop-shadow-[0_0_30px_rgba(220,38,38,1)] animate-pulse">
-              ⚠️ WARNING ⚠️
-            </div>
-            <div className="text-2xl md:text-4xl font-bold text-red-400 mt-4 tracking-wider drop-shadow-[0_0_20px_rgba(220,38,38,0.8)]">
-              BOSS APPROACHING
+              ⚠️ <br /> WARNING
             </div>
           </div>
         </div>

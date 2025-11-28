@@ -1,4 +1,4 @@
-import { WeaponType } from '@/types';
+import { WeaponType, ClickType, ExplosionSize } from '@/types';
 
 export class AudioSystem {
   private ctx: AudioContext | null = null;
@@ -49,7 +49,7 @@ export class AudioSystem {
     }
   }
 
-  playClick(type: 'default' | 'confirm' | 'cancel' | 'menu' = 'default') {
+  playClick(type: ClickType = ClickType.DEFAULT) {
     if (!this.ctx || !this.masterGain) return;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -58,7 +58,7 @@ export class AudioSystem {
 
     const now = this.ctx.currentTime;
 
-    if (type === 'confirm') {
+    if (type === ClickType.CONFIRM) {
       // High pitch ascending - Success/Start
       osc.type = 'sine';
       osc.frequency.setValueAtTime(800, now);
@@ -69,7 +69,7 @@ export class AudioSystem {
 
       osc.start(now);
       osc.stop(now + 0.1);
-    } else if (type === 'cancel') {
+    } else if (type === ClickType.CANCEL) {
       // Lower pitch descending - Back/Close
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(600, now);
@@ -80,7 +80,7 @@ export class AudioSystem {
 
       osc.start(now);
       osc.stop(now + 0.1);
-    } else if (type === 'menu') {
+    } else if (type === ClickType.MENU) {
       // Soft short click - Navigation/Tab
       osc.type = 'sine';
       osc.frequency.setValueAtTime(1000, now);
@@ -187,7 +187,7 @@ export class AudioSystem {
     }
   }
 
-  playExplosion(size: 'small' | 'large') {
+  playExplosion(size: ExplosionSize) {
     if (!this.ctx || !this.masterGain) return;
     const now = this.ctx.currentTime;
 
@@ -204,7 +204,7 @@ export class AudioSystem {
     noiseFilter.frequency.exponentialRampToValueAtTime(100, now + 0.3);
 
     const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(size === 'large' ? 1.5 : 0.8, now);
+    noiseGain.gain.setValueAtTime(size === ExplosionSize.LARGE ? 1.5 : 0.8, now);
     noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
 
     noise.connect(noiseFilter);
@@ -216,11 +216,11 @@ export class AudioSystem {
     const osc = this.ctx.createOscillator();
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(100, now);
-    osc.frequency.exponentialRampToValueAtTime(10, now + (size === 'large' ? 0.8 : 0.4));
+    osc.frequency.exponentialRampToValueAtTime(10, now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
 
     const oscGain = this.ctx.createGain();
-    oscGain.gain.setValueAtTime(size === 'large' ? 1.5 : 0.8, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.01, now + (size === 'large' ? 0.8 : 0.4));
+    oscGain.gain.setValueAtTime(size === ExplosionSize.LARGE ? 1.5 : 0.8, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
 
     // Lowpass for bass to make it deep
     const oscFilter = this.ctx.createBiquadFilter();
@@ -231,7 +231,7 @@ export class AudioSystem {
     oscFilter.connect(oscGain);
     oscGain.connect(this.masterGain);
     osc.start(now);
-    osc.stop(now + (size === 'large' ? 0.8 : 0.4));
+    osc.stop(now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
   }
 
   playHit() {

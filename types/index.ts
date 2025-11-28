@@ -9,6 +9,18 @@ export enum GameState {
   GALLERY
 }
 
+export enum ClickType {
+  DEFAULT = 'default',
+  CONFIRM = 'confirm',
+  CANCEL = 'cancel',
+  MENU = 'menu'
+}
+
+export enum ExplosionSize {
+  SMALL = 'small',
+  LARGE = 'large'
+}
+
 // Re-export all types from sprite.ts
 export * from './sprite';
 

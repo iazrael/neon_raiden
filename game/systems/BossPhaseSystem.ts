@@ -20,7 +20,7 @@
  *   - 阶段4 (25%-0%): 绝境反击,最强形态
  */
 
-import { Entity, BossType } from '@/types';
+import { Entity, BossType, ExplosionSize } from '@/types';
 import { AudioSystem } from '../AudioSystem';
 
 // ==================== Boss阶段枚举 ====================
@@ -37,16 +37,16 @@ export interface PhaseConfig {
     hpThreshold: number;      // 血量阈值(百分比)
     name: string;             // 阶段名称
     description: string;      // 阶段描述
-    
+
     // 行为配置
     moveSpeed?: number;       // 移动速度倍率
     fireRate?: number;        // 射击速率倍率
     bulletCount?: number;     // 子弹数量倍率
     damageMultiplier?: number; // 伤害倍率
-    
+
     // 特殊技能
     specialAbilities?: string[]; // 特殊技能列表
-    
+
     // 视觉效果
     color?: string;           // 阶段颜色
     flashEffect?: boolean;    // 闪光效果
@@ -201,7 +201,7 @@ export interface BossPhaseState {
     phaseConfig: PhaseConfig;
     transitionTimer: number;
     isTransitioning: boolean;
-    
+
     // 特殊技能计时器
     dashTimer?: number;
     laserTimer?: number;
@@ -212,11 +212,11 @@ export interface BossPhaseState {
 export class BossPhaseSystem {
     private audio: AudioSystem;
     private phaseStates: Map<string, BossPhaseState> = new Map();
-    
+
     constructor(audio: AudioSystem) {
         this.audio = audio;
     }
-    
+
     /**
      * 初始化Boss阶段状态
      */
@@ -232,7 +232,7 @@ export class BossPhaseSystem {
                 isTransitioning: false
             };
         }
-        
+
         const initialState: BossPhaseState = {
             currentPhase: BossPhase.PHASE_1,
             previousPhase: BossPhase.PHASE_1,
@@ -243,14 +243,14 @@ export class BossPhaseSystem {
             laserTimer: 0,
             barrageTimer: 0
         };
-        
+
         // 使用boss的ID作为key存储状态
         const key = this.getBossKey(boss);
         this.phaseStates.set(key, initialState);
-        
+
         return initialState;
     }
-    
+
     /**
      * 更新Boss阶段系统
      */
@@ -258,19 +258,19 @@ export class BossPhaseSystem {
         const key = this.getBossKey(boss);
         const state = this.phaseStates.get(key);
         if (!state) return;
-        
+
         const bossType = boss.subType as BossType;
         const phases = this.getPhaseConfigs(bossType);
         if (phases.length === 0) return;
-        
+
         // 检查是否需要切换阶段
         const hpPercent = boss.hp / boss.maxHp;
         const newPhase = this.determinePhase(hpPercent, phases);
-        
+
         if (newPhase !== state.currentPhase && !state.isTransitioning) {
             this.startPhaseTransition(boss, state, newPhase, phases);
         }
-        
+
         // 更新阶段过渡
         if (state.isTransitioning) {
             state.transitionTimer += dt;
@@ -278,11 +278,11 @@ export class BossPhaseSystem {
                 this.completePhaseTransition(boss, state);
             }
         }
-        
+
         // 更新特殊技能计时器
         this.updateAbilityTimers(boss, state, dt);
     }
-    
+
     /**
      * 获取Boss当前阶段状态
      */
@@ -290,7 +290,7 @@ export class BossPhaseSystem {
         const key = this.getBossKey(boss);
         return this.phaseStates.get(key);
     }
-    
+
     /**
      * 清理Boss阶段状态
      */
@@ -298,17 +298,17 @@ export class BossPhaseSystem {
         const key = this.getBossKey(boss);
         this.phaseStates.delete(key);
     }
-    
+
     /**
      * 检查Boss是否应该触发特殊技能
      */
     shouldTriggerAbility(boss: Entity, abilityName: string): boolean {
         const state = this.getPhaseState(boss);
         if (!state || state.isTransitioning) return false;
-        
+
         return state.phaseConfig.specialAbilities?.includes(abilityName) || false;
     }
-    
+
     /**
      * 获取阶段倍率
      */
@@ -322,7 +322,7 @@ export class BossPhaseSystem {
         if (!state) {
             return { moveSpeed: 1.0, fireRate: 1.0, bulletCount: 1.0, damageMultiplier: 1.0 };
         }
-        
+
         return {
             moveSpeed: state.phaseConfig.moveSpeed || 1.0,
             fireRate: state.phaseConfig.fireRate || 1.0,
@@ -330,14 +330,14 @@ export class BossPhaseSystem {
             damageMultiplier: state.phaseConfig.damageMultiplier || 1.0
         };
     }
-    
+
     // ==================== 私有方法 ====================
-    
+
     private getBossKey(boss: Entity): string {
         // 使用boss的位置和类型作为唯一标识
         return `${boss.subType}_${Math.floor(boss.x)}_${Math.floor(boss.y)}`;
     }
-    
+
     private getPhaseConfigs(bossType: BossType): PhaseConfig[] {
         switch (bossType) {
             case BossType.DESTROYER:
@@ -350,7 +350,7 @@ export class BossPhaseSystem {
                 return [];
         }
     }
-    
+
     private determinePhase(hpPercent: number, phases: PhaseConfig[]): BossPhase {
         // 从后向前检查,找到第一个满足条件的阶段
         for (let i = phases.length - 1; i >= 0; i--) {
@@ -360,7 +360,7 @@ export class BossPhaseSystem {
         }
         return BossPhase.PHASE_1;
     }
-    
+
     private startPhaseTransition(
         boss: Entity,
         state: BossPhaseState,
@@ -371,39 +371,39 @@ export class BossPhaseSystem {
         state.currentPhase = newPhase;
         state.isTransitioning = true;
         state.transitionTimer = 0;
-        
+
         // 找到新阶段的配置
         const newConfig = phases.find(p => p.phase === newPhase);
         if (newConfig) {
             state.phaseConfig = newConfig;
         }
-        
+
         // 触发视觉效果
         if (newConfig?.flashEffect) {
             // 这里可以通过回调触发屏幕闪光等效果
             boss.invulnerable = true; // 阶段切换时短暂无敌
         }
-        
+
         // 播放音效
-        this.audio.playExplosion('large');
-        
+        this.audio.playExplosion(ExplosionSize.LARGE);
+
         console.log(`Boss phase transition: ${state.previousPhase} -> ${state.currentPhase}`);
     }
-    
+
     private completePhaseTransition(boss: Entity, state: BossPhaseState): void {
         state.isTransitioning = false;
         state.transitionTimer = 0;
         boss.invulnerable = false;
-        
+
         // 重置技能计时器
         state.dashTimer = 0;
         state.laserTimer = 0;
         state.barrageTimer = 0;
     }
-    
+
     private updateAbilityTimers(boss: Entity, state: BossPhaseState, dt: number): void {
         if (state.isTransitioning) return;
-        
+
         // 更新各种技能计时器
         if (state.dashTimer !== undefined) {
             state.dashTimer += dt;
@@ -415,7 +415,7 @@ export class BossPhaseSystem {
             state.barrageTimer += dt;
         }
     }
-    
+
     private createDefaultPhaseConfig(): PhaseConfig {
         return {
             phase: BossPhase.PHASE_1,
