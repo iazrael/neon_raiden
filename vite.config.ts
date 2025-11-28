@@ -11,7 +11,7 @@ let appVersion = packageJson.version;
 const [major, minor] = appVersion.split('.');
 // 用当前的东八区时间的时分作为patch， hh:MM
 const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000); // 东八区时间
-const patch = now.getUTCHours().toString().padStart(2, '0') + ':' + now.getUTCMinutes().toString().padStart(2, '0');
+const patch = now.getUTCHours().toString().padStart(2, '0') + now.getUTCMinutes().toString().padStart(2, '0');
 appVersion = `${major}.${minor}.${patch}`;
 
 export default defineConfig(({ mode }) => {
