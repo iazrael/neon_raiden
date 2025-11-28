@@ -7,7 +7,7 @@ import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
-import { WeaponSynergySystem, SynergyTriggerContext } from './systems/WeaponSynergySystem';
+import { WeaponSynergySystem, SynergyTriggerContext, SynergyType } from './systems/WeaponSynergySystem';
 import { EnvironmentSystem, EnvironmentElement, EnvironmentType } from './systems/EnvironmentSystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
@@ -66,6 +66,7 @@ export class GameEngine {
     screenShake: number = 0;
     bossTransitionTimer: number = 0;
     levelStartTime: number = 0; // Track when level started
+    regenTimer: number = 0;
 
     // Level transition
     showLevelTransition: boolean = false;
@@ -389,8 +390,8 @@ export class GameEngine {
 
             // P3 Get dynamic difficulty configuration
             const difficultyConfig = this.difficultySys.getConfig();
-            const baseSpawnRate = Math.max(300, 1500 - (this.level * 200));
-            const spawnRate = baseSpawnRate * difficultyConfig.spawnIntervalMultiplier;
+            const baseSpawnRate = GameConfig.enemySpawnIntervalByLevel[this.level] || 1000;
+            const spawnRate = Math.round(baseSpawnRate * difficultyConfig.spawnIntervalMultiplier);
 
             if (this.enemySpawnTimer > spawnRate) {
                 this.enemySys.spawnEnemy(this.level, this.enemies);
@@ -444,7 +445,7 @@ export class GameEngine {
             if (this.bossTransitionTimer < 10000) {
                 this.bossTransitionTimer += dt;
                 this.enemySpawnTimer += dt;
-                const spawnRate = Math.max(800, 2000 - (this.level * 150));
+                const spawnRate = Math.round((GameConfig.enemySpawnIntervalByLevel[this.level] || 1000) * 1.8);
                 if (this.enemySpawnTimer > spawnRate) {
                     this.enemySys.spawnEnemy(this.level, this.enemies);
                     this.enemySpawnTimer = 0;
@@ -569,6 +570,20 @@ export class GameEngine {
         // P3 Update difficulty system
         const currentWeapons = this.getPlayerWeapons();
         this.difficultySys.update(dt, this.player, currentWeapons, this.comboSys.getState().count, this.level);
+
+        this.regenTimer += dt;
+        const comboLevel = this.comboSys.getState().level;
+        let regenAmount = 0;
+        if (this.synergySys.isSynergyActive(SynergyType.MAGMA_SHURIKEN)) {
+            if (comboLevel >= 4) regenAmount = 3;
+            else if (comboLevel >= 3) regenAmount = 2;
+            else if (comboLevel >= 2) regenAmount = 1;
+        }
+        if (this.regenTimer >= 1000 && regenAmount > 0 && this.player.hp > 0 && this.player.hp < this.player.maxHp) {
+            this.player.hp = Math.min(this.player.maxHp, this.player.hp + regenAmount);
+            this.onHpChange(this.player.hp);
+            this.regenTimer = 0;
+        }
 
         // P3 Update elite AI for all elite enemies
         this.enemies.forEach(enemy => {
@@ -1045,9 +1060,8 @@ export class GameEngine {
                 break;
 
             case PowerupType.HP:
-                // HP restoration
-                if (this.player.hp >= 100) {
-                    this.shield = Math.min(PlayerConfig.maxShield, this.shield + effects.shieldRestoreAmount);
+                if (this.player.hp >= PlayerConfig.maxHp) {
+                    this.shield = Math.min(this.getShieldCap(), this.shield + effects.shieldRestoreAmount);
                 } else {
                     this.player.hp = Math.min(PlayerConfig.maxHp, this.player.hp + effects.hpRestoreAmount);
                     this.onHpChange(this.player.hp);
@@ -1174,6 +1188,17 @@ export class GameEngine {
             weapons.push({ type: this.secondaryWeapon, level: this.weaponLevel });
         }
         return weapons;
+    }
+
+    private getShieldCap(): number {
+        const base = PlayerConfig.maxShield;
+        const comboLevel = this.comboSys.getState().level;
+        let bonus = 0;
+        if (comboLevel >= 2) bonus += 25;
+        if (comboLevel >= 3) bonus += 25;
+        if (comboLevel >= 4) bonus += 50;
+        if (this.synergySys.isSynergyActive(SynergyType.MAGMA_SHURIKEN)) bonus += 10;
+        return base + bonus;
     }
 
     draw() {

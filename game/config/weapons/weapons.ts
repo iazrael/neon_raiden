@@ -111,10 +111,10 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '超压缩技术将恒星核心物质封装成弹丸,锥形散射最大化覆盖目标区域,命中后形成持续灼烧场熔穿装甲。高射速配合持续伤害,是持续输出的理想选择。',
 
         color: '#f60',
-        baseDamage: 8,
+        baseDamage: 10,
         damagePerLevel: 2,
         speed: 12,
-        baseFireRate: 75,
+        baseFireRate: 200,
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.MAGMA],
         sprite: 'bullet_magma'

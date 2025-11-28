@@ -76,25 +76,25 @@ export const WeaponUpgradeConfig: {
         9: { chainCount: 5, chainRange: 230 }
     },
     [WeaponType.MAGMA]: {
-        1: { bulletCount: 3 },
-        2: { bulletCount: 3 },
-        3: { bulletCount: 4 },
-        4: { bulletCount: 4 },
+        1: { bulletCount: 2 },
+        2: { bulletCount: 2 },
+        3: { bulletCount: 3 },
+        4: { bulletCount: 3 },
         5: { bulletCount: 4 },
-        6: { bulletCount: 5 },
+        6: { bulletCount: 4 },
         7: { bulletCount: 5 },
         8: { bulletCount: 5 },
         9: { bulletCount: 6 }
     },
     [WeaponType.SHURIKEN]: {
-        1: { bulletCount: 2 },
-        2: { bulletCount: 3 },
-        3: { bulletCount: 3 },
-        4: { bulletCount: 4 },
-        5: { bulletCount: 4 },
-        6: { bulletCount: 5 },
-        7: { bulletCount: 5 },
-        8: { bulletCount: 6 },
-        9: { bulletCount: 6 }
+        1: { bulletCount: 1 },
+        2: { bulletCount: 1 },
+        3: { bulletCount: 2 },
+        4: { bulletCount: 2 },
+        5: { bulletCount: 3 },
+        6: { bulletCount: 3 },
+        7: { bulletCount: 4 },
+        8: { bulletCount: 4 },
+        9: { bulletCount: 4 }
     }
 };
