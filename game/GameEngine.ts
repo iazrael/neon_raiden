@@ -425,8 +425,8 @@ export class GameEngine {
             b.x += b.vx * timeScale;
             b.y += b.vy * timeScale;
 
-            // Homing missile AI
-            if (b.state === 1) {
+            // Homing missile AI - only for bullets marked with isHoming flag
+            if (b.isHoming) {
                 const dx = this.player.x - b.x;
                 const dy = this.player.y - b.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);

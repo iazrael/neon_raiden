@@ -193,11 +193,13 @@ export class BossSystem {
             }
         }
 
-        // Targeted Shot
+        // Targeted Shot - aims at player position at firing time, then flies straight
         if (config.weapons.includes(BossWeaponType.TARGETED) && config.weaponConfigs.targetedShotSpeed > 0) {
+            // Calculate direction to player at firing time
             const dx = player.x - boss.x;
             const dy = player.y - boss.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
+            // Bullet flies straight in this direction, no tracking
             enemyBullets.push({
                 x: boss.x,
                 y: boss.y + boss.height / 4,
@@ -235,24 +237,30 @@ export class BossSystem {
             }
         }
 
-        // Homing Missiles
+        // Homing Missiles - special tracking bullets
         if (config.weapons.includes(BossWeaponType.HOMING)) {
             for (let i = 0; i < 2; i++) {
                 const offsetX = (i === 0 ? -1 : 1) * 30;
+                // Initial direction towards player
+                const dx = player.x - (boss.x + offsetX);
+                const dy = player.y - (boss.y + boss.height / 4);
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const initialSpeed = 3;
+
                 enemyBullets.push({
                     x: boss.x + offsetX,
                     y: boss.y + boss.height / 4,
                     width: 18,
                     height: 24,
-                    vx: 0,
-                    vy: 3,
+                    vx: (dx / dist) * initialSpeed,
+                    vy: (dy / dist) * initialSpeed,
                     hp: 1,
                     maxHp: 1,
                     type: EntityType.BULLET,
                     color: '#ff00ff',
                     markedForDeletion: false,
                     spriteKey: 'bullet_enemy_orb',
-                    state: 1 // Homing state
+                    isHoming: true // Enable homing behavior
                 });
             }
         }

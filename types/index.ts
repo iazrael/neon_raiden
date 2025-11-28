@@ -72,6 +72,7 @@ export interface Entity {
   chainCount?: number; // For Tesla chain lightning
   chainRange?: number; // For Tesla chain lightning
   weaponType?: string; // Track which weapon fired this bullet
+  isHoming?: boolean; // For homing missiles that track the player
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

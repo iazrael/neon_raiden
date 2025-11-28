@@ -163,30 +163,33 @@ export class EnemySystem {
                 }
             }
 
-            // Elite Gunboat - Targeted rapid firing
+            // Elite Gunboat - Targeted rapid firing (aims at player position at firing time)
             if (e.subType === EnemyType.ELITE_GUNBOAT) {
                 const config = EnemyConfig[EnemyType.ELITE_GUNBOAT];
                 const shootFreq = (config.weapon.frequency || 0.02) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
                 const bulletSpeed = config.weapon.speed || 4;
 
                 if (Math.random() < shootFreq * timeScale) {
+                    // Calculate direction to player at firing time
                     const dx = player.x - e.x;
                     const dy = player.y - e.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
+                    // Bullet flies straight in this direction, no tracking
                     enemyBullets.push({
                         x: e.x + e.width / 2 - bulletConfig.size.width / 2,
                         y: e.y + e.height,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
-                        vx: (dx / dist) * bulletSpeed, vy: (dy / dist) * bulletSpeed,
+                        vx: (dx / dist) * bulletSpeed,
+                        vy: (dy / dist) * bulletSpeed,
                         hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
                         damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1)
                     });
                 }
             }
 
-            // Stalker - Homing missile firing
+            // Stalker - Homing missile firing (special tracking bullets)
             if (e.subType === EnemyType.STALKER) {
                 const config = EnemyConfig[EnemyType.STALKER];
                 const shootFreq = (config.weapon.frequency || 0.015) * (e.isElite ? EnemyCommonConfig.eliteFireRateMultiplier : 1);
@@ -194,17 +197,21 @@ export class EnemySystem {
 
                 if (Math.random() < shootFreq * timeScale) {
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_HOMING];
+                    // Initial direction towards player
                     const dx = player.x - e.x;
                     const dy = player.y - e.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
+                    // Mark as homing bullet with isHoming flag for special tracking behavior
                     enemyBullets.push({
                         x: e.x + e.width / 2 - bulletConfig.size.width / 2,
                         y: e.y + e.height,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
-                        vx: (dx / dist) * bulletSpeed, vy: (dy / dist) * bulletSpeed,
-                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite
+                        vx: (dx / dist) * bulletSpeed,
+                        vy: (dy / dist) * bulletSpeed,
+                        hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
+                        isHoming: true // Special flag for homing behavior
                     });
                 }
             }
