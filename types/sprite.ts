@@ -126,7 +126,13 @@ export enum BossMovementPattern {
     SINE = 'sine',
     FIGURE_8 = 'figure8',
     TRACKING = 'tracking',
-    AGGRESSIVE = 'aggressive'
+    AGGRESSIVE = 'aggressive',
+    // P3新增移动模式
+    ZIGZAG = 'zigzag',              // 之字形移动
+    RANDOM_TELEPORT = 'random_teleport', // 随机瞬移
+    CIRCLE = 'circle',              // 圆形轨迹
+    SLOW_DESCENT = 'slow_descent',  // 缓慢下沉
+    ADAPTIVE = 'adaptive'           // 自适应追踪
 }
 
 /**

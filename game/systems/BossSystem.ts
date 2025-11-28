@@ -170,6 +170,77 @@ export class BossSystem {
                     boss.y = Math.max(boss.y - 1 * timeScale, 100);
                 }
                 break;
+
+            // P3 New Movement Patterns
+            case 'zigzag':
+                // 之字形移动：在水平方向上快速左右摆动
+                const zigzagSpeed = 4;
+                const zigzagFrequency = 1.5;
+                boss.x += Math.sin(t * zigzagFrequency) * zigzagSpeed * timeScale;
+                boss.x = Math.max(100, Math.min(this.width - 100, boss.x));
+                // 垂直轻微摆动
+                boss.y = 150 + Math.sin(t * 0.8) * 25;
+                break;
+
+            case 'random_teleport':
+                // 随机瞬移：每3秒随机传送到新位置
+                if (!boss.teleportTimer) boss.teleportTimer = 0;
+                boss.teleportTimer += dt;
+                
+                if (boss.teleportTimer >= 3000) {
+                    // 传送到随机位置
+                    const newX = 100 + Math.random() * (this.width - 200);
+                    const newY = 100 + Math.random() * 100;
+                    boss.x = newX;
+                    boss.y = newY;
+                    boss.teleportTimer = 0;
+                } else {
+                    // 在当前位置轻微漂浮
+                    boss.x += Math.sin(t * 2) * 0.5 * timeScale;
+                    boss.y += Math.cos(t * 2) * 0.5 * timeScale;
+                }
+                boss.x = Math.max(100, Math.min(this.width - 100, boss.x));
+                boss.y = Math.max(80, Math.min(300, boss.y));
+                break;
+
+            case 'circle':
+                // 圆形轨迹：绕中心点做圆周运动
+                const centerX = this.width / 2;
+                const centerY = 180;
+                const radius = 120;
+                const angularSpeed = 0.8;
+                boss.x = centerX + Math.cos(t * angularSpeed) * radius;
+                boss.y = centerY + Math.sin(t * angularSpeed) * radius * 0.5; // 椭圆形
+                break;
+
+            case 'slow_descent':
+                // 缓慢下沉：缓慢向下移动同时横向飘动
+                const descentSpeed = 0.3;
+                boss.y += descentSpeed * timeScale;
+                // 限制下沉范围
+                boss.y = Math.min(boss.y, 250);
+                // 横向正弦波动
+                boss.x += Math.cos(t * 1.2) * 1.5 * timeScale;
+                boss.x = Math.max(100, Math.min(this.width - 100, boss.x));
+                break;
+
+            case 'adaptive':
+                // 自适应追踪：根据玩家距离调整追踪强度
+                const adaptiveDx = player.x - boss.x;
+                const adaptiveDy = player.y - boss.y;
+                const distance = Math.sqrt(adaptiveDx * adaptiveDx + adaptiveDy * adaptiveDy);
+                
+                // 距离越近，追踪越强
+                const trackingStrength = Math.max(0.01, Math.min(0.05, 1 / (distance / 100)));
+                boss.x += Math.sign(adaptiveDx) * Math.min(Math.abs(adaptiveDx) * trackingStrength, config.speed * 2.5) * timeScale;
+                boss.x = Math.max(100, Math.min(this.width - 100, boss.x));
+                
+                // 垂直方向也有轻微追踪，但保持在上半区域
+                const targetY = Math.min(player.y - 200, 200);
+                const dyToTarget = targetY - boss.y;
+                boss.y += Math.sign(dyToTarget) * Math.min(Math.abs(dyToTarget) * 0.01, 1) * timeScale;
+                boss.y = Math.max(80, Math.min(250, boss.y));
+                break;
         }
 
         // Weapon firing

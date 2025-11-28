@@ -10,6 +10,8 @@ import { ComboSystem, ComboState } from './systems/ComboSystem';
 import { WeaponSynergySystem, SynergyTriggerContext } from './systems/WeaponSynergySystem';
 import { EnvironmentSystem, EnvironmentElement, EnvironmentType } from './systems/EnvironmentSystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
+import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
+import { EliteAISystem } from './systems/EliteAISystem'; // P3 Elite AI System
 import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
 
 export class GameEngine {
@@ -26,6 +28,8 @@ export class GameEngine {
     synergySys: WeaponSynergySystem; // P2 Weapon Synergy System
     envSys: EnvironmentSystem; // P2 Environment System
     bossPhaseSys: BossPhaseSystem; // P2 Boss Phase System
+    difficultySys: DifficultySystem; // P3 Difficulty System
+    eliteAISys: EliteAISystem; // P3 Elite AI System
 
     // Game State
     state: GameState = GameState.MENU;
@@ -114,6 +118,8 @@ export class GameEngine {
         this.synergySys = new WeaponSynergySystem(); // P2 Weapon Synergy System
         this.envSys = new EnvironmentSystem(canvas.width, canvas.height); // P2 Environment System
         this.bossPhaseSys = new BossPhaseSystem(this.audio); // P2 Boss Phase System
+        this.difficultySys = new DifficultySystem(); // P3 Difficulty System
+        this.eliteAISys = new EliteAISystem(canvas.width, canvas.height); // P3 Elite AI System
 
         // Bind Input Actions
         this.input.onAction = (action) => {
@@ -156,6 +162,7 @@ export class GameEngine {
         this.enemySys.resize(width, height);
         this.bossSys.resize(width, height);
         this.envSys.resize(width, height); // P2 Resize environment system
+        this.eliteAISys.resize(width, height); // P3 Resize elite AI system
 
         // Update config if needed, though config is static, systems hold dimensions
     }
@@ -215,6 +222,9 @@ export class GameEngine {
         
         // P2 Reset environment system
         this.envSys.reset();
+        
+        // P3 Reset difficulty system
+        this.difficultySys.reset();
 
         this.onStateChange(this.state);
         this.onScoreChange(this.score);
@@ -362,9 +372,34 @@ export class GameEngine {
         if (!this.boss) {
             this.levelProgress += 0.05 * timeScale;
             this.enemySpawnTimer += dt;
-            const spawnRate = Math.max(300, 1500 - (this.level * 200));
+            
+            // P3 Get dynamic difficulty configuration
+            const difficultyConfig = this.difficultySys.getConfig();
+            const baseSpawnRate = Math.max(300, 1500 - (this.level * 200));
+            const spawnRate = baseSpawnRate * difficultyConfig.spawnIntervalMultiplier;
+            
             if (this.enemySpawnTimer > spawnRate) {
                 this.enemySys.spawnEnemy(this.level, this.enemies);
+                
+                // P3 Check if newly spawned enemy is elite and initialize AI
+                const newEnemy = this.enemies[this.enemies.length - 1];
+                if (newEnemy && newEnemy.isElite) {
+                    this.eliteAISys.initializeElite(newEnemy, this.enemies);
+                }
+                
+                // P3 Apply difficulty multipliers to newly spawned enemy
+                if (newEnemy) {
+                    // Apply HP multiplier
+                    newEnemy.hp *= difficultyConfig.enemyHpMultiplier;
+                    newEnemy.maxHp = newEnemy.hp;
+                    
+                    // Apply speed multiplier
+                    newEnemy.vy *= difficultyConfig.enemySpeedMultiplier;
+                    if (newEnemy.vx !== 0) {
+                        newEnemy.vx *= difficultyConfig.enemySpeedMultiplier;
+                    }
+                }
+                
                 this.enemySpawnTimer = 0;
             }
 
@@ -495,6 +530,18 @@ export class GameEngine {
         });
 
         this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
+        
+        // P3 Update difficulty system
+        const currentWeapons = this.getPlayerWeapons();
+        this.difficultySys.update(dt, this.player, currentWeapons, this.comboSys.getState().count, this.level);
+        
+        // P3 Update elite AI for all elite enemies
+        this.enemies.forEach(enemy => {
+            if (enemy.isElite) {
+                this.eliteAISys.update(enemy, dt, this.enemies, this.enemyBullets, this.player);
+            }
+        });
+        
         this.updateEntities(this.powerups, timeScale, dt);
 
         // Particles
@@ -872,7 +919,10 @@ export class GameEngine {
         
         const baseScore = EnemyConfig[e.subType]?.score || 100;
         const eliteMultiplier = e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1;
-        const finalScore = Math.floor(baseScore * eliteMultiplier * comboScoreMultiplier);
+        
+        // P3 Apply difficulty score multiplier
+        const difficultyScoreMultiplier = this.difficultySys.getScoreMultiplier();
+        const finalScore = Math.floor(baseScore * eliteMultiplier * comboScoreMultiplier * difficultyScoreMultiplier);
         
         this.score += finalScore;
         this.onScoreChange(this.score);
@@ -891,8 +941,12 @@ export class GameEngine {
             unlockEnemy(e.subType as EnemyType);
         }
 
-        const dropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
-        if (Math.random() < dropRate) this.spawnPowerup(e.x, e.y);
+        // P3 Apply difficulty drop rate multiplier
+        const difficultyConfig = this.difficultySys.getConfig();
+        const baseDropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
+        const finalDropRate = baseDropRate * difficultyConfig.powerupDropMultiplier;
+        
+        if (Math.random() < finalDropRate) this.spawnPowerup(e.x, e.y);
     }
 
     createPlasmaExplosion(x: number, y: number) {
@@ -1065,6 +1119,15 @@ export class GameEngine {
             a.y - a.height / 2 < b.y + b.height / 2 &&
             a.y + a.height / 2 > b.y - b.height / 2
         );
+    }
+
+    // P3 Helper method to get all equipped weapons for difficulty system
+    private getPlayerWeapons(): { type: WeaponType, level: number }[] {
+        const weapons = [{ type: this.weaponType, level: this.weaponLevel }];
+        if (this.secondaryWeapon) {
+            weapons.push({ type: this.secondaryWeapon, level: this.weaponLevel });
+        }
+        return weapons;
     }
 
     draw() {

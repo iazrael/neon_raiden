@@ -80,6 +80,7 @@ export interface Entity {
   // Boss special mechanics fields
   originalBulletCount?: number; // Boss armor break: store original bullet count
   currentBulletCount?: number; // Boss armor break: effective bullet count based on armor phase
+  teleportTimer?: number; // P3: Boss random teleport timer
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };
