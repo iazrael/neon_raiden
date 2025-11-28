@@ -9,7 +9,9 @@ import { swInjectPlugin } from './vite-plugins/sw-inject-plugin';
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 let appVersion = packageJson.version;
 const [major, minor] = appVersion.split('.');
-const patch = String(Math.floor(Date.now() / 1000000) % 1000); // 使用当前时间戳后3位作为patch版本（数字）
+// 用当前时分作为patch， hh:MM
+const now = new Date();
+const patch = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0');
 appVersion = `${major}.${minor}.${patch}`;
 
 export default defineConfig(({ mode }) => {

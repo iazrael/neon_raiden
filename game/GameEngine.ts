@@ -59,6 +59,10 @@ export class GameEngine {
     isLevelTransitioning: boolean = false; // Flag to prevent actions during transition
     levelTransitionTimer: number = 0;
 
+    // Boss Warning
+    isBossWarningActive: boolean = false;
+    bossWarningTimer: number = 0;
+
     // Callbacks
     onScoreChange: (score: number) => void;
     onLevelChange: (level: number) => void;
@@ -66,6 +70,7 @@ export class GameEngine {
     onHpChange: (hp: number) => void;
     onBombChange: (bombs: number) => void;
     onMaxLevelChange: (level: number) => void;
+    onBossWarning: (show: boolean) => void;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -74,7 +79,8 @@ export class GameEngine {
         onStateChange: (s: GameState) => void,
         onHpChange: (hp: number) => void,
         onBombChange: (bombs: number) => void,
-        onMaxLevelChange: (level: number) => void
+        onMaxLevelChange: (level: number) => void,
+        onBossWarning: (show: boolean) => void
     ) {
         this.canvas = canvas;
         this.onScoreChange = onScoreChange;
@@ -83,6 +89,7 @@ export class GameEngine {
         this.onHpChange = onHpChange;
         this.onBombChange = onBombChange;
         this.onMaxLevelChange = onMaxLevelChange;
+        this.onBossWarning = onBossWarning;
 
         // Initialize Systems
         this.audio = new AudioSystem();
@@ -179,6 +186,9 @@ export class GameEngine {
         this.isLevelTransitioning = false;
         this.levelTransitionTimer = 0;
         this.bossTransitionTimer = 0;
+        this.isBossWarningActive = false;
+        this.bossWarningTimer = 0;
+        this.onBossWarning(false);
         this.levelStartTime = Date.now(); // Initialize level start time
         this.audio.resume();
 
@@ -327,7 +337,19 @@ export class GameEngine {
             const minDuration = BossSpawnConfig.minLevelDuration;
             const minProgress = BossSpawnConfig.minLevelProgress;
             if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
-                this.spawnBoss();
+                if (!this.isBossWarningActive) {
+                    this.isBossWarningActive = true;
+                    this.bossWarningTimer = 2000; // 2 seconds warning
+                    this.onBossWarning(true);
+                    this.audio.playWarning(); // Assuming we will add this or use a sound
+                } else {
+                    this.bossWarningTimer -= dt;
+                    if (this.bossWarningTimer <= 0) {
+                        this.isBossWarningActive = false;
+                        this.onBossWarning(false);
+                        this.spawnBoss();
+                    }
+                }
             }
         } else {
             // Continue spawning enemies for a short time after boss appears

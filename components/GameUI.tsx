@@ -21,6 +21,7 @@ interface GameUIProps {
   onBackToMenu?: () => void;
   onPause?: () => void;
   onResume?: () => void;
+  showBossWarning?: boolean;
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -41,6 +42,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   onBackToMenu,
   onPause,
   onResume,
+  showBossWarning = false,
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
@@ -292,6 +294,31 @@ export const GameUI: React.FC<GameUIProps> = ({
         >
           <div className="text-2xl font-bold text-cyan-400 tracking-wider drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
             STAGE {level}
+          </div>
+        </div>
+      )}
+
+      {/* Boss Warning Overlay */}
+      {showBossWarning && state === GameState.PLAYING && (
+        <div
+          className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center"
+          style={{
+            animation: 'bossWarningFlash 0.5s ease-in-out infinite'
+          }}
+        >
+          <style>{`
+            @keyframes bossWarningFlash {
+              0%, 100% { background-color: rgba(220, 38, 38, 0); }
+              50% { background-color: rgba(220, 38, 38, 0.3); }
+            }
+          `}</style>
+          <div className="text-center">
+            <div className="text-6xl md:text-8xl font-black text-red-500 tracking-widest drop-shadow-[0_0_30px_rgba(220,38,38,1)] animate-pulse">
+              ⚠️ WARNING ⚠️
+            </div>
+            <div className="text-2xl md:text-4xl font-bold text-red-400 mt-4 tracking-wider drop-shadow-[0_0_20px_rgba(220,38,38,0.8)]">
+              BOSS APPROACHING
+            </div>
           </div>
         </div>
       )}

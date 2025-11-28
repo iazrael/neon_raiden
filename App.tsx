@@ -20,6 +20,7 @@ function App() {
   const [levelTransitionTimer, setLevelTransitionTimer] = useState(0);
   const [maxLevelReached, setMaxLevelReached] = useState(1);
   const [stateBeforeGallery, setStateBeforeGallery] = useState<GameState>(GameState.MENU);
+  const [showBossWarning, setShowBossWarning] = useState(false);
 
   useEffect(() => {
     // Preload assets
@@ -35,7 +36,8 @@ function App() {
       (newState) => setGameState(newState),
       (newHp) => setHp(newHp),
       (newBombs) => setBombs(newBombs),
-      (maxLevel) => setMaxLevelReached(maxLevel)
+      (maxLevel) => setMaxLevelReached(maxLevel),
+      (show) => setShowBossWarning(show)
     );
     engineRef.current = engine;
 
@@ -94,6 +96,7 @@ function App() {
         showLevelTransition={showLevelTransition}
         levelTransitionTimer={levelTransitionTimer}
         maxLevelReached={maxLevelReached}
+        showBossWarning={showBossWarning}
         onOpenGallery={() => {
           setStateBeforeGallery(gameState);
           if (gameState === GameState.PLAYING) {

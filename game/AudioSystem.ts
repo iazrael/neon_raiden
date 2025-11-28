@@ -329,4 +329,47 @@ export class AudioSystem {
       osc.stop(now + i * 0.2 + 0.3);
     });
   }
+
+  playWarning() {
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    // Siren effect: Two oscillators modulating each other
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc1.connect(gain);
+    osc2.connect(gain); // Layering for texture
+    gain.connect(this.masterGain);
+
+    osc1.type = 'sawtooth';
+    osc2.type = 'square';
+
+    // Siren pitch modulation
+    osc1.frequency.setValueAtTime(400, now);
+    osc1.frequency.linearRampToValueAtTime(800, now + 0.5);
+    osc1.frequency.linearRampToValueAtTime(400, now + 1.0);
+    osc1.frequency.linearRampToValueAtTime(800, now + 1.5);
+    osc1.frequency.linearRampToValueAtTime(400, now + 2.0);
+    osc1.frequency.linearRampToValueAtTime(800, now + 2.5);
+    osc1.frequency.linearRampToValueAtTime(400, now + 3.0);
+
+    osc2.frequency.setValueAtTime(405, now); // Detuned slightly
+    osc2.frequency.linearRampToValueAtTime(805, now + 0.5);
+    osc2.frequency.linearRampToValueAtTime(405, now + 1.0);
+    osc2.frequency.linearRampToValueAtTime(805, now + 1.5);
+    osc2.frequency.linearRampToValueAtTime(405, now + 2.0);
+    osc2.frequency.linearRampToValueAtTime(805, now + 2.5);
+    osc2.frequency.linearRampToValueAtTime(405, now + 3.0);
+
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 3.0);
+    gain.gain.linearRampToValueAtTime(0, now + 3.5);
+
+    osc1.start(now);
+    osc1.stop(now + 3.5);
+    osc2.start(now);
+    osc2.stop(now + 3.5);
+  }
 }
