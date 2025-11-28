@@ -1,3 +1,5 @@
+import { WeaponType } from './sprite';
+
 export enum GameState {
   MENU,
   PLAYING,
@@ -71,10 +73,13 @@ export interface Entity {
   timer?: number; // For AI timer
   chainCount?: number; // For Tesla chain lightning
   chainRange?: number; // For Tesla chain lightning
-  weaponType?: string; // Track which weapon fired this bullet
+  weaponType?: WeaponType; // Track which weapon fired this bullet (player weapons only)
   isHoming?: boolean; // For homing missiles that track the player
   invulnerable?: boolean; // Invulnerability status
   invulnerableTimer?: number; // Invulnerability duration in milliseconds
+  // Boss special mechanics fields
+  originalBulletCount?: number; // Boss armor break: store original bullet count
+  currentBulletCount?: number; // Boss armor break: effective bullet count based on armor phase
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

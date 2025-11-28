@@ -67,7 +67,12 @@ export class BossSystem {
             spriteKey: config.sprite,
             state: 0, // 0: entering, 1: fighting
             invulnerable: true, // Boss starts invulnerable when spawned
-            invulnerableTimer: 3000 // 3 seconds invulnerability
+            invulnerableTimer: 3000, // 3 seconds invulnerability
+            // P1 Boss special mechanics timers
+            timer: 0, // General purpose timer for special mechanics
+            // GUARDIAN: shield regeneration timer
+            // INTERCEPTOR: dash cooldown timer
+            // DESTROYER: armor parts tracking (using custom fields if needed)
         };
     }
 
@@ -131,6 +136,9 @@ export class BossSystem {
         this.movementTimer += dt;
         const t = this.movementTimer / 1000;
 
+        // P1 Boss Special Mechanics
+        this.updateBossSpecialMechanics(boss, dt, level, player, enemyBullets);
+
         switch (config.movement.pattern) {
             case 'sine':
                 boss.x += Math.cos(t * 2) * 2 * timeScale;
@@ -183,10 +191,13 @@ export class BossSystem {
         const config = getBossConfigByLevel(level);
         if (!config) return;
 
+        // Use currentBulletCount if available (for Boss armor mechanics), otherwise use config
+        const bulletCount = boss.currentBulletCount ?? config.weaponConfigs.bulletCount;
+
         // Radial Burst
         if (config.weapons.includes(BossWeaponType.RADIAL)) {
-            for (let i = 0; i < config.weaponConfigs.bulletCount; i++) {
-                const angle = (i / config.weaponConfigs.bulletCount) * Math.PI * 2 + (Date.now() / 1000);
+            for (let i = 0; i < bulletCount; i++) {
+                const angle = (i / bulletCount) * Math.PI * 2 + (Date.now() / 1000);
                 enemyBullets.push({
                     x: boss.x,
                     y: boss.y + boss.height / 4,
@@ -325,6 +336,103 @@ export class BossSystem {
                     });
                 }, i * 150);
             }
+        }
+    }
+
+    /**
+     * P1 Boss Special Mechanics Implementation
+     * - GUARDIAN (Lv1): Shield Regeneration - recovers 500 HP every 20 seconds
+     * - INTERCEPTOR (Lv2): Flash Dash - teleports and fires spread shot every 15 seconds
+     * - DESTROYER (Lv3): Armor Sections - (simplified: reduce bullet count when HP < 66%)
+     */
+    updateBossSpecialMechanics(boss: Entity, dt: number, level: number, player: Entity, enemyBullets: Entity[]) {
+        const config = getBossConfigByLevel(level);
+        if (!config) return;
+
+        // Initialize timer if undefined
+        if (boss.timer === undefined) {
+            boss.timer = 0;
+        }
+
+        boss.timer += dt;
+
+        // GUARDIAN (Level 1): Shield Regeneration
+        if (level === 1) {
+            const REGEN_INTERVAL = 20000; // 20 seconds
+            const REGEN_AMOUNT = 500;
+            
+            if (boss.timer >= REGEN_INTERVAL) {
+                // Regenerate HP, but don't exceed max HP
+                const healAmount = Math.min(REGEN_AMOUNT, boss.maxHp - boss.hp);
+                if (healAmount > 0) {
+                    boss.hp += healAmount;
+                    // Visual feedback could be added here (particle effect, flash, etc.)
+                }
+                boss.timer = 0; // Reset timer
+            }
+        }
+
+        // INTERCEPTOR (Level 2): Flash Dash
+        if (level === 2) {
+            const DASH_INTERVAL = 15000; // 15 seconds
+            
+            if (boss.timer >= DASH_INTERVAL) {
+                // Teleport to a random position
+                const oldX = boss.x;
+                const dashDistance = 100 + Math.random() * 100;
+                const direction = Math.random() < 0.5 ? -1 : 1;
+                boss.x = Math.max(100, Math.min(this.width - 100, boss.x + dashDistance * direction));
+                
+                // Fire spread shot after dash
+                for (let i = -3; i <= 3; i++) {
+                    const angle = Math.PI / 2 + (i * Math.PI / 8);
+                    enemyBullets.push({
+                        x: boss.x,
+                        y: boss.y + boss.height / 4,
+                        width: 16,
+                        height: 16,
+                        vx: Math.cos(angle) * 5,
+                        vy: Math.sin(angle) * 5,
+                        hp: 1,
+                        maxHp: 1,
+                        type: EntityType.BULLET,
+                        color: '#ff00aa',
+                        markedForDeletion: false,
+                        spriteKey: 'bullet_enemy_orb'
+                    });
+                }
+                
+                boss.timer = 0; // Reset timer
+            }
+        }
+
+        // DESTROYER (Level 3): Armor Sections (Simplified)
+        // When HP drops below 66%, reduce bullet count (simulating armor break)
+        if (level === 3) {
+            const hpPercent = boss.hp / boss.maxHp;
+            
+            // Store original bullet count if not already stored (for armor break mechanic)
+            if (boss.state === 1 && !boss.originalBulletCount) {
+                boss.originalBulletCount = config.weaponConfigs.bulletCount;
+            }
+            
+            // Calculate effective bullet count based on armor phase, store in boss entity
+            // Phase 1 (100%-66%): Full armor, normal bullet count
+            // Phase 2 (66%-33%): Left wing destroyed, reduce bullets by 25%
+            // Phase 3 (<33%): Both wings destroyed, reduce bullets by 50%
+            const originalCount = boss.originalBulletCount ?? config.weaponConfigs.bulletCount;
+            let effectiveBulletCount = originalCount;
+            
+            if (hpPercent < 0.33) {
+                // Both wings destroyed - 50% reduction
+                effectiveBulletCount = Math.floor(originalCount * 0.5);
+            } else if (hpPercent < 0.66) {
+                // Left wing destroyed - 25% reduction
+                effectiveBulletCount = Math.floor(originalCount * 0.75);
+            }
+            
+            // Store effective bullet count in boss entity instead of modifying config
+            boss.currentBulletCount = effectiveBulletCount;
         }
     }
 }

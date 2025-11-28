@@ -333,23 +333,23 @@ export const WeaponUpgradeConfig: {
 } = {
     [WeaponType.VULCAN]: {
         1: { bulletCount: 1 },
-        2: { bulletCount: 1 },
+        2: { bulletCount: 2 },
         3: { bulletCount: 3 },
-        4: { bulletCount: 3 },
-        5: { bulletCount: 3 },
-        6: { bulletCount: 5 },
-        7: { bulletCount: 5 },
-        8: { bulletCount: 5 },
-        9: { bulletCount: 7 }
+        4: { bulletCount: 4 },
+        5: { bulletCount: 5 },
+        6: { bulletCount: 6 },
+        7: { bulletCount: 7 },
+        8: { bulletCount: 8 },
+        9: { bulletCount: 9 }
     },
     [WeaponType.LASER]: {
         1: { bulletWidth: 1, beamCount: 1 },
         2: { bulletWidth: 2, beamCount: 1 },
         3: { bulletWidth: 3, beamCount: 1 },
-        4: { bulletWidth: 4, beamCount: 1 },
+        4: { bulletWidth: 4, beamCount: 2 },
         5: { bulletWidth: 5, beamCount: 2 },
         6: { bulletWidth: 6, beamCount: 2 },
-        7: { bulletWidth: 7, beamCount: 2 },
+        7: { bulletWidth: 7, beamCount: 3 },
         8: { bulletWidth: 8, beamCount: 3 },
         9: { bulletWidth: 9, beamCount: 3 }
     },
