@@ -102,7 +102,7 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
 export class WeaponSynergySystem {
     /** 当前激活的组合技类型列表 */
     private activeSynergies: Set<SynergyType> = new Set();
-    
+
     /** 玩家当前装备的武器列表 */
     private equippedWeapons: Set<WeaponType> = new Set();
 
@@ -135,7 +135,7 @@ export class WeaponSynergySystem {
      */
     private updateActiveSynergies() {
         this.activeSynergies.clear();
-        
+
         Object.values(SYNERGY_CONFIGS).forEach(config => {
             if (this.hasRequiredWeapons(config.requiredWeapons)) {
                 this.activeSynergies.add(config.type);
@@ -148,6 +148,19 @@ export class WeaponSynergySystem {
      */
     private hasRequiredWeapons(required: WeaponType[]): boolean {
         return required.every(weapon => this.equippedWeapons.has(weapon));
+    }
+
+    /**
+     * 检查两个武器是否可以组合成协同效果
+     */
+    canCombine(w1: WeaponType, w2: WeaponType): boolean {
+        if (!w1 || !w2) return false;
+
+        return Object.values(SYNERGY_CONFIGS).some(config => {
+            return config.requiredWeapons.includes(w1) &&
+                config.requiredWeapons.includes(w2) &&
+                config.requiredWeapons.length === 2;
+        });
     }
 
     /**
@@ -172,11 +185,11 @@ export class WeaponSynergySystem {
     tryTriggerSynergies(context: SynergyTriggerContext): SynergyTriggerResult[] {
         const results: SynergyTriggerResult[] = [];
         const bulletWeapon = context.weaponType;
-        
+
         if (!bulletWeapon) return results;
 
         // LASER + TESLA: 电磁折射
-        if (this.isSynergyActive(SynergyType.LASER_TESLA) && 
+        if (this.isSynergyActive(SynergyType.LASER_TESLA) &&
             bulletWeapon === WeaponType.LASER) {
             if (Math.random() < SYNERGY_CONFIGS[SynergyType.LASER_TESLA].triggerChance) {
                 results.push({
@@ -189,7 +202,7 @@ export class WeaponSynergySystem {
         }
 
         // WAVE + PLASMA: 能量共鸣
-        if (this.isSynergyActive(SynergyType.WAVE_PLASMA) && 
+        if (this.isSynergyActive(SynergyType.WAVE_PLASMA) &&
             bulletWeapon === WeaponType.WAVE) {
             // 检查WAVE子弹是否穿过PLASMA爆炸区
             // 这需要在GameEngine中跟踪PLASMA爆炸位置和时间
@@ -204,7 +217,7 @@ export class WeaponSynergySystem {
         }
 
         // MISSILE + VULCAN: 弹幕覆盖
-        if (this.isSynergyActive(SynergyType.MISSILE_VULCAN) && 
+        if (this.isSynergyActive(SynergyType.MISSILE_VULCAN) &&
             bulletWeapon === WeaponType.MISSILE) {
             // 检查目标是否同时被VULCAN子弹命中
             // 通过检查目标身上的"被击中标记"
@@ -221,7 +234,7 @@ export class WeaponSynergySystem {
         }
 
         // MAGMA + SHURIKEN: 熔火飞刃
-        if (this.isSynergyActive(SynergyType.MAGMA_SHURIKEN) && 
+        if (this.isSynergyActive(SynergyType.MAGMA_SHURIKEN) &&
             bulletWeapon === WeaponType.SHURIKEN) {
             // 检查SHURIKEN是否发生过反弹
             // 通过检查子弹的速度方向变化(简化)
@@ -244,8 +257,8 @@ export class WeaponSynergySystem {
      * 专门的方法,在PLASMA爆炸时调用
      */
     triggerPlasmaStorm(
-        explosionX: number, 
-        explosionY: number, 
+        explosionX: number,
+        explosionY: number,
         explosionRange: number,
         enemies: Entity[]
     ): Entity[] {
@@ -268,7 +281,7 @@ export class WeaponSynergySystem {
         for (let i = 0; i < Math.min(maxLightning, shuffled.length); i++) {
             const target = shuffled[i];
             const angle = Math.atan2(target.y - explosionY, target.x - explosionX);
-            
+
             lightningBullets.push({
                 x: explosionX,
                 y: explosionY,
@@ -287,7 +300,7 @@ export class WeaponSynergySystem {
                 chainCount: 1, // 可以继续连锁1次
                 chainRange: 150
             });
-            
+
             lightningCount++;
         }
 

@@ -216,13 +216,13 @@ export class GameEngine {
         this.onBossWarning(false);
         this.levelStartTime = Date.now(); // Initialize level start time
         this.audio.resume();
-        
+
         // P2 Reset combo system
         this.comboSys.reset();
-        
+
         // P2 Reset environment system
         this.envSys.reset();
-        
+
         // P3 Reset difficulty system
         this.difficultySys.reset();
 
@@ -292,10 +292,10 @@ export class GameEngine {
         if (this.state !== GameState.PLAYING) return;
 
         const timeScale = dt / 16.66;
-        
+
         // P2 Update combo timer
         this.comboSys.update(dt);
-        
+
         // P2 Update environment system
         this.envSys.update(dt, this.level, this.player);
 
@@ -315,12 +315,12 @@ export class GameEngine {
 
         // Player Movement
         let speed = PlayerConfig.speed * timeScale;
-        
+
         // P2 Apply energy storm slow effect
         if (this.envSys.isPlayerInStorm(this.player)) {
             speed *= 0.7; // 30% slow
         }
-        
+
         const kb = this.input.getKeyboardVector();
 
         // Touch
@@ -342,7 +342,7 @@ export class GameEngine {
 
         // P2 Apply gravity field before boundary check
         this.envSys.applyGravityToPlayer(this.player);
-        
+
         // Boundary
         this.player.x = Math.max(32, Math.min(this.render.width - 32, this.player.x));
         this.player.y = Math.max(32, Math.min(this.render.height - 32, this.player.y));
@@ -372,34 +372,34 @@ export class GameEngine {
         if (!this.boss) {
             this.levelProgress += 0.05 * timeScale;
             this.enemySpawnTimer += dt;
-            
+
             // P3 Get dynamic difficulty configuration
             const difficultyConfig = this.difficultySys.getConfig();
             const baseSpawnRate = Math.max(300, 1500 - (this.level * 200));
             const spawnRate = baseSpawnRate * difficultyConfig.spawnIntervalMultiplier;
-            
+
             if (this.enemySpawnTimer > spawnRate) {
                 this.enemySys.spawnEnemy(this.level, this.enemies);
-                
+
                 // P3 Check if newly spawned enemy is elite and initialize AI
                 const newEnemy = this.enemies[this.enemies.length - 1];
                 if (newEnemy && newEnemy.isElite) {
                     this.eliteAISys.initializeElite(newEnemy, this.enemies);
                 }
-                
+
                 // P3 Apply difficulty multipliers to newly spawned enemy
                 if (newEnemy) {
                     // Apply HP multiplier
                     newEnemy.hp *= difficultyConfig.enemyHpMultiplier;
                     newEnemy.maxHp = newEnemy.hp;
-                    
+
                     // Apply speed multiplier
                     newEnemy.vy *= difficultyConfig.enemySpeedMultiplier;
                     if (newEnemy.vx !== 0) {
                         newEnemy.vx *= difficultyConfig.enemySpeedMultiplier;
                     }
                 }
-                
+
                 this.enemySpawnTimer = 0;
             }
 
@@ -438,7 +438,7 @@ export class GameEngine {
             }
 
             this.bossSys.update(this.boss, dt, timeScale, this.player, this.enemyBullets, this.level);
-            
+
             // P2 Update boss phase system
             this.bossPhaseSys.update(this.boss, dt);
 
@@ -530,18 +530,18 @@ export class GameEngine {
         });
 
         this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
-        
+
         // P3 Update difficulty system
         const currentWeapons = this.getPlayerWeapons();
         this.difficultySys.update(dt, this.player, currentWeapons, this.comboSys.getState().count, this.level);
-        
+
         // P3 Update elite AI for all elite enemies
         this.enemies.forEach(enemy => {
             if (enemy.isElite) {
                 this.eliteAISys.update(enemy, dt, this.enemies, this.enemyBullets, this.player);
             }
         });
-        
+
         this.updateEntities(this.powerups, timeScale, dt);
 
         // Particles
@@ -582,7 +582,7 @@ export class GameEngine {
         this.bossWingmen = this.bossSys.spawnWingmen(this.level, this.boss, this.render.sprites);
         this.screenShake = 20;
         this.bossTransitionTimer = 0;
-        
+
         // P2 Initialize boss phase system
         if (this.boss) {
             this.bossPhaseSys.initializeBoss(this.boss, this.boss.subType as BossType);
@@ -635,7 +635,7 @@ export class GameEngine {
 
         // Unlock boss when defeated
         unlockBoss(bossLevel);
-        
+
         // P2 Cleanup boss phase state
         this.bossPhaseSys.cleanupBoss(this.boss);
 
@@ -706,7 +706,7 @@ export class GameEngine {
     checkCollisions() {
         // P2 Get obstacles for collision detection
         const obstacles = this.envSys.getObstacles();
-        
+
         // Bullets vs Enemies
         this.bullets.forEach(b => {
             // P2 Check bullet vs obstacle collision
@@ -719,10 +719,10 @@ export class GameEngine {
                     blockedByObstacle = true;
                 }
             });
-            
+
             // Skip enemy collision if blocked by obstacle
             if (blockedByObstacle) return;
-            
+
             this.enemies.forEach(e => {
                 if (this.isColliding(b, e)) {
                     this.handleBulletHit(b, e);
@@ -755,7 +755,7 @@ export class GameEngine {
                     }
                 });
             }
-            
+
             if (this.isColliding(e, this.player)) {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
@@ -849,7 +849,7 @@ export class GameEngine {
         // P2 Apply combo damage multiplier
         const comboDamageMultiplier = this.comboSys.getDamageMultiplier();
         let finalDamage = (b.damage || 10) * comboDamageMultiplier;
-        
+
         // P2 Try to trigger weapon synergies
         const synergyContext: SynergyTriggerContext = {
             weaponType: b.weaponType || this.weaponType,
@@ -860,7 +860,7 @@ export class GameEngine {
             player: this.player
         };
         const synergyResults = this.synergySys.tryTriggerSynergies(synergyContext);
-        
+
         // Apply synergy effects
         synergyResults.forEach(result => {
             if (result.effect === 'chain_lightning') {
@@ -895,7 +895,7 @@ export class GameEngine {
                 this.createExplosion(target.x, target.y, 'small', result.color);
             }
         });
-        
+
         target.hp -= finalDamage;
         this.audio.playHit();
 
@@ -912,23 +912,23 @@ export class GameEngine {
 
     killEnemy(e: Entity) {
         e.markedForDeletion = true;
-        
+
         // P2 Add combo kill and apply score multiplier
         const leveledUp = this.comboSys.addKill();
         const comboScoreMultiplier = this.comboSys.getScoreMultiplier();
-        
+
         const baseScore = EnemyConfig[e.subType]?.score || 100;
         const eliteMultiplier = e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1;
-        
+
         // P3 Apply difficulty score multiplier
         const difficultyScoreMultiplier = this.difficultySys.getScoreMultiplier();
         const finalScore = Math.floor(baseScore * eliteMultiplier * comboScoreMultiplier * difficultyScoreMultiplier);
-        
+
         this.score += finalScore;
         this.onScoreChange(this.score);
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');
-        
+
         // P2 Visual feedback for combo level up
         if (leveledUp) {
             const tier = this.comboSys.getCurrentTier();
@@ -945,7 +945,7 @@ export class GameEngine {
         const difficultyConfig = this.difficultySys.getConfig();
         const baseDropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
         const finalDropRate = baseDropRate * difficultyConfig.powerupDropMultiplier;
-        
+
         if (Math.random() < finalDropRate) this.spawnPowerup(e.x, e.y);
     }
 
@@ -956,10 +956,10 @@ export class GameEngine {
         this.audio.playExplosion('large');
 
         const range = 100 + (this.weaponLevel * 15);
-        
+
         // P2 Check for TESLA+PLASMA synergy (Plasma Storm)
         const affectedEnemies = this.synergySys.triggerPlasmaStorm(x, y, range, this.enemies);
-        
+
         if (affectedEnemies.length > 0) {
             // Generate lightning bolts to affected enemies
             affectedEnemies.forEach(e => {
@@ -984,7 +984,7 @@ export class GameEngine {
             });
             this.createExplosion(x, y, 'large', '#a855f7');
         }
-        
+
         this.enemies.forEach(e => {
             if (Math.hypot(e.x - x, e.y - y) < range) {
                 e.hp -= 50;
@@ -1053,23 +1053,24 @@ export class GameEngine {
                     if (this.weaponType === weaponType) {
                         // Same weapon type - upgrade level
                         this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
-                    } else if (this.secondaryWeapon === weaponType) {
-                        // Secondary weapon - upgrade or switch
-                        this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
                     } else {
-                        // P2 New weapon - set as secondary if no secondary exists
-                        if (this.secondaryWeapon === null) {
-                            this.secondaryWeapon = weaponType;
+                        // Different weapon - switch primary
+                        // Logic: New weapon becomes Primary. Old Primary becomes Secondary ONLY if it synergizes.
+                        // Old Secondary is always discarded.
+                        const oldPrimary = this.weaponType;
+                        this.weaponType = weaponType;
+                        this.weaponLevel = 1;
+
+                        // Check synergy with old primary
+                        if (this.synergySys.canCombine(this.weaponType, oldPrimary)) {
+                            this.secondaryWeapon = oldPrimary;
                         } else {
-                            // Switch primary weapon
-                            this.secondaryWeapon = this.weaponType;
-                            this.weaponType = weaponType;
-                            this.weaponLevel = 1;
+                            this.secondaryWeapon = null;
                         }
-                        
+
                         // P2 Update synergy system with equipped weapons
-                        const equippedWeapons = this.secondaryWeapon 
-                            ? [this.weaponType, this.secondaryWeapon] 
+                        const equippedWeapons = this.secondaryWeapon
+                            ? [this.weaponType, this.secondaryWeapon]
                             : [this.weaponType];
                         this.synergySys.updateEquippedWeapons(equippedWeapons);
                     }
