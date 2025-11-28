@@ -281,12 +281,16 @@ export class AudioSystem {
     gain.connect(this.masterGain);
 
     const now = this.ctx.currentTime;
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(400, now);
-    osc.frequency.linearRampToValueAtTime(1200, now + 0.4);
 
-    gain.gain.setValueAtTime(0.5, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+    // "Coin" sound: B5 -> E6 rapid transition
+    // First note
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(987.77, now); // B5
+    osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.linearRampToValueAtTime(0.4, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
 
     osc.start(now);
     osc.stop(now + 0.4);
@@ -334,87 +338,76 @@ export class AudioSystem {
     if (!this.ctx || !this.masterGain) return;
     const now = this.ctx.currentTime;
 
-    // Siren effect: Two oscillators modulating each other
-    const osc1 = this.ctx.createOscillator();
-    const osc2 = this.ctx.createOscillator();
+    // "Wang ~ Wang" effect
+    // Low frequency sawtooth with a bandpass filter sweep
+    const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
 
-    osc1.connect(gain);
-    osc2.connect(gain); // Layering for texture
+    osc.connect(filter);
+    filter.connect(gain);
     gain.connect(this.masterGain);
 
-    osc1.type = 'sawtooth';
-    osc2.type = 'square';
+    osc.type = 'sawtooth';
+    osc.frequency.value = 150; // Low drone
 
-    // Siren pitch modulation
-    osc1.frequency.setValueAtTime(400, now);
-    osc1.frequency.linearRampToValueAtTime(800, now + 0.5);
-    osc1.frequency.linearRampToValueAtTime(400, now + 1.0);
-    osc1.frequency.linearRampToValueAtTime(800, now + 1.5);
-    osc1.frequency.linearRampToValueAtTime(400, now + 2.0);
-    osc1.frequency.linearRampToValueAtTime(800, now + 2.5);
-    osc1.frequency.linearRampToValueAtTime(400, now + 3.0);
+    filter.type = 'bandpass';
+    filter.Q.value = 5; // High Q for "vocal" quality
 
-    osc2.frequency.setValueAtTime(405, now); // Detuned slightly
-    osc2.frequency.linearRampToValueAtTime(805, now + 0.5);
-    osc2.frequency.linearRampToValueAtTime(405, now + 1.0);
-    osc2.frequency.linearRampToValueAtTime(805, now + 1.5);
-    osc2.frequency.linearRampToValueAtTime(405, now + 2.0);
-    osc2.frequency.linearRampToValueAtTime(805, now + 2.5);
-    osc2.frequency.linearRampToValueAtTime(405, now + 3.0);
+    // First "Wang"
+    filter.frequency.setValueAtTime(200, now);
+    filter.frequency.exponentialRampToValueAtTime(800, now + 0.3); // Wah up
+    filter.frequency.exponentialRampToValueAtTime(200, now + 0.6); // Wah down
 
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.linearRampToValueAtTime(0.3, now + 3.0);
-    gain.gain.linearRampToValueAtTime(0, now + 3.5);
+    // Second "Wang"
+    filter.frequency.setValueAtTime(200, now + 0.8);
+    filter.frequency.exponentialRampToValueAtTime(800, now + 1.1); // Wah up
+    filter.frequency.exponentialRampToValueAtTime(200, now + 1.4); // Wah down
 
-    osc2.start(now);
-    osc2.stop(now + 3.5);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.1);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.6);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.9);
+    gain.gain.linearRampToValueAtTime(0, now + 1.5);
+
+    osc.start(now);
+    osc.stop(now + 1.5);
   }
 
   playBossDefeat() {
     if (!this.ctx || !this.masterGain) return;
     const now = this.ctx.currentTime;
 
-    // Triumphant fanfare: G C E G (ascending major arpeggio)
-    const notes = [392.00, 523.25, 659.25, 783.99];
+    // "Mario-style" victory: G C E G C E (Ascending arpeggio)
+    // "Deng deng deng de deng"
+    // Let's try a quick ascending major arpeggio
+    const notes = [
+      { f: 523.25, t: 0.0 }, // C5
+      { f: 659.25, t: 0.1 }, // E5
+      { f: 783.99, t: 0.2 }, // G5
+      { f: 1046.50, t: 0.3 }, // C6
+      { f: 1318.51, t: 0.4 }, // E6
+      { f: 1567.98, t: 0.5 }, // G6 (Sustained)
+    ];
 
-    notes.forEach((freq, i) => {
+    notes.forEach((note, i) => {
       const osc = this.ctx!.createOscillator();
       const gain = this.ctx!.createGain();
       osc.connect(gain);
       gain.connect(this.masterGain!);
 
-      // Mix of square and sawtooth for a brass-like sound
-      osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
-      osc.frequency.value = freq;
+      osc.type = 'square'; // 8-bit style
+      osc.frequency.value = note.f;
 
-      // Short staccato notes
-      gain.gain.setValueAtTime(0.25, now + i * 0.15);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
+      const startTime = now + note.t;
+      const duration = i === notes.length - 1 ? 1.0 : 0.08; // Last note long
 
-      osc.start(now + i * 0.15);
-      osc.stop(now + i * 0.15 + 0.3);
+      gain.gain.setValueAtTime(0.3, startTime);
+      gain.gain.linearRampToValueAtTime(0.3, startTime + duration - 0.02);
+      gain.gain.linearRampToValueAtTime(0.01, startTime + duration);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
     });
-
-    // Final sustained chord
-    setTimeout(() => {
-      const chord = [523.25, 659.25, 783.99]; // C Major
-      const chordNow = this.ctx!.currentTime;
-      chord.forEach(freq => {
-        const osc = this.ctx!.createOscillator();
-        const gain = this.ctx!.createGain();
-        osc.connect(gain);
-        gain.connect(this.masterGain!);
-
-        osc.type = 'triangle';
-        osc.frequency.value = freq;
-
-        gain.gain.setValueAtTime(0.15, chordNow);
-        gain.gain.exponentialRampToValueAtTime(0.01, chordNow + 1.5);
-
-        osc.start(chordNow);
-        osc.stop(chordNow + 1.5);
-      });
-    }, notes.length * 150 + 100);
   }
 }
