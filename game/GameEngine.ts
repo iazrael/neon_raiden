@@ -8,6 +8,8 @@ import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
 import { WeaponSynergySystem, SynergyTriggerContext } from './systems/WeaponSynergySystem';
+import { EnvironmentSystem, EnvironmentElement, EnvironmentType } from './systems/EnvironmentSystem';
+import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
 
 export class GameEngine {
@@ -22,6 +24,8 @@ export class GameEngine {
     bossSys: BossSystem;
     comboSys: ComboSystem; // P2 Combo System
     synergySys: WeaponSynergySystem; // P2 Weapon Synergy System
+    envSys: EnvironmentSystem; // P2 Environment System
+    bossPhaseSys: BossPhaseSystem; // P2 Boss Phase System
 
     // Game State
     state: GameState = GameState.MENU;
@@ -108,6 +112,8 @@ export class GameEngine {
         this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height);
         this.comboSys = new ComboSystem(undefined, (state) => this.onComboChange(state)); // P2 Combo System
         this.synergySys = new WeaponSynergySystem(); // P2 Weapon Synergy System
+        this.envSys = new EnvironmentSystem(canvas.width, canvas.height); // P2 Environment System
+        this.bossPhaseSys = new BossPhaseSystem(this.audio); // P2 Boss Phase System
 
         // Bind Input Actions
         this.input.onAction = (action) => {
@@ -149,6 +155,7 @@ export class GameEngine {
         this.render.resize(width, height);
         this.enemySys.resize(width, height);
         this.bossSys.resize(width, height);
+        this.envSys.resize(width, height); // P2 Resize environment system
 
         // Update config if needed, though config is static, systems hold dimensions
     }
@@ -205,6 +212,9 @@ export class GameEngine {
         
         // P2 Reset combo system
         this.comboSys.reset();
+        
+        // P2 Reset environment system
+        this.envSys.reset();
 
         this.onStateChange(this.state);
         this.onScoreChange(this.score);
@@ -275,6 +285,9 @@ export class GameEngine {
         
         // P2 Update combo timer
         this.comboSys.update(dt);
+        
+        // P2 Update environment system
+        this.envSys.update(dt, this.level, this.player);
 
         if (this.screenShake > 0) {
             this.screenShake *= 0.9;
@@ -291,7 +304,13 @@ export class GameEngine {
         }
 
         // Player Movement
-        const speed = PlayerConfig.speed * timeScale;
+        let speed = PlayerConfig.speed * timeScale;
+        
+        // P2 Apply energy storm slow effect
+        if (this.envSys.isPlayerInStorm(this.player)) {
+            speed *= 0.7; // 30% slow
+        }
+        
         const kb = this.input.getKeyboardVector();
 
         // Touch
@@ -311,6 +330,9 @@ export class GameEngine {
             this.player.vx *= 0.8;
         }
 
+        // P2 Apply gravity field before boundary check
+        this.envSys.applyGravityToPlayer(this.player);
+        
         // Boundary
         this.player.x = Math.max(32, Math.min(this.render.width - 32, this.player.x));
         this.player.y = Math.max(32, Math.min(this.render.height - 32, this.player.y));
@@ -381,6 +403,9 @@ export class GameEngine {
             }
 
             this.bossSys.update(this.boss, dt, timeScale, this.player, this.enemyBullets, this.level);
+            
+            // P2 Update boss phase system
+            this.bossPhaseSys.update(this.boss, dt);
 
             // Update wingmen
             this.bossWingmen.forEach(wingman => {
@@ -510,6 +535,11 @@ export class GameEngine {
         this.bossWingmen = this.bossSys.spawnWingmen(this.level, this.boss, this.render.sprites);
         this.screenShake = 20;
         this.bossTransitionTimer = 0;
+        
+        // P2 Initialize boss phase system
+        if (this.boss) {
+            this.bossPhaseSys.initializeBoss(this.boss, this.boss.subType as BossType);
+        }
     }
 
     damageBoss(amount: number) {
@@ -558,6 +588,9 @@ export class GameEngine {
 
         // Unlock boss when defeated
         unlockBoss(bossLevel);
+        
+        // P2 Cleanup boss phase state
+        this.bossPhaseSys.cleanupBoss(this.boss);
 
         this.boss = null;
         this.bossWingmen = [];
@@ -624,8 +657,25 @@ export class GameEngine {
     }
 
     checkCollisions() {
+        // P2 Get obstacles for collision detection
+        const obstacles = this.envSys.getObstacles();
+        
         // Bullets vs Enemies
         this.bullets.forEach(b => {
+            // P2 Check bullet vs obstacle collision
+            let blockedByObstacle = false;
+            obstacles.forEach(obstacle => {
+                if (this.isColliding(b, obstacle)) {
+                    b.markedForDeletion = true;
+                    this.envSys.damageObstacle(obstacle, b.damage || 10);
+                    this.createExplosion(b.x, b.y, 'small', '#888888');
+                    blockedByObstacle = true;
+                }
+            });
+            
+            // Skip enemy collision if blocked by obstacle
+            if (blockedByObstacle) return;
+            
             this.enemies.forEach(e => {
                 if (this.isColliding(b, e)) {
                     this.handleBulletHit(b, e);
@@ -649,6 +699,16 @@ export class GameEngine {
 
         // Enemy Stuff vs Player
         [...this.enemyBullets, ...this.enemies, ...this.bossWingmen].forEach(e => {
+            // P2 Check enemy bullet vs obstacle collision
+            if (e.type === EntityType.BULLET) {
+                obstacles.forEach(obstacle => {
+                    if (this.isColliding(e, obstacle)) {
+                        e.markedForDeletion = true;
+                        this.createExplosion(e.x, e.y, 'small', '#888888');
+                    }
+                });
+            }
+            
             if (this.isColliding(e, this.player)) {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
@@ -1023,7 +1083,8 @@ export class GameEngine {
             this.meteors,
             this.shield,
             this.screenShake,
-            this.weaponLevel
+            this.weaponLevel,
+            this.envSys.getAllElements() // P2 Pass environment elements
         );
     }
 

@@ -1,6 +1,7 @@
 import { SpriteGenerator } from '@/game/SpriteGenerator';
 import { SpriteMap, Entity, Particle, Shockwave, GameState, BulletType, EnemyType, PowerupType, WeaponType, EntityType } from '@/types';
 import { BossConfig, EnemyConfig } from '../config';
+import { EnvironmentElement, EnvironmentType } from './EnvironmentSystem';
 
 export class RenderSystem {
     ctx: CanvasRenderingContext2D;
@@ -67,7 +68,8 @@ export class RenderSystem {
         meteors: any[],
         shield: number,
         screenShake: number,
-        weaponLevel: number
+        weaponLevel: number,
+        environmentElements: EnvironmentElement[] = [] // P2 Environment elements
     ) {
         this.ctx.save();
 
@@ -136,6 +138,10 @@ export class RenderSystem {
             }
 
             powerups.forEach(p => this.drawEntity(p));
+            
+            // P2 Draw environment elements
+            environmentElements.forEach(elem => this.drawEnvironmentElement(elem));
+            
             enemies.forEach(e => this.drawEntity(e));
             if (boss) this.drawEntity(boss);
             bossWingmen.forEach(w => this.drawEntity(w));
@@ -248,6 +254,75 @@ export class RenderSystem {
             this.ctx.lineWidth = 2;
             this.ctx.strokeRect(-e.width / 2, -e.height / 2, e.width, e.height);
         }
+        this.ctx.restore();
+    }
+
+    /**
+     * P2 Draw environment element
+     */
+    drawEnvironmentElement(elem: EnvironmentElement) {
+        this.ctx.save();
+        
+        switch (elem.environmentType) {
+            case EnvironmentType.OBSTACLE:
+                // Draw obstacle as gray metallic block
+                this.ctx.translate(elem.x, elem.y);
+                this.ctx.fillStyle = elem.color;
+                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                
+                // Metallic shine effect
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width / 3, elem.height);
+                
+                // HP bar
+                const hpPercent = elem.hp / elem.maxHp;
+                this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                this.ctx.fillRect(-elem.width / 2, -elem.height / 2 - 8, elem.width, 4);
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.fillRect(-elem.width / 2, -elem.height / 2 - 8, elem.width * hpPercent, 4);
+                break;
+                
+            case EnvironmentType.ENERGY_STORM:
+                // Draw energy storm as animated green band
+                this.ctx.translate(elem.x, elem.y);
+                const alpha = 0.3 + Math.sin(Date.now() / 200) * 0.15;
+                this.ctx.fillStyle = `rgba(74, 222, 128, ${alpha})`;
+                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                
+                // Energy waves
+                this.ctx.strokeStyle = `rgba(74, 222, 128, ${alpha + 0.2})`;
+                this.ctx.lineWidth = 2;
+                const waveOffset = (Date.now() / 50) % 30;
+                for (let i = -elem.width / 2; i < elem.width / 2; i += 30) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i + waveOffset, -elem.height / 2);
+                    this.ctx.lineTo(i + waveOffset, elem.height / 2);
+                    this.ctx.stroke();
+                }
+                break;
+                
+            case EnvironmentType.GRAVITY_FIELD:
+                // Draw gravity field as purple translucent zone
+                this.ctx.translate(elem.x, elem.y);
+                const gravityAlpha = 0.2 + Math.sin(Date.now() / 300) * 0.1;
+                this.ctx.fillStyle = `rgba(139, 92, 246, ${gravityAlpha})`;
+                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                
+                // Gravity particles
+                const side = elem.data?.side || 'left';
+                const pullDirection = side === 'left' ? 1 : -1;
+                this.ctx.fillStyle = `rgba(139, 92, 246, 0.6)`;
+                for (let i = 0; i < 10; i++) {
+                    const t = (Date.now() / 1000 + i * 0.3) % 2;
+                    const x = pullDirection * (elem.width / 2 - t * elem.width / 2);
+                    const y = (i - 5) * (elem.height / 10);
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                break;
+        }
+        
         this.ctx.restore();
     }
 }
