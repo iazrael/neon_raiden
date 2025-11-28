@@ -70,7 +70,7 @@ export const GameUI: React.FC<GameUIProps> = ({
             SCORE: {score.toString().padStart(6, "0")}
           </div>
           <div className="text-sm text-gray-300">LEVEL: {level}</div>
-          
+
           {/* P2 Weapon Status & Active Synergies */}
           {state === GameState.PLAYING && weaponType && (
             <div className="mt-2 flex flex-col gap-1">
@@ -81,15 +81,15 @@ export const GameUI: React.FC<GameUIProps> = ({
                   <span className="text-purple-400"> + {secondaryWeapon}</span>
                 )}
               </div>
-              
+
               {/* Active Synergies */}
               {activeSynergies.length > 0 && (
                 <div className="flex flex-col gap-0.5">
                   {activeSynergies.map(synergy => (
-                    <div 
+                    <div
                       key={synergy.type}
                       className="text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1"
-                      style={{ 
+                      style={{
                         borderColor: synergy.color,
                         backgroundColor: `${synergy.color}20`,
                         color: synergy.color
@@ -126,44 +126,44 @@ export const GameUI: React.FC<GameUIProps> = ({
 
       {/* P2 Combo Display */}
       {state === GameState.PLAYING && comboState && comboState.count > 0 && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-40 flex flex-col items-center gap-2">
+        <div className="absolute top-32 right-4 pointer-events-none z-40 flex flex-col items-end gap-2">
           {/* Combo Count */}
-          <div 
-            className="text-center transition-all duration-200"
+          <div
+            className="text-right transition-all duration-200"
             style={{
               transform: `scale(${1 + Math.min(comboState.count / 100, 1) * 0.5})`,
             }}
           >
-            <div 
+            <div
               className="text-5xl font-black tracking-wider drop-shadow-[0_0_15px_currentColor]"
-              style={{ 
+              style={{
                 color: getComboColor(comboState.level),
                 textShadow: `0 0 20px ${getComboColor(comboState.level)}`
               }}
             >
               {comboState.count}
             </div>
-            <div 
+            <div
               className="text-sm font-bold tracking-widest mt-1"
               style={{ color: getComboColor(comboState.level) }}
             >
               {getComboTierName(comboState.level)}
             </div>
           </div>
-          
+
           {/* Progress Bar to next tier */}
           {comboState.level < 4 && (
             <div className="w-32 h-1 bg-gray-800/50 rounded-full overflow-hidden border border-gray-600/50">
-              <div 
+              <div
                 className="h-full transition-all duration-300"
-                style={{ 
+                style={{
                   width: `${getProgressToNextTier(comboState) * 100}%`,
                   backgroundColor: getComboColor(comboState.level)
                 }}
               />
             </div>
           )}
-          
+
           {/* Multipliers */}
           <div className="flex gap-3 text-xs">
             <div className="text-red-400 drop-shadow-md">
