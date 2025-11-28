@@ -1071,6 +1071,12 @@ export class GameEngine {
                     if (this.weaponType === weaponType) {
                         // Same weapon type - upgrade level
                         this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
+
+                        // P2 Update synergy system to keep it in sync with current equipment
+                        const equippedWeapons = this.secondaryWeapon
+                            ? [this.weaponType, this.secondaryWeapon]
+                            : [this.weaponType];
+                        this.synergySys.updateEquippedWeapons(equippedWeapons);
                     } else {
                         // Different weapon - switch primary
                         // Logic: New weapon becomes Primary. Old Primary becomes Secondary ONLY if it synergizes.
