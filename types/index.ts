@@ -73,6 +73,8 @@ export interface Entity {
   chainRange?: number; // For Tesla chain lightning
   weaponType?: string; // Track which weapon fired this bullet
   isHoming?: boolean; // For homing missiles that track the player
+  invulnerable?: boolean; // Invulnerability status
+  invulnerableTimer?: number; // Invulnerability duration in milliseconds
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

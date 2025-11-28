@@ -65,7 +65,9 @@ export class BossSystem {
             markedForDeletion: false,
             angle: 0,
             spriteKey: config.sprite,
-            state: 0 // 0: entering, 1: fighting
+            state: 0, // 0: entering, 1: fighting
+            invulnerable: true, // Boss starts invulnerable when spawned
+            invulnerableTimer: 3000 // 3 seconds invulnerability
         };
     }
 
@@ -104,6 +106,15 @@ export class BossSystem {
     update(boss: Entity, dt: number, timeScale: number, player: Entity, enemyBullets: Entity[], level: number) {
         const config = getBossConfigByLevel(level);
         if (!config) return;
+
+        // Update invulnerability timer
+        if (boss.invulnerable && boss.invulnerableTimer !== undefined) {
+            boss.invulnerableTimer -= dt;
+            if (boss.invulnerableTimer <= 0) {
+                boss.invulnerable = false;
+                boss.invulnerableTimer = 0;
+            }
+        }
 
         // Entry phase
         if (boss.state === 0) {

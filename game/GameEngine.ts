@@ -339,7 +339,7 @@ export class GameEngine {
             if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
                 if (!this.isBossWarningActive) {
                     this.isBossWarningActive = true;
-                    this.bossWarningTimer = 2000; // 2 seconds warning
+                    this.bossWarningTimer = 3000; // 3 seconds warning
                     this.onBossWarning(true);
                     this.audio.playWarning(); // Assuming we will add this or use a sound
                 } else {
@@ -498,6 +498,11 @@ export class GameEngine {
     damageBoss(amount: number) {
         if (!this.boss) return;
 
+        // Boss cannot take damage while invulnerable
+        if (this.boss.invulnerable) {
+            return;
+        }
+
         // Boss can only take damage if all wingmen are destroyed
         if (this.bossWingmen.length > 0) {
             return;
@@ -618,7 +623,10 @@ export class GameEngine {
             });
 
             if (this.boss && this.isColliding(b, this.boss)) {
-                this.handleBulletHit(b, this.boss);
+                // Only handle collision if boss is not invulnerable
+                if (!this.boss.invulnerable) {
+                    this.handleBulletHit(b, this.boss);
+                }
             }
         });
 

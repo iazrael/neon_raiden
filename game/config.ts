@@ -340,8 +340,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletCount: 5 },
         7: { bulletCount: 5 },
         8: { bulletCount: 5 },
-        9: { bulletCount: 7 },
-        10: { bulletCount: 7 }
+        9: { bulletCount: 7 }
     },
     [WeaponType.LASER]: {
         1: { bulletWidth: 1, beamCount: 1 },
@@ -352,8 +351,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletWidth: 6, beamCount: 2 },
         7: { bulletWidth: 7, beamCount: 2 },
         8: { bulletWidth: 8, beamCount: 3 },
-        9: { bulletWidth: 9, beamCount: 3 },
-        10: { bulletWidth: 10, beamCount: 3 }
+        9: { bulletWidth: 9, beamCount: 3 }
     },
     [WeaponType.MISSILE]: {
         1: { bulletCount: 1 },
@@ -364,8 +362,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletCount: 6 },
         7: { bulletCount: 6 },
         8: { bulletCount: 6 },
-        9: { bulletCount: 8 },
-        10: { bulletCount: 8 }
+        9: { bulletCount: 8 }
     },
     [WeaponType.WAVE]: {
         1: { bulletWidth: 12 },
@@ -376,8 +373,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletWidth: 72 },
         7: { bulletWidth: 84 },
         8: { bulletWidth: 96 },
-        9: { bulletWidth: 108 },
-        10: { bulletWidth: 120 }
+        9: { bulletWidth: 108 }
     },
     [WeaponType.PLASMA]: {
         1: { bulletWidth: 8, bulletHeight: 8 },
@@ -388,8 +384,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletWidth: 48, bulletHeight: 48 },
         7: { bulletWidth: 56, bulletHeight: 56 },
         8: { bulletWidth: 64, bulletHeight: 64 },
-        9: { bulletWidth: 72, bulletHeight: 72 },
-        10: { bulletWidth: 80, bulletHeight: 80 }
+        9: { bulletWidth: 72, bulletHeight: 72 }
     },
     [WeaponType.TESLA]: {
         1: { chainCount: 1, chainRange: 150 },
@@ -400,8 +395,7 @@ export const WeaponUpgradeConfig: {
         6: { chainCount: 3, chainRange: 200 },
         7: { chainCount: 4, chainRange: 210 },
         8: { chainCount: 4, chainRange: 220 },
-        9: { chainCount: 5, chainRange: 230 },
-        10: { chainCount: 5, chainRange: 250 }
+        9: { chainCount: 5, chainRange: 230 }
     },
     [WeaponType.MAGMA]: {
         1: { bulletCount: 3 },
@@ -412,8 +406,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletCount: 5 },
         7: { bulletCount: 5 },
         8: { bulletCount: 5 },
-        9: { bulletCount: 6 },
-        10: { bulletCount: 6 }
+        9: { bulletCount: 6 }
     },
     [WeaponType.SHURIKEN]: {
         1: { bulletCount: 2 },
@@ -424,8 +417,7 @@ export const WeaponUpgradeConfig: {
         6: { bulletCount: 5 },
         7: { bulletCount: 5 },
         8: { bulletCount: 6 },
-        9: { bulletCount: 6 },
-        10: { bulletCount: 6 }
+        9: { bulletCount: 6 }
     }
 };
 
@@ -485,7 +477,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         describe: '速度轻快的飞翼敌机，折线移动较难瞄准。虽然血量低但子弹轰炸强，带来麻烦。',
         color: '#aa44ff',
         baseHp: 10,
-        hpPerLevel: 0,
+        hpPerLevel: 2,
         baseSpeed: 8,
         speedPerLevel: 0.5,
         sprite: 'enemy_fast',
@@ -517,7 +509,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         describe: '橙色尖刺形的尖兵机，速度最快直接冲撞。血量低但子弹轰炸强，带来残血。',
         color: '#ffaa44',
         baseHp: 5,
-        hpPerLevel: 0,
+        hpPerLevel: 1,
         baseSpeed: 10,
         speedPerLevel: 0.8,
         sprite: 'enemy_kamikaze',
@@ -677,7 +669,7 @@ export function selectPowerupType(): PowerupType {
 }
 
 export const PowerupEffects = {
-    maxWeaponLevel: 10,
+    maxWeaponLevel: 9,
     maxOptions: 3,
     maxBombs: 6,
     hpRestoreAmount: 30,
@@ -809,7 +801,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '突击巡洋舰，速度轻快血量较低。装备环形弹幕、瞄准弹武器。攻击速度快需要提高警惕才能躲避。',
         color: '#ff4488',
         level: 2,
-        hp: 1400,
+        hp: 2100,
         speed: 2.0,
         size: { width: 200, height: 200 },
         score: 10000,
@@ -840,7 +832,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '重型战列舰，血量可观。装备环形弹幕、瞄准弹武器。密集的攻击需要敏感期锐的反应能力。',
         color: '#44ff88',
         level: 3,
-        hp: 2400,
+        hp: 2940,
         speed: 0.8,
         size: { width: 220, height: 220 },
         score: 15000,
@@ -871,7 +863,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '隐形战机，射击速度快为其特点。装备环形弹幕、瞄准弹武器。密集攻击需要大量躲避和反应。',
         color: '#ff8844',
         level: 4,
-        hp: 2000,
+        hp: 4116,
         speed: 1.5,
         size: { width: 240, height: 240 },
         score: 20000,
@@ -902,16 +894,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '能量要塞，弹幕最密集难以躲避。装备环形弹幕、瞄准弹武器。等级越高攻击越强，是中期的大麻烦。',
         color: '#8844ff',
         level: 5,
-        hp: 2800,
+        hp: 5762,
         speed: 1.3,
         size: { width: 260, height: 260 },
         score: 25000,
         sprite: 'boss_dominator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 24,
+            bulletCount: 18,
             bulletSpeed: 5.0,
-            fireRate: 0.09,
+            fireRate: 0.07,
             targetedShotSpeed: 10
         },
         movement: {
@@ -933,7 +925,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '双子舰，首次提升激光攻击。装备环形弹幕、瞄准弹、连续激光武器。追踪你的位置然后画激光求救。',
         color: '#ff44ff',
         level: 6,
-        hp: 3200,
+        hp: 8066,
         speed: 1.8,
         size: { width: 280, height: 280 },
         score: 30000,
@@ -964,7 +956,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '三角要塞，血段你的第一道大关。装备环形弹幕、瞄准弹、连续激光武器。重装坦克的防御是你最强的寄望。',
         color: '#44ff44',
         level: 7,
-        hp: 5000,
+        hp: 11292,
         speed: 1.0,
         size: { width: 300, height: 300 },
         score: 35000,
@@ -995,16 +987,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '蛛型机甲，爆发刺客型内下手。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕武器，配置1个激光拦截机僚机。脉冲激光是其主要威胁，需要全力象。',
         color: '#ffff44',
         level: 8,
-        hp: 4000,
+        hp: 9412,
         speed: 2.2,
         size: { width: 320, height: 320 },
         score: 40000,
         sprite: 'boss_colossus',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD],
         weaponConfigs: {
-            bulletCount: 22,
+            bulletCount: 20,
             bulletSpeed: 7.0,
-            fireRate: 0.08,
+            fireRate: 0.07,
             targetedShotSpeed: 12
         },
         movement: {
@@ -1030,16 +1022,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '环形核心，全能战士不可谋下。装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个激光拦截机僚机。那些会发动旁点的激光是你最大的敌手。',
         color: '#44ffff',
         level: 9,
-        hp: 6000,
+        hp: 12235,
         speed: 1.6,
         size: { width: 340, height: 340 },
         score: 45000,
         sprite: 'boss_leviathan',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         weaponConfigs: {
-            bulletCount: 26,
+            bulletCount: 22,
             bulletSpeed: 7.5,
-            fireRate: 0.095,
+            fireRate: 0.08,
             targetedShotSpeed: 13
         },
         movement: {
@@ -1065,16 +1057,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '最终龙王，装备环形弹幕、瞄准弹、脉冲激光、扇形弹幕、追踪导弹武器，配置2个布雷机僚机。五重弹幕与激光齐飞，僚机掩护下势不可挡。唯有掌握节奏、把握间隙，才能突破天启的绝望防线。',
         color: '#ff0000',
         level: 10,
-        hp: 10000,
+        hp: 15905,
         speed: 2.3,
         size: { width: 360, height: 360 },
         score: 50000,
         sprite: 'boss_apocalypse',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         weaponConfigs: {
-            bulletCount: 30,
+            bulletCount: 26,
             bulletSpeed: 8.0,
-            fireRate: 0.10,
+            fireRate: 0.09,
             targetedShotSpeed: 15
         },
         movement: {
