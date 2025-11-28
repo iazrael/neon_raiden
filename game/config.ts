@@ -243,8 +243,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseDamage: 15,
         damagePerLevel: 6,
         speed: 15,
-        baseFireRate: 150,
-        ratePerLevel: 2,
+        baseFireRate: 350,
+        ratePerLevel: 15,
         bullet: BulletConfigs[BulletType.MISSILE],
         sprite: 'bullet_missile'
     },
@@ -356,7 +356,7 @@ export const WeaponUpgradeConfig: {
         10: { bulletWidth: 10, beamCount: 3 }
     },
     [WeaponType.MISSILE]: {
-        1: { bulletCount: 2 },
+        1: { bulletCount: 1 },
         2: { bulletCount: 2 },
         3: { bulletCount: 4 },
         4: { bulletCount: 4 },

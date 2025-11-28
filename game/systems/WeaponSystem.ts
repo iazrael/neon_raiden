@@ -79,24 +79,8 @@ export class WeaponSystem {
             const height = config.bullet.size.height + (upgradeConfig.bulletHeight || 0);
             spawn(player.x, player.y - 40, 0, -config.speed, damage, weaponType, config.sprite, width, height);
         } else if (weaponType === WeaponType.TESLA) {
-            // Auto-lock to nearest enemy
-            let target: Entity | null = null;
-            let minDist = 400; // Range
-            enemies.forEach(e => {
-                const dist = Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2);
-                if (dist < minDist && e.y < player.y) { // Only target enemies above
-                    minDist = dist;
-                    target = e;
-                }
-            });
-
-            if (target) {
-                const t = target as Entity; // TS check
-                const angle = Math.atan2(t.y - player.y, t.x - player.x);
-                spawn(player.x, player.y - 20, Math.cos(angle) * config.speed, Math.sin(angle) * config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
-            } else {
-                spawn(player.x, player.y - 20, 0, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
-            }
+            // Tesla fires straight, chains on hit (handled in GameEngine)
+            spawn(player.x, player.y - 20, 0, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height, upgradeConfig.chainCount, upgradeConfig.chainRange);
         } else if (weaponType === WeaponType.MAGMA) {
             // 使用配置中的子弹数量
             const count = upgradeConfig.bulletCount || 3;

@@ -384,7 +384,7 @@ export class GameEngine {
                     const dy = target.y - b.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist > 0) {
-                        const turnSpeed = 0.15;
+                        const turnSpeed = 0.5; // Increased from 0.15 for better tracking
                         b.vx += (dx / dist) * turnSpeed;
                         b.vy += (dy / dist) * turnSpeed;
                         const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
