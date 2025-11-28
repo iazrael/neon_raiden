@@ -8,7 +8,9 @@ import { swInjectPlugin } from './vite-plugins/sw-inject-plugin';
 // 读取package.json中的版本号
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 let appVersion = packageJson.version;
-const [major, minor] = appVersion.split('.');
+const [major] = appVersion.split('.');
+// 用距离2025-01-01的天数作为 minor
+const minor = Math.floor((new Date().getTime() - new Date('2025-01-01').getTime()) / (24 * 60 * 60 * 1000)).toString();
 // 用当前的东八区时间的时分作为patch， hh:MM
 const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000); // 东八区时间
 const patch = now.getUTCHours().toString().padStart(2, '0') + now.getUTCMinutes().toString().padStart(2, '0');
