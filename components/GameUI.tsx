@@ -126,7 +126,7 @@ export const GameUI: React.FC<GameUIProps> = ({
 
       {/* P2 Combo Display */}
       {state === GameState.PLAYING && comboState && comboState.count > 0 && (
-        <div className="absolute top-32 right-4 pointer-events-none z-40 flex flex-col items-end gap-2">
+        <div className="absolute top-36 right-4 pointer-events-none z-40 flex flex-col items-end gap-2">
           {/* Combo Count */}
           <div
             className="text-right transition-all duration-200"
