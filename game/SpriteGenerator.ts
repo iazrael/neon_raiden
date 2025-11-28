@@ -1,4 +1,4 @@
-import { ASSETS_BASE_PATH, WeaponConfig, BulletConfigs } from '@/game/config';
+import { ASSETS_BASE_PATH, WeaponConfig, BulletConfigs, PowerupVisuals } from '@/game/config';
 import { BulletType, WeaponType, PowerupType, EnemyEntity, BossEntity } from '@/types';
 import { AssetsLoader } from './AssetsLoader';
 
@@ -60,7 +60,7 @@ export class SpriteGenerator {
         return this.loadSVG(`${ASSETS_BASE_PATH}bullets/${spriteName}.svg`, w, h);
     }
 
-    // 生成掉落物，现在包含内部图标
+    // 生成掉落物,现在包含内部图标
     generatePowerup(type: PowerupType): HTMLCanvasElement {
         const { canvas, ctx } = this.createCanvas(40, 40);
 
@@ -80,12 +80,11 @@ export class SpriteGenerator {
             const spriteName = weaponConfig.sprite;
             iconSrc = `${ASSETS_BASE_PATH}bullets/${spriteName}.svg`;
         } else {
-            // Special powerups
-            switch (type) {
-                case PowerupType.POWER: color = '#ecc94b'; label = 'P'; break; // POWER
-                case PowerupType.HP: color = '#48bb78'; label = 'H'; break; // HP
-                case PowerupType.BOMB: color = '#f56565'; label = 'B'; break; // BOMB
-                case PowerupType.OPTION: color = '#a0aec0'; label = 'O'; break; // OPTION
+            // Special powerups - use config
+            const visualConfig = PowerupVisuals[type];
+            if (visualConfig) {
+                color = visualConfig.color;
+                label = visualConfig.label;
             }
         }
 

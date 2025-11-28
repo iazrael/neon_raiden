@@ -19,6 +19,7 @@ export { EnemyConfig } from './enemies/entities';
 // 道具相关配置
 export { PowerupDropConfig, PowerupDropRates, selectPowerupType } from './powerups/drops';
 export { PowerupEffects } from './powerups/effects';
+export { PowerupVisuals } from './powerups/visuals';
 
 // Boss相关配置
 export { BossSpawnConfig } from './bosses/spawns';
