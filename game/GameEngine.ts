@@ -515,6 +515,11 @@ export class GameEngine {
             if (b.weaponType !== WeaponType.PLASMA && b.vx !== undefined && b.vy !== undefined) {
                 b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
             }
+
+            // Update rotation angle for plasma bullets
+            if (b.weaponType === WeaponType.PLASMA && b.rotationSpeed !== undefined) {
+                b.angle = (b.angle || 0) + b.rotationSpeed;
+            }
         });
 
         // Update enemy bullets with homing logic
@@ -543,6 +548,11 @@ export class GameEngine {
             // Update all enemy bullets rotation to face flight direction
             if (b.vx !== undefined && b.vy !== undefined && b.spriteKey !== 'bullet_enemy_spiral') {
                 b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
+            }
+
+            // Update rotation angle for spiral bullets
+            if (b.spriteKey === 'bullet_enemy_spiral' && b.rotationSpeed !== undefined) {
+                b.angle = (b.angle || 0) + b.rotationSpeed;
             }
 
             // Laser timer countdown

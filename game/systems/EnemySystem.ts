@@ -234,7 +234,9 @@ export class EnemySystem {
                         height: bulletConfig.size.height,
                         vx: Math.cos(angle) * bulletSpeed, vy: Math.sin(angle) * bulletSpeed + 2, // +2 to ensure downward trend
                         hp: 1, maxHp: 1, type: EntityType.BULLET, color: bulletConfig.color, markedForDeletion: false, spriteKey: bulletConfig.sprite,
-                        damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1)
+                        damage: 10 * (e.isElite ? EnemyCommonConfig.eliteDamageMultiplier : 1),
+                        angle: Math.random() * Math.PI * 2, // Random initial angle
+                        rotationSpeed: 0.15 // Set faster rotation speed
                     });
                 }
             }

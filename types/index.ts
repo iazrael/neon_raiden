@@ -75,6 +75,7 @@ export interface Entity {
   color: string;
   markedForDeletion: boolean;
   angle?: number;
+  rotationSpeed?: number; // Rotation speed in radians per frame for self-rotating bullets
   spriteKey?: string;
   frame?: number;
   damage?: number;

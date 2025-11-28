@@ -27,15 +27,23 @@ export class WeaponSystem {
         const upgradeConfig = WeaponUpgradeConfig[weaponType][weaponLevel] || {};
 
         // Helper to spawn bullet
-        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, sprite: string, w: number, h: number, chainCount?: number, chainRange?: number) => {
-            bullets.push({
+        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, sprite: string, w: number, h: number, chainCount?: number, chainRange?: number, rotationSpeed?: number) => {
+            const bullet: Entity = {
                 x, y, width: w, height: h, vx, vy,
                 hp: type === WeaponType.WAVE || type === WeaponType.LASER ? 999 : 1,
                 maxHp: 1, type: EntityType.BULLET, color: config.color, markedForDeletion: false,
                 spriteKey: sprite, damage: dmg,
                 chainCount, chainRange,
                 weaponType: type
-            });
+            };
+
+            // Add rotation properties if specified
+            if (rotationSpeed !== undefined) {
+                bullet.angle = Math.random() * Math.PI * 2; // Random starting angle
+                bullet.rotationSpeed = rotationSpeed;
+            }
+
+            bullets.push(bullet);
         }; // Main Gun Logic
         if (weaponType === WeaponType.VULCAN) {
             // 使用配置中的子弹数量
@@ -77,7 +85,8 @@ export class WeaponSystem {
             // 使用配置中的尺寸增量
             const width = config.bullet.size.width + (upgradeConfig.bulletWidth || 0);
             const height = config.bullet.size.height + (upgradeConfig.bulletHeight || 0);
-            spawn(player.x, player.y - 40, 0, -config.speed, damage, weaponType, config.sprite, width, height);
+            // Add rotation: 0.03 radians per frame (about 1.7 degrees per frame, slower rotation)
+            spawn(player.x, player.y - 40, 0, -config.speed, damage, weaponType, config.sprite, width, height, undefined, undefined, 0.03);
         } else if (weaponType === WeaponType.TESLA) {
             // Tesla fires straight, chains on hit (handled in GameEngine)
             spawn(player.x, player.y - 20, 0, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height, upgradeConfig.chainCount, upgradeConfig.chainRange);
