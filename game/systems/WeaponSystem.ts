@@ -27,16 +27,16 @@ export class WeaponSystem {
         const upgradeConfig = WeaponUpgradeConfig[weaponType][weaponLevel] || {};
 
         // Helper to spawn bullet
-        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, sprite: string, w: number, h: number) => {
+        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, sprite: string, w: number, h: number, chainCount?: number, chainRange?: number) => {
             bullets.push({
                 x, y, width: w, height: h, vx, vy,
                 hp: type === WeaponType.WAVE || type === WeaponType.LASER ? 999 : 1,
                 maxHp: 1, type: EntityType.BULLET, color: config.color, markedForDeletion: false,
-                spriteKey: sprite, damage: dmg
+                spriteKey: sprite, damage: dmg,
+                chainCount, chainRange,
+                weaponType: type
             });
-        };
-
-        // Main Gun Logic
+        }; // Main Gun Logic
         if (weaponType === WeaponType.VULCAN) {
             // 使用配置中的子弹数量
             const count = upgradeConfig.bulletCount || 1;

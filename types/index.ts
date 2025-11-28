@@ -69,6 +69,9 @@ export interface Entity {
   isElite?: boolean;
   state?: number; // For AI state
   timer?: number; // For AI timer
+  chainCount?: number; // For Tesla chain lightning
+  chainRange?: number; // For Tesla chain lightning
+  weaponType?: string; // Track which weapon fired this bullet
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

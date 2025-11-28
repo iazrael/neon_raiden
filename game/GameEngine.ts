@@ -365,6 +365,39 @@ export class GameEngine {
         // Updates
         this.updateEntities(this.bullets, timeScale, dt);
 
+        // Update player bullets with weapon-specific logic
+        this.bullets.forEach(b => {
+            // Missile homing logic
+            if (b.weaponType === WeaponType.MISSILE) {
+                let target: Entity | null = null;
+                let minDist = 300; // Homing range
+                this.enemies.forEach(e => {
+                    const dist = Math.sqrt((e.x - b.x) ** 2 + (e.y - b.y) ** 2);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        target = e;
+                    }
+                });
+
+                if (target) {
+                    const dx = target.x - b.x;
+                    const dy = target.y - b.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 0) {
+                        const turnSpeed = 0.15;
+                        b.vx += (dx / dist) * turnSpeed;
+                        b.vy += (dy / dist) * turnSpeed;
+                        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                        const maxSpeed = 15;
+                        if (speed > maxSpeed) {
+                            b.vx = (b.vx / speed) * maxSpeed;
+                            b.vy = (b.vy / speed) * maxSpeed;
+                        }
+                    }
+                }
+            }
+        });
+
         // Update enemy bullets with homing logic
         this.enemyBullets.forEach(b => {
             b.x += b.vx * timeScale;
@@ -528,7 +561,7 @@ export class GameEngine {
             e.x += e.vx * timeScale;
             e.y += e.vy * timeScale;
 
-            if (e.type === 'bullet' && e.spriteKey === 'bullet_shuriken') {
+            if (e.type === 'bullet' && e.weaponType === WeaponType.SHURIKEN) {
                 if (e.x < 0 || e.x > this.render.width) {
                     e.vx *= -1;
                     e.x = Math.max(0, Math.min(this.render.width, e.x));
@@ -604,11 +637,52 @@ export class GameEngine {
     }
 
     handleBulletHit(b: Entity, target: Entity) {
-        if (this.weaponType === WeaponType.PLASMA) {
+        if (b.weaponType === WeaponType.PLASMA) {
             this.createPlasmaExplosion(b.x, b.y);
             b.markedForDeletion = true;
-        } else if (this.weaponType === WeaponType.WAVE || this.weaponType === WeaponType.LASER) {
+        } else if (b.weaponType === WeaponType.WAVE || b.weaponType === WeaponType.LASER) {
             // Piercing
+        } else if (b.weaponType === WeaponType.TESLA && (b.chainCount || 0) > 0) {
+            // Tesla Chain Logic
+            b.markedForDeletion = true;
+            const range = b.chainRange || 150;
+            let nearest: Entity | null = null;
+            let minDist = range;
+
+            this.enemies.forEach(e => {
+                if (e === target || e.hp <= 0 || e.markedForDeletion) return; // Skip current target and dead enemies
+                const dist = Math.sqrt((e.x - target.x) ** 2 + (e.y - target.y) ** 2);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = e;
+                }
+            });
+
+            if (nearest) {
+                const t = nearest as Entity;
+                const angle = Math.atan2(t.y - target.y, t.x - target.x);
+                const speed = 20; // Fast chain speed
+
+                // Spawn chain bullet from current target to next target
+                this.bullets.push({
+                    x: target.x,
+                    y: target.y,
+                    width: b.width,
+                    height: b.height,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    hp: 1,
+                    maxHp: 1,
+                    type: EntityType.BULLET,
+                    color: b.color,
+                    markedForDeletion: false,
+                    spriteKey: b.spriteKey,
+                    damage: b.damage,
+                    chainCount: (b.chainCount || 0) - 1,
+                    chainRange: b.chainRange,
+                    weaponType: WeaponType.TESLA
+                });
+            }
         } else {
             b.markedForDeletion = true;
         }
@@ -622,7 +696,7 @@ export class GameEngine {
             } else {
                 this.killEnemy(target);
             }
-        } else if (b.type !== 'bullet' || this.weaponType !== WeaponType.PLASMA) {
+        } else if (b.type !== 'bullet' || b.weaponType !== WeaponType.PLASMA) {
             this.createExplosion(b.x, b.y, 'small', '#ffe066');
         }
     }
