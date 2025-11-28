@@ -69,7 +69,9 @@ export class RenderSystem {
         shield: number,
         screenShake: number,
         weaponLevel: number,
-        environmentElements: EnvironmentElement[] = [] // P2 Environment elements
+        environmentElements: EnvironmentElement[] = [], // P2 Environment elements
+        showBossDefeatAnimation: boolean = false,
+        bossDefeatTimer: number = 0
     ) {
         this.ctx.save();
 
@@ -138,10 +140,10 @@ export class RenderSystem {
             }
 
             powerups.forEach(p => this.drawEntity(p));
-            
+
             // P2 Draw environment elements
             environmentElements.forEach(elem => this.drawEnvironmentElement(elem));
-            
+
             enemies.forEach(e => this.drawEntity(e));
             if (boss) this.drawEntity(boss);
             bossWingmen.forEach(w => this.drawEntity(w));
@@ -174,6 +176,29 @@ export class RenderSystem {
         this.ctx.globalAlpha = 1.0;
         this.ctx.globalCompositeOperation = 'source-over';
 
+        // Draw Boss Defeat Animation
+        if (showBossDefeatAnimation) {
+            this.ctx.save();
+            // Fade out based on timer (3000ms to 0)
+            const alpha = Math.min(1, bossDefeatTimer / 1000);
+            this.ctx.globalAlpha = alpha;
+
+            this.ctx.fillStyle = '#ffd700'; // Gold
+            this.ctx.font = 'bold 48px monospace';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.shadowColor = '#ffaa00';
+            this.ctx.shadowBlur = 20;
+
+            // Scale effect
+            const scale = 1 + Math.sin(Date.now() / 200) * 0.1;
+            this.ctx.translate(this.width / 2, this.height / 2);
+            this.ctx.scale(scale, scale);
+
+            this.ctx.fillText('BOSS DEFEATED', 0, 0);
+            this.ctx.restore();
+        }
+
         this.ctx.restore();
     }
 
@@ -203,6 +228,11 @@ export class RenderSystem {
             this.ctx.shadowColor = '#00ffff';
             this.ctx.shadowBlur = 5;
             this.ctx.fillText(`LV.${weaponLevel || 1}`, 0, -50);
+            this.ctx.globalAlpha = 1.0;
+            this.ctx.globalCompositeOperation = 'source-over';
+
+
+
             this.ctx.restore();
         }
 
@@ -241,6 +271,34 @@ export class RenderSystem {
             this.ctx.fillRect(-50, 0, 100, 6);
             this.ctx.fillStyle = '#00ff00';
             this.ctx.fillRect(-50, 0, 100 * (e.hp / e.maxHp), 6);
+
+            // P1 Boss Invulnerability Visual Indicator
+            if (e.invulnerable) {
+                const t = Date.now() / 200;
+                const alpha = 0.5 + Math.sin(t) * 0.3; // Pulsing alpha
+
+                // Outer glow
+                this.ctx.shadowColor = '#ffd700'; // Gold
+                this.ctx.shadowBlur = 20 + Math.sin(t) * 10;
+
+                // Draw golden border
+                this.ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
+                this.ctx.lineWidth = 3;
+
+                // Draw a circle or rectangle depending on sprite shape? 
+                // Using a slightly larger rectangle for now to encompass the sprite
+                // Ideally we'd use the sprite's actual shape, but a bounding box is safer
+                const borderPadding = 10;
+                this.ctx.strokeRect(
+                    -e.width / 2 - borderPadding,
+                    -e.height / 2 - borderPadding,
+                    e.width + borderPadding * 2,
+                    e.height + borderPadding * 2
+                );
+
+                // Reset shadow
+                this.ctx.shadowBlur = 0;
+            }
         }
 
         // Elite Visual Effect
@@ -262,18 +320,18 @@ export class RenderSystem {
      */
     drawEnvironmentElement(elem: EnvironmentElement) {
         this.ctx.save();
-        
+
         switch (elem.environmentType) {
             case EnvironmentType.OBSTACLE:
                 // Draw obstacle as gray metallic block
                 this.ctx.translate(elem.x, elem.y);
                 this.ctx.fillStyle = elem.color;
                 this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
-                
+
                 // Metallic shine effect
                 this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
                 this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width / 3, elem.height);
-                
+
                 // HP bar
                 const hpPercent = elem.hp / elem.maxHp;
                 this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
@@ -281,14 +339,14 @@ export class RenderSystem {
                 this.ctx.fillStyle = '#00ff00';
                 this.ctx.fillRect(-elem.width / 2, -elem.height / 2 - 8, elem.width * hpPercent, 4);
                 break;
-                
+
             case EnvironmentType.ENERGY_STORM:
                 // Draw energy storm as animated green band
                 this.ctx.translate(elem.x, elem.y);
                 const alpha = 0.3 + Math.sin(Date.now() / 200) * 0.15;
                 this.ctx.fillStyle = `rgba(74, 222, 128, ${alpha})`;
                 this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
-                
+
                 // Energy waves
                 this.ctx.strokeStyle = `rgba(74, 222, 128, ${alpha + 0.2})`;
                 this.ctx.lineWidth = 2;
@@ -300,14 +358,14 @@ export class RenderSystem {
                     this.ctx.stroke();
                 }
                 break;
-                
+
             case EnvironmentType.GRAVITY_FIELD:
                 // Draw gravity field as purple translucent zone
                 this.ctx.translate(elem.x, elem.y);
                 const gravityAlpha = 0.2 + Math.sin(Date.now() / 300) * 0.1;
                 this.ctx.fillStyle = `rgba(139, 92, 246, ${gravityAlpha})`;
                 this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
-                
+
                 // Gravity particles
                 const side = elem.data?.side || 'left';
                 const pullDirection = side === 'left' ? 1 : -1;
@@ -322,7 +380,7 @@ export class RenderSystem {
                 }
                 break;
         }
-        
+
         this.ctx.restore();
     }
 }

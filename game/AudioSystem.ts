@@ -367,9 +367,54 @@ export class AudioSystem {
     gain.gain.linearRampToValueAtTime(0.3, now + 3.0);
     gain.gain.linearRampToValueAtTime(0, now + 3.5);
 
-    osc1.start(now);
-    osc1.stop(now + 3.5);
     osc2.start(now);
     osc2.stop(now + 3.5);
+  }
+
+  playBossDefeat() {
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    // Triumphant fanfare: G C E G (ascending major arpeggio)
+    const notes = [392.00, 523.25, 659.25, 783.99];
+
+    notes.forEach((freq, i) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+
+      // Mix of square and sawtooth for a brass-like sound
+      osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
+      osc.frequency.value = freq;
+
+      // Short staccato notes
+      gain.gain.setValueAtTime(0.25, now + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
+
+      osc.start(now + i * 0.15);
+      osc.stop(now + i * 0.15 + 0.3);
+    });
+
+    // Final sustained chord
+    setTimeout(() => {
+      const chord = [523.25, 659.25, 783.99]; // C Major
+      const chordNow = this.ctx!.currentTime;
+      chord.forEach(freq => {
+        const osc = this.ctx!.createOscillator();
+        const gain = this.ctx!.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain!);
+
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+
+        gain.gain.setValueAtTime(0.15, chordNow);
+        gain.gain.exponentialRampToValueAtTime(0.01, chordNow + 1.5);
+
+        osc.start(chordNow);
+        osc.stop(chordNow + 1.5);
+      });
+    }, notes.length * 150 + 100);
   }
 }

@@ -76,6 +76,10 @@ export class GameEngine {
     isBossWarningActive: boolean = false;
     bossWarningTimer: number = 0;
 
+    // Boss Defeat Celebration
+    showBossDefeatAnimation: boolean = false;
+    bossDefeatTimer: number = 0;
+
     // Callbacks
     onScoreChange: (score: number) => void;
     onLevelChange: (level: number) => void;
@@ -214,6 +218,8 @@ export class GameEngine {
         this.isBossWarningActive = false;
         this.bossWarningTimer = 0;
         this.onBossWarning(false);
+        this.showBossDefeatAnimation = false;
+        this.bossDefeatTimer = 0;
         this.levelStartTime = Date.now(); // Initialize level start time
         this.audio.resume();
 
@@ -310,6 +316,14 @@ export class GameEngine {
             if (this.levelTransitionTimer > 1500) { // Reduced from 3000ms
                 this.showLevelTransition = false;
                 this.levelTransitionTimer = 0;
+            }
+        }
+
+        // Boss Defeat Animation
+        if (this.showBossDefeatAnimation) {
+            this.bossDefeatTimer -= dt;
+            if (this.bossDefeatTimer <= 0) {
+                this.showBossDefeatAnimation = false;
             }
         }
 
@@ -625,6 +639,10 @@ export class GameEngine {
             }, i * 100);
         }
         this.audio.playExplosion('large');
+        this.audio.playBossDefeat(); // Play victory fanfare
+        this.showBossDefeatAnimation = true;
+        this.bossDefeatTimer = 3000; // Show for 3 seconds
+
         this.score += BossConfig[this.boss.subType]?.score || (5000 * this.level);
         this.onScoreChange(this.score);
 
@@ -1148,7 +1166,9 @@ export class GameEngine {
             this.shield,
             this.screenShake,
             this.weaponLevel,
-            this.envSys.getAllElements() // P2 Pass environment elements
+            this.envSys.getAllElements(), // P2 Pass environment elements
+            this.showBossDefeatAnimation,
+            this.bossDefeatTimer
         );
     }
 
