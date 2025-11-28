@@ -509,6 +509,12 @@ export class GameEngine {
                     }
                 }
             }
+
+            // Update all player bullets rotation to face flight direction
+            // Skip plasma as it has its own spinning animation
+            if (b.weaponType !== WeaponType.PLASMA && b.vx !== undefined && b.vy !== undefined) {
+                b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
+            }
         });
 
         // Update enemy bullets with homing logic
@@ -532,6 +538,11 @@ export class GameEngine {
                         b.vy = (b.vy / speed) * maxSpeed;
                     }
                 }
+            }
+
+            // Update all enemy bullets rotation to face flight direction
+            if (b.vx !== undefined && b.vy !== undefined && b.spriteKey !== 'bullet_enemy_spiral') {
+                b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
             }
 
             // Laser timer countdown

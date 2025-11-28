@@ -240,6 +240,11 @@ export class RenderSystem {
             this.ctx.rotate(Date.now() / 100);
         }
 
+        // Enemy spiral bullet self-rotation animation
+        if (e.spriteKey === 'bullet_enemy_spiral') {
+            this.ctx.rotate(Date.now() / 80); // Slightly faster rotation for spiral effect
+        }
+
         if (e.angle) {
             this.ctx.rotate(e.angle);
         }
