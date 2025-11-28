@@ -1,4 +1,4 @@
-import { AudioSystem } from './AudioSystem';
+import { AudioSystem } from './systems/AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize } from '@/types';
 import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig } from './config';
 import { InputSystem } from './systems/InputSystem';

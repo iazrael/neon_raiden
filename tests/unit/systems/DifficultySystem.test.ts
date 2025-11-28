@@ -1,4 +1,4 @@
-import { DifficultySystem, DifficultyMode, DIFFICULTY_CONFIGS, STANDARD_LEVEL_DURATION } from '../../../game/systems/DifficultySystem';
+import { DifficultySystem, DifficultyMode, DIFFICULTY_CONFIGS, STANDARD_LEVEL_DURATION } from '@/game/systems/DifficultySystem';
 
 describe('DifficultySystem', () => {
   let difficultySystem: DifficultySystem;

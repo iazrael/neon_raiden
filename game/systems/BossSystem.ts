@@ -1,6 +1,6 @@
 import { Entity, SpriteMap, WeaponType, BossWeaponType, BossSpawnPosition, EntityType } from '@/types';
 import { getBossConfigByLevel } from '@/game/config';
-import { AudioSystem } from '@/game/AudioSystem';
+import { AudioSystem } from '@/game/systems/AudioSystem';
 
 export class BossSystem {
     audio: AudioSystem;

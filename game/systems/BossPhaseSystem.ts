@@ -21,7 +21,7 @@
  */
 
 import { Entity, BossType, ExplosionSize } from '@/types';
-import { AudioSystem } from '../AudioSystem';
+import { AudioSystem } from './AudioSystem';
 
 // ==================== Boss阶段枚举 ====================
 export enum BossPhase {

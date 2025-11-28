@@ -1,4 +1,4 @@
-import { WeaponSynergySystem, SynergyType, SYNERGY_CONFIGS } from '../../../game/systems/WeaponSynergySystem';
+import { WeaponSynergySystem, SynergyType, SYNERGY_CONFIGS } from '@/game/systems/WeaponSynergySystem';
 import { WeaponType, Entity, EntityType } from '@/types';
 
 describe('WeaponSynergySystem', () => {

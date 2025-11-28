@@ -1,4 +1,4 @@
-import { ComboSystem, COMBO_CONFIG } from '../../../game/systems/ComboSystem';
+import { ComboSystem, COMBO_CONFIG } from '@/game/systems/ComboSystem';
 
 describe('ComboSystem', () => {
   let comboSystem: ComboSystem;

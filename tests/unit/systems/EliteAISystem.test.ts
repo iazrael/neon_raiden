@@ -1,4 +1,4 @@
-import { EliteAISystem, EliteBehaviorType } from '../../../game/systems/EliteAISystem';
+import { EliteAISystem, EliteBehaviorType } from '@/game/systems/EliteAISystem';
 import { Entity, EntityType, EnemyType } from '@/types';
 
 describe('EliteAISystem', () => {

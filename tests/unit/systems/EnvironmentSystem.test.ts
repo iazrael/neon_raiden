@@ -1,4 +1,4 @@
-import { EnvironmentSystem, EnvironmentType } from '../../../game/systems/EnvironmentSystem';
+import { EnvironmentSystem, EnvironmentType } from '@/game/systems/EnvironmentSystem';
 import { Entity, EntityType } from '@/types';
 
 describe('EnvironmentSystem', () => {

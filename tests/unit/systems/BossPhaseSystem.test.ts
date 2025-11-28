@@ -1,6 +1,6 @@
-import { BossPhaseSystem, BossPhase, DESTROYER_PHASES, TITAN_PHASES, APOCALYPSE_PHASES } from '../../../game/systems/BossPhaseSystem';
+import { BossPhaseSystem, BossPhase, DESTROYER_PHASES, TITAN_PHASES, APOCALYPSE_PHASES } from '@/game/systems/BossPhaseSystem';
 import { Entity, BossType } from '@/types';
-import { AudioSystem } from '../../../game/AudioSystem';
+import { AudioSystem } from '@/game/systems/AudioSystem';
 
 // 创建一个简单的AudioSystem mock
 class MockAudioSystem {
