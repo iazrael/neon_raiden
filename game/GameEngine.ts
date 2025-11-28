@@ -6,6 +6,7 @@ import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
+import { ComboSystem, ComboState } from './systems/ComboSystem';
 import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
 
 export class GameEngine {
@@ -18,6 +19,7 @@ export class GameEngine {
     weaponSys: WeaponSystem;
     enemySys: EnemySystem;
     bossSys: BossSystem;
+    comboSys: ComboSystem; // P2 Combo System
 
     // Game State
     state: GameState = GameState.MENU;
@@ -71,6 +73,7 @@ export class GameEngine {
     onBombChange: (bombs: number) => void;
     onMaxLevelChange: (level: number) => void;
     onBossWarning: (show: boolean) => void;
+    onComboChange: (state: ComboState) => void; // P2 Combo callback
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -80,7 +83,8 @@ export class GameEngine {
         onHpChange: (hp: number) => void,
         onBombChange: (bombs: number) => void,
         onMaxLevelChange: (level: number) => void,
-        onBossWarning: (show: boolean) => void
+        onBossWarning: (show: boolean) => void,
+        onComboChange: (state: ComboState) => void // P2 Combo callback
     ) {
         this.canvas = canvas;
         this.onScoreChange = onScoreChange;
@@ -90,6 +94,7 @@ export class GameEngine {
         this.onBombChange = onBombChange;
         this.onMaxLevelChange = onMaxLevelChange;
         this.onBossWarning = onBossWarning;
+        this.onComboChange = onComboChange;
 
         // Initialize Systems
         this.audio = new AudioSystem();
@@ -98,6 +103,7 @@ export class GameEngine {
         this.weaponSys = new WeaponSystem(this.audio);
         this.enemySys = new EnemySystem(this.audio, canvas.width, canvas.height);
         this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height);
+        this.comboSys = new ComboSystem(undefined, (state) => this.onComboChange(state)); // P2 Combo System
 
         // Bind Input Actions
         this.input.onAction = (action) => {
@@ -191,6 +197,9 @@ export class GameEngine {
         this.onBossWarning(false);
         this.levelStartTime = Date.now(); // Initialize level start time
         this.audio.resume();
+        
+        // P2 Reset combo system
+        this.comboSys.reset();
 
         this.onStateChange(this.state);
         this.onScoreChange(this.score);
@@ -258,6 +267,9 @@ export class GameEngine {
         if (this.state !== GameState.PLAYING) return;
 
         const timeScale = dt / 16.66;
+        
+        // P2 Update combo timer
+        this.comboSys.update(dt);
 
         if (this.screenShake > 0) {
             this.screenShake *= 0.9;
@@ -722,7 +734,10 @@ export class GameEngine {
             b.markedForDeletion = true;
         }
 
-        target.hp -= (b.damage || 10);
+        // P2 Apply combo damage multiplier
+        const comboDamageMultiplier = this.comboSys.getDamageMultiplier();
+        const finalDamage = (b.damage || 10) * comboDamageMultiplier;
+        target.hp -= finalDamage;
         this.audio.playHit();
 
         if (target.hp <= 0 && !target.markedForDeletion) {
@@ -738,11 +753,26 @@ export class GameEngine {
 
     killEnemy(e: Entity) {
         e.markedForDeletion = true;
+        
+        // P2 Add combo kill and apply score multiplier
+        const leveledUp = this.comboSys.addKill();
+        const comboScoreMultiplier = this.comboSys.getScoreMultiplier();
+        
         const baseScore = EnemyConfig[e.subType]?.score || 100;
-        this.score += baseScore * (e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1);
+        const eliteMultiplier = e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1;
+        const finalScore = Math.floor(baseScore * eliteMultiplier * comboScoreMultiplier);
+        
+        this.score += finalScore;
         this.onScoreChange(this.score);
         this.createExplosion(e.x, e.y, 'large', e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion('small');
+        
+        // P2 Visual feedback for combo level up
+        if (leveledUp) {
+            const tier = this.comboSys.getCurrentTier();
+            this.addShockwave(this.player.x, this.player.y, tier.color, 200, 8);
+            this.screenShake = 15;
+        }
 
         // Unlock enemy when defeated
         if (e.subType !== undefined) {

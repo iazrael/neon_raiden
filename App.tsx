@@ -1,8 +1,8 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { GameEngine } from './game/GameEngine';
 import { GameUI } from './components/GameUI';
 import { GameState } from './types';
+import type { ComboState } from './game/systems/ComboSystem';
 
 import { SpriteGenerator } from './game/SpriteGenerator';
 
@@ -21,6 +21,7 @@ function App() {
   const [maxLevelReached, setMaxLevelReached] = useState(1);
   const [stateBeforeGallery, setStateBeforeGallery] = useState<GameState>(GameState.MENU);
   const [showBossWarning, setShowBossWarning] = useState(false);
+  const [comboState, setComboState] = useState<ComboState>({ count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false }); // P2 Combo
 
   useEffect(() => {
     // Preload assets
@@ -37,7 +38,8 @@ function App() {
       (newHp) => setHp(newHp),
       (newBombs) => setBombs(newBombs),
       (maxLevel) => setMaxLevelReached(maxLevel),
-      (show) => setShowBossWarning(show)
+      (show) => setShowBossWarning(show),
+      (newComboState) => setComboState(newComboState) // P2 Combo
     );
     engineRef.current = engine;
 
@@ -97,6 +99,7 @@ function App() {
         levelTransitionTimer={levelTransitionTimer}
         maxLevelReached={maxLevelReached}
         showBossWarning={showBossWarning}
+        comboState={comboState}
         onOpenGallery={() => {
           setStateBeforeGallery(gameState);
           if (gameState === GameState.PLAYING) {

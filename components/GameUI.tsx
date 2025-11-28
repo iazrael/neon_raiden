@@ -2,6 +2,7 @@ import React from "react";
 import { GameState } from "@/types";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
+import type { ComboState } from "@/game/systems/ComboSystem";
 
 interface GameUIProps {
   state: GameState;
@@ -22,6 +23,7 @@ interface GameUIProps {
   onPause?: () => void;
   onResume?: () => void;
   showBossWarning?: boolean;
+  comboState?: ComboState; // P2 Combo system
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -43,6 +45,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   onPause,
   onResume,
   showBossWarning = false,
+  comboState, // P2 Combo system
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
@@ -81,6 +84,57 @@ export const GameUI: React.FC<GameUIProps> = ({
         </div>
       </div>
 
+      {/* P2 Combo Display */}
+      {state === GameState.PLAYING && comboState && comboState.count > 0 && (
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-40 flex flex-col items-center gap-2">
+          {/* Combo Count */}
+          <div 
+            className="text-center transition-all duration-200"
+            style={{
+              transform: `scale(${1 + Math.min(comboState.count / 100, 1) * 0.5})`,
+            }}
+          >
+            <div 
+              className="text-5xl font-black tracking-wider drop-shadow-[0_0_15px_currentColor]"
+              style={{ 
+                color: getComboColor(comboState.level),
+                textShadow: `0 0 20px ${getComboColor(comboState.level)}`
+              }}
+            >
+              {comboState.count}
+            </div>
+            <div 
+              className="text-sm font-bold tracking-widest mt-1"
+              style={{ color: getComboColor(comboState.level) }}
+            >
+              {getComboTierName(comboState.level)}
+            </div>
+          </div>
+          
+          {/* Progress Bar to next tier */}
+          {comboState.level < 4 && (
+            <div className="w-32 h-1 bg-gray-800/50 rounded-full overflow-hidden border border-gray-600/50">
+              <div 
+                className="h-full transition-all duration-300"
+                style={{ 
+                  width: `${getProgressToNextTier(comboState) * 100}%`,
+                  backgroundColor: getComboColor(comboState.level)
+                }}
+              />
+            </div>
+          )}
+          
+          {/* Multipliers */}
+          <div className="flex gap-3 text-xs">
+            <div className="text-red-400 drop-shadow-md">
+              DMG ×{getComboMultiplier(comboState.level, 'damage').toFixed(1)}
+            </div>
+            <div className="text-yellow-400 drop-shadow-md">
+              SCORE ×{getComboMultiplier(comboState.level, 'score').toFixed(1)}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Exit Button (Top Right, below HUD) */}
       {state === GameState.PLAYING && (
@@ -332,3 +386,28 @@ export const GameUI: React.FC<GameUIProps> = ({
     </div>
   );
 };
+
+// P2 Combo Helper Functions
+function getComboColor(level: number): string {
+  const colors = ['#ffffff', '#4ade80', '#60a5fa', '#a78bfa', '#f87171'];
+  return colors[level] || '#ffffff';
+}
+
+function getComboTierName(level: number): string {
+  const names = ['', 'COMBO', 'HIGH COMBO', 'SUPER COMBO', 'BERSERK'];
+  return names[level] || '';
+}
+
+function getProgressToNextTier(comboState: ComboState): number {
+  const thresholds = [0, 10, 25, 50, 100];
+  const currentThreshold = thresholds[comboState.level];
+  const nextThreshold = thresholds[comboState.level + 1];
+  if (!nextThreshold) return 0;
+  return (comboState.count - currentThreshold) / (nextThreshold - currentThreshold);
+}
+
+function getComboMultiplier(level: number, type: 'damage' | 'score'): number {
+  const damage = [1.0, 1.2, 1.5, 2.0, 3.0];
+  const score = [1.0, 1.5, 2.0, 3.0, 5.0];
+  return type === 'damage' ? damage[level] : score[level];
+}
