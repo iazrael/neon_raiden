@@ -143,4 +143,16 @@ export class SpriteGenerator {
 
         return canvas;
     }
+
+    generateEnvironmentObstacle(): HTMLImageElement {
+        return this.loadSVG(`${ASSETS_BASE_PATH}environment/obstacle.svg`, 60, 80);
+    }
+
+    generateEnvironmentEnergyStorm(): HTMLImageElement {
+        return this.loadSVG(`${ASSETS_BASE_PATH}environment/energy_storm.svg`, 600, 120);
+    }
+
+    generateEnvironmentGravityField(): HTMLImageElement {
+        return this.loadSVG(`${ASSETS_BASE_PATH}environment/gravity_field.svg`, 220, 600);
+    }
 }

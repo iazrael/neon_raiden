@@ -96,7 +96,7 @@ export interface GravityFieldConfig {
 
 export const GRAVITY_FIELD_CONFIG: GravityFieldConfig = {
     pullForce: 0.5,
-    width: 150,
+    width: 220,
     color: '#8b5cf6',
     switchInterval: 8000,  // 每8秒切换一次
     side: 'left'
@@ -273,7 +273,8 @@ export class EnvironmentSystem {
             color: ENERGY_STORM_CONFIG.color,
             markedForDeletion: false,
             environmentType: EnvironmentType.ENERGY_STORM,
-            data: { speedMultiplier: ENERGY_STORM_CONFIG.speedMultiplier }
+            data: { speedMultiplier: ENERGY_STORM_CONFIG.speedMultiplier },
+            spriteKey: 'energy_storm'
         };
     }
 
@@ -343,7 +344,8 @@ export class EnvironmentSystem {
             data: { 
                 pullForce: GRAVITY_FIELD_CONFIG.pullForce,
                 side: this.currentGravitySide
-            }
+            },
+            spriteKey: 'gravity_field'
         };
     }
 

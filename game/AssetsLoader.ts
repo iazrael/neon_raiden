@@ -46,6 +46,10 @@ export class AssetsLoader {
             load(`${ASSETS_BASE_PATH}bosses/${config.sprite}.svg`);
         });
 
+        load(`${ASSETS_BASE_PATH}environment/obstacle.svg`);
+        load(`${ASSETS_BASE_PATH}environment/energy_storm.svg`);
+        load(`${ASSETS_BASE_PATH}environment/gravity_field.svg`);
+
         await Promise.all(promises);
         console.log('All assets preloaded');
     }

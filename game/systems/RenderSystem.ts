@@ -40,6 +40,10 @@ export class RenderSystem {
         Object.values(BossConfig).forEach(config => {
             this.sprites[`boss_${config.type}`] = this.spriteGen.generateBoss(config);
         });
+
+        this.sprites['obstacle'] = this.spriteGen.generateEnvironmentObstacle();
+        this.sprites['energy_storm'] = this.spriteGen.generateEnvironmentEnergyStorm();
+        this.sprites['gravity_field'] = this.spriteGen.generateEnvironmentGravityField();
     }
 
     resize(width: number, height: number) {
@@ -319,16 +323,17 @@ export class RenderSystem {
 
         switch (elem.environmentType) {
             case EnvironmentType.OBSTACLE:
-                // Draw obstacle as gray metallic block
                 this.ctx.translate(elem.x, elem.y);
-                this.ctx.fillStyle = elem.color;
-                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                if (elem.spriteKey && this.sprites[elem.spriteKey]) {
+                    const sprite = this.sprites[elem.spriteKey];
+                    this.ctx.drawImage(sprite as HTMLImageElement, -elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                } else {
+                    this.ctx.fillStyle = elem.color;
+                    this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width / 3, elem.height);
+                }
 
-                // Metallic shine effect
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width / 3, elem.height);
-
-                // HP bar
                 const hpPercent = elem.hp / elem.maxHp;
                 this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
                 this.ctx.fillRect(-elem.width / 2, -elem.height / 2 - 8, elem.width, 4);
@@ -337,14 +342,17 @@ export class RenderSystem {
                 break;
 
             case EnvironmentType.ENERGY_STORM:
-                // Draw energy storm as animated green band
                 this.ctx.translate(elem.x, elem.y);
-                const alpha = 0.3 + Math.sin(Date.now() / 200) * 0.15;
-                this.ctx.fillStyle = `rgba(74, 222, 128, ${alpha})`;
-                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
-
-                // Energy waves
-                this.ctx.strokeStyle = `rgba(74, 222, 128, ${alpha + 0.2})`;
+                if (elem.spriteKey && this.sprites[elem.spriteKey]) {
+                    const sprite = this.sprites[elem.spriteKey];
+                    this.ctx.drawImage(sprite as HTMLImageElement, -elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                } else {
+                    const alpha = 0.3 + Math.sin(Date.now() / 200) * 0.15;
+                    this.ctx.fillStyle = `rgba(74, 222, 128, ${alpha})`;
+                    this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                }
+                const alpha2 = 0.3 + Math.sin(Date.now() / 200) * 0.15;
+                this.ctx.strokeStyle = `rgba(74, 222, 128, ${alpha2 + 0.2})`;
                 this.ctx.lineWidth = 2;
                 const waveOffset = (Date.now() / 50) % 30;
                 for (let i = -elem.width / 2; i < elem.width / 2; i += 30) {
@@ -356,13 +364,16 @@ export class RenderSystem {
                 break;
 
             case EnvironmentType.GRAVITY_FIELD:
-                // Draw gravity field as purple translucent zone
                 this.ctx.translate(elem.x, elem.y);
-                const gravityAlpha = 0.2 + Math.sin(Date.now() / 300) * 0.1;
-                this.ctx.fillStyle = `rgba(139, 92, 246, ${gravityAlpha})`;
-                this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                if (elem.spriteKey && this.sprites[elem.spriteKey]) {
+                    const sprite = this.sprites[elem.spriteKey];
+                    this.ctx.drawImage(sprite as HTMLImageElement, -elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                } else {
+                    const gravityAlpha = 0.2 + Math.sin(Date.now() / 300) * 0.1;
+                    this.ctx.fillStyle = `rgba(139, 92, 246, ${gravityAlpha})`;
+                    this.ctx.fillRect(-elem.width / 2, -elem.height / 2, elem.width, elem.height);
+                }
 
-                // Gravity particles
                 const side = elem.data?.side || 'left';
                 const pullDirection = side === 'left' ? 1 : -1;
                 this.ctx.fillStyle = `rgba(139, 92, 246, 0.6)`;
@@ -380,4 +391,3 @@ export class RenderSystem {
         this.ctx.restore();
     }
 }
-
