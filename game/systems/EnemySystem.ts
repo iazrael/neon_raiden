@@ -117,8 +117,8 @@ export class EnemySystem {
                         this.audio.playShoot(WeaponType.LASER);
                         const bulletConfig = BulletConfigs[BulletType.ENEMY_BEAM];
                         enemyBullets.push({
-                            x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                            y: e.y + e.height,
+                            x: e.x,
+                            y: e.y + e.height / 2,
                             width: bulletConfig.size.width,
                             height: bulletConfig.size.height,
                             vx: 0,
@@ -152,8 +152,8 @@ export class EnemySystem {
                     // Drop Mine
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_HEAVY];
                     enemyBullets.push({
-                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                        y: e.y + e.height,
+                        x: e.x,
+                        y: e.y + e.height / 2,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: 0, vy: 0, // Static mine
@@ -177,8 +177,8 @@ export class EnemySystem {
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
                     // Bullet flies straight in this direction, no tracking
                     enemyBullets.push({
-                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                        y: e.y + e.height,
+                        x: e.x,
+                        y: e.y + e.height / 2,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: (dx / dist) * bulletSpeed,
@@ -204,8 +204,8 @@ export class EnemySystem {
 
                     // Mark as homing bullet with isHoming flag for special tracking behavior
                     enemyBullets.push({
-                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                        y: e.y + e.height,
+                        x: e.x,
+                        y: e.y + e.height / 2,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: (dx / dist) * bulletSpeed,
@@ -228,7 +228,7 @@ export class EnemySystem {
                     const angle = (Date.now() / 200) % (Math.PI * 2);
 
                     enemyBullets.push({
-                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
+                        x: e.x,
                         y: e.y + e.height / 2,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
@@ -248,8 +248,8 @@ export class EnemySystem {
                 if (Math.random() < shootFreq * timeScale) {
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_RAPID];
                     enemyBullets.push({
-                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                        y: e.y + e.height,
+                        x: e.x,
+                        y: e.y + e.height / 2,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: 0, vy: bulletSpeed,
@@ -273,8 +273,8 @@ export class EnemySystem {
                 if (Math.random() < shootFreq * timeScale) {
                     const bulletConfig = BulletConfigs[BulletType.ENEMY_ORB];
                     enemyBullets.push({
-                        x: e.x + e.width / 2 - bulletConfig.size.width / 2,
-                        y: e.y + e.height,
+                        x: e.x,
+                        y: e.y + e.height / 2,
                         width: bulletConfig.size.width,
                         height: bulletConfig.size.height,
                         vx: 0, vy: 5, hp: 1, maxHp: 1,
