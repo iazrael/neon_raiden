@@ -106,21 +106,16 @@ describe('BossSystem', () => {
       expect(boss.vy).toBe(0);
     });
 
-    it('should update boss invulnerability timer', () => {
+    it('should keep invulnerable during entry and disable when fighting starts', () => {
+      boss.state = 0;
       boss.invulnerable = true;
-      boss.invulnerableTimer = 3000; // 3 seconds
-      
-      bossSystem.update(boss, 1000, 1, player, enemyBullets, 1); // 1 second passed
-      
-      expect(boss.invulnerableTimer).toBe(2000);
-    });
+      boss.y = 140;
+      bossSystem.update(boss, 16, 1, player, enemyBullets, 1);
+      expect(boss.invulnerable).toBe(true);
 
-    it('should remove boss invulnerability when timer expires', () => {
-      boss.invulnerable = true;
-      boss.invulnerableTimer = 500; // 0.5 seconds
-      
-      bossSystem.update(boss, 1000, 1, player, enemyBullets, 1); // 1 second passed
-      
+      boss.y = 160;
+      bossSystem.update(boss, 16, 1, player, enemyBullets, 1);
+      expect(boss.state).toBe(1);
       expect(boss.invulnerable).toBe(false);
       expect(boss.invulnerableTimer).toBe(0);
     });

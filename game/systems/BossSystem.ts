@@ -65,9 +65,8 @@ export class BossSystem {
             markedForDeletion: false,
             angle: 0,
             spriteKey: config.sprite,
-            state: 0, // 0: entering, 1: fighting
-            invulnerable: true, // Boss starts invulnerable when spawned
-            invulnerableTimer: 3000, // 3 seconds invulnerability
+            state: 0,
+            invulnerable: true,
             // P1 Boss special mechanics timers
             timer: 0, // General purpose timer for special mechanics
             // GUARDIAN: shield regeneration timer
@@ -112,14 +111,7 @@ export class BossSystem {
         const config = getBossConfigByLevel(level);
         if (!config) return;
 
-        // Update invulnerability timer
-        if (boss.invulnerable && boss.invulnerableTimer !== undefined) {
-            boss.invulnerableTimer -= dt;
-            if (boss.invulnerableTimer <= 0) {
-                boss.invulnerable = false;
-                boss.invulnerableTimer = 0;
-            }
-        }
+        
 
         // Entry phase
         if (boss.state === 0) {
@@ -128,6 +120,8 @@ export class BossSystem {
             } else {
                 boss.state = 1;
                 boss.vy = 0;
+                boss.invulnerable = false;
+                boss.invulnerableTimer = 0;
             }
             return;
         }
