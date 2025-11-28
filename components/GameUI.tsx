@@ -42,18 +42,11 @@ export const GameUI: React.FC<GameUIProps> = ({
   onPause,
   onResume,
 }) => {
-  const bombButtonRef = React.useRef<HTMLButtonElement>(null);
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
   const handleBombClick = () => {
-    if (bombButtonRef.current && onUseBomb) {
-      const rect = bombButtonRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      onUseBomb(centerX, centerY);
-    } else {
-      onUseBomb?.();
-    }
+    // Bomb triggers at player's current position, not button position
+    onUseBomb?.();
   };
 
   return (
@@ -156,7 +149,6 @@ export const GameUI: React.FC<GameUIProps> = ({
             BOMB x{bombs}
           </span>
           <button
-            ref={bombButtonRef}
             onClick={handleBombClick}
             className={`w-20 h-20 rounded-full border-4 ${bombs > 0
               ? "border-red-500 bg-red-600/50 animate-pulse hover:bg-red-500/80 active:scale-95"
