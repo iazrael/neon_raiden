@@ -28,8 +28,9 @@ export class BossSystem {
 
         const hp = config.hp;
         const sprite = sprites[`boss_${level}`];
-        const width = sprite ? sprite.width : 150;
-        const height = sprite ? sprite.height : 150;
+        // console.log(`sprite width: ${sprite?.width}, height: ${sprite?.height}`);
+        const width = config.size.width || (sprite ? sprite.width : 150);
+        const height = config.size.height || (sprite ? sprite.height : 150);
 
         // Determine spawn X position based on config
         let spawnX: number;
@@ -49,12 +50,12 @@ export class BossSystem {
 
         // Apply hitbox scaling for more precise collision detection
         const hitboxScale = config.hitboxScale || 1.0;
-        console.log(`Boss hitbox scale: ${config.size.width}x${config.size.height}`);
+        console.log(`Boss size: ${width}x${height}`);
         return {
             x: spawnX,
             y: -150,
-            width: width * config.size.width * hitboxScale,
-            height: height * config.size.height * hitboxScale,
+            width: width * hitboxScale,
+            height: height * hitboxScale,
             vx: 0,
             vy: config.speed,
             hp: hp,

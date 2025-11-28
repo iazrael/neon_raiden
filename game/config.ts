@@ -228,7 +228,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseDamage: 5,
         damagePerLevel: 3,
         speed: 25,
-        baseFireRate: 60,
+        baseFireRate: 120,
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.LASER],
         sprite: 'bullet_laser'
@@ -243,7 +243,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseDamage: 15,
         damagePerLevel: 6,
         speed: 12,
-        baseFireRate: 100,
+        baseFireRate: 150,
         ratePerLevel: 2,
         bullet: BulletConfigs[BulletType.MISSILE],
         sprite: 'bullet_missile'
@@ -258,7 +258,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseDamage: 20,
         damagePerLevel: 6,
         speed: 15,
-        baseFireRate: 350,
+        baseFireRate: 400,
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.WAVE],
         sprite: 'bullet_wave'
@@ -271,10 +271,10 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '高能等离子球，触发爆炸产生范围伤害。威力最强但射速最慢，稀有武器。',
         color: '#ed64a6',
         baseDamage: 80,
-        damagePerLevel: 25,
+        damagePerLevel: 15,
         speed: 8,
         baseFireRate: 600,
-        ratePerLevel: 50,
+        ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.PLASMA],
         sprite: 'bullet_plasma'
     },
@@ -285,7 +285,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '电磁炮',
         describe: '释放电磁脉冲锁定敌人，支持连锁攻击。等级越高连锁范围越大威力越强。',
         color: '#ccf',
-        baseDamage: 15,
+        baseDamage: 20,
         damagePerLevel: 4,
         speed: 20,
         baseFireRate: 200,
@@ -303,7 +303,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseDamage: 8,
         damagePerLevel: 2,
         speed: 12,
-        baseFireRate: 50,
+        baseFireRate: 75,
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.MAGMA],
         sprite: 'bullet_magma'
@@ -318,7 +318,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseDamage: 12,
         damagePerLevel: 3,
         speed: 12,
-        baseFireRate: 400,
+        baseFireRate: 300,
         ratePerLevel: 30,
         bullet: BulletConfigs[BulletType.SHURIKEN],
         sprite: 'bullet_shuriken'
@@ -392,8 +392,16 @@ export const WeaponUpgradeConfig: {
         10: { bulletWidth: 80, bulletHeight: 80 }
     },
     [WeaponType.TESLA]: {
-        1: {}, 2: {}, 3: {}, 4: {}, 5: {},
-        6: {}, 7: {}, 8: {}, 9: {}, 10: {}
+        1: { chainCount: 1, chainRange: 150 },
+        2: { chainCount: 1, chainRange: 160 },
+        3: { chainCount: 2, chainRange: 170 },
+        4: { chainCount: 2, chainRange: 180 },
+        5: { chainCount: 3, chainRange: 190 },
+        6: { chainCount: 3, chainRange: 200 },
+        7: { chainCount: 4, chainRange: 210 },
+        8: { chainCount: 4, chainRange: 220 },
+        9: { chainCount: 5, chainRange: 230 },
+        10: { chainCount: 5, chainRange: 250 }
     },
     [WeaponType.MAGMA]: {
         1: { bulletCount: 3 },
@@ -409,15 +417,15 @@ export const WeaponUpgradeConfig: {
     },
     [WeaponType.SHURIKEN]: {
         1: { bulletCount: 2 },
-        2: { bulletCount: 2 },
+        2: { bulletCount: 3 },
         3: { bulletCount: 3 },
-        4: { bulletCount: 3 },
-        5: { bulletCount: 3 },
-        6: { bulletCount: 4 },
-        7: { bulletCount: 4 },
-        8: { bulletCount: 4 },
-        9: { bulletCount: 5 },
-        10: { bulletCount: 5 }
+        4: { bulletCount: 4 },
+        5: { bulletCount: 4 },
+        6: { bulletCount: 5 },
+        7: { bulletCount: 5 },
+        8: { bulletCount: 6 },
+        9: { bulletCount: 6 },
+        10: { bulletCount: 6 }
     }
 };
 
@@ -528,7 +536,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_gunboat',
         size: { width: 70, height: 50 },
         score: 500,
-        weapon: { bulletType: EnemyBulletType.RAPID, frequency: 0.02 ,speed: 4},
+        weapon: { bulletType: EnemyBulletType.RAPID, frequency: 0.02, speed: 4 },
     },
     [EnemyType.LASER_INTERCEPTOR]: {
         type: EnemyType.LASER_INTERCEPTOR,
@@ -787,7 +795,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 0,
             cooldown: 0
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.INTERCEPTOR]: {
         type: BossType.INTERCEPTOR,
@@ -818,7 +826,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 0,
             cooldown: 0
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.DESTROYER]: {
         type: BossType.DESTROYER,
@@ -849,7 +857,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 0,
             cooldown: 0
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.ANNIHILATOR]: {
         type: BossType.ANNIHILATOR,
@@ -880,7 +888,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 0,
             cooldown: 0
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.DOMINATOR]: {
         type: BossType.DOMINATOR,
@@ -911,7 +919,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 0,
             cooldown: 0
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.OVERLORD]: {
         type: BossType.OVERLORD,
@@ -942,7 +950,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 35,
             cooldown: 3000
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.TITAN]: {
         type: BossType.TITAN,
@@ -973,7 +981,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             damage: 30,
             cooldown: 3500
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.COLOSSUS]: {
         type: BossType.COLOSSUS,
@@ -1008,7 +1016,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             count: 1,
             type: EnemyType.LASER_INTERCEPTOR
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.LEVIATHAN]: {
         type: BossType.LEVIATHAN,
@@ -1043,7 +1051,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             count: 2,
             type: EnemyType.LASER_INTERCEPTOR
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     },
     [BossType.APOCALYPSE]: {
         type: BossType.APOCALYPSE,
@@ -1078,7 +1086,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             count: 2,
             type: EnemyType.MINE_LAYER
         },
-        hitboxScale: 0.8
+        hitboxScale: 0.7
     }
 };
 

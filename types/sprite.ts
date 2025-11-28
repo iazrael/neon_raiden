@@ -284,4 +284,6 @@ export interface WeaponUpgradeEnhancements {
     offsetY?: number;
     widthMultiplier?: number;
     heightMultiplier?: number;
+    chainCount?: number;
+    chainRange?: number;
 }
