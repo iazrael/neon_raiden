@@ -43,7 +43,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         chineseName: '相位海啸炮',
         describe: '通过大量共振水晶同步激发的宽频能量波,形成覆盖大范围扇区的相位潮汐,穿透目标时触发连锁共振反应,在战场上掀起蓝色的能量海啸,可同时瓦解密集阵型中的所有目标。',
         color: '#1e8de7ff',
-        size: { width: 60, height: 24 },
+        size: { width: 60, height: 12 },
         sprite: 'bullet_wave'
     },
     [BulletType.PLASMA]: {
