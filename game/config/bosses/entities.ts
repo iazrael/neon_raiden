@@ -55,10 +55,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_interceptor',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 7,
+            bulletCount: 6,
             bulletSpeed: 4.2,
             fireRate: 0.09,
-            targetedShotSpeed: 4
+            targetedShotSpeed: 2
         },
         movement: {
             pattern: BossMovementPattern.ZIGZAG,
@@ -89,7 +89,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             bulletCount: 8,
             bulletSpeed: 5,
             fireRate: 0.05,
-            targetedShotSpeed: 6
+            targetedShotSpeed: 3
         },
         movement: {
             pattern: BossMovementPattern.FIGURE_8,
@@ -117,10 +117,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_annihilator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 9,
+            bulletCount: 4,
             bulletSpeed: 5.0,
             fireRate: 0.07,
-            targetedShotSpeed: 7
+            targetedShotSpeed: 6
         },
         movement: {
             pattern: BossMovementPattern.RANDOM_TELEPORT,
@@ -148,10 +148,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_dominator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 12,
+            bulletCount: 10,
             bulletSpeed: 5.0,
             fireRate: 0.08,
-            targetedShotSpeed: 3
+            targetedShotSpeed: 1
         },
         movement: {
             pattern: BossMovementPattern.CIRCLE,
@@ -182,7 +182,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             bulletCount: 10,
             bulletSpeed: 5.2,
             fireRate: 0.07,
-            targetedShotSpeed: 5
+            targetedShotSpeed: 3
         },
         movement: {
             pattern: BossMovementPattern.TRACKING,
@@ -210,10 +210,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_titan',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
         weaponConfigs: {
-            bulletCount: 12,
+            bulletCount: 6,
             bulletSpeed: 6,
             fireRate: 0.065,
-            targetedShotSpeed: 6
+            targetedShotSpeed: 3
         },
         movement: {
             pattern: BossMovementPattern.SLOW_DESCENT,
@@ -241,10 +241,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_colossus',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD],
         weaponConfigs: {
-            bulletCount: 10,
+            bulletCount: 3,
             bulletSpeed: 7.0,
             fireRate: 0.07,
-            targetedShotSpeed: 12
+            targetedShotSpeed: 6
         },
         movement: {
             pattern: BossMovementPattern.AGGRESSIVE,
@@ -276,10 +276,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_leviathan',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         weaponConfigs: {
-            bulletCount: 10,
+            bulletCount: 5,
             bulletSpeed: 7.5,
             fireRate: 0.08,
-            targetedShotSpeed: 10
+            targetedShotSpeed: 5
         },
         movement: {
             pattern: BossMovementPattern.AGGRESSIVE,
@@ -314,7 +314,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
             bulletCount: 12,
             bulletSpeed: 8.0,
             fireRate: 0.10,
-            targetedShotSpeed: 10
+            targetedShotSpeed: 6
         },
         movement: {
             pattern: BossMovementPattern.ADAPTIVE,

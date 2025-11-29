@@ -43,11 +43,13 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const isMaster = urlParams.has('master');
     const debugMode = urlParams.get('debug') === '1';
+    const bossDivisor = parseInt(urlParams.get('boss') || '1');
 
     // 如果是master模式且debug=1，则启用调试模式
     if (isMaster && debugMode) {
       import('./game/config/game').then((configModule) => {
         configModule.GameConfig.debug = true;
+        configModule.GameConfig.debugBossDivisor = Math.max(1, bossDivisor);
       });
     }
 

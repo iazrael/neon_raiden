@@ -1,5 +1,6 @@
 import { Entity, SpriteMap, WeaponType, BossWeaponType, BossSpawnPosition, EntityType } from '@/types';
 import { getBossConfigByLevel } from '@/game/config';
+import { GameConfig } from '@/game/config/game';
 import { AudioSystem } from '@/game/systems/AudioSystem';
 import { DifficultySystem } from '@/game/systems/DifficultySystem';
 
@@ -38,6 +39,11 @@ export class BossSystem {
             const specificMultiplier = this.difficultySys.getSpecificBossDifficultyMultiplier(level);
             // Apply both multipliers
             hp = Math.round(hp * baseMultiplier * specificMultiplier);
+        }
+
+        // Apply debug mode boss HP divisor
+        if (GameConfig.debug && GameConfig.debugBossDivisor > 1) {
+            hp = Math.max(1, Math.floor(hp / GameConfig.debugBossDivisor));
         }
         const sprite = sprites[`boss_${level}`];
         // console.log(`sprite width: ${sprite?.width}, height: ${sprite?.height}`);

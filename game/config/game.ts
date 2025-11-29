@@ -1,10 +1,11 @@
 
 // ==================== 游戏基础配置 ====================
 export const GameConfig = {
-    width: 0,           // 游戏宽度（动态设置）
-    height: 0,          // 游戏高度（动态设置）
-    maxLevels: 10,      // 最大关卡数
-    debug: false,       // 调试模式开关
+    width: 0,               // 游戏宽度（动态设置）
+    height: 0,              // 游戏高度（动态设置）
+    maxLevels: 10,          // 最大关卡数
+    debug: false,           // 调试模式开关
+    debugBossDivisor: 1,    // 调试模式Boss血量除数
     
 };
 

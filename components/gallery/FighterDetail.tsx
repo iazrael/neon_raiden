@@ -76,6 +76,7 @@ export const FighterDetail: React.FC<FighterDetailProps> = ({ fighter }) => {
         <span className="text-gray-500 text-xs">DAMAGE (MAX)</span>
         <span className="text-red-300 font-semibold">{damagePctFinal}%</span>
       </div>
+      <div className="col-span-2 mt-2"></div>
     </div>
   );
 };
