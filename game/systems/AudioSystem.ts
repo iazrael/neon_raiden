@@ -5,15 +5,7 @@ export class AudioSystem {
   private masterGain: GainNode | null = null;
 
   constructor() {
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      this.ctx = new AudioContextClass();
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.3; // 降低总体音量
-      this.masterGain.connect(this.ctx.destination);
-    } catch (e) {
-      console.warn("Web Audio API not supported");
-    }
+    this.initContext();
 
     // Resume audio context on user interaction (essential for Safari)
     const resumeAudio = () => {
@@ -22,6 +14,8 @@ export class AudioSystem {
     window.addEventListener('touchstart', resumeAudio, { passive: true });
     window.addEventListener('click', resumeAudio);
     window.addEventListener('keydown', resumeAudio);
+    window.addEventListener('pageshow', resumeAudio);
+    window.addEventListener('focus', resumeAudio);
 
     // Handle visibility change to suspend/resume audio
     document.addEventListener('visibilitychange', () => {
@@ -30,15 +24,41 @@ export class AudioSystem {
           this.ctx.suspend();
         }
       } else {
-        if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
+        this.resume();
       }
+    });
+    window.addEventListener('pagehide', () => {
+      this.pause();
     });
   }
 
+  private initContext() {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      this.ctx = new AudioContextClass();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.3;
+      this.masterGain.connect(this.ctx.destination);
+    } catch (e) {
+      console.warn("Web Audio API not supported");
+    }
+  }
+
+  private ensureContext() {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!this.ctx || this.ctx.state === 'closed') {
+      this.initContext();
+    }
+    if (!this.masterGain && this.ctx) {
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.3;
+      this.masterGain.connect(this.ctx.destination);
+    }
+  }
+
   resume() {
-    if (this.ctx && this.ctx.state === 'suspended') {
+    this.ensureContext();
+    if (this.ctx && this.ctx.state !== 'running') {
       this.ctx.resume().catch(e => console.warn("Audio resume failed", e));
     }
   }
