@@ -15,7 +15,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '智能弹道预测系统根据敌机密度自动调整扇形覆盖,纳米级表面处理确保远距离精准打击,是可靠而优雅的基础武装。',
 
         color: '#ebdd17ff',
-        baseDamage: 10,
+        baseDamage: 12,
         damagePerLevel: 3,
         speed: 15,
         baseSpeed: 15,
@@ -23,7 +23,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 2,
         bullet: BulletConfigs[BulletType.VULCAN],
         sprite: 'bullet_vulcan',
-        maxLevel: 9
+        maxLevel: 6
     },
     [WeaponType.LASER]: {
         type: WeaponType.LASER,
@@ -37,8 +37,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         damagePerLevel: 2,
         speed: 25,
         baseSpeed: 15,
-        baseFireRate: 200,
-        ratePerLevel: 0,
+        baseFireRate: 180,
+        ratePerLevel: 2,
         bullet: BulletConfigs[BulletType.LASER],
         sprite: 'bullet_laser',
         maxLevel: 6
@@ -51,7 +51,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '自主学习型量子计算机同时锁定多个高价值目标,复合推进技术在接近时加速至亚光速,高爆核心产生定向能爆炸,即使最敏捷的敌机也难逃毁灭。',
 
         color: '#ca0ac7ff',
-        baseDamage: 20,
+        baseDamage: 30,
         damagePerLevel: 3,
         speed: 15,
         baseSpeed: 15,
@@ -123,7 +123,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '超压缩技术将恒星核心物质封装成弹丸,锥形散射最大化覆盖目标区域,命中后形成持续灼烧场熔穿装甲。高射速配合持续伤害,是持续输出的理想选择。',
 
         color: '#f60',
-        baseDamage: 10,
+        baseDamage: 12,
         damagePerLevel: 2,
         speed: 12,
         baseSpeed: 15,
@@ -141,7 +141,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '记忆金属与量子核心打造的特制飞镖,在战场边界完美反弹并通过量子感应追踪敌人。每次反弹吸收环境能量使伤害指数增长,熟练飞行员可利用复杂轨迹造成毁灭性打击。',
 
         color: '#ccccccff',
-        baseDamage: 12,
+        baseDamage: 14,
         damagePerLevel: 3,
         speed: 12,
         baseSpeed: 15,

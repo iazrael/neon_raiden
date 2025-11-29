@@ -62,7 +62,6 @@ export class BossSystem {
             spawnX = this.width * (0.25 + Math.random() * 0.5);
         }
 
-        this.audio.playPowerUp(); // Alarm sound
         this.laserTimer = 0;
         this.movementTimer = 0;
 

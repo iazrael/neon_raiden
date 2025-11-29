@@ -75,7 +75,48 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="text-xl font-bold text-yellow-400 drop-shadow-md">
             SCORE: {score.toString().padStart(6, "0")}
           </div>
-          <div className="text-sm text-gray-300">LEVEL: {level}</div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-300">STAGE: <span className="inline-block min-w-[1.5em]">{level}</span></div>
+            {state === GameState.PLAYING && (
+              <button
+                onClick={() => {
+                  playClick?.(ClickType.CANCEL);
+                  onPause?.();
+                  setShowExitDialog(true);
+                }}
+                className="w-8 h-8 rounded-full border border-cyan-500/50 bg-gray-900/70 hover:bg-cyan-900/50 hover:border-cyan-400 flex items-center justify-center transition-all backdrop-blur-sm group"
+                title="Pause / Abort"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="transition-all"
+                >
+                  <rect
+                    x="2"
+                    y="1"
+                    width="2.5"
+                    height="10"
+                    fill="currentColor"
+                    className="text-cyan-400 group-hover:text-cyan-300"
+                    style={{ filter: 'drop-shadow(0 0 2px currentColor)' }}
+                  />
+                  <rect
+                    x="7.5"
+                    y="1"
+                    width="2.5"
+                    height="10"
+                    fill="currentColor"
+                    className="text-cyan-400 group-hover:text-cyan-300"
+                    style={{ filter: 'drop-shadow(0 0 2px currentColor)' }}
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
 
           {/* Weapon Status & Synergy */}
           {state === GameState.PLAYING && weaponType && (
@@ -206,22 +247,7 @@ export const GameUI: React.FC<GameUIProps> = ({
         </div>
       )}
 
-      {/* Exit Button (Left Center) */}
-      {state === GameState.PLAYING && (
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-auto z-30">
-          <button
-            onClick={() => {
-              playClick?.(ClickType.CANCEL);
-              onPause?.();
-              setShowExitDialog(true);
-            }}
-            className="w-10 h-10 rounded-full border border-gray-600 bg-gray-900/50 text-gray-400 hover:text-white hover:bg-red-900/50 hover:border-red-500 flex items-center justify-center transition-all backdrop-blur-sm"
-            title="Abort Mission"
-          >
-            <span className="text-lg font-bold">||</span>
-          </button>
-        </div>
-      )}
+
 
       {/* Exit Confirmation Dialog */}
       {showExitDialog && state === GameState.PLAYING && (
@@ -358,7 +384,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="text-3xl mb-8 font-light">
             SCORE: <span className="text-white font-bold">{score}</span>
           </div>
-          <div className="text-2xl mb-6 font-mono tracking-wider text-red-200">MAX LEVEL: {level}</div>
+          <div className="text-2xl mb-6 font-mono tracking-wider text-red-200">MAX STAGE: {level}</div>
           <button
             onClick={() => {
               playClick?.(ClickType.CONFIRM);

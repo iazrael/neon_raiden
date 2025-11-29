@@ -274,42 +274,49 @@ export class AudioSystem {
 
   playShieldBreak() {
     if (!this.ctx || !this.masterGain) return;
-    const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.2, this.ctx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      // High-frequency burst with decay
-      const t = i / this.ctx.sampleRate;
-      data[i] = (Math.random() * 2 - 1) * (1 - t);
-    }
 
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.6, this.ctx.currentTime);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 1200;
-
-    noise.connect(filter);
-    filter.connect(noiseGain);
-    noiseGain.connect(this.masterGain);
-    noise.start();
-    noise.stop(this.ctx.currentTime + 0.2);
-
-    const crack = this.ctx.createOscillator();
-    crack.type = 'square';
-    const crackGain = this.ctx.createGain();
-    crack.connect(crackGain);
-    crackGain.connect(this.masterGain);
     const now = this.ctx.currentTime;
-    crack.frequency.setValueAtTime(600, now);
-    crack.frequency.exponentialRampToValueAtTime(200, now + 0.12);
-    crackGain.gain.setValueAtTime(0.2, now);
-    crackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-    crack.start(now);
-    crack.stop(now + 0.12);
+
+    // Crisp "po!" sound - sharp attack with quick decay
+    const pop = this.ctx.createOscillator();
+    const popGain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    pop.type = 'triangle';
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 3;
+
+    pop.connect(filter);
+    filter.connect(popGain);
+    popGain.connect(this.masterGain);
+
+    // Sharp frequency drop for "po!" effect
+    pop.frequency.setValueAtTime(1800, now);
+    pop.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+
+    // Quick, crisp envelope
+    popGain.gain.setValueAtTime(0.7, now);
+    popGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+    pop.start(now);
+    pop.stop(now + 0.08);
+
+    // Add a subtle high-frequency click for crispness
+    const click = this.ctx.createOscillator();
+    const clickGain = this.ctx.createGain();
+
+    click.type = 'sine';
+    click.frequency.value = 3500;
+
+    click.connect(clickGain);
+    clickGain.connect(this.masterGain);
+
+    clickGain.gain.setValueAtTime(0.3, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+
+    click.start(now);
+    click.stop(now + 0.02);
   }
 
   playBomb() {
@@ -476,40 +483,32 @@ export class AudioSystem {
     if (!this.ctx || !this.masterGain) return;
     const now = this.ctx.currentTime;
 
-    const osc1 = this.ctx.createOscillator();
-    const gain1 = this.ctx.createGain();
-    osc1.type = 'square';
-    osc1.connect(gain1);
-    gain1.connect(this.masterGain);
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
 
-    osc1.frequency.setValueAtTime(440, now);
-    osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
-    osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.24);
+    osc.type = 'square';
+    osc.connect(gain);
+    gain.connect(this.masterGain);
 
-    gain1.gain.setValueAtTime(0, now);
-    gain1.gain.linearRampToValueAtTime(0.5, now + 0.02);
-    gain1.gain.linearRampToValueAtTime(0.4, now + 0.12);
-    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+    // Mario mushroom sound: wong~wong~wong (three ascending notes)
+    // First "wong" - C5
+    osc.frequency.setValueAtTime(523.25, now);
+    // Second "wong" - E5
+    osc.frequency.setValueAtTime(659.25, now + 0.12);
+    // Third "wong" - G5
+    osc.frequency.setValueAtTime(783.99, now + 0.24);
 
-    osc1.start(now);
-    osc1.stop(now + 0.4);
+    // Envelope for each note with distinct attack
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.12);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.14);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.24);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.26);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
 
-    const osc2 = this.ctx.createOscillator();
-    const gain2 = this.ctx.createGain();
-    osc2.type = 'square';
-    osc2.connect(gain2);
-    gain2.connect(this.masterGain);
-
-    osc2.frequency.setValueAtTime(880, now);
-    osc2.frequency.exponentialRampToValueAtTime(1760, now + 0.12);
-    osc2.frequency.exponentialRampToValueAtTime(3520, now + 0.24);
-
-    gain2.gain.setValueAtTime(0, now);
-    gain2.gain.linearRampToValueAtTime(0.25, now + 0.02);
-    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-
-    osc2.start(now);
-    osc2.stop(now + 0.3);
+    osc.start(now);
+    osc.stop(now + 0.5);
   }
 
   private shieldOsc: OscillatorNode | null = null;

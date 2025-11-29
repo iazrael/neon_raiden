@@ -304,7 +304,7 @@ export class GameEngine {
             this.onScoreChange(this.score);
 
             if (this.boss) {
-                this.damageBoss(500);
+                this.damageBoss(GameConfig.bombDamage);
             }
         }
     }

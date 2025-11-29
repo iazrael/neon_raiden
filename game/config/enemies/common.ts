@@ -6,18 +6,18 @@ export const EnemyCommonConfig = {
     // 小怪刷新速度配置
     enemySpawnIntervalByLevel: {
         1: 1000,
-        2: 950,
+        2: 900,
         3: 900,
-        4: 850,
+        4: 900,
         5: 800,
-        6: 750,
-        7: 700,
-        8: 650,
-        9: 600,
-        10: 600
+        6: 800,
+        7: 800,
+        8: 700,
+        9: 700,
+        10: 700
     },
     // 精英怪配置
-    eliteChance: 0.15,
+    eliteChance: 0.1, // 变精英的概率
     eliteHpMultiplier: 3,
     eliteSizeMultiplier: 1.3,
     eliteScoreMultiplier: 3,
