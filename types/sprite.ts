@@ -116,7 +116,11 @@ export enum PowerupType {
     POWER = 'power',    // 武器能量提升
     HP = 'hp',          // 生命值恢复
     BOMB = 'bomb',      // 炸弹
-    OPTION = 'option'   // 僚机
+    OPTION = 'option',  // 僚机
+    
+    // 新增容错道具
+    TEMP_SHIELD = 'temp_shield',  // 临时护盾
+    TIME_SLOW = 'time_slow'       // 时间减缓
 }
 
 /**
@@ -197,6 +201,7 @@ export interface WeaponEntity extends BaseEntityMeta {
     ratePerLevel: number;       // 每级射速提升（毫秒减少）
     bullet: BulletEntity;       // 子弹配置
     sprite: string;             // 精灵图名称
+    baseSpeed?: number;         // 基准速度（用于DPS计算，默认为15）
 }
 
 /**

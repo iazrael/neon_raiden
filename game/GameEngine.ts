@@ -68,6 +68,10 @@ export class GameEngine {
     bossTransitionTimer: number = 0;
     levelStartTime: number = 0; // Track when level started
     regenTimer: number = 0;
+    
+    // Time Slow Effect
+    timeSlowActive: boolean = false;
+    timeSlowTimer: number = 0;
 
     // Level transition
     showLevelTransition: boolean = false;
@@ -119,7 +123,7 @@ export class GameEngine {
         this.render = new RenderSystem(canvas);
         this.weaponSys = new WeaponSystem(this.audio);
         this.enemySys = new EnemySystem(this.audio, canvas.width, canvas.height);
-        this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height);
+        this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height, this.difficultySys);
         this.comboSys = new ComboSystem(undefined, (state) => this.onComboChange(state)); // P2 Combo System
         this.synergySys = new WeaponSynergySystem(); // P2 Weapon Synergy System
         this.envSys = new EnvironmentSystem(canvas.width, canvas.height); // P2 Environment System
@@ -298,6 +302,16 @@ export class GameEngine {
 
     update(dt: number) {
         if (this.state !== GameState.PLAYING) return;
+
+        // 处理时间减缓效果
+        if (this.timeSlowActive) {
+            this.timeSlowTimer -= dt;
+            if (this.timeSlowTimer <= 0) {
+                this.timeSlowActive = false;
+            }
+            // 减缓时间为原来的一半
+            dt *= 0.5;
+        }
 
         const timeScale = dt / 16.66;
 
@@ -625,6 +639,12 @@ export class GameEngine {
         this.powerups = this.powerups.filter(e => !e.markedForDeletion && e.y < this.render.height + 50);
 
         if (this.player.hp <= 0) {
+            // P3 Record player defeated by boss for dynamic difficulty adjustment
+            // Only record if there's a boss present
+            if (this.boss) {
+                this.difficultySys.recordPlayerDefeatedByBoss(this.level);
+            }
+            
             this.createExplosion(this.player.x, this.player.y, ExplosionSize.LARGE, '#00ffff');
             this.audio.playExplosion(ExplosionSize.LARGE);
             this.audio.playDefeat();
@@ -695,6 +715,7 @@ export class GameEngine {
 
         // Unlock boss when defeated
         unlockBoss(bossLevel);
+
 
         // P2 Cleanup boss phase state
         this.bossPhaseSys.cleanupBoss(this.boss);
@@ -980,7 +1001,6 @@ export class GameEngine {
 
         const baseScore = EnemyConfig[e.subType]?.score || 100;
         const eliteMultiplier = e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1;
-
         // P3 Apply difficulty score multiplier
         const difficultyScoreMultiplier = this.difficultySys.getScoreMultiplier();
         const finalScore = Math.floor(baseScore * eliteMultiplier * comboScoreMultiplier * difficultyScoreMultiplier);
@@ -1103,6 +1123,18 @@ export class GameEngine {
                         spriteKey: 'option'
                     });
                 }
+                break;
+
+            case PowerupType.TEMP_SHIELD:
+                // 临时护盾 - 给玩家5秒无敌时间
+                this.player.invulnerable = true;
+                this.player.invulnerableTimer = 5000; // 5秒
+                break;
+
+            case PowerupType.TIME_SLOW:
+                // 时间减缓 - 减缓游戏速度3秒
+                this.timeSlowActive = true;
+                this.timeSlowTimer = 3000; // 3秒
                 break;
 
             default:

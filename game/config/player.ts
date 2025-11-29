@@ -17,10 +17,10 @@ export const PlayerConfig: FighterEntity = {
         height: 48
     },
     speed: 7,
-    initialHp: 100,
-    maxHp: 120,
+    initialHp: 120,
+    maxHp: 140,
     initialBombs: 3,
     maxBombs: 9,
-    maxShield: 50,
+    maxShield: 70,
     hitboxShrink: 0
 };

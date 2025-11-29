@@ -62,6 +62,10 @@ export enum EntityType {
 }
 
 export interface Entity {
+  id?: string;
+  name?: string;
+  chineseName?: string;
+  describe?: string;
   x: number;
   y: number;
   width: number;

@@ -1,16 +1,19 @@
 import { Entity, SpriteMap, WeaponType, BossWeaponType, BossSpawnPosition, EntityType } from '@/types';
 import { getBossConfigByLevel } from '@/game/config';
 import { AudioSystem } from '@/game/systems/AudioSystem';
+import { DifficultySystem } from '@/game/systems/DifficultySystem';
 
 export class BossSystem {
     audio: AudioSystem;
+    difficultySys: DifficultySystem | null = null;
     width: number = 0;
     height: number = 0;
     laserTimer: number = 0;
     movementTimer: number = 0;
 
-    constructor(audio: AudioSystem, width: number, height: number) {
+    constructor(audio: AudioSystem, width: number, height: number, difficultySys?: DifficultySystem) {
         this.audio = audio;
+        this.difficultySys = difficultySys || null;
         this.width = width;
         this.height = height;
     }
@@ -26,7 +29,16 @@ export class BossSystem {
             throw new Error(`Boss config not found for level ${level}`);
         }
 
-        const hp = config.hp;
+        // Apply difficulty adjustment to boss HP
+        let hp = config.hp;
+        if (this.difficultySys) {
+            // Get base difficulty multiplier
+            const baseMultiplier = this.difficultySys.getBossDifficultyMultiplier();
+            // Get specific boss difficulty multiplier based on defeat count
+            const specificMultiplier = this.difficultySys.getSpecificBossDifficultyMultiplier(level);
+            // Apply both multipliers
+            hp = Math.round(hp * baseMultiplier * specificMultiplier);
+        }
         const sprite = sprites[`boss_${level}`];
         // console.log(`sprite width: ${sprite?.width}, height: ${sprite?.height}`);
         const width = config.size.width || (sprite ? sprite.width : 150);

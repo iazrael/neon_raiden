@@ -32,6 +32,7 @@ export interface DifficultyConfig {
     enemySpeedMultiplier: number;     // 敌人速度倍率
     powerupDropMultiplier: number;    // 道具掉落率倍率
     scoreMultiplier: number;          // 得分倍率
+    bossDifficultyMultiplier: number; // Boss难度倍率
     description: string;              // 难度描述
 }
 
@@ -56,6 +57,7 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyMode, DifficultyConfig> = {
         enemySpeedMultiplier: 1.0,       // 敌人速度不变
         powerupDropMultiplier: 1.0,      // 道具掉落率不变
         scoreMultiplier: 1.2,            // 得分+20% (奖励高技术玩家)
+        bossDifficultyMultiplier: 1.1,   // Boss难度+10%
         description: '高手模式 - 挑战增强,得分加成'
     },
     [DifficultyMode.NORMAL]: {
@@ -66,6 +68,7 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyMode, DifficultyConfig> = {
         enemySpeedMultiplier: 1.0,       // 敌人速度不变
         powerupDropMultiplier: 1.0,      // 道具掉落率不变
         scoreMultiplier: 1.0,            // 标准得分
+        bossDifficultyMultiplier: 1.0,   // Boss标准难度
         description: '标准模式 - 原始平衡'
     },
     [DifficultyMode.HARD]: {
@@ -76,6 +79,7 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyMode, DifficultyConfig> = {
         enemySpeedMultiplier: 0.90,      // 敌人速度-10%
         powerupDropMultiplier: 1.20,     // 道具掉落率+20%
         scoreMultiplier: 1.0,            // 得分不变
+        bossDifficultyMultiplier: 0.9,   // Boss难度-10%
         description: '新手模式 - 难度降低,道具增加'
     }
 };
@@ -112,6 +116,9 @@ export class DifficultySystem {
     
     private levelStartTime: number = 0;
     private isEnabled: boolean = true; // 可通过配置开关
+    
+    // Boss击败次数记录
+    private playerDefeatCounts: Record<number, number> = {}; // 关卡 -> 击败次数
     
     constructor() {
         // 初始化为标准模式
@@ -253,6 +260,36 @@ export class DifficultySystem {
      */
     getScoreMultiplier(): number {
         return this.currentConfig.scoreMultiplier;
+    }
+    
+    /**
+     * 记录玩家被Boss击败
+     */
+    recordPlayerDefeatedByBoss(level: number): void {
+        if (!this.playerDefeatCounts[level]) {
+            this.playerDefeatCounts[level] = 0;
+        }
+        this.playerDefeatCounts[level]++;
+    }
+    
+    /**
+     * 获取Boss难度倍率
+     * 基于玩家击败Boss的次数调整Boss难度
+     */
+    getBossDifficultyMultiplier(): number {
+        return this.currentConfig.bossDifficultyMultiplier;
+    }
+    
+    /**
+     * 获取特定Boss的额外难度倍率
+     * 基于玩家被该Boss击败的次数（玩家挑战失败次数）
+     * 如果玩家多次无法击败同一个Boss，则降低该Boss的难度
+     */
+    getSpecificBossDifficultyMultiplier(level: number): number {
+        const defeatCount = this.playerDefeatCounts[level] || 0;
+        // 每被Boss击败一次，Boss难度降低3%，最多降低30%
+        const reductionMultiplier = Math.min(0.3, defeatCount * 0.03);
+        return 1.0 - reductionMultiplier;
     }
     
     /**

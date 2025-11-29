@@ -17,16 +17,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '赛博空间的初级守护程序,以优雅的正弦轨迹游弋于霓虹战场,全向弹幕系统是对新手飞行员的第一道试炼。',
         color: '#4488ff',
         level: 1,
-        hp: 1800,
+        hp: 1600,
         speed: 1.2,
         size: { width: 180, height: 180 },
         score: 5000,
         sprite: 'boss_guardian',
         weapons: [BossWeaponType.RADIAL],
         weaponConfigs: {
-            bulletCount: 8,
+            bulletCount: 6,
             bulletSpeed: 4.0,
-            fireRate: 0.06,
+            fireRate: 0.07,
             targetedShotSpeed: 0
         },
         movement: {
@@ -48,16 +48,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '突击型战斗平台,以之字形轨迹高速机动,双模式火力系统兼顾区域封锁与精准打击,是速度与火力的完美结合。',
         color: '#ff4488',
         level: 2,
-        hp: 2400,
+        hp: 2100,
         speed: 2.0,
         size: { width: 200, height: 200 },
         score: 10000,
         sprite: 'boss_interceptor',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 10,
+            bulletCount: 8,
             bulletSpeed: 4.5,
-            fireRate: 0.08,
+            fireRate: 0.09,
             targetedShotSpeed: 8
         },
         movement: {
@@ -79,16 +79,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '重型装甲作战单元,以八字轨迹碾压战场,三重进化形态层层解锁毁灭之力,每个阶段都更加致命。',
         color: '#44ff88',
         level: 3,
-        hp: 3200,
+        hp: 2800,
         speed: 0.8,
         size: { width: 220, height: 220 },
         score: 15000,
         sprite: 'boss_destroyer',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 24,
+            bulletCount: 20,
             bulletSpeed: 5.5,
-            fireRate: 0.04,
+            fireRate: 0.05,
             targetedShotSpeed: 9
         },
         movement: {
@@ -110,16 +110,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '装备光学迷彩的幽灵战斗机,空间跃迁轨迹如鬼魅般难以捉摸,全方位弹雨与锁定追踪的双重威胁令人防不胜防。',
         color: '#ff8844',
         level: 4,
-        hp: 4000,
+        hp: 3600,
         speed: 1.5,
         size: { width: 240, height: 240 },
         score: 20000,
         sprite: 'boss_annihilator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 15,
+            bulletCount: 13,
             bulletSpeed: 5.0,
-            fireRate: 0.06,
+            fireRate: 0.07,
             targetedShotSpeed: 14
         },
         movement: {
@@ -141,16 +141,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '高能粒子壁垒,沿螺旋轨道释放无尽弹幕洪流,致密火力网封锁一切突破可能,是弹幕艺术的极致体现。',
         color: '#8844ff',
         level: 5,
-        hp: 5500,
+        hp: 4800,
         speed: 1.3,
         size: { width: 260, height: 260 },
         score: 25000,
         sprite: 'boss_dominator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 18,
+            bulletCount: 16,
             bulletSpeed: 5.0,
-            fireRate: 0.07,
+            fireRate: 0.08,
             targetedShotSpeed: 10
         },
         movement: {
@@ -304,16 +304,16 @@ export const BossConfig: Record<BossType, BossEntity> = {
         describe: '终极龙王,轨迹莫测难寻,五维火力全域覆盖,双布雷机僚机协同,四重超载形态逐次显现,是霓虹战场的终极审判。',
         color: '#ff0000',
         level: 10,
-        hp: 16000,
+        hp: 14000,
         speed: 2.3,
         size: { width: 360, height: 360 },
         score: 50000,
         sprite: 'boss_apocalypse',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         weaponConfigs: {
-            bulletCount: 26,
+            bulletCount: 22,
             bulletSpeed: 8.0,
-            fireRate: 0.09,
+            fireRate: 0.10,
             targetedShotSpeed: 15
         },
         movement: {
