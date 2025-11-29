@@ -495,21 +495,23 @@ export class GameEngine {
             // Debug Mode: Spawn boss after 10 seconds and 10 enemy kills
             if (this.debugModeEnabled) {
                 if (levelDuration >= 10 && this.debugEnemyKillCount >= 10 && !this.isLevelTransitioning) {
-                    this.spawnBoss();
+                    if (!this.isBossWarningActive) {
+                        this.isBossWarningActive = true;
+                        this.bossWarningTimer = 3000; // 3 seconds warning
+                        this.onBossWarning(true);
+                        this.audio.playWarning();
+                        // Spawn boss immediately, warning will show during entrance
+                        this.spawnBoss();
+                    }
                 }
             } else if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
                 if (!this.isBossWarningActive) {
                     this.isBossWarningActive = true;
                     this.bossWarningTimer = 3000; // 3 seconds warning
                     this.onBossWarning(true);
-                    this.audio.playWarning(); // Assuming we will add this or use a sound
-                } else {
-                    this.bossWarningTimer -= dt;
-                    if (this.bossWarningTimer <= 0) {
-                        this.isBossWarningActive = false;
-                        this.onBossWarning(false);
-                        this.spawnBoss();
-                    }
+                    this.audio.playWarning();
+                    // Spawn boss immediately, warning will show during entrance
+                    this.spawnBoss();
                 }
             }
         } else {
@@ -534,6 +536,15 @@ export class GameEngine {
                 wingman.x = this.boss!.x + (wingman.x - this.boss!.x) * 0.95;
                 wingman.y = this.boss!.y + 80;
             });
+        }
+
+        // Handle boss warning timer countdown (outside boss check so it works after spawn)
+        if (this.isBossWarningActive) {
+            this.bossWarningTimer -= dt;
+            if (this.bossWarningTimer <= 0) {
+                this.isBossWarningActive = false;
+                this.onBossWarning(false);
+            }
         }
 
         // Meteors

@@ -13,7 +13,7 @@
       <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <g transform="translate(110, 110)">
+  <g transform="translate(110, 110) rotate(180)">
     <!-- Heavy Armor Plates -->
     <path d="M-50 -80 L50 -80 L60 0 L50 80 L-50 80 L-60 0 Z" fill="#1a202c" stroke="#4a5568" stroke-width="4"/>
     <rect x="-40" y="-70" width="80" height="140" fill="#2d3748" rx="5" />
