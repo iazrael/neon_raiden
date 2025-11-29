@@ -27,6 +27,7 @@ function App() {
   const [activeSynergies, setActiveSynergies] = useState<SynergyConfig[]>([]); // P2 Weapon Synergy
   const [weaponType, setWeaponType] = useState<WeaponType>(WeaponType.VULCAN); // P2 Current weapon
   const [secondaryWeapon, setSecondaryWeapon] = useState<WeaponType | null>(null); // P2 Secondary weapon
+  const [weaponLevel, setWeaponLevel] = useState<number>(1);
 
   useEffect(() => {
     // Preload assets
@@ -72,10 +73,9 @@ function App() {
       setActiveSynergies(engine.synergySys.getActiveSynergies());
       setWeaponType(engine.weaponType);
       setSecondaryWeapon(engine.secondaryWeapon);
+      setWeaponLevel(engine.weaponLevel);
 
-      const cap = engine.getShieldCap ? engine.getShieldCap() : 0;
-      const sp = cap > 0 ? Math.max(0, Math.min(100, Math.round((engine.shield / cap) * 100))) : 0;
-      setShieldPercent(sp);
+      setShieldPercent(engine.getShieldPercent());
 
       animationId = requestAnimationFrame(loop);
     };
@@ -123,6 +123,7 @@ function App() {
         activeSynergies={activeSynergies}
         weaponType={weaponType}
         secondaryWeapon={secondaryWeapon}
+        weaponLevel={weaponLevel}
         shieldPercent={shieldPercent}
         onOpenGallery={() => {
           setStateBeforeGallery(gameState);

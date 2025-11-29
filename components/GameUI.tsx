@@ -1,6 +1,7 @@
 import React from "react";
 import { GameState, WeaponType, ClickType } from "@/types";
-import { WeaponConfig, ASSETS_BASE_PATH } from "@/game/config";
+import { WeaponConfig, ASSETS_BASE_PATH, PowerupEffects } from "@/game/config";
+import { capitalize } from "@/utils/string";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
@@ -29,6 +30,7 @@ interface GameUIProps {
   activeSynergies?: SynergyConfig[]; // P2 Weapon Synergy
   weaponType?: WeaponType; // P2 Current weapon
   secondaryWeapon?: WeaponType | null; // P2 Secondary weapon
+  weaponLevel?: number;
   shieldPercent?: number;
 }
 
@@ -55,6 +57,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   activeSynergies = [],
   weaponType,
   secondaryWeapon,
+  weaponLevel,
   shieldPercent = 0,
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
@@ -84,14 +87,22 @@ export const GameUI: React.FC<GameUIProps> = ({
                     className="font-bold"
                     style={{ color: WeaponConfig[weaponType!]?.color || '#0ff' }}
                   >
-                    {weaponType}
+                    {capitalize(weaponType!)}
                   </span>
+                  {typeof weaponLevel === 'number' && (
+                    <span className="ml-1 text-gray-300">
+                      {(() => {
+                        const max = (weaponType ? WeaponConfig[weaponType!]?.maxLevel : undefined) ?? PowerupEffects.maxWeaponLevel;
+                        return `Lv.${weaponLevel >= max ? 'max' : weaponLevel}`;
+                      })()}
+                    </span>
+                  )}
                   {secondaryWeapon && (
                     <span 
                       className="ml-1"
                       style={{ color: WeaponConfig[secondaryWeapon!]?.color || '#f0f' }}
                     >
-                      + {secondaryWeapon}
+                      + {capitalize(secondaryWeapon!)}
                     </span>
                   )}
                 </div>

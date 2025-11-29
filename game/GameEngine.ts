@@ -1,5 +1,5 @@
 import { AudioSystem } from './systems/AudioSystem';
-import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize } from '@/types';
+import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize, FighterEntity } from '@/types';
 import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals, WeaponConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
@@ -59,6 +59,15 @@ export class GameEngine {
     weaponLevel: number = 1;
     bombs: number = PlayerConfig.initialBombs;
     shield: number = 0;
+    playerLevel: number = 1;
+    nextLevelScore: number = PlayerConfig.leveling.baseScoreForLevel1 ?? 1000;
+    playerDefensePct: number = 0;
+    playerFireRateBonusPct: number = 0;
+    playerDamageBonusPct: number = 0;
+    levelingShieldBonus: number = 0;
+
+    // Instance PlayerConfig (deep clone per start)
+    playerConfig: FighterEntity = JSON.parse(JSON.stringify(PlayerConfig));
 
     // Timers
     enemySpawnTimer: number = 0;
@@ -68,7 +77,7 @@ export class GameEngine {
     bossTransitionTimer: number = 0;
     levelStartTime: number = 0; // Track when level started
     regenTimer: number = 0;
-    
+
     // Time Slow Effect
     timeSlowActive: boolean = false;
     timeSlowTimer: number = 0;
@@ -141,7 +150,7 @@ export class GameEngine {
         };
 
         this.input.onMouseMove = (x, y) => {
-            if (this.state === GameState.PLAYING) {
+            if (this.state === GameState.PLAYING && this.player) {
                 this.player.x = x;
                 this.player.y = y;
             }
@@ -150,7 +159,7 @@ export class GameEngine {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        this.player = this.createPlayer();
+        // this.player = this.createPlayer();
 
         // Load progress
         const savedMaxLevel = localStorage.getItem('neon_raiden_max_level');
@@ -179,36 +188,44 @@ export class GameEngine {
     }
 
     createPlayer(): Entity {
+        this.playerConfig = JSON.parse(JSON.stringify(PlayerConfig));
         return {
             x: this.render.width / 2,
             y: this.render.height - 100,
-            width: PlayerConfig.size.width,
-            height: PlayerConfig.size.height,
+            width: this.playerConfig.size.width,
+            height: this.playerConfig.size.height,
             vx: 0,
             vy: 0,
-            hp: PlayerConfig.initialHp,
-            maxHp: PlayerConfig.maxHp,
+            hp: this.playerConfig.initialHp,
+            maxHp: this.playerConfig.maxHp,
             type: EntityType.PLAYER,
-            color: PlayerConfig.color,
+            color: this.playerConfig.color,
             markedForDeletion: false,
             spriteKey: 'player'
         };
     }
 
     startGame() {
+        this.player = this.createPlayer();
         this.state = GameState.PLAYING;
         this.score = 0;
         this.level = 1;
         this.weaponLevel = 1;
+        this.playerLevel = 1;
+        this.nextLevelScore = this.playerConfig.leveling?.baseScoreForLevel1 ?? 1000;
+        this.playerDefensePct = 0;
+        this.playerFireRateBonusPct = 0;
+        this.playerDamageBonusPct = 0;
+        this.levelingShieldBonus = 0;
         this.weaponType = WeaponType.VULCAN;
         this.secondaryWeapon = null; // P2 Reset secondary weapon
-        this.bombs = PlayerConfig.initialBombs;
+        this.bombs = this.playerConfig.initialBombs;
         this.shield = 0;
         this.timeSlowActive = false;
         this.timeSlowTimer = 0;
         resetDropContext();
 
-        this.player = this.createPlayer();
+
         this.options = [];
         this.enemies = [];
         this.bullets = [];
@@ -350,7 +367,7 @@ export class GameEngine {
         }
 
         // Player Movement
-        let speed = PlayerConfig.speed * timeScale;
+        let speed = this.playerConfig.speed * timeScale;
 
         // P2 Apply energy storm slow effect
         if (this.envSys.isPlayerInStorm(this.player)) {
@@ -395,7 +412,8 @@ export class GameEngine {
 
         // Fire
         this.fireTimer += dt;
-        const fireRate = this.weaponSys.getFireRate(this.weaponType, this.weaponLevel);
+        const baseFireRate = this.weaponSys.getFireRate(this.weaponType, this.weaponLevel);
+        const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.playerFireRateBonusPct)));
         if (this.fireTimer > fireRate) {
             this.weaponSys.firePlayerWeapon(
                 this.player, this.weaponType, this.weaponLevel,
@@ -650,7 +668,7 @@ export class GameEngine {
             if (this.boss) {
                 this.difficultySys.recordPlayerDefeatedByBoss(this.level);
             }
-            
+
             this.createExplosion(this.player.x, this.player.y, ExplosionSize.LARGE, '#00ffff');
             this.audio.playExplosion(ExplosionSize.LARGE);
             this.audio.playDefeat();
@@ -713,6 +731,7 @@ export class GameEngine {
 
         this.score += BossConfig[this.boss.subType]?.score || (5000 * this.level);
         this.onScoreChange(this.score);
+        this.checkAndApplyLevelUp();
 
         // Boss guaranteed drop
         if (Math.random() < PowerupDropConfig.bossDropRate) {
@@ -744,8 +763,8 @@ export class GameEngine {
                     this.onMaxLevelChange(this.maxLevelReached);
                 }
 
-                this.player.hp = PlayerConfig.maxHp;
-                this.shield = PlayerConfig.maxShield;
+                this.player.hp = this.player.maxHp;
+                this.shield = this.getShieldCap();
                 this.onHpChange(this.player.hp);
 
                 // Show level transition UI
@@ -862,22 +881,25 @@ export class GameEngine {
                 this.audio.playPowerUp();
                 this.score += 100;
                 this.onScoreChange(this.score);
+                this.checkAndApplyLevelUp();
                 this.applyPowerup(p.subType as PowerupType);
             }
         });
     }
 
     takeDamage(amount: number) {
+        const defenseMultiplier = Math.max(0, 1 - this.playerDefensePct);
+        const effective = Math.ceil(amount * defenseMultiplier);
         const prevShield = this.shield;
         if (this.shield > 0) {
-            this.shield -= amount;
+            this.shield -= effective;
             if (this.shield < 0) {
                 this.player.hp += this.shield;
                 this.shield = 0;
             }
             this.screenShake = 5;
         } else {
-            this.player.hp -= amount;
+            this.player.hp -= effective;
             this.screenShake = 10;
         }
         if (prevShield > 0 && this.shield === 0) {
@@ -941,7 +963,7 @@ export class GameEngine {
 
         // P2 Apply combo damage multiplier
         const comboDamageMultiplier = this.comboSys.getDamageMultiplier();
-        let finalDamage = (b.damage || 10) * comboDamageMultiplier;
+        let finalDamage = (b.damage || 10) * comboDamageMultiplier * (1 + this.playerDamageBonusPct);
 
         // P2 Try to trigger weapon synergies
         const synergyContext: SynergyTriggerContext = {
@@ -1019,6 +1041,7 @@ export class GameEngine {
 
         this.score += finalScore;
         this.onScoreChange(this.score);
+        this.checkAndApplyLevelUp();
         this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion(ExplosionSize.SMALL);
 
@@ -1097,14 +1120,17 @@ export class GameEngine {
         switch (type) {
             case PowerupType.POWER:
                 // Generic power upgrade for current weapon
-                this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
+                {
+                    const currentMax = (WeaponConfig[this.weaponType]?.maxLevel ?? effects.maxWeaponLevel);
+                    this.weaponLevel = Math.min(currentMax, this.weaponLevel + 1);
+                }
                 break;
 
             case PowerupType.HP:
-                if (this.player.hp >= PlayerConfig.maxHp) {
+                if (this.player.hp >= this.player.maxHp) {
                     this.shield = Math.min(this.getShieldCap(), this.shield + effects.shieldRestoreAmount);
                 } else {
-                    this.player.hp = Math.min(PlayerConfig.maxHp, this.player.hp + effects.hpRestoreAmount);
+                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + effects.hpRestoreAmount);
                     this.onHpChange(this.player.hp);
                 }
                 break;
@@ -1158,7 +1184,10 @@ export class GameEngine {
 
                     if (this.weaponType === weaponType) {
                         // Same weapon type - upgrade level
-                        this.weaponLevel = Math.min(effects.maxWeaponLevel, this.weaponLevel + 1);
+                        {
+                            const currentMax = (WeaponConfig[this.weaponType]?.maxLevel ?? effects.maxWeaponLevel);
+                            this.weaponLevel = Math.min(currentMax, this.weaponLevel + 1);
+                        }
 
                         // P2 Update synergy system to keep it in sync with current equipment
                         const equippedWeapons = this.secondaryWeapon
@@ -1244,7 +1273,7 @@ export class GameEngine {
     }
 
     getShieldCap(): number {
-        const base = PlayerConfig.maxShield;
+        const base = this.playerConfig.maxShield + this.levelingShieldBonus;
         const comboLevel = this.comboSys.getState().level;
         let bonus = 0;
         if (comboLevel >= 2) bonus += 25;
@@ -1252,6 +1281,11 @@ export class GameEngine {
         if (comboLevel >= 4) bonus += 50;
         if (this.synergySys.isSynergyActive(SynergyType.MAGMA_SHURIKEN)) bonus += 10;
         return base + bonus;
+    }
+
+    getShieldPercent(): number {
+        const cap = this.getShieldCap();
+        return cap > 0 ? Math.max(0, Math.min(100, Math.round((this.shield / cap) * 100))) : 0;
     }
 
     draw() {
@@ -1274,6 +1308,7 @@ export class GameEngine {
             this.shield,
             this.screenShake,
             this.weaponLevel,
+            this.playerLevel,
             this.envSys.getAllElements(), // P2 Pass environment elements
             this.showBossDefeatAnimation,
             this.bossDefeatTimer,
@@ -1286,5 +1321,29 @@ export class GameEngine {
     loop(dt: number) {
         this.update(dt);
         this.draw();
+    }
+
+    private checkAndApplyLevelUp() {
+        const conf = this.playerConfig.leveling;
+        if (!conf) return;
+        while (this.score >= this.nextLevelScore && this.playerLevel < conf.maxLevel) {
+            this.playerLevel += 1;
+            this.nextLevelScore *= conf.scoreGrowthFactor;
+            this.player.maxHp += conf.bonusesPerLevel.maxHpFlat;
+            this.player.hp = this.player.maxHp;
+            this.levelingShieldBonus += conf.bonusesPerLevel.maxShieldFlat;
+            this.shield = this.getShieldCap();
+            const defInc = (conf.bonusesPerLevel.defensePct || 0) / 100;
+            const frInc = (conf.bonusesPerLevel.fireRatePct || 0) / 100;
+            const dmgInc = (conf.bonusesPerLevel.damagePct || 0) / 100;
+            const defCap = (conf.bonusesPerLevel.defensePctMax ?? Number.POSITIVE_INFINITY) / 100;
+            const frCap = (conf.bonusesPerLevel.fireRatePctMax ?? Number.POSITIVE_INFINITY) / 100;
+            const dmgCap = (conf.bonusesPerLevel.damagePctMax ?? Number.POSITIVE_INFINITY) / 100;
+            this.playerDefensePct = Math.min(this.playerDefensePct + defInc, defCap);
+            this.playerFireRateBonusPct = Math.min(this.playerFireRateBonusPct + frInc, frCap);
+            this.playerDamageBonusPct = Math.min(this.playerDamageBonusPct + dmgInc, dmgCap);
+            this.player.hitFlashUntil = Date.now() + 300;
+            this.audio.playLevelUp();
+        }
     }
 }

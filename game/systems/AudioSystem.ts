@@ -396,6 +396,7 @@ export class AudioSystem {
 
   playWarning() {
     if (!this.ctx || !this.masterGain) return;
+    console.log('Playing boss warning sound');
     const now = this.ctx.currentTime;
 
     // "Wang ~ Wang" effect
@@ -469,5 +470,45 @@ export class AudioSystem {
       osc.start(startTime);
       osc.stop(startTime + duration);
     });
+  }
+
+  playLevelUp() {
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    const osc1 = this.ctx.createOscillator();
+    const gain1 = this.ctx.createGain();
+    osc1.type = 'square';
+    osc1.connect(gain1);
+    gain1.connect(this.masterGain);
+
+    osc1.frequency.setValueAtTime(440, now);
+    osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+    osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.24);
+
+    gain1.gain.setValueAtTime(0, now);
+    gain1.gain.linearRampToValueAtTime(0.5, now + 0.02);
+    gain1.gain.linearRampToValueAtTime(0.4, now + 0.12);
+    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+    osc1.start(now);
+    osc1.stop(now + 0.4);
+
+    const osc2 = this.ctx.createOscillator();
+    const gain2 = this.ctx.createGain();
+    osc2.type = 'square';
+    osc2.connect(gain2);
+    gain2.connect(this.masterGain);
+
+    osc2.frequency.setValueAtTime(880, now);
+    osc2.frequency.exponentialRampToValueAtTime(1760, now + 0.12);
+    osc2.frequency.exponentialRampToValueAtTime(3520, now + 0.24);
+
+    gain2.gain.setValueAtTime(0, now);
+    gain2.gain.linearRampToValueAtTime(0.25, now + 0.02);
+    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+    osc2.start(now);
+    osc2.stop(now + 0.3);
   }
 }

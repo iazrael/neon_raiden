@@ -73,6 +73,7 @@ export class RenderSystem {
         shield: number,
         screenShake: number,
         weaponLevel: number,
+        playerLevel: number,
         environmentElements: EnvironmentElement[] = [], // P2 Environment elements
         showBossDefeatAnimation: boolean = false,
         bossDefeatTimer: number = 0,
@@ -128,7 +129,7 @@ export class RenderSystem {
         if (gameState !== GameState.MENU) {
             if (gameState !== GameState.GAME_OVER) {
                 
-                this.drawEntity(player, weaponLevel, playerPrimaryColor, playerSecondaryColor, playerCombine);
+                this.drawEntity(player, weaponLevel, playerLevel, playerPrimaryColor, playerSecondaryColor, playerCombine);
 
                 // Draw Shield
                 if (shield > 0) {
@@ -235,7 +236,7 @@ export class RenderSystem {
         this.ctx.restore();
     }
 
-    drawEntity(e: Entity, weaponLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean) {
+    drawEntity(e: Entity, weaponLevel?: number, playerLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean) {
         this.ctx.save();
         this.ctx.translate(Math.round(e.x), Math.round(e.y));
 
@@ -284,7 +285,7 @@ export class RenderSystem {
             this.ctx.lineTo(0, 40 + Math.random() * 10);
             this.ctx.fill();
 
-            // Draw Weapon Level
+            // Draw Player Level
             this.ctx.save();
             this.ctx.rotate(-bankAngle); // Cancel rotation for text
             this.ctx.fillStyle = '#00ffff';
@@ -292,7 +293,7 @@ export class RenderSystem {
             this.ctx.textAlign = 'center';
             this.ctx.shadowColor = '#00ffff';
             this.ctx.shadowBlur = 5;
-            this.ctx.fillText(`LV.${weaponLevel || 1}`, 0, -50);
+            this.ctx.fillText(`LV.${playerLevel || 1}`, 0, -50);
             this.ctx.globalAlpha = 1.0;
             this.ctx.globalCompositeOperation = 'source-over';
 

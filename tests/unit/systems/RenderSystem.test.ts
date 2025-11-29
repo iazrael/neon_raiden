@@ -128,7 +128,7 @@ describe('RenderSystem', () => {
         vx: 0
       };
 
-      renderSystem.drawEntity(player, 3);
+      renderSystem.drawEntity(player, undefined, 3);
 
       // Check that the context was translated to the player's position
       expect(mockCanvasContext.save).toHaveBeenCalled();
@@ -308,6 +308,7 @@ describe('RenderSystem', () => {
         shield,
         screenShake,
         weaponLevel,
+        1,
         environmentElements,
         showBossDefeatAnimation,
         bossDefeatTimer

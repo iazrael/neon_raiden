@@ -16,6 +16,7 @@ export const BossWeaponConfig: Record<BossWeaponType, BossWeaponEntity> = {
         fireRate: 0.05,
         cooldown: 0,
         color: '#ff4444',
+        maxLevel: 9,
     },
     [BossWeaponType.TARGETED]: {
         type: BossWeaponType.TARGETED,
@@ -28,6 +29,7 @@ export const BossWeaponConfig: Record<BossWeaponType, BossWeaponEntity> = {
         fireRate: 0.05,
         cooldown: 0,
         color: '#ff8844',
+        maxLevel: 9,
     },
     [BossWeaponType.SPREAD]: {
         type: BossWeaponType.SPREAD,
@@ -40,6 +42,7 @@ export const BossWeaponConfig: Record<BossWeaponType, BossWeaponEntity> = {
         fireRate: 0.05,
         cooldown: 0,
         color: '#44ff88',
+        maxLevel: 9,
     },
     [BossWeaponType.HOMING]: {
         type: BossWeaponType.HOMING,
@@ -52,6 +55,7 @@ export const BossWeaponConfig: Record<BossWeaponType, BossWeaponEntity> = {
         fireRate: 0.05,
         cooldown: 0,
         color: '#44ffff',
+        maxLevel: 9,
     },
     [BossWeaponType.LASER]: {
         type: BossWeaponType.LASER,
@@ -64,5 +68,6 @@ export const BossWeaponConfig: Record<BossWeaponType, BossWeaponEntity> = {
         fireRate: 0.05,
         cooldown: 0,
         color: '#ff44ff',
+        maxLevel: 9,
     },
 };

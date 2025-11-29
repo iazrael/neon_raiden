@@ -22,5 +22,20 @@ export const PlayerConfig: FighterEntity = {
     initialBombs: 3,
     maxBombs: 9,
     maxShield: 70,
-    hitboxShrink: 0
+    hitboxShrink: 0,
+    leveling: {
+        maxLevel: 20,
+        baseScoreForLevel1: 10000,
+        scoreGrowthFactor: 2,
+        bonusesPerLevel: {
+            maxHpFlat: 20,
+            maxShieldFlat: 10,
+            defensePct: 1,
+            fireRatePct: 1,
+            damagePct: 1,
+            defensePctMax: 15,
+            fireRatePctMax: 15,
+            damagePctMax: 15
+        }
+    }
 };

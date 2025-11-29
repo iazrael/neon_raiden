@@ -22,7 +22,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 100,
         ratePerLevel: 2,
         bullet: BulletConfigs[BulletType.VULCAN],
-        sprite: 'bullet_vulcan'
+        sprite: 'bullet_vulcan',
+        maxLevel: 9
     },
     [WeaponType.LASER]: {
         type: WeaponType.LASER,
@@ -39,7 +40,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 120,
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.LASER],
-        sprite: 'bullet_laser'
+        sprite: 'bullet_laser',
+        maxLevel: 9
     },
     [WeaponType.MISSILE]: {
         type: WeaponType.MISSILE,
@@ -56,7 +58,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 350,
         ratePerLevel: 15,
         bullet: BulletConfigs[BulletType.MISSILE],
-        sprite: 'bullet_missile'
+        sprite: 'bullet_missile',
+        maxLevel: 9
     },
     [WeaponType.WAVE]: {
         type: WeaponType.WAVE,
@@ -73,7 +76,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 400,
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.WAVE],
-        sprite: 'bullet_wave'
+        sprite: 'bullet_wave',
+        maxLevel: 9
     },
     [WeaponType.PLASMA]: {
         type: WeaponType.PLASMA,
@@ -90,7 +94,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 600,
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.PLASMA],
-        sprite: 'bullet_plasma'
+        sprite: 'bullet_plasma',
+        maxLevel: 9
     },
     [WeaponType.TESLA]: {
         type: WeaponType.TESLA,
@@ -107,7 +112,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 200,
         ratePerLevel: 10,
         bullet: BulletConfigs[BulletType.TESLA],
-        sprite: 'bullet_tesla'
+        sprite: 'bullet_tesla',
+        maxLevel: 9
     },
     [WeaponType.MAGMA]: {
         type: WeaponType.MAGMA,
@@ -124,7 +130,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 200,
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.MAGMA],
-        sprite: 'bullet_magma'
+        sprite: 'bullet_magma',
+        maxLevel: 9
     },
     [WeaponType.SHURIKEN]: {
         type: WeaponType.SHURIKEN,
@@ -141,6 +148,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         baseFireRate: 300,
         ratePerLevel: 30,
         bullet: BulletConfigs[BulletType.SHURIKEN],
-        sprite: 'bullet_shuriken'
+        sprite: 'bullet_shuriken',
+        maxLevel: 9
     }
 };

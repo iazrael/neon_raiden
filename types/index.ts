@@ -101,6 +101,8 @@ export interface Entity {
   phaseGlowColor?: string; // Boss phase transition glow color
   phaseGlowUntil?: number; // Boss phase transition glow expiration timestamp
   hitFlashUntil?: number;
+  playerLevel?: number;
+  defensePct?: number;
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

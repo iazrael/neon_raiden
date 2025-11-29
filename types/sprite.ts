@@ -117,7 +117,7 @@ export enum PowerupType {
     HP = 'hp',          // 生命值恢复
     BOMB = 'bomb',      // 炸弹
     OPTION = 'option',  // 僚机
-    
+
     // 新增容错道具
     TEMP_SHIELD = 'temp_shield',  // 临时护盾
     TIME_SLOW = 'time_slow'       // 时间减缓
@@ -187,6 +187,38 @@ export interface FighterEntity extends BaseEntityMeta {
     maxShield: number;          // 最大护盾值
     hitboxShrink: number;       // 碰撞箱缩小比例
     sprite: string;             // 精灵图名称
+    leveling: PlayerLevelingConfig; // 战机升级配置
+}
+
+/**
+ * 战机升级配置
+ */
+export interface PlayerLevelingConfig {
+    /** 最高可达到的战机等级（达到后不再升级） */
+    maxLevel: number;
+    /** 升至2级所需的基础得分（后续按倍数递增） */
+    baseScoreForLevel1: number;
+    /** 每级所需得分的增长倍数（例如2表示每级翻倍） */
+    scoreGrowthFactor: number;
+    /** 每升一级所获得的属性增益（按级叠加） */
+    bonusesPerLevel: {
+        /** 每级提升的最大生命值（点数） */
+        maxHpFlat: number;
+        /** 每级提升的护盾上限（点数） */
+        maxShieldFlat: number;
+        /** 每级提升的伤害减免百分比（%），受上限约束 */
+        defensePct: number;
+        /** 每级提升的射速百分比（%），受上限约束（最终射速=基础×(1-累计加成)） */
+        fireRatePct: number;
+        /** 每级提升的武器伤害百分比（%），受上限约束 */
+        damagePct: number;
+        /** 防御提升的累计百分比上限（%），达到上限不再增加 */
+        defensePctMax?: number;
+        /** 射速提升的累计百分比上限（%），达到上限不再增加 */
+        fireRatePctMax?: number;
+        /** 伤害提升的累计百分比上限（%），达到上限不再增加 */
+        damagePctMax?: number;
+    };
 }
 
 /**
@@ -202,6 +234,7 @@ export interface WeaponEntity extends BaseEntityMeta {
     bullet: BulletEntity;       // 子弹配置
     sprite: string;             // 精灵图名称
     baseSpeed?: number;         // 基准速度（用于DPS计算，默认为15）
+    maxLevel?: number;          // 最高等级（默认9，用于展示与约束）
 }
 
 /**
@@ -246,6 +279,7 @@ export interface BossWeaponEntity extends BaseEntityMeta {
     fireRate?: number;          // 开火频率
     damage?: number;            // 伤害值
     cooldown?: number;          // 冷却时间（毫秒）
+    maxLevel?: number;          // 最高等级（用于展示与数值边界）
 }
 
 /**

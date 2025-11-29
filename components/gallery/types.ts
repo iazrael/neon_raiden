@@ -1,5 +1,5 @@
 import { WeaponType, EnemyType, BossWeaponType, FighterEntity } from '@/types';
-import { WeaponConfig, EnemyConfig, BossConfig, PlayerConfig } from '@/game/config';
+import { WeaponConfig, EnemyConfig, BossConfig } from '@/game/config';
 
 export interface BaseItem {
   name: string;
