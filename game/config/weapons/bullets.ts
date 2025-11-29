@@ -22,7 +22,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Laser Beam',
         chineseName: '量子穿刺光束',
         describe: '通过量子纠缠技术聚焦的高能光束武器,能够无视常规护盾直接穿透目标核心,在空间中留下短暂的量子残影,对分子结构造成不可逆的解离,是精准狙击的科技结晶。',
-        color: 'rgba(63, 196, 240, 1)',
+        color: '#3fc4f0ff',
         size: { width: 8, height: 50 },
         sprite: 'bullet_laser'
     },
@@ -32,7 +32,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Homing Missile',
         chineseName: '幽灵追踪导弹',
         describe: '搭载第五代AI导航系统的智能导弹,通过量子雷达锁定目标生命信号,可进行多次空间折跃追击,弹头内置反物质炸药,接触瞬间释放强大的能量,绽放出致命的等离子爆炸。',
-        color: 'rgba(202, 10, 199, 1)',
+        color: '#ca0ac7ff',
         size: { width: 16, height: 32 },
         sprite: 'bullet_missile'
     },
@@ -42,7 +42,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Wave Cannon',
         chineseName: '相位海啸炮',
         describe: '通过大量共振水晶同步激发的宽频能量波,形成覆盖大范围扇区的相位潮汐,穿透目标时触发连锁共振反应,在战场上掀起蓝色的能量海啸,可同时瓦解密集阵型中的所有目标。',
-        color: 'rgba(30, 141, 231, 1)',
+        color: '#1e8de7ff',
         size: { width: 60, height: 24 },
         sprite: 'bullet_wave'
     },
@@ -62,7 +62,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Tesla Bolt',
         chineseName: '特斯拉链式闪电',
         describe: '释放超高压电弧武器,通过离子化空气在敌群间形成连锁传导,可多次跳跃目标并递增伤害,编织出覆盖全场的紫色闪电网络,对电子系统造成永久性瘫痪。',
-        color: 'rgba(16, 83, 217, 1)',
+        color: '#1053d9ff',
         size: { width: 16, height: 64 },
         sprite: 'bullet_tesla'
     },

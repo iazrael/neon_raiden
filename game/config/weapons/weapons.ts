@@ -14,7 +14,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '星裂火神炮',
         describe: '智能弹道预测系统根据敌机密度自动调整扇形覆盖,纳米级表面处理确保远距离精准打击,是可靠而优雅的基础武装。',
 
-        color: '#fff',
+        color: '#ebdd17ff',
         baseDamage: 10,
         damagePerLevel: 3.5,
         speed: 15,
@@ -31,7 +31,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '裂空镭射炮',
         describe: '零点能量凝聚核心生成的高聚焦光束,升级时激活谐振腔使光束分裂增宽,形成穿透网络。每道光束穿透多个目标后仍保持80%能量,是对抗集群的终极利器。',
 
-        color: '#f0f',
+        color: '#3fc4f0ff',
         baseDamage: 6,
         damagePerLevel: 2.5,
         speed: 25,
@@ -48,7 +48,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '幽影追踪弹',
         describe: '自主学习型量子计算机同时锁定多个高价值目标,复合推进技术在接近时加速至亚光速,高爆核心产生定向能爆炸,即使最敏捷的敌机也难逃毁灭。',
 
-        color: '#f00',
+        color: '#ca0ac7ff',
         baseDamage: 15,
         damagePerLevel: 6,
         speed: 15,
@@ -65,7 +65,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '宙域震荡波',
         describe: '特殊晶体阵列产生的宽幅能量震荡波,升级时解锁更多晶体使波宽呈指数增长,穿过目标时释放脉冲能量引发连锁反应,是清场的终极武器。',
 
-        color: '#0ff',
+        color: '#1e8de7ff',
         baseDamage: 20,
         damagePerLevel: 6,
         speed: 12,
@@ -96,10 +96,10 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         type: WeaponType.TESLA,
         id: 'weapon_tesla',
         name: 'Tesla Coil',
-        chineseName: '连锁电磁脉冲',
+        chineseName: '量子电磁炮',
         describe: '量子电磁脉冲系统生成高浓度电浆团,击中目标后电流在敌人间跳跃传导形成闭合电路。升级后传导距离增加、连锁次数增多,在密集战场中发挥最大效能。',
 
-        color: '#ccf',
+        color: '#1053d9ff',
         baseDamage: 15,
         damagePerLevel: 4,
         speed: 25,
@@ -133,7 +133,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '量子飞镖',
         describe: '记忆金属与量子核心打造的特制飞镖,在战场边界完美反弹并通过量子感应追踪敌人。每次反弹吸收环境能量使伤害指数增长,熟练飞行员可利用复杂轨迹造成毁灭性打击。',
 
-        color: '#ccc',
+        color: '#ccccccff',
         baseDamage: 12,
         damagePerLevel: 3,
         speed: 12,
