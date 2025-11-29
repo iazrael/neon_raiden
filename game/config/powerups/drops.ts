@@ -20,10 +20,10 @@ export const PowerupDropRates: Record<PowerupType, number> = {
     [PowerupType.MAGMA]: 0.08,
     [PowerupType.WAVE]: 0.04,
     [PowerupType.PLASMA]: 0.02,
-    [PowerupType.BOMB]: 0.01,
+    [PowerupType.BOMB]: 0.1,
     [PowerupType.OPTION]: 0.02,
-    [PowerupType.TEMP_SHIELD]: 0.01,
-    [PowerupType.TIME_SLOW]: 0.01
+    [PowerupType.TEMP_SHIELD]: 0.1,
+    [PowerupType.TIME_SLOW]: 0.1
 };
 
 // 存储动态掉率的全局状态
@@ -41,7 +41,7 @@ export function setDropContext(level: number, score: number, weaponLevel: number
     playerScore = score;
     playerWeaponLevel = weaponLevel;
     playerHpRatio = hpRatio;
-    
+
     // 根据上下文重新计算动态掉率
     updateDynamicDropRates();
 }
@@ -60,19 +60,19 @@ export function resetDropContext(): void {
 function updateDynamicDropRates(): void {
     // 基于原始掉率
     dynamicDropRates = { ...PowerupDropRates };
-    
+
     // 根据关卡进度调整僚机道具掉率（从第5关开始增加）
     if (currentLevel >= 5) {
         const levelBonus = Math.min(0.05, (currentLevel - 4) * 0.01); // 每关增加1%，最多增加5%
         dynamicDropRates[PowerupType.OPTION] += levelBonus;
     }
-    
+
     // 根据玩家表现调整掉率
     // 玩家分数较低时，稍微提高Power道具掉率
     if (playerScore < 10000) {
         dynamicDropRates[PowerupType.POWER] += 0.05;
     }
-    
+
     // 玩家生命值较低时，提高HP道具掉率
     if (playerHpRatio < 0.3) {
         dynamicDropRates[PowerupType.HP] += 0.10;

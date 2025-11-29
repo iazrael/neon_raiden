@@ -133,6 +133,47 @@ export class SpriteGenerator {
             } else {
                 img.addEventListener('load', drawIcon);
             }
+        } else if (type === PowerupType.TEMP_SHIELD) {
+            // Draw Shield Icon
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // Shield shape
+            ctx.moveTo(0, -10);
+            ctx.bezierCurveTo(10, -10, 10, -5, 10, 0);
+            ctx.bezierCurveTo(10, 10, 0, 12, 0, 12);
+            ctx.bezierCurveTo(0, 12, -10, 10, -10, 0);
+            ctx.bezierCurveTo(-10, -5, -10, -10, 0, -10);
+            ctx.stroke();
+
+            // Inner cross
+            ctx.beginPath();
+            ctx.moveTo(0, -6);
+            ctx.lineTo(0, 6);
+            ctx.moveTo(-6, 0);
+            ctx.lineTo(6, 0);
+            ctx.stroke();
+        } else if (type === PowerupType.TIME_SLOW) {
+            // Draw Hourglass Icon
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-8, -10);
+            ctx.lineTo(8, -10);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(8, 10);
+            ctx.lineTo(-8, 10);
+            ctx.lineTo(0, 0);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Sand
+            ctx.fillStyle = '#00ffff';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(4, 5);
+            ctx.lineTo(-4, 5);
+            ctx.fill();
         } else {
             ctx.fillStyle = color;
             ctx.font = 'bold 20px Arial';

@@ -11,10 +11,6 @@ export const PowerupEffects = {
     hpRestoreAmount: 30,
     shieldRestoreAmount: 25,
     weaponTypeMap: {
-        [PowerupType.POWER]: null,
-        [PowerupType.HP]: null,
-        [PowerupType.BOMB]: null,
-        [PowerupType.OPTION]: null,
         [PowerupType.VULCAN]: WeaponType.VULCAN,
         [PowerupType.LASER]: WeaponType.LASER,
         [PowerupType.MISSILE]: WeaponType.MISSILE,

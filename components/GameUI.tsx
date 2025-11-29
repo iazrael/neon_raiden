@@ -83,7 +83,7 @@ export const GameUI: React.FC<GameUIProps> = ({
               {/* Equipped Weapons */}
               <div className="flex items-center gap-2">
                 <div className="text-xs">
-                  <span 
+                  <span
                     className="font-bold"
                     style={{ color: WeaponConfig[weaponType!]?.color || '#0ff' }}
                   >
@@ -98,7 +98,7 @@ export const GameUI: React.FC<GameUIProps> = ({
                     </span>
                   )}
                   {secondaryWeapon && (
-                    <span 
+                    <span
                       className="ml-1"
                       style={{ color: WeaponConfig[secondaryWeapon!]?.color || '#f0f' }}
                     >
@@ -156,7 +156,7 @@ export const GameUI: React.FC<GameUIProps> = ({
 
       {/* P2 Combo Display */}
       {state === GameState.PLAYING && comboState && comboState.count > 0 && (
-        <div className="absolute top-36 right-4 pointer-events-none z-40 flex flex-col items-end gap-2">
+        <div className="absolute top-28 right-4 pointer-events-none z-40 flex flex-col items-end gap-2">
           {/* Combo Count */}
           <div
             className="text-right transition-all duration-200"
@@ -358,7 +358,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="text-3xl mb-8 font-light">
             SCORE: <span className="text-white font-bold">{score}</span>
           </div>
-          <div className="text-xl mb-6 font-mono tracking-wider text-red-200">LEVEL: {level}</div>
+          <div className="text-2xl mb-6 font-mono tracking-wider text-red-200">MAX LEVEL: {level}</div>
           <button
             onClick={() => {
               playClick?.(ClickType.CONFIRM);

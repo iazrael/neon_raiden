@@ -345,6 +345,25 @@ export class GameEngine {
         }
 
         const timeScale = dt / 16.66;
+        // Player's time scale (unaffected by slow motion)
+        // If timeSlowActive is true, dt was halved, so we need to double it back for player to be normal speed relative to real time
+        const playerTimeScale = this.timeSlowActive ? timeScale * 2 : timeScale;
+
+        // Handle Shield Timer & Audio
+        if (this.player.invulnerable && this.player.invulnerableTimer && this.player.invulnerableTimer > 0) {
+            this.player.invulnerableTimer -= (this.timeSlowActive ? dt * 2 : dt); // Shield timer runs in real time
+            this.audio.playShieldLoop();
+
+            if (this.player.invulnerableTimer <= 0) {
+                this.player.invulnerable = false;
+                this.player.invulnerableTimer = 0;
+                this.audio.stopShieldLoop();
+            }
+        } else if (this.player.invulnerable && (!this.player.invulnerableTimer || this.player.invulnerableTimer <= 0)) {
+            // Cleanup if timer is missing or invalid but flag is set (safety)
+            this.player.invulnerable = false;
+            this.audio.stopShieldLoop();
+        }
 
         // P2 Update combo timer
         this.comboSys.update(dt);
@@ -375,7 +394,7 @@ export class GameEngine {
         }
 
         // Player Movement
-        let speed = this.playerConfig.speed * timeScale;
+        let speed = this.playerConfig.speed * playerTimeScale;
 
         // P2 Apply energy storm slow effect
         if (this.envSys.isPlayerInStorm(this.player)) {
@@ -419,7 +438,7 @@ export class GameEngine {
         });
 
         // Fire
-        this.fireTimer += dt;
+        this.fireTimer += (this.timeSlowActive ? dt * 2 : dt); // Fire rate based on real time
         const baseFireRate = this.weaponSys.getFireRate(this.weaponType, this.weaponLevel);
         const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.playerFireRateBonusPct)));
         if (this.fireTimer > fireRate) {
@@ -472,7 +491,7 @@ export class GameEngine {
             const levelDuration = (Date.now() - this.levelStartTime) / 1000; // in seconds
             const minDuration = BossSpawnConfig.minLevelDuration;
             const minProgress = BossSpawnConfig.minLevelProgress;
-            
+
             // Debug Mode: Spawn boss after 10 seconds and 10 enemy kills
             if (this.debugModeEnabled) {
                 if (levelDuration >= 10 && this.debugEnemyKillCount >= 10 && !this.isLevelTransitioning) {
@@ -1202,6 +1221,7 @@ export class GameEngine {
                 // 时间减缓 - 减缓游戏速度3秒
                 this.timeSlowActive = true;
                 this.timeSlowTimer = 3000; // 3秒
+                this.audio.playSlowMotionEnter();
                 break;
 
             default:
@@ -1295,11 +1315,11 @@ export class GameEngine {
     private isPlayerColliding(player: Entity, other: Entity): boolean {
         // 获取玩家的碰撞箱收缩比例
         const shrinkFactor = this.playerConfig.hitboxShrink || 0;
-        
+
         // 计算收缩后的宽度和高度
         const playerWidth = player.width * (1 - shrinkFactor);
         const playerHeight = player.height * (1 - shrinkFactor);
-        
+
         // 使用收缩后的尺寸进行碰撞检测
         return (
             player.x - playerWidth / 2 < other.x + other.width / 2 &&
@@ -1360,7 +1380,8 @@ export class GameEngine {
             this.bossDefeatTimer,
             primaryColor,
             secondaryColor,
-            canCombine
+            canCombine,
+            this.timeSlowActive
         );
     }
 

@@ -511,4 +511,82 @@ export class AudioSystem {
     osc2.start(now);
     osc2.stop(now + 0.3);
   }
+
+  private shieldOsc: OscillatorNode | null = null;
+  private shieldGain: GainNode | null = null;
+
+  playShieldLoop() {
+    if (!this.ctx || !this.masterGain) return;
+    if (this.shieldOsc) return; // Already playing
+
+    const now = this.ctx.currentTime;
+    this.shieldOsc = this.ctx.createOscillator();
+    this.shieldGain = this.ctx.createGain();
+
+    this.shieldOsc.connect(this.shieldGain);
+    this.shieldGain.connect(this.masterGain);
+
+    // Cheerful high-pitched sine wave loop
+    this.shieldOsc.type = 'sine';
+    this.shieldOsc.frequency.setValueAtTime(880, now);
+
+    // LFO for vibrato effect
+    const lfo = this.ctx.createOscillator();
+    lfo.frequency.value = 8; // 8Hz vibrato
+    const lfoGain = this.ctx.createGain();
+    lfoGain.gain.value = 20; // Depth
+    lfo.connect(lfoGain);
+    lfoGain.connect(this.shieldOsc.frequency);
+    lfo.start(now);
+
+    this.shieldGain.gain.setValueAtTime(0, now);
+    this.shieldGain.gain.linearRampToValueAtTime(0.1, now + 0.5); // Fade in
+
+    this.shieldOsc.start(now);
+
+    // Store LFO to stop it later (hacky, ideally track it properly)
+    (this.shieldOsc as any)._lfo = lfo;
+  }
+
+  stopShieldLoop() {
+    if (!this.ctx || !this.shieldOsc || !this.shieldGain) return;
+
+    const now = this.ctx.currentTime;
+    this.shieldGain.gain.cancelScheduledValues(now);
+    this.shieldGain.gain.setValueAtTime(this.shieldGain.gain.value, now);
+    this.shieldGain.gain.linearRampToValueAtTime(0, now + 0.5); // Fade out
+
+    const osc = this.shieldOsc;
+    const lfo = (osc as any)._lfo;
+
+    setTimeout(() => {
+      osc.stop();
+      if (lfo) lfo.stop();
+      osc.disconnect();
+    }, 500);
+
+    this.shieldOsc = null;
+    this.shieldGain = null;
+  }
+
+  playSlowMotionEnter() {
+    if (!this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    // Deep "warp" sound
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 1.0);
+
+    gain.gain.setValueAtTime(0.5, now);
+    gain.gain.linearRampToValueAtTime(0, now + 1.0);
+
+    osc.start(now);
+    osc.stop(now + 1.0);
+  }
 }

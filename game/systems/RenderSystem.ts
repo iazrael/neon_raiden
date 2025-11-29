@@ -79,7 +79,8 @@ export class RenderSystem {
         bossDefeatTimer: number = 0,
         playerPrimaryColor?: string,
         playerSecondaryColor?: string,
-        playerCombine?: boolean
+        playerCombine?: boolean,
+        timeSlowActive: boolean = false
     ) {
         this.ctx.save();
 
@@ -126,9 +127,18 @@ export class RenderSystem {
             this.ctx.stroke();
         });
 
+        // Slow Motion Effect (Screen Tint/Blur)
+        if (timeSlowActive) {
+            this.ctx.save();
+            this.ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
+            this.ctx.fillRect(0, 0, this.width, this.height);
+            // Optional: Add a subtle chromatic aberration or scanline effect here if desired
+            this.ctx.restore();
+        }
+
         if (gameState !== GameState.MENU) {
             if (gameState !== GameState.GAME_OVER) {
-                
+
                 this.drawEntity(player, weaponLevel, playerLevel, playerPrimaryColor, playerSecondaryColor, playerCombine);
 
                 // Draw Shield
@@ -217,22 +227,22 @@ export class RenderSystem {
 
         this.ctx.save();
         this.ctx.translate(Math.round(player.x), Math.round(player.y));
-        
+
         const radius = Math.max(player.width, player.height) / 2;
         const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
-        
+
         // Use player's primary weapon color for glow
         const glowColor = color || '#00ffff';
-        
+
         gradient.addColorStop(0, glowColor);
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
+
         this.ctx.fillStyle = gradient;
         this.ctx.globalCompositeOperation = 'screen';
         this.ctx.beginPath();
         this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
         this.ctx.fill();
-        
+
         this.ctx.restore();
     }
 
@@ -270,6 +280,23 @@ export class RenderSystem {
         }
 
         if (e.type === EntityType.PLAYER) {
+
+            // Draw Golden Outline for Invulnerability (Shield Powerup)
+            if (e.invulnerable) {
+                const t = Date.now() / 100;
+                const alpha = 0.6 + Math.sin(t) * 0.4; // Pulsing
+                const radius = Math.max(e.width, e.height) / 2 + 5;
+
+                this.ctx.save();
+                this.ctx.shadowColor = '#ffd700';
+                this.ctx.shadowBlur = 15;
+                this.ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.restore();
+            }
 
             // this.drawPlayerGlow(player, playerPrimaryColor || '#00ffff');
 
@@ -329,11 +356,11 @@ export class RenderSystem {
 
         if (e.type === EntityType.BOSS) {
             this.ctx.rotate(Math.PI);
-            
+
             // Calculate dynamic bar length based on maxHp
             const baseBarLength = Math.sqrt(e.maxHp) * 2; // Using square root to make growth more gradual
             const barHeight = 8; // Increased height for better visibility
-            
+
             // Determine bar color based on health percentage
             const hpPercent = e.hp / e.maxHp;
             let barColor;
@@ -344,15 +371,15 @@ export class RenderSystem {
             } else {
                 barColor = '#ff0000'; // Red
             }
-            
+
             // Draw background bar
             this.ctx.fillStyle = 'rgba(255,0,0,0.5)';
-            this.ctx.fillRect(-baseBarLength/2, 0, baseBarLength, barHeight);
-            
+            this.ctx.fillRect(-baseBarLength / 2, 0, baseBarLength, barHeight);
+
             // Draw current health bar
             this.ctx.fillStyle = barColor;
             const currentBarLength = baseBarLength * (e.hp / e.maxHp);
-            this.ctx.fillRect(-baseBarLength/2, 0, currentBarLength, barHeight);
+            this.ctx.fillRect(-baseBarLength / 2, 0, currentBarLength, barHeight);
 
             // P1 Boss Invulnerability Visual Indicator
             if (e.invulnerable) {
