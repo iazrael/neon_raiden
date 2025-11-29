@@ -75,7 +75,10 @@ export class RenderSystem {
         weaponLevel: number,
         environmentElements: EnvironmentElement[] = [], // P2 Environment elements
         showBossDefeatAnimation: boolean = false,
-        bossDefeatTimer: number = 0
+        bossDefeatTimer: number = 0,
+        playerPrimaryColor?: string,
+        playerSecondaryColor?: string,
+        playerCombine?: boolean
     ) {
         this.ctx.save();
 
@@ -124,7 +127,9 @@ export class RenderSystem {
 
         if (gameState !== GameState.MENU) {
             if (gameState !== GameState.GAME_OVER) {
-                this.drawEntity(player, weaponLevel);
+                
+                this.drawEntity(player, weaponLevel, playerPrimaryColor, playerSecondaryColor, playerCombine);
+
                 // Draw Shield
                 if (shield > 0) {
                     this.ctx.save();
@@ -206,11 +211,67 @@ export class RenderSystem {
         this.ctx.restore();
     }
 
-    drawEntity(e: Entity, weaponLevel?: number) {
+    drawPlayerGlow(player: Entity, color: string) {
+        if (player.hp <= 0) return;
+
+        this.ctx.save();
+        this.ctx.translate(Math.round(player.x), Math.round(player.y));
+        
+        const radius = Math.max(player.width, player.height) / 2;
+        const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+        
+        // Use player's primary weapon color for glow
+        const glowColor = color || '#00ffff';
+        
+        gradient.addColorStop(0, glowColor);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.globalCompositeOperation = 'screen';
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        this.ctx.restore();
+    }
+
+    drawEntity(e: Entity, weaponLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean) {
         this.ctx.save();
         this.ctx.translate(Math.round(e.x), Math.round(e.y));
 
         if (e.type === EntityType.PLAYER) {
+            const t = Date.now();
+            const tintColor = playerCombine && playerSecondaryColor ? ((Math.floor(t / 300) % 2) === 0 ? playerPrimaryColor : playerSecondaryColor) : playerPrimaryColor;
+            if (tintColor) {
+                const radius = Math.max(e.width, e.height) / 2;
+                this.ctx.globalAlpha = 0.5;
+                this.ctx.globalCompositeOperation = 'source-atop';
+                const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+                gradient.addColorStop(0, tintColor);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                this.ctx.fillStyle = gradient;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1.0;
+                this.ctx.globalCompositeOperation = 'source-over';
+            }
+
+            if (e.hitFlashUntil && e.hitFlashUntil > Date.now()) {
+                const radius = Math.max(e.width, e.height) / 2;
+                this.ctx.globalCompositeOperation = 'overlay';
+                this.ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.globalCompositeOperation = 'source-over';
+            }
+        }
+
+        if (e.type === EntityType.PLAYER) {
+
+            // this.drawPlayerGlow(player, playerPrimaryColor || '#00ffff');
+
             const bankAngle = Math.max(-0.3, Math.min(0.3, (e.vx || 0) * 0.05));
             this.ctx.rotate(bankAngle);
 
@@ -297,6 +358,23 @@ export class RenderSystem {
                 );
 
                 // Reset shadow
+                this.ctx.shadowBlur = 0;
+            }
+
+            if (e.phaseGlowUntil && e.phaseGlowUntil > Date.now()) {
+                const alpha = 0.4;
+                const glowColor = e.phaseGlowColor || '#ffd700';
+                this.ctx.shadowColor = glowColor;
+                this.ctx.shadowBlur = 25;
+                this.ctx.strokeStyle = `${glowColor}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+                this.ctx.lineWidth = 4;
+                const padding = 14;
+                this.ctx.strokeRect(
+                    -e.width / 2 - padding,
+                    -e.height / 2 - padding,
+                    e.width + padding * 2,
+                    e.height + padding * 2
+                );
                 this.ctx.shadowBlur = 0;
             }
         }

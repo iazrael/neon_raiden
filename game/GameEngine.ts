@@ -1,6 +1,6 @@
 import { AudioSystem } from './systems/AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals, WeaponConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -868,6 +868,7 @@ export class GameEngine {
     }
 
     takeDamage(amount: number) {
+        const prevShield = this.shield;
         if (this.shield > 0) {
             this.shield -= amount;
             if (this.shield < 0) {
@@ -879,6 +880,11 @@ export class GameEngine {
             this.player.hp -= amount;
             this.screenShake = 10;
         }
+        if (prevShield > 0 && this.shield === 0) {
+            this.audio.playShieldBreak();
+        }
+        this.player.hitFlashUntil = Date.now() + 150;
+        this.audio.playHit();
         this.onHpChange(this.player.hp);
     }
 
@@ -1237,7 +1243,7 @@ export class GameEngine {
         return weapons;
     }
 
-    private getShieldCap(): number {
+    getShieldCap(): number {
         const base = PlayerConfig.maxShield;
         const comboLevel = this.comboSys.getState().level;
         let bonus = 0;
@@ -1249,6 +1255,9 @@ export class GameEngine {
     }
 
     draw() {
+        const primaryColor = WeaponConfig[this.weaponType]?.color;
+        const secondaryColor = this.secondaryWeapon ? WeaponConfig[this.secondaryWeapon]?.color : undefined;
+        const canCombine = this.secondaryWeapon ? this.synergySys.canCombine(this.weaponType, this.secondaryWeapon) : false;
         this.render.draw(
             this.state,
             this.player,
@@ -1267,7 +1276,10 @@ export class GameEngine {
             this.weaponLevel,
             this.envSys.getAllElements(), // P2 Pass environment elements
             this.showBossDefeatAnimation,
-            this.bossDefeatTimer
+            this.bossDefeatTimer,
+            primaryColor,
+            secondaryColor,
+            canCombine
         );
     }
 

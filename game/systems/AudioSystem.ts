@@ -272,6 +272,46 @@ export class AudioSystem {
     osc.stop(now + 0.05);
   }
 
+  playShieldBreak() {
+    if (!this.ctx || !this.masterGain) return;
+    const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.2, this.ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      // High-frequency burst with decay
+      const t = i / this.ctx.sampleRate;
+      data[i] = (Math.random() * 2 - 1) * (1 - t);
+    }
+
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.6, this.ctx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 1200;
+
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(this.masterGain);
+    noise.start();
+    noise.stop(this.ctx.currentTime + 0.2);
+
+    const crack = this.ctx.createOscillator();
+    crack.type = 'square';
+    const crackGain = this.ctx.createGain();
+    crack.connect(crackGain);
+    crackGain.connect(this.masterGain);
+    const now = this.ctx.currentTime;
+    crack.frequency.setValueAtTime(600, now);
+    crack.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+    crackGain.gain.setValueAtTime(0.2, now);
+    crackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+    crack.start(now);
+    crack.stop(now + 0.12);
+  }
+
   playBomb() {
     if (!this.ctx || !this.masterGain) return;
     // Deep rumbling sweep

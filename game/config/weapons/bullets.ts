@@ -12,7 +12,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Vulcan Bullet',
         chineseName: '中子火神炮',
         describe: '采用超密度中子合金弹头,通过电磁加速器快速形成扇形弹幕网,每发子弹携带微型反应堆,在空间中划出炫目的等离子轨迹,是压制集群目标的终极火力方案。',
-        color: '#fff',
+        color: '#ebdd17ff',
         size: { width: 10, height: 20 },
         sprite: 'bullet_vulcan'
     },
@@ -22,7 +22,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Laser Beam',
         chineseName: '量子穿刺光束',
         describe: '通过量子纠缠技术聚焦的高能光束武器,能够无视常规护盾直接穿透目标核心,在空间中留下短暂的量子残影,对分子结构造成不可逆的解离,是精准狙击的科技结晶。',
-        color: '#f0f',
+        color: 'rgba(63, 196, 240, 1)',
         size: { width: 8, height: 50 },
         sprite: 'bullet_laser'
     },
@@ -32,7 +32,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Homing Missile',
         chineseName: '幽灵追踪导弹',
         describe: '搭载第五代AI导航系统的智能导弹,通过量子雷达锁定目标生命信号,可进行多次空间折跃追击,弹头内置反物质炸药,接触瞬间释放强大的能量,绽放出致命的等离子爆炸。',
-        color: '#f00',
+        color: 'rgba(202, 10, 199, 1)',
         size: { width: 16, height: 32 },
         sprite: 'bullet_missile'
     },
@@ -42,7 +42,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Wave Cannon',
         chineseName: '相位海啸炮',
         describe: '通过大量共振水晶同步激发的宽频能量波,形成覆盖大范围扇区的相位潮汐,穿透目标时触发连锁共振反应,在战场上掀起蓝色的能量海啸,可同时瓦解密集阵型中的所有目标。',
-        color: '#0ff',
+        color: 'rgba(30, 141, 231, 1)',
         size: { width: 60, height: 24 },
         sprite: 'bullet_wave'
     },
@@ -62,7 +62,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Tesla Bolt',
         chineseName: '特斯拉链式闪电',
         describe: '释放超高压电弧武器,通过离子化空气在敌群间形成连锁传导,可多次跳跃目标并递增伤害,编织出覆盖全场的紫色闪电网络,对电子系统造成永久性瘫痪。',
-        color: '#ccf',
+        color: 'rgba(16, 83, 217, 1)',
         size: { width: 16, height: 64 },
         sprite: 'bullet_tesla'
     },
@@ -82,7 +82,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Shuriken',
         chineseName: '量子回旋刃',
         describe: '采用单分子锋刃技术的回旋武器,边缘锋利度达原子级,可在战场边界间进行多次完美反弹,每次碰撞吸收动能使伤害递增,银色轨迹编织出无法躲避的死亡之网。',
-        color: '#ccc',
+        color: '#ccccccff',
         size: { width: 24, height: 24 },
         sprite: 'bullet_shuriken'
     },
@@ -103,7 +103,7 @@ export const BulletConfigs: Record<BulletType, BulletEntity> = {
         name: 'Enemy Beam',
         chineseName: '光束',
         describe: '聚焦水晶强化的高密度能量流,持续穿透装甲并形成高温熔蚀通道,对护盾系统造成持续压制。',
-        color: '#f97316',
+        color: '#f97316ff',
         size: { width: 12, height: 32 },
         sprite: 'bullet_enemy_beam'
     },

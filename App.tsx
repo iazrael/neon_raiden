@@ -17,6 +17,7 @@ function App() {
   const [gameState, setGameState] = useState<GameState>(GameState.MENU);
   const [hp, setHp] = useState(100);
   const [bombs, setBombs] = useState(0);
+  const [shieldPercent, setShieldPercent] = useState(0);
   const [showLevelTransition, setShowLevelTransition] = useState(false);
   const [levelTransitionTimer, setLevelTransitionTimer] = useState(0);
   const [maxLevelReached, setMaxLevelReached] = useState(1);
@@ -72,6 +73,10 @@ function App() {
       setWeaponType(engine.weaponType);
       setSecondaryWeapon(engine.secondaryWeapon);
 
+      const cap = engine.getShieldCap ? engine.getShieldCap() : 0;
+      const sp = cap > 0 ? Math.max(0, Math.min(100, Math.round((engine.shield / cap) * 100))) : 0;
+      setShieldPercent(sp);
+
       animationId = requestAnimationFrame(loop);
     };
 
@@ -118,6 +123,7 @@ function App() {
         activeSynergies={activeSynergies}
         weaponType={weaponType}
         secondaryWeapon={secondaryWeapon}
+        shieldPercent={shieldPercent}
         onOpenGallery={() => {
           setStateBeforeGallery(gameState);
           if (gameState === GameState.PLAYING) {

@@ -31,6 +31,49 @@ export enum BossPhase {
     PHASE_4 = 4
 }
 
+// ==================== 阶段颜色配置 ====================
+export const BossPhaseColors = {
+    [BossPhase.PHASE_1]: '#ffffff', // 普通
+    [BossPhase.PHASE_2]: '#ffd700', // 警告 - 金黄色
+    [BossPhase.PHASE_3]: '#ff4500', // 危险 - 橙红色
+    [BossPhase.PHASE_4]: '#8b0000'  // 致命 - 深红色
+};
+
+// ==================== Boss特殊技能常量 ====================
+export const BossAbilities = {
+    // DESTROYER
+    WINGMAN_SUPPORT: 'wingman_support',
+    DASH_ATTACK: 'dash_attack',
+    ENHANCED_BARRAGE: 'enhanced_barrage',
+    BERSERK_MODE: 'berserk_mode',
+    SPIRAL_BARRAGE: 'spiral_barrage',
+    LASER_SWEEP: 'laser_sweep',
+
+    // TITAN
+    CONTINUOUS_LASER: 'continuous_laser',
+    TRACKING_SHOT: 'tracking_shot',
+    RAPID_LASER: 'rapid_laser',
+    ENHANCED_TRACKING: 'enhanced_tracking',
+    ENERGY_BURST: 'energy_burst',
+    LASER_BARRAGE: 'laser_barrage',
+    OMNIDIRECTIONAL_FIRE: 'omnidirectional_fire',
+    FORTRESS_MODE: 'fortress_mode',
+
+    // APOCALYPSE
+    WEAPON_ROTATION: 'weapon_rotation',
+    PLASMA_VOLLEY: 'plasma_volley',
+    MISSILE_BARRAGE: 'missile_barrage',
+    ARMOR_SHIELD: 'armor_shield',
+    COUNTER_ATTACK: 'counter_attack',
+    ENERGY_BARRIER: 'energy_barrier',
+    BERSERK_RAGE: 'berserk_rage',
+    RAPID_FIRE: 'rapid_fire',
+    TRACKING_MISSILES: 'tracking_missiles',
+    LAST_STAND: 'last_stand',
+    SCREEN_CLEAR: 'screen_clear',
+    OMNIDIRECTIONAL_LASER: 'omnidirectional_laser'
+} as const;
+
 // ==================== 阶段配置接口 ====================
 export interface PhaseConfig {
     phase: BossPhase;
@@ -63,8 +106,8 @@ export const DESTROYER_PHASES: PhaseConfig[] = [
         fireRate: 1.0,
         bulletCount: 1.0,
         damageMultiplier: 1.0,
-        specialAbilities: ['wingman_support'],
-        color: '#ff6b6b',
+        specialAbilities: [BossAbilities.WINGMAN_SUPPORT],
+        color: BossPhaseColors[BossPhase.PHASE_1],
         flashEffect: false
     },
     {
@@ -76,8 +119,8 @@ export const DESTROYER_PHASES: PhaseConfig[] = [
         fireRate: 1.2,
         bulletCount: 1.3,
         damageMultiplier: 1.2,
-        specialAbilities: ['dash_attack', 'enhanced_barrage'],
-        color: '#ff4757',
+        specialAbilities: [BossAbilities.DASH_ATTACK, BossAbilities.ENHANCED_BARRAGE],
+        color: BossPhaseColors[BossPhase.PHASE_2],
         flashEffect: true
     },
     {
@@ -89,8 +132,8 @@ export const DESTROYER_PHASES: PhaseConfig[] = [
         fireRate: 1.5,
         bulletCount: 1.5,
         damageMultiplier: 1.5,
-        specialAbilities: ['berserk_mode', 'spiral_barrage', 'laser_sweep'],
-        color: '#ee5a6f',
+        specialAbilities: [BossAbilities.BERSERK_MODE, BossAbilities.SPIRAL_BARRAGE, BossAbilities.LASER_SWEEP],
+        color: BossPhaseColors[BossPhase.PHASE_3],
         flashEffect: true
     }
 ];
@@ -106,8 +149,8 @@ export const TITAN_PHASES: PhaseConfig[] = [
         fireRate: 1.0,
         bulletCount: 1.0,
         damageMultiplier: 1.0,
-        specialAbilities: ['continuous_laser', 'tracking_shot'],
-        color: '#44ff44',
+        specialAbilities: [BossAbilities.CONTINUOUS_LASER, BossAbilities.TRACKING_SHOT],
+        color: BossPhaseColors[BossPhase.PHASE_1],
         flashEffect: false
     },
     {
@@ -119,8 +162,8 @@ export const TITAN_PHASES: PhaseConfig[] = [
         fireRate: 1.5,
         bulletCount: 1.3,
         damageMultiplier: 1.3,
-        specialAbilities: ['rapid_laser', 'enhanced_tracking', 'energy_burst'],
-        color: '#66ff66',
+        specialAbilities: [BossAbilities.RAPID_LASER, BossAbilities.ENHANCED_TRACKING, BossAbilities.ENERGY_BURST],
+        color: BossPhaseColors[BossPhase.PHASE_2],
         flashEffect: true
     },
     {
@@ -132,8 +175,8 @@ export const TITAN_PHASES: PhaseConfig[] = [
         fireRate: 2.0,
         bulletCount: 1.8,
         damageMultiplier: 1.5,
-        specialAbilities: ['laser_barrage', 'omnidirectional_fire', 'fortress_mode'],
-        color: '#88ff88',
+        specialAbilities: [BossAbilities.LASER_BARRAGE, BossAbilities.OMNIDIRECTIONAL_FIRE, BossAbilities.FORTRESS_MODE],
+        color: BossPhaseColors[BossPhase.PHASE_3],
         flashEffect: true
     }
 ];
@@ -149,8 +192,8 @@ export const APOCALYPSE_PHASES: PhaseConfig[] = [
         fireRate: 1.0,
         bulletCount: 1.0,
         damageMultiplier: 1.0,
-        specialAbilities: ['weapon_rotation', 'plasma_volley', 'missile_barrage'],
-        color: '#9b59b6',
+        specialAbilities: [BossAbilities.WEAPON_ROTATION, BossAbilities.PLASMA_VOLLEY, BossAbilities.MISSILE_BARRAGE],
+        color: BossPhaseColors[BossPhase.PHASE_1],
         flashEffect: false
     },
     {
@@ -162,8 +205,8 @@ export const APOCALYPSE_PHASES: PhaseConfig[] = [
         fireRate: 1.2,
         bulletCount: 1.2,
         damageMultiplier: 1.3,
-        specialAbilities: ['armor_shield', 'counter_attack', 'energy_barrier'],
-        color: '#3498db',
+        specialAbilities: [BossAbilities.ARMOR_SHIELD, BossAbilities.COUNTER_ATTACK, BossAbilities.ENERGY_BARRIER],
+        color: BossPhaseColors[BossPhase.PHASE_2],
         flashEffect: true
     },
     {
@@ -175,8 +218,8 @@ export const APOCALYPSE_PHASES: PhaseConfig[] = [
         fireRate: 1.6,
         bulletCount: 1.5,
         damageMultiplier: 1.3,
-        specialAbilities: ['berserk_rage', 'rapid_fire', 'tracking_missiles'],
-        color: '#e74c3c',
+        specialAbilities: [BossAbilities.BERSERK_RAGE, BossAbilities.RAPID_FIRE, BossAbilities.TRACKING_MISSILES],
+        color: BossPhaseColors[BossPhase.PHASE_3],
         flashEffect: true
     },
     {
@@ -188,8 +231,8 @@ export const APOCALYPSE_PHASES: PhaseConfig[] = [
         fireRate: 2.0,
         bulletCount: 1.7,
         damageMultiplier: 1.7,
-        specialAbilities: ['last_stand', 'screen_clear', 'omnidirectional_laser'],
-        color: '#c0392b',
+        specialAbilities: [BossAbilities.LAST_STAND, BossAbilities.SCREEN_CLEAR, BossAbilities.OMNIDIRECTIONAL_LASER],
+        color: BossPhaseColors[BossPhase.PHASE_4],
         flashEffect: true
     }
 ];
@@ -273,10 +316,10 @@ export class BossPhaseSystem {
 
         // 更新阶段过渡
         if (state.isTransitioning) {
-            state.transitionTimer += dt;
-            if (state.transitionTimer >= 2000) { // 2秒过渡时间
-                this.completePhaseTransition(boss, state);
-            }
+        state.transitionTimer += dt;
+        if (state.transitionTimer >= 1000) {
+            this.completePhaseTransition(boss, state);
+        }
         }
 
         // 更新特殊技能计时器
@@ -378,14 +421,16 @@ export class BossPhaseSystem {
             state.phaseConfig = newConfig;
         }
 
-        // 触发视觉效果
         if (newConfig?.flashEffect) {
-            // 这里可以通过回调触发屏幕闪光等效果
-            boss.invulnerable = true; // 阶段切换时短暂无敌
+            boss.invulnerable = true;
         }
-
-        // 播放音效
-        this.audio.playExplosion(ExplosionSize.LARGE);
+        // 每次切换阶段都播放紧张音效
+        this.audio.playWarning();
+        // 阶段颜色按配置设置（第一阶段不需要）
+        if (newPhase !== BossPhase.PHASE_1 && newConfig?.color) {
+            boss.phaseGlowColor = newConfig.color;
+            boss.phaseGlowUntil = Date.now() + 1000;
+        }
 
         console.log(`Boss phase transition: ${state.previousPhase} -> ${state.currentPhase}`);
     }

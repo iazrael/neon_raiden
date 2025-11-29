@@ -31,8 +31,25 @@ export class SpriteGenerator {
     }
 
     // 僚机/浮游炮
-    generateOption(): HTMLImageElement {
-        return this.loadSVG(`${ASSETS_BASE_PATH}fighters/option.svg`, 32, 32);
+    generateOption(): HTMLCanvasElement {
+        const { canvas, ctx } = this.createCanvas(32, 32);
+        ctx.translate(16, 16);
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#60a5fa';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-6, 0);
+        ctx.lineTo(6, 0);
+        ctx.moveTo(0, -6);
+        ctx.lineTo(0, 6);
+        ctx.stroke();
+        return canvas;
     }
 
     // 生成敌人

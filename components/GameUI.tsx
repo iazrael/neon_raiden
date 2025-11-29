@@ -1,5 +1,6 @@
 import React from "react";
 import { GameState, WeaponType, ClickType } from "@/types";
+import { WeaponConfig, ASSETS_BASE_PATH } from "@/game/config";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
@@ -28,6 +29,7 @@ interface GameUIProps {
   activeSynergies?: SynergyConfig[]; // P2 Weapon Synergy
   weaponType?: WeaponType; // P2 Current weapon
   secondaryWeapon?: WeaponType | null; // P2 Secondary weapon
+  shieldPercent?: number;
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -50,9 +52,10 @@ export const GameUI: React.FC<GameUIProps> = ({
   onResume,
   showBossWarning = false,
   comboState, // P2 Combo system
-  activeSynergies = [], // P2 Weapon Synergy
+  activeSynergies = [],
   weaponType,
   secondaryWeapon,
+  shieldPercent = 0,
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
@@ -71,15 +74,27 @@ export const GameUI: React.FC<GameUIProps> = ({
           </div>
           <div className="text-sm text-gray-300">LEVEL: {level}</div>
 
-          {/* P2 Weapon Status & Active Synergies */}
+          {/* Weapon Status & Synergy */}
           {state === GameState.PLAYING && weaponType && (
             <div className="mt-2 flex flex-col gap-1">
               {/* Equipped Weapons */}
-              <div className="text-xs text-gray-400">
-                <span className="text-cyan-400 font-bold">{weaponType}</span>
-                {secondaryWeapon && (
-                  <span className="text-purple-400"> + {secondaryWeapon}</span>
-                )}
+              <div className="flex items-center gap-2">
+                <div className="text-xs">
+                  <span 
+                    className="font-bold"
+                    style={{ color: WeaponConfig[weaponType!]?.color || '#0ff' }}
+                  >
+                    {weaponType}
+                  </span>
+                  {secondaryWeapon && (
+                    <span 
+                      className="ml-1"
+                      style={{ color: WeaponConfig[secondaryWeapon!]?.color || '#f0f' }}
+                    >
+                      + {secondaryWeapon}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Active Synergies */}
@@ -105,7 +120,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           )}
         </div>
 
-        {/* HP Bar */}
+        {/* HP + Shield Bars */}
         <div className="flex flex-col items-end w-1/3">
           <div className="w-full bg-gray-800 h-4 rounded-full border border-gray-600 overflow-hidden relative">
             <div
@@ -118,9 +133,13 @@ export const GameUI: React.FC<GameUIProps> = ({
               style={{ width: `${Math.max(0, hp)}%` }}
             ></div>
           </div>
-          <div className="text-xs mt-1 text-gray-400 tracking-wider">
-            SHIELD INTEGRITY
+          <div className="w-full bg-gray-800 h-3 rounded-full border border-gray-600 overflow-hidden relative mt-1">
+            <div
+              className="h-full transition-all duration-200"
+              style={{ width: `${Math.max(0, Math.min(100, shieldPercent))}%`, backgroundImage: 'linear-gradient(to right, #22d3ee, #3b82f6)' }}
+            />
           </div>
+          <div className="text-xs mt-1 text-gray-400 tracking-wider">HP / SHIELD</div>
         </div>
       </div>
 
@@ -328,6 +347,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="text-3xl mb-8 font-light">
             SCORE: <span className="text-white font-bold">{score}</span>
           </div>
+          <div className="text-xl mb-6 font-mono tracking-wider text-red-200">LEVEL: {level}</div>
           <button
             onClick={() => {
               playClick?.(ClickType.CONFIRM);

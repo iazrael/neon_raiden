@@ -1,3 +1,3 @@
 <svg width="60" height="20" viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M0 10 Q30 -10 60 10 Q30 30 0 10 Z" fill="#63b3ed"/>
+  <path d="M0 12 Q30 1 60 12" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round"/>
 </svg>

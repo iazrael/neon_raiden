@@ -98,6 +98,9 @@ export interface Entity {
   originalBulletCount?: number; // Boss armor break: store original bullet count
   currentBulletCount?: number; // Boss armor break: effective bullet count based on armor phase
   teleportTimer?: number; // P3: Boss random teleport timer
+  phaseGlowColor?: string; // Boss phase transition glow color
+  phaseGlowUntil?: number; // Boss phase transition glow expiration timestamp
+  hitFlashUntil?: number;
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

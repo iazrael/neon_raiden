@@ -49,7 +49,7 @@ export const ItemList: React.FC<ItemListProps> = ({
         );
       case 'ARMORY':
         return (
-          <div className="grid grid-cols-2 gap-3 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2">
             {weapons.map((weapon) => (
               <WeaponListItem
                 key={weapon.type}
@@ -67,7 +67,7 @@ export const ItemList: React.FC<ItemListProps> = ({
         );
       case 'BESTIARY':
         return (
-          <div className="grid grid-cols-2 gap-3 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2">
             {enemies.map((enemy) => (
               <EnemyListItem
                 key={enemy.type}

@@ -12,7 +12,7 @@ export const WeaponListItem: React.FC<WeaponListItemProps> = ({ weapon, isSelect
 
   return (
     <div
-      className={`p-4 sm:p-3 border-2 rounded-lg active:scale-98 cursor-pointer transition-all pointer-events-auto select-none min-h-[90px] flex flex-col justify-center shadow-md ${
+      className={`p-3 sm:p-2 border-2 rounded-lg active:scale-98 cursor-pointer transition-all pointer-events-auto select-none min-h-[72px] flex flex-col justify-center shadow-md ${
         isLocked
           ? 'border-gray-700 bg-gray-900/50 text-gray-600 cursor-not-allowed opacity-60'
           : isSelected
