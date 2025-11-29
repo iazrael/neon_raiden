@@ -1,6 +1,6 @@
 import { AudioSystem } from './systems/AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -162,6 +162,7 @@ export class GameEngine {
 
         // Ensure first weapon is always available
         unlockWeapon(WeaponType.VULCAN);
+        validatePowerupVisuals(Object.values(PowerupType));
     }
 
     resize() {
@@ -203,6 +204,9 @@ export class GameEngine {
         this.secondaryWeapon = null; // P2 Reset secondary weapon
         this.bombs = PlayerConfig.initialBombs;
         this.shield = 0;
+        this.timeSlowActive = false;
+        this.timeSlowTimer = 0;
+        resetDropContext();
 
         this.player = this.createPlayer();
         this.options = [];
@@ -234,6 +238,8 @@ export class GameEngine {
 
         // P2 Reset environment system
         this.envSys.reset();
+
+        this.synergySys.reset();
 
         // P3 Reset difficulty system
         this.difficultySys.reset();

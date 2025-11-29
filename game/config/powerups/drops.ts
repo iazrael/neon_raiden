@@ -46,6 +46,14 @@ export function setDropContext(level: number, score: number, weaponLevel: number
     updateDynamicDropRates();
 }
 
+export function resetDropContext(): void {
+    dynamicDropRates = { ...PowerupDropRates };
+    currentLevel = 1;
+    playerScore = 0;
+    playerWeaponLevel = 1;
+    playerHpRatio = 1.0;
+}
+
 /**
  * 更新动态掉率
  */
