@@ -65,15 +65,15 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 72, bulletHeight: 72 }
     },
     [WeaponType.TESLA]: {
-        1: { chainCount: 1, chainRange: 150 },
-        2: { chainCount: 1, chainRange: 160 },
-        3: { chainCount: 2, chainRange: 170 },
-        4: { chainCount: 2, chainRange: 180 },
-        5: { chainCount: 3, chainRange: 190 },
-        6: { chainCount: 3, chainRange: 200 },
-        7: { chainCount: 4, chainRange: 210 },
-        8: { chainCount: 4, chainRange: 220 },
-        9: { chainCount: 5, chainRange: 230 }
+        1: { chainCount: 1, chainRange: 300 },
+        2: { chainCount: 1, chainRange: 400 },
+        3: { chainCount: 2, chainRange: 500 },
+        4: { chainCount: 2, chainRange: 600 },
+        5: { chainCount: 3, chainRange: 700 },
+        6: { chainCount: 3, chainRange: 800 },
+        7: { chainCount: 4, chainRange: 900 },
+        8: { chainCount: 4, chainRange: 1000 },
+        9: { chainCount: 5, chainRange: 1100 }
     },
     [WeaponType.MAGMA]: {
         1: { bulletCount: 2 },

@@ -187,6 +187,7 @@ export interface FighterEntity extends BaseEntityMeta {
     maxShield: number;          // 最大护盾值
     hitboxShrink: number;       // 碰撞箱缩小比例
     sprite: string;             // 精灵图名称
+    initialLevel: number;              // 初始等级
     leveling: PlayerLevelingConfig; // 战机升级配置
 }
 

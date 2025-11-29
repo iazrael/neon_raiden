@@ -86,7 +86,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_destroyer',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 20,
+            bulletCount: 10,
             bulletSpeed: 5.5,
             fireRate: 0.05,
             targetedShotSpeed: 9
@@ -137,7 +137,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         type: BossType.DOMINATOR,
         id: 'boss_dominator',
         name: 'Dominator',
-        chineseName: '弹幕主宰',
+        chineseName: '弹幕主宰者',
         describe: '高能粒子壁垒,沿螺旋轨道释放无尽弹幕洪流,致密火力网封锁一切突破可能,是弹幕艺术的极致体现。',
         color: '#8844ff',
         level: 5,
@@ -179,7 +179,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_overlord',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
         weaponConfigs: {
-            bulletCount: 18,
+            bulletCount: 14,
             bulletSpeed: 6.0,
             fireRate: 0.07,
             targetedShotSpeed: 10
@@ -210,7 +210,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_titan',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
         weaponConfigs: {
-            bulletCount: 20,
+            bulletCount: 16,
             bulletSpeed: 6.5,
             fireRate: 0.065,
             targetedShotSpeed: 11
@@ -276,7 +276,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_leviathan',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         weaponConfigs: {
-            bulletCount: 22,
+            bulletCount: 20,
             bulletSpeed: 7.5,
             fireRate: 0.08,
             targetedShotSpeed: 13
@@ -311,7 +311,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_apocalypse',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
         weaponConfigs: {
-            bulletCount: 22,
+            bulletCount: 20,
             bulletSpeed: 8.0,
             fireRate: 0.10,
             targetedShotSpeed: 15

@@ -133,20 +133,20 @@ export const GameUI: React.FC<GameUIProps> = ({
 
         {/* HP + Shield Bars */}
         <div className="flex flex-col items-end w-1/3">
-          <div className="w-full bg-gray-800 h-4 rounded-full border border-gray-600 overflow-hidden relative">
+          <div className="w-full bg-gray-800 h-5 rounded-full border border-gray-600 overflow-hidden relative">
             <div
               className={`h-full ${hp > 50
                 ? "bg-gradient-to-r from-green-500 to-green-400"
                 : hp > 20
                   ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
                   : "bg-gradient-to-r from-red-600 to-red-500"
-                } transition-all duration-200`}
+                } transition-all duration-300 ease-out`}
               style={{ width: `${Math.max(0, hp)}%` }}
             ></div>
           </div>
-          <div className="w-full bg-gray-800 h-3 rounded-full border border-gray-600 overflow-hidden relative mt-1">
+          <div className="w-full bg-gray-800 h-4 rounded-full border border-gray-600 overflow-hidden relative mt-1">
             <div
-              className="h-full transition-all duration-200"
+              className="h-full transition-all duration-300 ease-out"
               style={{ width: `${Math.max(0, Math.min(100, shieldPercent))}%`, backgroundImage: 'linear-gradient(to right, #22d3ee, #3b82f6)' }}
             />
           </div>
@@ -206,9 +206,9 @@ export const GameUI: React.FC<GameUIProps> = ({
         </div>
       )}
 
-      {/* Exit Button (Top Right, below HUD) */}
+      {/* Exit Button (Left Center) */}
       {state === GameState.PLAYING && (
-        <div className="absolute top-[max(3rem,calc(env(safe-area-inset-top)+2rem))] right-4 pointer-events-auto z-30">
+        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-auto z-30">
           <button
             onClick={() => {
               playClick?.(ClickType.CANCEL);
@@ -218,7 +218,7 @@ export const GameUI: React.FC<GameUIProps> = ({
             className="w-10 h-10 rounded-full border border-gray-600 bg-gray-900/50 text-gray-400 hover:text-white hover:bg-red-900/50 hover:border-red-500 flex items-center justify-center transition-all backdrop-blur-sm"
             title="Abort Mission"
           >
-            <span className="text-xl">✕</span>
+            <span className="text-lg font-bold">||</span>
           </button>
         </div>
       )}

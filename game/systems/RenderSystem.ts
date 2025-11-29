@@ -329,10 +329,30 @@ export class RenderSystem {
 
         if (e.type === EntityType.BOSS) {
             this.ctx.rotate(Math.PI);
+            
+            // Calculate dynamic bar length based on maxHp
+            const baseBarLength = Math.sqrt(e.maxHp) * 2; // Using square root to make growth more gradual
+            const barHeight = 8; // Increased height for better visibility
+            
+            // Determine bar color based on health percentage
+            const hpPercent = e.hp / e.maxHp;
+            let barColor;
+            if (hpPercent > 0.6) {
+                barColor = '#00ff00'; // Green
+            } else if (hpPercent > 0.3) {
+                barColor = '#ffff00'; // Yellow
+            } else {
+                barColor = '#ff0000'; // Red
+            }
+            
+            // Draw background bar
             this.ctx.fillStyle = 'rgba(255,0,0,0.5)';
-            this.ctx.fillRect(-50, 0, 100, 6);
-            this.ctx.fillStyle = '#00ff00';
-            this.ctx.fillRect(-50, 0, 100 * (e.hp / e.maxHp), 6);
+            this.ctx.fillRect(-baseBarLength/2, 0, baseBarLength, barHeight);
+            
+            // Draw current health bar
+            this.ctx.fillStyle = barColor;
+            const currentBarLength = baseBarLength * (e.hp / e.maxHp);
+            this.ctx.fillRect(-baseBarLength/2, 0, currentBarLength, barHeight);
 
             // P1 Boss Invulnerability Visual Indicator
             if (e.invulnerable) {

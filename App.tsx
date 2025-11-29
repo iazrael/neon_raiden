@@ -39,6 +39,18 @@ function App() {
       loadingIndicator.style.display = 'none';
     }
 
+    // 解析URL参数以确定是否启用调试模式
+    const urlParams = new URLSearchParams(window.location.search);
+    const isMaster = urlParams.has('master');
+    const debugMode = urlParams.get('debug') === '1';
+
+    // 如果是master模式且debug=1，则启用调试模式
+    if (isMaster && debugMode) {
+      import('./game/config/game').then((configModule) => {
+        configModule.GameConfig.debug = true;
+      });
+    }
+
     if (!canvasRef.current) return;
 
     // Initialize Engine

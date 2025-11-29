@@ -95,6 +95,10 @@ export class GameEngine {
     showBossDefeatAnimation: boolean = false;
     bossDefeatTimer: number = 0;
 
+    // Debug Mode Variables
+    debugEnemyKillCount: number = 0;
+    debugModeEnabled: boolean = false;
+
     // Callbacks
     onScoreChange: (score: number) => void;
     onLevelChange: (level: number) => void;
@@ -249,6 +253,10 @@ export class GameEngine {
         this.bossDefeatTimer = 0;
         this.levelStartTime = Date.now(); // Initialize level start time
         this.audio.resume();
+
+        // Debug Mode: Set debug mode enabled flag based on GameConfig
+        this.debugModeEnabled = GameConfig.debug;
+        this.debugEnemyKillCount = 0;
 
         // P2 Reset combo system
         this.comboSys.reset();
@@ -429,7 +437,7 @@ export class GameEngine {
 
             // P3 Get dynamic difficulty configuration
             const difficultyConfig = this.difficultySys.getConfig();
-            const baseSpawnRate = GameConfig.enemySpawnIntervalByLevel[this.level] || 1000;
+            const baseSpawnRate = EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000;
             const spawnRate = Math.round(baseSpawnRate * difficultyConfig.spawnIntervalMultiplier);
 
             if (this.enemySpawnTimer > spawnRate) {
@@ -464,7 +472,13 @@ export class GameEngine {
             const levelDuration = (Date.now() - this.levelStartTime) / 1000; // in seconds
             const minDuration = BossSpawnConfig.minLevelDuration;
             const minProgress = BossSpawnConfig.minLevelProgress;
-            if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
+            
+            // Debug Mode: Spawn boss after 10 seconds and 10 enemy kills
+            if (this.debugModeEnabled) {
+                if (levelDuration >= 10 && this.debugEnemyKillCount >= 10 && !this.isLevelTransitioning) {
+                    this.spawnBoss();
+                }
+            } else if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
                 if (!this.isBossWarningActive) {
                     this.isBossWarningActive = true;
                     this.bossWarningTimer = 3000; // 3 seconds warning
@@ -484,7 +498,7 @@ export class GameEngine {
             if (this.bossTransitionTimer < 10000) {
                 this.bossTransitionTimer += dt;
                 this.enemySpawnTimer += dt;
-                const spawnRate = Math.round((GameConfig.enemySpawnIntervalByLevel[this.level] || 1000) * 1.8);
+                const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000) * 1.8);
                 if (this.enemySpawnTimer > spawnRate) {
                     this.enemySys.spawnEnemy(this.level, this.enemies);
                     this.enemySpawnTimer = 0;
@@ -862,7 +876,7 @@ export class GameEngine {
                 });
             }
 
-            if (this.isColliding(e, this.player)) {
+            if (this.isPlayerColliding(this.player, e)) {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
                 this.takeDamage(10);
@@ -870,13 +884,13 @@ export class GameEngine {
             }
         });
 
-        if (this.boss && this.isColliding(this.boss, this.player)) {
+        if (this.boss && this.isPlayerColliding(this.player, this.boss)) {
             this.takeDamage(1);
         }
 
         // Powerups
         this.powerups.forEach(p => {
-            if (this.isColliding(p, this.player)) {
+            if (this.isPlayerColliding(this.player, p)) {
                 p.markedForDeletion = true;
                 this.audio.playPowerUp();
                 this.score += 100;
@@ -1063,6 +1077,11 @@ export class GameEngine {
         const finalDropRate = baseDropRate * difficultyConfig.powerupDropMultiplier;
 
         if (Math.random() < finalDropRate) this.spawnPowerup(e.x, e.y);
+
+        // Debug Mode: Increment enemy kill count
+        if (this.debugModeEnabled) {
+            this.debugEnemyKillCount++;
+        }
     }
 
     createPlasmaExplosion(x: number, y: number) {
@@ -1127,12 +1146,22 @@ export class GameEngine {
                 break;
 
             case PowerupType.HP:
+                // 生命值溢出转换为护盾能量
                 if (this.player.hp >= this.player.maxHp) {
-                    this.shield = Math.min(this.getShieldCap(), this.shield + effects.shieldRestoreAmount);
+                    // 当生命值已满时，将溢出的生命值转换为护盾能量
+                    const overflowHp = effects.hpRestoreAmount;
+                    this.shield = Math.min(this.getShieldCap(), this.shield + overflowHp);
                 } else {
+                    // 当生命值未满时，优先恢复生命值
                     this.player.hp = Math.min(this.player.maxHp, this.player.hp + effects.hpRestoreAmount);
-                    this.onHpChange(this.player.hp);
+                    // 如果恢复生命值后仍有溢出，则将溢出部分转换为护盾能量
+                    const overflowHp = Math.max(0, this.player.hp + effects.hpRestoreAmount - this.player.maxHp);
+                    if (overflowHp > 0) {
+                        this.shield = Math.min(this.getShieldCap(), this.shield + overflowHp);
+                    }
+                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + effects.hpRestoreAmount);
                 }
+                this.onHpChange(this.player.hp);
                 break;
 
             case PowerupType.BOMB:
@@ -1260,6 +1289,23 @@ export class GameEngine {
             a.x + a.width / 2 > b.x - b.width / 2 &&
             a.y - a.height / 2 < b.y + b.height / 2 &&
             a.y + a.height / 2 > b.y - b.height / 2
+        );
+    }
+
+    private isPlayerColliding(player: Entity, other: Entity): boolean {
+        // 获取玩家的碰撞箱收缩比例
+        const shrinkFactor = this.playerConfig.hitboxShrink || 0;
+        
+        // 计算收缩后的宽度和高度
+        const playerWidth = player.width * (1 - shrinkFactor);
+        const playerHeight = player.height * (1 - shrinkFactor);
+        
+        // 使用收缩后的尺寸进行碰撞检测
+        return (
+            player.x - playerWidth / 2 < other.x + other.width / 2 &&
+            player.x + playerWidth / 2 > other.x - other.width / 2 &&
+            player.y - playerHeight / 2 < other.y + other.height / 2 &&
+            player.y + playerHeight / 2 > other.y - other.height / 2
         );
     }
 

@@ -22,7 +22,8 @@ export const PlayerConfig: FighterEntity = {
     initialBombs: 3,
     maxBombs: 9,
     maxShield: 70,
-    hitboxShrink: 0,
+    initialLevel: 1,
+    hitboxShrink: 0.2,
     leveling: {
         maxLevel: 20,
         baseScoreForLevel1: 10000,

@@ -16,10 +16,10 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
 
         color: '#ebdd17ff',
         baseDamage: 10,
-        damagePerLevel: 3.5,
+        damagePerLevel: 3,
         speed: 15,
         baseSpeed: 15,
-        baseFireRate: 100,
+        baseFireRate: 150,
         ratePerLevel: 2,
         bullet: BulletConfigs[BulletType.VULCAN],
         sprite: 'bullet_vulcan',
@@ -34,14 +34,14 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
 
         color: '#3fc4f0ff',
         baseDamage: 6,
-        damagePerLevel: 2.5,
+        damagePerLevel: 2,
         speed: 25,
         baseSpeed: 15,
-        baseFireRate: 120,
+        baseFireRate: 200,
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.LASER],
         sprite: 'bullet_laser',
-        maxLevel: 9
+        maxLevel: 6
     },
     [WeaponType.MISSILE]: {
         type: WeaponType.MISSILE,
@@ -51,15 +51,15 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '自主学习型量子计算机同时锁定多个高价值目标,复合推进技术在接近时加速至亚光速,高爆核心产生定向能爆炸,即使最敏捷的敌机也难逃毁灭。',
 
         color: '#ca0ac7ff',
-        baseDamage: 15,
-        damagePerLevel: 6,
+        baseDamage: 20,
+        damagePerLevel: 3,
         speed: 15,
         baseSpeed: 15,
         baseFireRate: 350,
-        ratePerLevel: 15,
+        ratePerLevel: 10,
         bullet: BulletConfigs[BulletType.MISSILE],
         sprite: 'bullet_missile',
-        maxLevel: 9
+        maxLevel: 6
     },
     [WeaponType.WAVE]: {
         type: WeaponType.WAVE,
@@ -69,7 +69,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         describe: '特殊晶体阵列产生的宽幅能量震荡波,升级时解锁更多晶体使波宽呈指数增长,穿过目标时释放脉冲能量引发连锁反应,是清场的终极武器。',
 
         color: '#1e8de7ff',
-        baseDamage: 20,
+        baseDamage: 18,
         damagePerLevel: 6,
         speed: 12,
         baseSpeed: 15,
@@ -77,7 +77,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.WAVE],
         sprite: 'bullet_wave',
-        maxLevel: 9
+        maxLevel: 3
     },
     [WeaponType.PLASMA]: {
         type: WeaponType.PLASMA,
@@ -95,7 +95,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.PLASMA],
         sprite: 'bullet_plasma',
-        maxLevel: 9
+        maxLevel: 3
     },
     [WeaponType.TESLA]: {
         type: WeaponType.TESLA,
@@ -113,7 +113,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 10,
         bullet: BulletConfigs[BulletType.TESLA],
         sprite: 'bullet_tesla',
-        maxLevel: 9
+        maxLevel: 6
     },
     [WeaponType.MAGMA]: {
         type: WeaponType.MAGMA,
@@ -131,7 +131,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 0,
         bullet: BulletConfigs[BulletType.MAGMA],
         sprite: 'bullet_magma',
-        maxLevel: 9
+        maxLevel: 6
     },
     [WeaponType.SHURIKEN]: {
         type: WeaponType.SHURIKEN,
@@ -149,6 +149,6 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 30,
         bullet: BulletConfigs[BulletType.SHURIKEN],
         sprite: 'bullet_shuriken',
-        maxLevel: 9
+        maxLevel: 6
     }
 };

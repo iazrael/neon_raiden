@@ -180,6 +180,6 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_barrage',
         size: { width: 50, height: 50 },
         score: 600,
-        weapon: { bulletType: EnemyBulletType.SPIRAL, frequency: 0.2, speed: 3 },
+        weapon: { bulletType: EnemyBulletType.SPIRAL, frequency: 0.1, speed: 3 },
     }
 };
