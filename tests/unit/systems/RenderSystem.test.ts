@@ -57,7 +57,10 @@ jest.mock('@/game/SpriteGenerator', () => {
         generateEnemy: jest.fn().mockReturnValue(document.createElement('canvas')),
         generateBullet: jest.fn().mockReturnValue(document.createElement('canvas')),
         generatePowerup: jest.fn().mockReturnValue(document.createElement('canvas')),
-        generateBoss: jest.fn().mockReturnValue(document.createElement('canvas'))
+        generateBoss: jest.fn().mockReturnValue(document.createElement('canvas')),
+        generateEnvironmentObstacle: jest.fn().mockReturnValue(document.createElement('canvas')),
+        generateEnvironmentEnergyStorm: jest.fn().mockReturnValue(document.createElement('canvas')),
+        generateEnvironmentGravityField: jest.fn().mockReturnValue(document.createElement('canvas'))
       };
     })
   };

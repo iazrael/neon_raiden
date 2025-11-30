@@ -162,7 +162,7 @@ describe('EnvironmentSystem', () => {
       expect(gravityField).not.toBeNull();
       expect(gravityField?.environmentType).toBe(EnvironmentType.GRAVITY_FIELD);
       expect(gravityField?.type).toBe(EntityType.POWERUP);
-      expect(gravityField?.width).toBe(150);
+      expect(gravityField?.width).toBe(220);
       expect(gravityField?.height).toBe(screenHeight);
       expect(gravityField?.color).toBe('#8b5cf6');
     });

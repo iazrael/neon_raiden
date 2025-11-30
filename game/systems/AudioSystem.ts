@@ -277,46 +277,58 @@ export class AudioSystem {
 
     const now = this.ctx.currentTime;
 
-    // Crisp "po!" sound - sharp attack with quick decay
-    const pop = this.ctx.createOscillator();
-    const popGain = this.ctx.createGain();
-    const filter = this.ctx.createBiquadFilter();
+    // Layer 1: Main "Pop" (Sharp frequency drop)
+    // Provides the main body of the sound
+    const osc1 = this.ctx.createOscillator();
+    const gain1 = this.ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(this.masterGain);
 
-    pop.type = 'triangle';
-    filter.type = 'bandpass';
-    filter.frequency.value = 2000;
-    filter.Q.value = 3;
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(1200, now);
+    osc1.frequency.exponentialRampToValueAtTime(100, now + 0.15);
 
-    pop.connect(filter);
-    filter.connect(popGain);
-    popGain.connect(this.masterGain);
+    gain1.gain.setValueAtTime(0.7, now);
+    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
 
-    // Sharp frequency drop for "po!" effect
-    pop.frequency.setValueAtTime(1800, now);
-    pop.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+    osc1.start(now);
+    osc1.stop(now + 0.15);
 
-    // Quick, crisp envelope
-    popGain.gain.setValueAtTime(0.7, now);
-    popGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    // Layer 2: High "Crisp" (Fast snap)
+    // Adds the sharp, high-frequency definition
+    const osc2 = this.ctx.createOscillator();
+    const gain2 = this.ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(this.masterGain);
 
-    pop.start(now);
-    pop.stop(now + 0.08);
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(3000, now);
+    osc2.frequency.exponentialRampToValueAtTime(1000, now + 0.05);
 
-    // Add a subtle high-frequency click for crispness
-    const click = this.ctx.createOscillator();
-    const clickGain = this.ctx.createGain();
+    gain2.gain.setValueAtTime(0.2, now);
+    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
 
-    click.type = 'sine';
-    click.frequency.value = 3500;
+    osc2.start(now);
+    osc2.stop(now + 0.05);
 
-    click.connect(clickGain);
-    clickGain.connect(this.masterGain);
+    // Layer 3: "Bubble" Character (Watery modulation)
+    // Adds the "bloop" characteristic
+    const osc3 = this.ctx.createOscillator();
+    const gain3 = this.ctx.createGain();
+    osc3.connect(gain3);
+    gain3.connect(this.masterGain);
 
-    clickGain.gain.setValueAtTime(0.3, now);
-    clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(400, now);
+    osc3.frequency.linearRampToValueAtTime(600, now + 0.05); // Slight rise
+    osc3.frequency.exponentialRampToValueAtTime(100, now + 0.2); // Fall
 
-    click.start(now);
-    click.stop(now + 0.02);
+    gain3.gain.setValueAtTime(0.4, now);
+    gain3.gain.linearRampToValueAtTime(0.2, now + 0.05);
+    gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+    osc3.start(now);
+    osc3.stop(now + 0.2);
   }
 
   playBomb() {

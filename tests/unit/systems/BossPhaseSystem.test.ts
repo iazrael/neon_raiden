@@ -7,6 +7,10 @@ class MockAudioSystem {
   playExplosion(size: string) {
     // 空实现
   }
+  
+  playWarning() {
+    // 空实现
+  }
 }
 
 describe('BossPhaseSystem', () => {

@@ -1,4 +1,19 @@
-<svg width="10" height="25" viewBox="0 0 10 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M5 0 L10 20 L5 25 L0 20 Z" fill="#9f7aea"/>
-  <circle cx="5" cy="22" r="3" fill="#ed8936"/>
+<svg width="15" height="30" viewBox="10 10 80 185" xmlns="http://www.w3.org/2000/svg">
+  <!-- Nose Cone -->
+  <path d="M 30 50 Q 50 0 70 50 L 70 55 L 30 55 Z" fill="#8A2BE2" />
+  
+  <!-- Body -->
+  <path d="M 30 58 L 70 58 Q 65 120 50 180 Q 35 120 30 58 Z" fill="#8A2BE2" />
+
+  <!-- Left Wing -->
+  <path d="M 35 120 L 15 155 L 43 160 Z" fill="#D35400" />
+
+  <!-- Right Wing -->
+  <path d="M 65 120 L 85 155 L 57 160 Z" fill="#D35400" />
+  
+  <!-- Left Tail Fin -->
+  <path d="M 45 160 L 35 185 L 48 175 Z" fill="#D35400" />
+
+  <!-- Right Tail Fin -->
+  <path d="M 55 160 L 65 185 L 52 175 Z" fill="#D35400" />
 </svg>

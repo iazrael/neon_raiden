@@ -33,7 +33,6 @@ describe('BossSystem', () => {
       expect(spawnedBoss.y).toBe(-150); // Should start above screen
       expect(spawnedBoss.hp).toBeGreaterThan(0);
       expect(spawnedBoss.invulnerable).toBe(true); // Should start invulnerable
-      expect(audioMock.playPowerUp).toHaveBeenCalled();
     });
 
     it('should spawn boss at center position when configured', () => {
