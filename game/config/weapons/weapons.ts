@@ -142,7 +142,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
 
         color: '#ccccccff',
         baseDamage: 12,
-        damagePerLevel: 3,
+        damagePerLevel: 1,
         speed: 20,
         baseSpeed: 15,
         baseFireRate: 300,

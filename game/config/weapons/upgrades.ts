@@ -88,13 +88,13 @@ export const WeaponUpgradeConfig: {
     },
     [WeaponType.SHURIKEN]: {
         1: { bulletCount: 1 },
-        2: { bulletCount: 1 },
-        3: { bulletCount: 2 },
-        4: { bulletCount: 2 },
+        2: { bulletCount: 2 },
+        3: { bulletCount: 3 },
+        4: { bulletCount: 3 },
         5: { bulletCount: 3 },
-        6: { bulletCount: 3 },
+        6: { bulletCount: 4 },
         7: { bulletCount: 4 },
         8: { bulletCount: 4 },
-        9: { bulletCount: 4 }
+        9: { bulletCount: 5 }
     }
 };
