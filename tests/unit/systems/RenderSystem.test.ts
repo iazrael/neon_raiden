@@ -102,10 +102,10 @@ describe('RenderSystem', () => {
 
       expect(renderSystem.width).toBe(400);
       expect(renderSystem.height).toBe(300);
-      expect(mockCanvasContext.canvas.width).toBe(800); // 400 * 2
-      expect(mockCanvasContext.canvas.height).toBe(600); // 300 * 2
-      expect(mockCanvasContext.canvas.style.width).toBe('400px');
-      expect(mockCanvasContext.canvas.style.height).toBe('300px');
+      expect((mockCanvasContext.canvas as any).width).toBe(800); // 400 * 2
+      expect((mockCanvasContext.canvas as any).height).toBe(600); // 300 * 2
+      expect((mockCanvasContext.canvas as any).style.width).toBe('400px');
+      expect((mockCanvasContext.canvas as any).style.height).toBe('300px');
       expect(mockCanvasContext.scale).toHaveBeenCalledWith(2, 2);
 
       // Restore original devicePixelRatio
@@ -125,7 +125,12 @@ describe('RenderSystem', () => {
         y: 100,
         width: 20,
         height: 30,
-        vx: 0
+        vx: 0,
+        vy: 0,
+        hp: 100,
+        maxHp: 100,
+        color: '#00ff00',
+        markedForDeletion: false
       };
 
       renderSystem.drawEntity(player, undefined, 3);
@@ -152,6 +157,12 @@ describe('RenderSystem', () => {
         y: 150,
         width: 25,
         height: 25,
+        vx: 0,
+        vy: 0,
+        hp: 50,
+        maxHp: 50,
+        color: '#ff0000',
+        markedForDeletion: false,
         spriteKey: 'enemy_basic'
       };
 
@@ -177,8 +188,12 @@ describe('RenderSystem', () => {
         y: 200,
         width: 100,
         height: 100,
+        vx: 0,
+        vy: 0,
         hp: 80,
         maxHp: 100,
+        color: '#0000ff',
+        markedForDeletion: false,
         spriteKey: 'boss_1'
       };
 
@@ -209,10 +224,14 @@ describe('RenderSystem', () => {
         y: 100,
         width: 50,
         height: 50,
-        environmentType: EnvironmentType.OBSTACLE,
-        color: '#888888',
+        vx: 0,
+        vy: 0,
         hp: 100,
-        maxHp: 100
+        maxHp: 100,
+        type: EntityType.POWERUP,
+        color: '#888888',
+        markedForDeletion: false,
+        environmentType: EnvironmentType.OBSTACLE
       };
 
       renderSystem.drawEnvironmentElement(obstacle);
@@ -233,6 +252,13 @@ describe('RenderSystem', () => {
         y: 200,
         width: 100,
         height: 100,
+        vx: 0,
+        vy: 0,
+        hp: 1,
+        maxHp: 1,
+        type: EntityType.POWERUP,
+        color: '#4ade80',
+        markedForDeletion: false,
         environmentType: EnvironmentType.ENERGY_STORM
       };
 
@@ -254,6 +280,13 @@ describe('RenderSystem', () => {
         y: 300,
         width: 150,
         height: 150,
+        vx: 0,
+        vy: 0,
+        hp: 1,
+        maxHp: 1,
+        type: EntityType.POWERUP,
+        color: '#8b5cf6',
+        markedForDeletion: false,
         environmentType: EnvironmentType.GRAVITY_FIELD,
         data: { side: 'left' }
       };
@@ -268,6 +301,63 @@ describe('RenderSystem', () => {
       expect(mockCanvasContext.fillRect).toHaveBeenCalledWith(-75, -75, 150, 150);
       
       expect(mockCanvasContext.restore).toHaveBeenCalled();
+    });
+
+    it('should draw environment elements correctly', () => {
+      // Test obstacle rendering
+      const obstacle: EnvironmentElement = {
+        x: 100,
+        y: 100,
+        width: 50,
+        height: 80,
+        vx: 0,
+        vy: 0,
+        hp: 100,
+        maxHp: 100,
+        type: EntityType.POWERUP, // Reusing POWERUP type as in the actual implementation
+        color: '#888888',
+        markedForDeletion: false,
+        environmentType: EnvironmentType.OBSTACLE
+      };
+
+      renderSystem['drawEnvironmentElement'](obstacle);
+
+      // Test energy storm rendering
+      const storm: EnvironmentElement = {
+        x: 0,
+        y: 50,
+        width: 400, // Full screen width
+        height: 120,
+        vx: 0,
+        vy: 0,
+        hp: 1,
+        maxHp: 1,
+        type: EntityType.POWERUP,
+        color: '#4ade80',
+        markedForDeletion: false,
+        environmentType: EnvironmentType.ENERGY_STORM
+      };
+
+      renderSystem['drawEnvironmentElement'](storm);
+
+      // Test gravity field rendering
+      const gravityField: EnvironmentElement = {
+        x: 100,
+        y: 0,
+        width: 220,
+        height: 300, // Full screen height
+        vx: 0,
+        vy: 0,
+        hp: 1,
+        maxHp: 1,
+        type: EntityType.POWERUP,
+        color: '#8b5cf6',
+        markedForDeletion: false,
+        environmentType: EnvironmentType.GRAVITY_FIELD,
+        data: { side: 'left' }
+      };
+
+      renderSystem['drawEnvironmentElement'](gravityField);
     });
   });
 
@@ -323,23 +413,42 @@ describe('RenderSystem', () => {
     });
 
     it('should draw all game elements in game state', () => {
-      const gameState = GameState.RUNNING;
-      const player: Entity = { type: EntityType.PLAYER, x: 100, y: 100, width: 20, height: 30, vx: 0 };
+      const gameState = GameState.PLAYING;
+      const player: Entity = { 
+        type: EntityType.PLAYER, x: 100, y: 100, width: 20, height: 30, 
+        vx: 0, vy: 0, hp: 100, maxHp: 100, color: '#00ff00', markedForDeletion: false
+      };
       const options: Entity[] = [];
-      const enemies: Entity[] = [{ type: EntityType.ENEMY, x: 150, y: 150, width: 25, height: 25 }];
-      const boss: Entity = { type: EntityType.BOSS, x: 200, y: 200, width: 100, height: 100, hp: 100, maxHp: 100 };
+      const enemies: Entity[] = [{ 
+        type: EntityType.ENEMY, x: 150, y: 150, width: 25, height: 25,
+        vx: 0, vy: 0, hp: 50, maxHp: 50, color: '#ff0000', markedForDeletion: false
+      }];
+      const boss: Entity = { 
+        type: EntityType.BOSS, x: 200, y: 200, width: 100, height: 100, 
+        hp: 100, maxHp: 100, vx: 0, vy: 0, color: '#0000ff', markedForDeletion: false
+      };
       const bossWingmen: Entity[] = [];
-      const bullets: Entity[] = [{ type: EntityType.BULLET, x: 120, y: 120, width: 5, height: 5 }];
+      const bullets: Entity[] = [{ 
+        type: EntityType.BULLET, x: 120, y: 120, width: 5, height: 5,
+        vx: 0, vy: 0, hp: 1, maxHp: 1, color: '#ffff00', markedForDeletion: false
+      }];
       const enemyBullets: Entity[] = [];
       const particles: any[] = [{ x: 50, y: 50, size: 2, color: '#ffffff', life: 10, maxLife: 20 }];
       const shockwaves: any[] = [{ x: 75, y: 75, radius: 30, width: 5, color: '#ff0000', life: 0.5 }];
-      const powerups: Entity[] = [{ type: EntityType.POWERUP, x: 180, y: 180, width: 15, height: 15 }];
+      const powerups: Entity[] = [{ 
+        type: EntityType.POWERUP, x: 180, y: 180, width: 15, height: 15,
+        vx: 0, vy: 0, hp: 1, maxHp: 1, color: '#00ffff', markedForDeletion: false
+      }];
       const meteors: any[] = [{ x: 300, y: 300, vx: -2, vy: 1 }];
       const shield = 50;
       const screenShake = 0;
       const weaponLevel = 2;
       const environmentElements: EnvironmentElement[] = [{ 
-        x: 250, y: 250, width: 50, height: 50, environmentType: EnvironmentType.OBSTACLE, color: '#888888', hp: 100, maxHp: 100 
+        x: 250, y: 250, width: 50, height: 50, 
+        vx: 0, vy: 0, hp: 100, maxHp: 100,
+        type: EntityType.POWERUP, color: '#888888', 
+        markedForDeletion: false,
+        environmentType: EnvironmentType.OBSTACLE
       }];
       const showBossDefeatAnimation = false;
       const bossDefeatTimer = 0;
@@ -360,6 +469,79 @@ describe('RenderSystem', () => {
         shield,
         screenShake,
         weaponLevel,
+        1, // playerLevel
+        environmentElements,
+        showBossDefeatAnimation,
+        bossDefeatTimer
+      );
+
+      // Check that various drawing functions were called
+      expect(mockCanvasContext.fillRect).toHaveBeenCalledWith(0, 0, renderSystem.width, renderSystem.height); // Background
+      expect(mockCanvasContext.translate).toHaveBeenCalledWith(100, 100); // Player position
+      expect(mockCanvasContext.beginPath).toHaveBeenCalled(); // Particles
+      expect(mockCanvasContext.arc).toHaveBeenCalled(); // Particles and shockwaves
+      expect(mockCanvasContext.stroke).toHaveBeenCalled(); // Meteor trails and shockwaves
+    });
+
+    it('should render the game correctly', () => {
+      // Setup test data
+      const gameState = GameState.PLAYING;
+      const player: Entity = { 
+        type: EntityType.PLAYER, x: 100, y: 100, width: 20, height: 30, 
+        vx: 0, vy: 0, hp: 100, maxHp: 100, color: '#00ff00', markedForDeletion: false
+      };
+      const options: Entity[] = [];
+      const enemies: Entity[] = [{ 
+        type: EntityType.ENEMY, x: 150, y: 150, width: 25, height: 25,
+        vx: 0, vy: 0, hp: 50, maxHp: 50, color: '#ff0000', markedForDeletion: false
+      }];
+      const boss: Entity = { 
+        type: EntityType.BOSS, x: 200, y: 200, width: 100, height: 100, 
+        hp: 100, maxHp: 100, vx: 0, vy: 0, color: '#0000ff', markedForDeletion: false
+      };
+      const bossWingmen: Entity[] = [];
+      const bullets: Entity[] = [{ 
+        type: EntityType.BULLET, x: 120, y: 120, width: 5, height: 5,
+        vx: 0, vy: 0, hp: 1, maxHp: 1, color: '#ffff00', markedForDeletion: false
+      }];
+      const enemyBullets: Entity[] = [];
+      const particles: any[] = [{ x: 50, y: 50, size: 2, color: '#ffffff', life: 10, maxLife: 20 }];
+      const shockwaves: any[] = [{ x: 75, y: 75, radius: 30, width: 5, color: '#ff0000', life: 0.5 }];
+      const powerups: Entity[] = [{ 
+        type: EntityType.POWERUP, x: 180, y: 180, width: 15, height: 15,
+        vx: 0, vy: 0, hp: 1, maxHp: 1, color: '#00ffff', markedForDeletion: false
+      }];
+      const meteors: any[] = [{ x: 300, y: 300, vx: -2, vy: 1 }];
+      const shield = 50;
+      const screenShake = 0;
+      const weaponLevel = 2;
+      const environmentElements: EnvironmentElement[] = [{ 
+        x: 250, y: 250, width: 50, height: 50, 
+        vx: 0, vy: 0, hp: 100, maxHp: 100,
+        type: EntityType.POWERUP, color: '#888888', 
+        markedForDeletion: false,
+        environmentType: EnvironmentType.OBSTACLE
+      }];
+      const showBossDefeatAnimation = false;
+      const bossDefeatTimer = 0;
+
+      renderSystem.draw(
+        gameState,
+        player,
+        options,
+        enemies,
+        boss,
+        bossWingmen,
+        bullets,
+        enemyBullets,
+        particles,
+        shockwaves,
+        powerups,
+        meteors,
+        shield,
+        screenShake,
+        weaponLevel,
+        1, // playerLevel
         environmentElements,
         showBossDefeatAnimation,
         bossDefeatTimer

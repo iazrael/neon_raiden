@@ -23,7 +23,7 @@ describe('BossSystem', () => {
     it('should spawn a boss with correct initial properties', () => {
       // Mock the sprite map since we don't have actual sprites in tests
       const sprites = {
-        'boss_1': { width: 150, height: 150 }
+        'boss_1': { width: 150, height: 150 } as HTMLCanvasElement
       };
       
       const spawnedBoss = bossSystem.spawn(1, sprites);
@@ -39,7 +39,7 @@ describe('BossSystem', () => {
     it('should spawn boss at center position when configured', () => {
       // Mock the sprite map
       const sprites = {
-        'boss_2': { width: 200, height: 200 }
+        'boss_2': { width: 200, height: 200 } as HTMLCanvasElement
       };
       
       const spawnedBoss = bossSystem.spawn(2, sprites);
@@ -61,7 +61,7 @@ describe('BossSystem', () => {
     it('should spawn wingmen for bosses that have them', () => {
       // Mock the sprite map
       const sprites = {
-        'boss_8': { width: 320, height: 320 }
+        'boss_8': { width: 320, height: 320 } as HTMLCanvasElement
       };
       
       const wingmen = bossSystem.spawnWingmen(8, boss, sprites);
@@ -74,7 +74,7 @@ describe('BossSystem', () => {
     it('should return empty array for bosses without wingmen', () => {
       // Mock the sprite map
       const sprites = {
-        'boss_1': { width: 150, height: 150 }
+        'boss_1': { width: 150, height: 150 } as HTMLCanvasElement
       };
       
       const wingmen = bossSystem.spawnWingmen(1, boss, sprites);

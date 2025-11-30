@@ -24,7 +24,7 @@ export const PowerupVisuals: Record<PowerupType, PowerupVisualConfig> = {
     [PowerupType.HP]: { color: '#48bb78', label: 'H' },     // 生命值恢复
     [PowerupType.BOMB]: { color: '#f56565', label: 'B' },   // 炸弹
     [PowerupType.OPTION]: { color: '#a0aec0', label: 'O' },  // 僚机
-    [PowerupType.TEMP_SHIELD]: { color: '#cbd5e1', label: 'S' },
+    [PowerupType.INVINCIBILITY]: { color: '#cbd5e1', label: 'S' },
     [PowerupType.TIME_SLOW]: { color: '#22d3ee', label: 'T' }
 };
 

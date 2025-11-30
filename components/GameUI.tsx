@@ -7,6 +7,24 @@ import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
 import type { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
 
+// 罗马数字转换函数
+function intToRoman(num: number): string {
+  if (num <= 0 || num >= 4000) return num.toString();
+  
+  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  const symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+  
+  let result = "";
+  for (let i = 0; i < values.length; i++) {
+    while (num >= values[i]) {
+      result += symbols[i];
+      num -= values[i];
+    }
+  }
+  console.log(result)
+  return result;
+}
+
 interface GameUIProps {
   state: GameState;
   score: number;
@@ -76,103 +94,64 @@ export const GameUI: React.FC<GameUIProps> = ({
             SCORE: {score.toString().padStart(6, "0")}
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-gray-300">STAGE: <span className="inline-block min-w-[1.5em]">{level}</span></div>
-            {state === GameState.PLAYING && (
-              <button
-                onClick={() => {
-                  playClick?.(ClickType.CANCEL);
-                  onPause?.();
-                  setShowExitDialog(true);
-                }}
-                className="w-8 h-8 rounded-full border border-cyan-500/50 bg-gray-900/70 hover:bg-cyan-900/50 hover:border-cyan-400 flex items-center justify-center transition-all backdrop-blur-sm group"
-                title="Pause / Abort"
-              >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="transition-all"
-                >
-                  <rect
-                    x="2"
-                    y="1"
-                    width="2.5"
-                    height="10"
-                    fill="currentColor"
-                    className="text-cyan-400 group-hover:text-cyan-300"
-                    style={{ filter: 'drop-shadow(0 0 2px currentColor)' }}
-                  />
-                  <rect
-                    x="7.5"
-                    y="1"
-                    width="2.5"
-                    height="10"
-                    fill="currentColor"
-                    className="text-cyan-400 group-hover:text-cyan-300"
-                    style={{ filter: 'drop-shadow(0 0 2px currentColor)' }}
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* Weapon Status & Synergy */}
-          {state === GameState.PLAYING && weaponType && (
+            <div className="text-sm text-gray-300">STAGE: <span className="inline-block min-w-[1.5em]">{intToRoman(level)}</span></div>
+      </div>
+      
+      {/* Weapon Status & Synergy */}
+      {state === GameState.PLAYING && weaponType && (
             <div className="mt-2 flex flex-col gap-1">
-              {/* Equipped Weapons */}
-              <div className="flex items-center gap-2">
-                <div className="text-xs">
-                  <span
-                    className="font-bold"
-                    style={{ color: WeaponConfig[weaponType!]?.color || '#0ff' }}
-                  >
-                    {capitalize(weaponType!)}
-                  </span>
-                  {typeof weaponLevel === 'number' && (
-                    <span className="ml-1 text-gray-300">
-                      {(() => {
-                        const max = (weaponType ? WeaponConfig[weaponType!]?.maxLevel : undefined) ?? PowerupEffects.maxWeaponLevel;
-                        return `Lv.${weaponLevel >= max ? 'max' : weaponLevel}`;
-                      })()}
-                    </span>
-                  )}
-                  {secondaryWeapon && (
-                    <span
-                      className="ml-1"
-                      style={{ color: WeaponConfig[secondaryWeapon!]?.color || '#f0f' }}
-                    >
-                      + {capitalize(secondaryWeapon!)}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Active Synergies */}
-              {activeSynergies.length > 0 && (
-                <div className="flex flex-col gap-0.5">
-                  {activeSynergies.map(synergy => (
-                    <div
-                      key={synergy.type}
-                      className="text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1"
-                      style={{
-                        borderColor: synergy.color,
-                        backgroundColor: `${synergy.color}20`,
-                        color: synergy.color
-                      }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: synergy.color }} />
-                      <span className="font-bold tracking-wider">{synergy.chineseName}</span>
-                    </div>
-                  ))}
-                </div>
+          {/* Equipped Weapons */}
+          <div className="flex items-center gap-2">
+            <div className="text-xs">
+              <span
+                className="font-bold"
+                style={{ color: WeaponConfig[weaponType!]?.color || '#0ff' }}
+              >
+                {capitalize(weaponType!)}
+              </span>
+              {typeof weaponLevel === 'number' && (
+                <span className="ml-1 text-gray-300">
+                  {(() => {
+                    const max = (weaponType ? WeaponConfig[weaponType!]?.maxLevel : undefined) ?? PowerupEffects.maxWeaponLevel;
+                    return `Lv.${weaponLevel >= max ? 'max' : weaponLevel}`;
+                  })()}
+                </span>
               )}
+              {secondaryWeapon && (
+                <span
+                  className="ml-1"
+                  style={{ color: WeaponConfig[secondaryWeapon!]?.color || '#f0f' }}
+                >
+                  + {capitalize(secondaryWeapon!)}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Active Synergies */}
+          {activeSynergies.length > 0 && (
+            <div className="flex flex-col gap-0.5">
+              {activeSynergies.map(synergy => (
+                <div
+                  key={synergy.type}
+                  className="text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1"
+                  style={{
+                    borderColor: synergy.color,
+                    backgroundColor: `${synergy.color}20`,
+                    color: synergy.color
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: synergy.color }} />
+                  <span className="font-bold tracking-wider">{synergy.chineseName}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
-
-        {/* HP + Shield Bars */}
+      )}
+        </div>
+      
+      {/* HP + Shield Bars */}
         <div className="flex flex-col items-end w-1/3">
           <div className="w-full bg-gray-800 h-5 rounded-full border border-gray-600 overflow-hidden relative">
             <div
@@ -312,6 +291,49 @@ export const GameUI: React.FC<GameUIProps> = ({
           </button>
         </div>
       )}
+      
+      {/* Pause Button (Bottom Left) */}
+      {state === GameState.PLAYING && (
+        <div className="absolute bottom-20 left-6 pointer-events-auto z-30 flex flex-col items-center gap-1 pb-safe">
+          <span className="text-xs font-bold text-cyan-400 tracking-widest">
+            PAUSE
+          </span>
+          <button
+            onClick={() => {
+              playClick?.(ClickType.CANCEL);
+              onPause?.();
+              setShowExitDialog(true);
+            }}
+            className="w-20 h-20 rounded-full border-4 border-cyan-500/70 bg-gray-900/80 hover:bg-cyan-900/60 hover:border-cyan-400 flex items-center justify-center transition-all shadow-lg"
+            title="Pause / Abort"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                x="2"
+                y="1"
+                width="2.5"
+                height="10"
+                fill="currentColor"
+                className="text-cyan-400"
+              />
+              <rect
+                x="7.5"
+                y="1"
+                width="2.5"
+                height="10"
+                fill="currentColor"
+                className="text-cyan-400"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Menus - Pointer events allowed */}
       {state === GameState.MENU && (
@@ -384,7 +406,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="text-3xl mb-8 font-light">
             SCORE: <span className="text-white font-bold">{score}</span>
           </div>
-          <div className="text-2xl mb-6 font-mono tracking-wider text-red-200">MAX STAGE: {level}</div>
+          <div className="text-2xl mb-6 font-mono tracking-wider text-red-200">MAX STAGE: {intToRoman(level)}</div>
           <button
             onClick={() => {
               playClick?.(ClickType.CONFIRM);
@@ -444,7 +466,7 @@ export const GameUI: React.FC<GameUIProps> = ({
           }}
         >
           <div className="text-2xl font-bold text-cyan-400 tracking-wider drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
-            STAGE {level}
+            STAGE {intToRoman(level)}
           </div>
         </div>
       )}

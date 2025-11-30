@@ -151,17 +151,17 @@ export const PowerupConfig: Record<PowerupType, Omit<Entity, 'x' | 'y' | 'vx' | 
         spriteKey: 'powerup_plasma'
     },
     // 新增容错道具
-    [PowerupType.TEMP_SHIELD]: {
+    [PowerupType.INVINCIBILITY]: {
         type: EntityType.POWERUP,
-        subType: PowerupType.TEMP_SHIELD,
-        id: 'powerup_temp_shield',
-        name: 'Temporary Shield',
-        chineseName: '临时护盾',
+        subType: PowerupType.INVINCIBILITY,
+        id: 'powerup_invincibility',
+        name: 'Invincibility Shield',
+        chineseName: '无敌护盾',
         describe: '获得短暂的无敌护盾',
         color: '#00ff00',
         width: 24,
         height: 24,
-        spriteKey: 'powerup_temp_shield'
+        spriteKey: 'powerup_invincibility'
     },
     [PowerupType.TIME_SLOW]: {
         type: EntityType.POWERUP,

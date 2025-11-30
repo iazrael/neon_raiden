@@ -133,7 +133,7 @@ export class SpriteGenerator {
             } else {
                 img.addEventListener('load', drawIcon);
             }
-        } else if (type === PowerupType.TEMP_SHIELD) {
+        } else if (type === PowerupType.INVINCIBILITY) {
             // Draw Shield Icon
             ctx.strokeStyle = '#00ff00';
             ctx.lineWidth = 2;

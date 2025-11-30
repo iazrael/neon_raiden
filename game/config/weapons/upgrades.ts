@@ -34,10 +34,10 @@ export const WeaponUpgradeConfig: {
     [WeaponType.MISSILE]: {
         1: { bulletCount: 1 },
         2: { bulletCount: 2 },
-        3: { bulletCount: 4 },
+        3: { bulletCount: 3 },
         4: { bulletCount: 4 },
         5: { bulletCount: 4 },
-        6: { bulletCount: 6 },
+        6: { bulletCount: 4 },
         7: { bulletCount: 6 },
         8: { bulletCount: 6 },
         9: { bulletCount: 8 }
@@ -65,15 +65,15 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 72, bulletHeight: 72 }
     },
     [WeaponType.TESLA]: {
-        1: { chainCount: 1, chainRange: 300 },
-        2: { chainCount: 1, chainRange: 400 },
-        3: { chainCount: 2, chainRange: 500 },
-        4: { chainCount: 2, chainRange: 600 },
-        5: { chainCount: 3, chainRange: 700 },
-        6: { chainCount: 3, chainRange: 800 },
-        7: { chainCount: 4, chainRange: 900 },
+        1: { chainCount: 1, chainRange: 400 },
+        2: { chainCount: 1, chainRange: 500 },
+        3: { chainCount: 2, chainRange: 600 },
+        4: { chainCount: 2, chainRange: 700 },
+        5: { chainCount: 3, chainRange: 800 },
+        6: { chainCount: 3, chainRange: 900 },
+        7: { chainCount: 4, chainRange: 1000 },
         8: { chainCount: 4, chainRange: 1000 },
-        9: { chainCount: 5, chainRange: 1100 }
+        9: { chainCount: 5, chainRange: 1000 }
     },
     [WeaponType.MAGMA]: {
         1: { bulletCount: 2 },

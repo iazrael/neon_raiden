@@ -21,11 +21,30 @@ const mockCanvasContext = {
   fillText: jest.fn(),
 };
 
-global.HTMLCanvasElement = class extends HTMLElement {
+// Define the mock class separately
+class MockHTMLCanvasElement extends HTMLElement {
+  width = 0;
+  height = 0;
+  
   getContext() {
     return mockCanvasContext;
   }
-};
+  
+  captureStream() {
+    return new MediaStream();
+  }
+  
+  toBlob() {
+    return Promise.resolve(new Blob());
+  }
+  
+  toDataURL() {
+    return '';
+  }
+}
+
+// Cast to any to avoid type errors
+global.HTMLCanvasElement = MockHTMLCanvasElement as any;
 
 // Mock AudioSystem
 jest.mock('@/game/systems/AudioSystem');

@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
+import checker from 'vite-plugin-checker';
 import { swInjectPlugin } from './vite-plugins/sw-inject-plugin';
 
 // 读取package.json中的版本号
@@ -27,6 +28,9 @@ export default defineConfig(({ mode }) => {
         plugins: [
             react(),
             tailwindcss(),
+            checker({
+                typescript: true
+            }),
             // Service Worker 注入插件
             swInjectPlugin({
                 appName: 'neon-raiden',
