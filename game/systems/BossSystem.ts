@@ -67,7 +67,11 @@ export class BossSystem {
 
         // Apply hitbox scaling for more precise collision detection
         const hitboxScale = config.hitboxScale || 1.0;
-        console.log(`Boss size: ${width}x${height}`);
+        // console.log(`Boss size: ${width}x${height}`);
+        
+        // // Play power up sound when spawning boss
+        // this.audio.playPowerUp();
+        
         return {
             x: spawnX,
             y: -150,

@@ -43,21 +43,13 @@ export const EnemyDetail: React.FC<EnemyDetailProps> = ({ enemy }) => {
         <span className="text-gray-500 text-xs">SCORE</span>
         <span className="text-green-300 font-semibold">{enemy.config.score}</span>
       </div>
-      <div className="flex justify-between border-b border-gray-800 py-2">
+      {/* <div className="flex justify-between border-b border-gray-800 py-2">
         <span className="text-gray-500 text-xs">BULLET TYPE</span>
         <span className="text-yellow-300 font-semibold">{bulletType}</span>
-      </div>
+      </div> */}
       <div className="flex justify-between border-b border-gray-800 py-2">
         <span className="text-gray-500 text-xs">FIRE RATE</span>
         <span className="text-cyan-300 font-semibold">{(weaponConfig.frequency || 0).toFixed(3)}</span>
-      </div>
-      <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">ELITE HP</span>
-        <span className="text-red-300 font-semibold">×{eliteHpMultiplier}</span>
-      </div>
-      <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">ELITE DMG</span>
-        <span className="text-red-300 font-semibold">×{eliteDamageMultiplier}</span>
       </div>
     </div>
   );

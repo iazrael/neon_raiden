@@ -6,7 +6,7 @@ import type { ComboState } from './game/systems/ComboSystem';
 import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
 import { SpriteGenerator } from './game/SpriteGenerator';
-import { GameConfig } from './game/config';
+import { GameConfig } from './game/config/game';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

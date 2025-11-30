@@ -21,7 +21,7 @@ export const BossDetail: React.FC<BossDetailProps> = ({ boss }) => {
     [BossMovementPattern.AGGRESSIVE]: '激进突进',
     [BossMovementPattern.ADAPTIVE]: '自适应追踪',
   };
-  
+
   return (
     <div className="grid grid-cols-2 gap-3 text-sm">
       <div className="flex justify-between border-b border-gray-800 py-2">
@@ -29,9 +29,10 @@ export const BossDetail: React.FC<BossDetailProps> = ({ boss }) => {
         <span className="text-purple-300 font-semibold">{boss.config.hp}</span>
       </div>
       <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">SPEED</span>
-        <span className="text-cyan-300 font-semibold">{boss.config.speed}</span>
+        <span className="text-gray-500 text-xs">SCORE</span>
+        <span className="text-green-300 font-semibold">{boss.config.score}</span>
       </div>
+
       <div className="flex justify-between border-b border-gray-800 py-2">
         <span className="text-gray-500 text-xs">BULLET CNT</span>
         <span className="text-yellow-300 font-semibold">{boss.config.weaponConfigs.bulletCount}</span>
@@ -41,18 +42,18 @@ export const BossDetail: React.FC<BossDetailProps> = ({ boss }) => {
         <span className="text-yellow-300 font-semibold">{boss.config.weaponConfigs.bulletSpeed}</span>
       </div>
       <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">FIRE RATE</span>
-        <span className="text-yellow-300 font-semibold">{(boss.config.weaponConfigs.fireRate * 100).toFixed(1)}%</span>
-      </div>
-      <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">SCORE</span>
-        <span className="text-green-300 font-semibold">{boss.config.score}</span>
+        <span className="text-gray-500 text-xs">SPEED</span>
+        <span className="text-cyan-300 font-semibold">{boss.config.speed}</span>
       </div>
       <div className="flex justify-between border-b border-gray-800 py-2">
         <span className="text-gray-500 text-xs">MOVEMENT</span>
         <span className="text-cyan-300 font-semibold">{patternDescriptions[movementPattern]}</span>
       </div>
-      
+
+      <div className="flex justify-between border-b border-gray-800 py-2">
+        <span className="text-gray-500 text-xs">FIRE RATE</span>
+        <span className="text-yellow-300 font-semibold">{(boss.config.weaponConfigs.fireRate * 100).toFixed(1)}%</span>
+      </div>
       {boss.config.laser && boss.config.laser.type !== 'none' && (
         <>
           <div className="flex justify-between border-b border-gray-800 py-2">
@@ -65,7 +66,7 @@ export const BossDetail: React.FC<BossDetailProps> = ({ boss }) => {
           </div>
         </>
       )}
-      
+
       {/* Weapons Display */}
       {boss.weapons && boss.weapons.length > 0 && (
         <div className="col-span-2 border-b border-gray-800 py-2 mt-2 mb-2">
@@ -87,7 +88,7 @@ export const BossDetail: React.FC<BossDetailProps> = ({ boss }) => {
           </div>
         </div>
       )}
-      
+
       {/* Wingmen Display */}
       {boss.wingmenCount > 0 && (
         <div className="col-span-2 border-b border-gray-800 py-2">

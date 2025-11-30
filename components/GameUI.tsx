@@ -6,24 +6,9 @@ import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
 import type { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
+import { intToRoman } from "@/game/utils/numbers";
 
-// 罗马数字转换函数
-function intToRoman(num: number): string {
-  if (num <= 0 || num >= 4000) return num.toString();
-  
-  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-  const symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
-  
-  let result = "";
-  for (let i = 0; i < values.length; i++) {
-    while (num >= values[i]) {
-      result += symbols[i];
-      num -= values[i];
-    }
-  }
-  console.log(result)
-  return result;
-}
+
 
 interface GameUIProps {
   state: GameState;
