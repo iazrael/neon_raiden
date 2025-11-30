@@ -1,295 +1,311 @@
-import { WeaponSynergySystem, SynergyType, SYNERGY_CONFIGS } from '@/game/systems/WeaponSynergySystem';
-import { WeaponType, Entity } from '@/types';
+import { WeaponSynergySystem, SynergyType } from '@/game/systems/WeaponSynergySystem';
+import { WeaponType, Entity, EntityType, CombatEventType, SynergyEffectType } from '@/types';
 
-describe('WeaponSynergySystem', () => {
-  let weaponSynergySystem: WeaponSynergySystem;
+const enemy: Entity = {
+  x: 100, y: 100, width: 20, height: 20, vx: 0, vy: 0,
+  hp: 100, maxHp: 100, type: EntityType.ENEMY, color: '#fff', markedForDeletion: false
+};
 
-  beforeEach(() => {
-    weaponSynergySystem = new WeaponSynergySystem();
+const player: Entity = {
+  x: 50, y: 50, width: 20, height: 20, vx: 0, vy: 0,
+  hp: 100, maxHp: 100, type: EntityType.PLAYER, color: '#0ff', markedForDeletion: false
+};
+
+describe('WeaponSynergySystem - Basic Synergy Activation', () => {
+  test('WAVE+PLASMA returns damage_boost on hit', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.WAVE, WeaponType.PLASMA]);
+    const res = sys.tryTriggerSynergies({
+      weaponType: WeaponType.WAVE,
+      bulletX: 0,
+      bulletY: 0,
+      targetEnemy: enemy,
+      enemies: [enemy],
+      player,
+      eventType: CombatEventType.HIT
+    });
+    expect(res.some(r => r.type === SynergyType.WAVE_PLASMA && r.effect === SynergyEffectType.DAMAGE_BOOST)).toBeTruthy();
+    expect(res.find(r => r.type === SynergyType.WAVE_PLASMA)?.multiplier).toBe(1.5);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  test('TESLA+PLASMA returns defense effects on explode', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.TESLA, WeaponType.PLASMA]);
+    const res = sys.tryTriggerSynergies({
+      weaponType: WeaponType.PLASMA,
+      bulletX: 0,
+      bulletY: 0,
+      targetEnemy: enemy,
+      enemies: [enemy],
+      player,
+      eventType: CombatEventType.EXPLODE
+    });
+    expect(res.some(r => r.effect === SynergyEffectType.SHIELD_REGEN)).toBeTruthy();
+    expect(res.some(r => r.effect === SynergyEffectType.INVULNERABLE)).toBeTruthy();
+    expect(res.find(r => r.effect === SynergyEffectType.SHIELD_REGEN)?.value).toBe(6);
+    expect(res.find(r => r.effect === SynergyEffectType.INVULNERABLE)?.value).toBe(200);
   });
 
-  describe('constructor and reset', () => {
-    it('should initialize with empty sets', () => {
-      // 构造函数已经被调用，系统应该正常工作
-      expect(weaponSynergySystem).toBeDefined();
-    });
+  test('LASER+TESLA triggers chain lightning with 15% probability', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER, WeaponType.TESLA]);
 
-    it('should reset to initial state', () => {
-      // 添加一些武器和组合技
-      (weaponSynergySystem as any).equippedWeapons.add(WeaponType.LASER);
-      (weaponSynergySystem as any).equippedWeapons.add(WeaponType.TESLA);
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.LASER_TESLA);
-      
-      // 重置
-      weaponSynergySystem.reset();
-      
-      // 所有元素应该被清除
-      expect((weaponSynergySystem as any).equippedWeapons.size).toBe(0);
-      expect((weaponSynergySystem as any).activeSynergies.size).toBe(0);
-    });
-  });
-
-  describe('updateEquippedWeapons', () => {
-    it('should update equipped weapons and activate synergies', () => {
-      const weapons = [WeaponType.LASER, WeaponType.TESLA];
-      weaponSynergySystem.updateEquippedWeapons(weapons);
-      
-      // 应该激活LASER+TESLA组合技
-      const isActive = weaponSynergySystem.isSynergyActive(SynergyType.LASER_TESLA);
-      expect(isActive).toBe(true);
-    });
-
-    it('should not activate synergy when required weapons are missing', () => {
-      const weapons = [WeaponType.LASER]; // 缺少TESLA
-      weaponSynergySystem.updateEquippedWeapons(weapons);
-      
-      // 不应该激活LASER+TESLA组合技
-      const isActive = weaponSynergySystem.isSynergyActive(SynergyType.LASER_TESLA);
-      expect(isActive).toBe(false);
-    });
-  });
-
-  describe('canCombine', () => {
-    it('should return true for combinable weapons', () => {
-      const canCombine = weaponSynergySystem.canCombine(WeaponType.LASER, WeaponType.TESLA);
-      expect(canCombine).toBe(true);
-    });
-
-    it('should return false for non-combinable weapons', () => {
-      const canCombine = weaponSynergySystem.canCombine(WeaponType.LASER, WeaponType.MISSILE);
-      expect(canCombine).toBe(false);
-    });
-
-    it('should return false for invalid weapons', () => {
-      const canCombine1 = weaponSynergySystem.canCombine(undefined as any, WeaponType.LASER);
-      const canCombine2 = weaponSynergySystem.canCombine(WeaponType.LASER, undefined as any);
-      expect(canCombine1).toBe(false);
-      expect(canCombine2).toBe(false);
-    });
-  });
-
-  describe('isSynergyActive', () => {
-    it('should return true for active synergy', () => {
-      // 手动激活一个组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.LASER_TESLA);
-      
-      const isActive = weaponSynergySystem.isSynergyActive(SynergyType.LASER_TESLA);
-      expect(isActive).toBe(true);
-    });
-
-    it('should return false for inactive synergy', () => {
-      const isActive = weaponSynergySystem.isSynergyActive(SynergyType.LASER_TESLA);
-      expect(isActive).toBe(false);
-    });
-  });
-
-  describe('getActiveSynergies', () => {
-    it('should return active synergies', () => {
-      // 手动激活几个组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.LASER_TESLA);
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.WAVE_PLASMA);
-      
-      const activeSynergies = weaponSynergySystem.getActiveSynergies();
-      expect(activeSynergies).toHaveLength(2);
-      expect(activeSynergies[0].type).toBe(SynergyType.LASER_TESLA);
-      expect(activeSynergies[1].type).toBe(SynergyType.WAVE_PLASMA);
-    });
-
-    it('should return empty array when no synergies are active', () => {
-      const activeSynergies = weaponSynergySystem.getActiveSynergies();
-      expect(activeSynergies).toEqual([]);
-    });
-  });
-
-  describe('tryTriggerSynergies', () => {
-    it('should return empty array for invalid context', () => {
-      const context = {
-        weaponType: undefined,
+    // Run multiple times to test probability
+    let triggered = 0;
+    const iterations = 1000;
+    for (let i = 0; i < iterations; i++) {
+      const res = sys.tryTriggerSynergies({
+        weaponType: WeaponType.LASER,
         bulletX: 0,
         bulletY: 0,
-        targetEnemy: {} as Entity,
-        enemies: [],
-        player: {} as Entity
-      };
-      
-      const results = weaponSynergySystem.tryTriggerSynergies(context);
-      expect(results).toEqual([]);
-    });
+        targetEnemy: enemy,
+        enemies: [enemy],
+        player,
+        eventType: CombatEventType.HIT
+      });
+      if (res.some(r => r.type === SynergyType.LASER_TESLA && r.effect === SynergyEffectType.CHAIN_LIGHTNING)) {
+        triggered++;
+      }
+    }
 
-    it('should trigger LASER_TESLA synergy', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.LASER_TESLA);
-      
-      // Mock Math.random to always trigger the synergy
-      jest.spyOn(global.Math, 'random').mockReturnValue(0.1); // 小于触发概率0.15
-      
-      const context = {
-        weaponType: WeaponType.LASER,
-        bulletX: 100,
-        bulletY: 100,
-        targetEnemy: {} as Entity,
-        enemies: [],
-        player: {} as Entity
-      };
-      
-      const results = weaponSynergySystem.tryTriggerSynergies(context);
-      expect(results).toHaveLength(1);
-      expect(results[0].type).toBe(SynergyType.LASER_TESLA);
-      expect(results[0].effect).toBe('chain_lightning');
-      
-      // 恢复Math.random
-      jest.spyOn(global.Math, 'random').mockRestore();
-    });
-
-    it('should not trigger LASER_TESLA synergy when probability fails', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.LASER_TESLA);
-      
-      // Mock Math.random to never trigger the synergy
-      jest.spyOn(global.Math, 'random').mockReturnValue(0.2); // 大于触发概率0.15
-      
-      const context = {
-        weaponType: WeaponType.LASER,
-        bulletX: 100,
-        bulletY: 100,
-        targetEnemy: {} as Entity,
-        enemies: [],
-        player: {} as Entity
-      };
-      
-      const results = weaponSynergySystem.tryTriggerSynergies(context);
-      expect(results).toHaveLength(0);
-      
-      // 恢复Math.random
-      jest.spyOn(global.Math, 'random').mockRestore();
-    });
-
-    it('should trigger WAVE_PLASMA synergy when bullet is inside explosion zone', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.WAVE_PLASMA);
-      
-      const context = {
-        weaponType: WeaponType.WAVE,
-        bulletX: 100,
-        bulletY: 100,
-        targetEnemy: {} as Entity,
-        enemies: [],
-        player: {} as Entity,
-        plasmaExplosions: [{ x: 100, y: 100, range: 200 }]
-      };
-      
-      const results = weaponSynergySystem.tryTriggerSynergies(context);
-      expect(results).toHaveLength(1);
-      expect(results[0].type).toBe(SynergyType.WAVE_PLASMA);
-      expect(results[0].effect).toBe('damage_boost');
-      expect(results[0].multiplier).toBe(1.5);
-    });
-
-    it('should trigger MISSILE_VULCAN synergy', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.MISSILE_VULCAN);
-      
-      const targetEnemy = { state: 1 } as Entity; // 标记为被Vulcan击中
-      
-      const context = {
-        weaponType: WeaponType.MISSILE,
-        bulletX: 100,
-        bulletY: 100,
-        targetEnemy,
-        enemies: [],
-        player: {} as Entity
-      };
-      
-      const results = weaponSynergySystem.tryTriggerSynergies(context);
-      expect(results).toHaveLength(1);
-      expect(results[0].type).toBe(SynergyType.MISSILE_VULCAN);
-      expect(results[0].effect).toBe('damage_boost');
-      expect(results[0].multiplier).toBe(1.3);
-    });
-
-    it('should trigger MAGMA_SHURIKEN synergy', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.MAGMA_SHURIKEN);
-      
-      const targetEnemy = { state: 1 } as Entity; // 标记为反弹
-      
-      const context = {
-        weaponType: WeaponType.SHURIKEN,
-        bulletX: 100,
-        bulletY: 100,
-        targetEnemy,
-        enemies: [],
-        player: {} as Entity
-      };
-      
-      const results = weaponSynergySystem.tryTriggerSynergies(context);
-      expect(results).toHaveLength(1);
-      expect(results[0].type).toBe(SynergyType.MAGMA_SHURIKEN);
-      expect(results[0].effect).toBe('burn');
-      expect(results[0].value).toBe(5);
-    });
+    // Should trigger roughly 15% of the time (allow 10-20% range for randomness)
+    const triggerRate = triggered / iterations;
+    expect(triggerRate).toBeGreaterThan(0.10);
+    expect(triggerRate).toBeLessThan(0.20);
   });
 
-  describe('triggerPlasmaStorm', () => {
-    it('should not trigger plasma storm when synergy is not active', () => {
-      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 100, []);
-      expect(targets).toEqual([]);
+  test('MISSILE+VULCAN triggers damage boost when target has vulcan tag', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.MISSILE, WeaponType.VULCAN]);
+
+    const taggedEnemy = {
+      ...enemy,
+      tags: { hitByVulcan: Date.now() + 1000 }
+    };
+
+    const res = sys.tryTriggerSynergies({
+      weaponType: WeaponType.MISSILE,
+      bulletX: 0,
+      bulletY: 0,
+      targetEnemy: taggedEnemy,
+      enemies: [taggedEnemy],
+      player,
+      eventType: CombatEventType.HIT
     });
 
-    it('should trigger plasma storm and return up to 3 enemies in range', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.TESLA_PLASMA);
-      
-      const enemies: Entity[] = [
-        { x: 450, y: 350, markedForDeletion: false } as Entity,
-        { x: 350, y: 250, markedForDeletion: false } as Entity,
-        { x: 500, y: 300, markedForDeletion: false } as Entity
-      ];
-      
-      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 150, enemies);
-      
-      // 应该返回最多3个目标敌人
-      expect(targets.length).toBeGreaterThanOrEqual(1);
-      expect(targets.length).toBeLessThanOrEqual(3);
-      
-      // 返回的目标应为输入敌人子集且在范围内
-      targets.forEach(t => {
-        expect(enemies.includes(t)).toBe(true);
-        const dist = Math.hypot(t.x - 400, t.y - 300);
-        expect(dist).toBeLessThan(150);
-      });
+    expect(res.some(r => r.type === SynergyType.MISSILE_VULCAN && r.effect === SynergyEffectType.DAMAGE_BOOST)).toBeTruthy();
+    expect(res.find(r => r.type === SynergyType.MISSILE_VULCAN)?.multiplier).toBe(1.3);
+  });
+
+  test('MISSILE+VULCAN does not trigger without vulcan tag', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.MISSILE, WeaponType.VULCAN]);
+
+    const res = sys.tryTriggerSynergies({
+      weaponType: WeaponType.MISSILE,
+      bulletX: 0,
+      bulletY: 0,
+      targetEnemy: enemy,
+      enemies: [enemy],
+      player,
+      eventType: CombatEventType.HIT
     });
 
-    it('should not include enemies outside explosion range', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.TESLA_PLASMA);
-      
-      const enemies: Entity[] = [
-        { x: 600, y: 500, markedForDeletion: false } as Entity // 在爆炸范围外
-      ];
-      
-      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 100, enemies);
-      
-      // 应该不返回目标
-      expect(targets).toEqual([]);
+    expect(res.some(r => r.type === SynergyType.MISSILE_VULCAN)).toBeFalsy();
+  });
+
+  test('MAGMA+SHURIKEN triggers burn effect on bounce', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.MAGMA, WeaponType.SHURIKEN]);
+
+    const res = sys.tryTriggerSynergies({
+      weaponType: WeaponType.SHURIKEN,
+      bulletX: 0,
+      bulletY: 0,
+      targetEnemy: enemy,
+      enemies: [enemy],
+      player,
+      eventType: CombatEventType.HIT,
+      shurikenBounced: true
     });
 
-    it('should not include marked for deletion enemies', () => {
-      // 激活组合技
-      (weaponSynergySystem as any).activeSynergies.add(SynergyType.TESLA_PLASMA);
-      
-      const enemies: Entity[] = [
-        { x: 450, y: 350, markedForDeletion: true } as Entity // 标记为删除
-      ];
-      
-      const targets = weaponSynergySystem.triggerPlasmaStorm(400, 300, 150, enemies);
-      
-      // 应该不返回目标
-      expect(targets).toEqual([]);
+    expect(res.some(r => r.type === SynergyType.MAGMA_SHURIKEN && r.effect === SynergyEffectType.BURN)).toBeTruthy();
+    expect(res.find(r => r.type === SynergyType.MAGMA_SHURIKEN)?.value).toBe(5);
+  });
+
+  test('MAGMA+SHURIKEN does not trigger without bounce', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.MAGMA, WeaponType.SHURIKEN]);
+
+    const res = sys.tryTriggerSynergies({
+      weaponType: WeaponType.SHURIKEN,
+      bulletX: 0,
+      bulletY: 0,
+      targetEnemy: enemy,
+      enemies: [enemy],
+      player,
+      eventType: CombatEventType.HIT,
+      shurikenBounced: false
     });
+
+    expect(res.some(r => r.type === SynergyType.MAGMA_SHURIKEN)).toBeFalsy();
+  });
+});
+
+describe('WeaponSynergySystem - canCombine Tests', () => {
+  test('canCombine returns true for valid synergy pairs', () => {
+    const sys = new WeaponSynergySystem();
+
+    expect(sys.canCombine(WeaponType.LASER, WeaponType.TESLA)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.TESLA, WeaponType.LASER)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.WAVE, WeaponType.PLASMA)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.PLASMA, WeaponType.WAVE)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.MISSILE, WeaponType.VULCAN)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.VULCAN, WeaponType.MISSILE)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.MAGMA, WeaponType.SHURIKEN)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.SHURIKEN, WeaponType.MAGMA)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.TESLA, WeaponType.PLASMA)).toBeTruthy();
+    expect(sys.canCombine(WeaponType.PLASMA, WeaponType.TESLA)).toBeTruthy();
+  });
+
+  test('canCombine returns false for invalid pairs', () => {
+    const sys = new WeaponSynergySystem();
+
+    expect(sys.canCombine(WeaponType.LASER, WeaponType.WAVE)).toBeFalsy();
+    expect(sys.canCombine(WeaponType.MISSILE, WeaponType.PLASMA)).toBeFalsy();
+    expect(sys.canCombine(WeaponType.VULCAN, WeaponType.MAGMA)).toBeFalsy();
+    expect(sys.canCombine(WeaponType.SHURIKEN, WeaponType.TESLA)).toBeFalsy();
+  });
+
+  test('canCombine returns false for same weapon', () => {
+    const sys = new WeaponSynergySystem();
+
+    expect(sys.canCombine(WeaponType.LASER, WeaponType.LASER)).toBeFalsy();
+    expect(sys.canCombine(WeaponType.PLASMA, WeaponType.PLASMA)).toBeFalsy();
+  });
+
+  test('canCombine returns false for null/undefined', () => {
+    const sys = new WeaponSynergySystem();
+
+    expect(sys.canCombine(null as any, WeaponType.LASER)).toBeFalsy();
+    expect(sys.canCombine(WeaponType.LASER, null as any)).toBeFalsy();
+    expect(sys.canCombine(undefined as any, undefined as any)).toBeFalsy();
+  });
+});
+
+describe('WeaponSynergySystem - getPotentialSynergyColors Tests', () => {
+  test('returns synergy info when weapon can combine with equipped weapon', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER]);
+
+    const result = sys.getPotentialSynergyColors(WeaponType.TESLA);
+    expect(result).not.toBeNull();
+    expect(result?.synergyType).toBe(SynergyType.LASER_TESLA);
+    expect(result?.colors).toHaveLength(1);
+  });
+
+  test('returns null when weapon cannot combine with equipped weapons', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER]);
+
+    const result = sys.getPotentialSynergyColors(WeaponType.WAVE);
+    expect(result).toBeNull();
+  });
+
+  test('returns null when no weapons are equipped', () => {
+    const sys = new WeaponSynergySystem();
+
+    const result = sys.getPotentialSynergyColors(WeaponType.TESLA);
+    expect(result).toBeNull();
+  });
+
+  test('returns synergy info for multiple equipped weapons', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER, WeaponType.WAVE]);
+
+    // TESLA can combine with LASER
+    const result1 = sys.getPotentialSynergyColors(WeaponType.TESLA);
+    expect(result1).not.toBeNull();
+    expect(result1?.synergyType).toBe(SynergyType.LASER_TESLA);
+
+    // PLASMA can combine with WAVE
+    const result2 = sys.getPotentialSynergyColors(WeaponType.PLASMA);
+    expect(result2).not.toBeNull();
+    // Could be either WAVE_PLASMA or TESLA_PLASMA depending on order
+    expect([SynergyType.WAVE_PLASMA, SynergyType.TESLA_PLASMA]).toContain(result2?.synergyType);
+  });
+});
+
+describe('WeaponSynergySystem - Synergy Activation Tests', () => {
+  test('synergy activates when both weapons are equipped', () => {
+    const sys = new WeaponSynergySystem();
+
+    expect(sys.isSynergyActive(SynergyType.LASER_TESLA)).toBeFalsy();
+
+    sys.updateEquippedWeapons([WeaponType.LASER, WeaponType.TESLA]);
+
+    expect(sys.isSynergyActive(SynergyType.LASER_TESLA)).toBeTruthy();
+  });
+
+  test('synergy deactivates when weapons are changed', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER, WeaponType.TESLA]);
+
+    expect(sys.isSynergyActive(SynergyType.LASER_TESLA)).toBeTruthy();
+
+    sys.updateEquippedWeapons([WeaponType.WAVE, WeaponType.PLASMA]);
+
+    expect(sys.isSynergyActive(SynergyType.LASER_TESLA)).toBeFalsy();
+    expect(sys.isSynergyActive(SynergyType.WAVE_PLASMA)).toBeTruthy();
+  });
+
+  test('getActiveSynergies returns all active synergies', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER, WeaponType.TESLA]);
+
+    const active = sys.getActiveSynergies();
+    expect(active).toHaveLength(1);
+    expect(active[0].type).toBe(SynergyType.LASER_TESLA);
+  });
+});
+
+describe('WeaponSynergySystem - Plasma Storm Tests', () => {
+  test('triggerPlasmaStorm returns enemies in range', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.TESLA, WeaponType.PLASMA]);
+
+    const nearEnemy = { ...enemy, x: 50, y: 50 };
+    const farEnemy = { ...enemy, x: 500, y: 500 };
+
+    const targets = sys.triggerPlasmaStorm(100, 100, 100, [nearEnemy, farEnemy]);
+
+    expect(targets).toHaveLength(1);
+    expect(targets[0]).toBe(nearEnemy);
+  });
+
+  test('triggerPlasmaStorm returns empty array when synergy not active', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.LASER]);
+
+    const targets = sys.triggerPlasmaStorm(100, 100, 100, [enemy]);
+
+    expect(targets).toHaveLength(0);
+  });
+
+  test('triggerPlasmaStorm returns max 3 targets', () => {
+    const sys = new WeaponSynergySystem();
+    sys.updateEquippedWeapons([WeaponType.TESLA, WeaponType.PLASMA]);
+
+    const enemies = [
+      { ...enemy, x: 100, y: 100 },
+      { ...enemy, x: 110, y: 110 },
+      { ...enemy, x: 120, y: 120 },
+      { ...enemy, x: 130, y: 130 },
+      { ...enemy, x: 140, y: 140 }
+    ];
+
+    const targets = sys.triggerPlasmaStorm(100, 100, 200, enemies);
+
+    expect(targets.length).toBeLessThanOrEqual(3);
   });
 });

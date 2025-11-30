@@ -94,6 +94,8 @@ export interface Entity {
   isHoming?: boolean; // For homing missiles that track the player
   invulnerable?: boolean; // Invulnerability status
   invulnerableTimer?: number; // Invulnerability duration in milliseconds
+  tags?: Record<string, number>;
+  slowed?: boolean;
   // Boss special mechanics fields
   originalBulletCount?: number; // Boss armor break: store original bullet count
   currentBulletCount?: number; // Boss armor break: effective bullet count based on armor phase
@@ -103,6 +105,23 @@ export interface Entity {
   hitFlashUntil?: number;
   playerLevel?: number;
   defensePct?: number;
+}
+
+export enum CombatEventType {
+  HIT = 'hit',
+  EXPLODE = 'explode',
+  BOUNCE = 'bounce',
+  KILL = 'kill'
+}
+
+export enum SynergyEffectType {
+  CHAIN_LIGHTNING = 'chain_lightning',
+  DAMAGE_BOOST = 'damage_boost',
+  BURN = 'burn',
+  SHIELD_REGEN = 'shield_regen',
+  INVULNERABLE = 'invulnerable',
+  SLOW_FIELD = 'slow_field',
+  SPEED_BOOST = 'speed_boost'
 }
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

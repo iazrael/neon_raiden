@@ -5,9 +5,15 @@ import { AudioSystem } from '@/game/systems/AudioSystem';
 
 export class WeaponSystem {
     audio: AudioSystem;
+    alternateFireEnabled: boolean;
 
     constructor(audio: AudioSystem) {
         this.audio = audio;
+        this.alternateFireEnabled = false;
+    }
+
+    enableAlternateFire(enable: boolean) {
+        this.alternateFireEnabled = !!enable;
     }
 
     firePlayerWeapon(

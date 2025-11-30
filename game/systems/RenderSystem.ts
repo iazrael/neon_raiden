@@ -80,7 +80,8 @@ export class RenderSystem {
         playerPrimaryColor?: string,
         playerSecondaryColor?: string,
         playerCombine?: boolean,
-        timeSlowActive: boolean = false
+        timeSlowActive: boolean = false,
+        powerupSynergyInfo?: Map<Entity, { colors: string[], synergyType: any }>
     ) {
         this.ctx.save();
 
@@ -159,7 +160,10 @@ export class RenderSystem {
                 options.forEach(opt => this.drawEntity(opt));
             }
 
-            powerups.forEach(p => this.drawEntity(p));
+            powerups.forEach(p => {
+                const synergyInfo = powerupSynergyInfo?.get(p);
+                this.drawEntity(p, undefined, undefined, undefined, undefined, undefined, synergyInfo);
+            });
 
             // P2 Draw environment elements
             environmentElements.forEach(elem => this.drawEnvironmentElement(elem));
@@ -246,9 +250,40 @@ export class RenderSystem {
         this.ctx.restore();
     }
 
-    drawEntity(e: Entity, weaponLevel?: number, playerLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean) {
+    drawEntity(e: Entity, weaponLevel?: number, playerLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean, synergyInfo?: { colors: string[], synergyType: any }) {
         this.ctx.save();
         this.ctx.translate(Math.round(e.x), Math.round(e.y));
+
+        // P2 Draw synergy indicator for weapon powerups
+        if (e.type === EntityType.POWERUP && synergyInfo) {
+            const t = Date.now();
+            const blinkInterval = 300; // Blink every 300ms
+            const phase = Math.floor(t / blinkInterval) % 2;
+
+            // Alternate between synergy color and a brighter version
+            const synergyColor = synergyInfo.colors[0];
+            const glowAlpha = 0.6 + Math.sin(t / 100) * 0.4; // Pulsing glow
+
+            // Draw outer glow ring
+            this.ctx.save();
+            this.ctx.shadowColor = synergyColor;
+            this.ctx.shadowBlur = 20 + Math.sin(t / 150) * 10;
+            this.ctx.strokeStyle = `${synergyColor}${Math.round(glowAlpha * 255).toString(16).padStart(2, '0')}`;
+            this.ctx.lineWidth = 3;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, Math.max(e.width, e.height) / 2 + 8, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+
+            // Draw inner pulsing circle
+            this.ctx.save();
+            this.ctx.globalAlpha = phase === 0 ? 0.3 : 0.15;
+            this.ctx.fillStyle = synergyColor;
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, Math.max(e.width, e.height) / 2 + 5, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+        }
 
         if (e.type === EntityType.PLAYER) {
             const t = Date.now();

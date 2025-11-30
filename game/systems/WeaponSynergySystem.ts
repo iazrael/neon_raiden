@@ -8,7 +8,7 @@
  * - 提供视觉和数值反馈
  */
 
-import { WeaponType, Entity, EntityType } from '@/types';
+import { WeaponType, Entity, EntityType, CombatEventType, SynergyEffectType } from '@/types';
 
 export enum SynergyType {
     LASER_TESLA = 'LASER_TESLA',           // 电磁折射
@@ -50,6 +50,10 @@ export interface SynergyTriggerContext {
     player: Entity;
     /** PLASMA爆炸区域 */
     plasmaExplosions?: { x: number; y: number; range: number }[];
+    /** 事件类型 */
+    eventType?: CombatEventType;
+    /** SHURIKEN是否发生反弹 */
+    shurikenBounced?: boolean;
 }
 
 // 组合技配置表
@@ -68,7 +72,7 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Energy Resonance',
         chineseName: '能量共鸣',
         requiredWeapons: [WeaponType.WAVE, WeaponType.PLASMA],
-        description: 'WAVE子弹穿过PLASMA爆炸区时伤害+50%',
+        description: 'WAVE命中后沿路径生成涡流区，处于该区的波段伤害+50%',
         triggerChance: 1.0, // 位置判定,不需要概率
         color: '#ec4899' // 粉色
     },
@@ -95,7 +99,7 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Plasma Storm',
         chineseName: '等离子风暴',
         requiredWeapons: [WeaponType.TESLA, WeaponType.PLASMA],
-        description: 'PLASMA爆炸范围内额外触发3道闪电',
+        description: 'PLASMA爆炸触发3道闪电，并为玩家护盾+6与200ms无敌',
         triggerChance: 1.0, // 爆炸触发,不需要概率
         color: '#8b5cf6' // 紫罗兰色
     }
@@ -156,13 +160,45 @@ export class WeaponSynergySystem {
      * 检查两个武器是否可以组合成协同效果
      */
     canCombine(w1: WeaponType, w2: WeaponType): boolean {
-        if (!w1 || !w2) return false;
+        if (!w1 || !w2 || w1 === w2) return false;
 
         return Object.values(SYNERGY_CONFIGS).some(config => {
             return config.requiredWeapons.includes(w1) &&
                 config.requiredWeapons.includes(w2) &&
                 config.requiredWeapons.length === 2;
         });
+    }
+
+    /**
+     * 获取潜在的协同效果颜色
+     * 用于在道具上显示视觉提示，表明该武器可以与当前装备的武器形成协同效果
+     * @param weaponType 待检查的武器类型（通常是道具的武器类型）
+     * @returns 如果可以形成协同效果，返回包含两种武器颜色的数组；否则返回null
+     */
+    getPotentialSynergyColors(weaponType: WeaponType): { colors: string[], synergyType: SynergyType } | null {
+        if (!weaponType) return null;
+
+        // 检查该武器是否可以与任何已装备的武器形成协同效果
+        for (const equippedWeapon of this.equippedWeapons) {
+            if (this.canCombine(weaponType, equippedWeapon)) {
+                // 找到对应的协同效果配置
+                const synergyConfig = Object.values(SYNERGY_CONFIGS).find(config =>
+                    config.requiredWeapons.includes(weaponType) &&
+                    config.requiredWeapons.includes(equippedWeapon) &&
+                    config.requiredWeapons.length === 2
+                );
+
+                if (synergyConfig) {
+                    // 返回协同效果的颜色（用于闪烁效果）
+                    return {
+                        colors: [synergyConfig.color],
+                        synergyType: synergyConfig.type
+                    };
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -192,43 +228,37 @@ export class WeaponSynergySystem {
 
         // LASER + TESLA: 电磁折射
         if (this.isSynergyActive(SynergyType.LASER_TESLA) &&
-            bulletWeapon === WeaponType.LASER) {
+            bulletWeapon === WeaponType.LASER && (context.eventType === undefined || context.eventType === 'hit')) {
             if (Math.random() < SYNERGY_CONFIGS[SynergyType.LASER_TESLA].triggerChance) {
                 results.push({
                     type: SynergyType.LASER_TESLA,
-                    effect: 'chain_lightning',
+                    effect: SynergyEffectType.CHAIN_LIGHTNING,
                     value: 1, // 触发1次连锁闪电
                     color: SYNERGY_CONFIGS[SynergyType.LASER_TESLA].color
                 });
             }
         }
 
-        // WAVE + PLASMA: 能量共鸣
+        // WAVE + PLASMA: 能量共鸣（合成弹）：命中事件直接获得伤害加成
         if (this.isSynergyActive(SynergyType.WAVE_PLASMA) &&
-            bulletWeapon === WeaponType.WAVE) {
-            const zones = context.plasmaExplosions || [];
-            const inZone = zones.some(z => Math.hypot(context.bulletX - z.x, context.bulletY - z.y) < z.range);
-            if (inZone) {
-                results.push({
-                    type: SynergyType.WAVE_PLASMA,
-                    effect: 'damage_boost',
-                    value: 1.5,
-                    color: SYNERGY_CONFIGS[SynergyType.WAVE_PLASMA].color,
-                    multiplier: 1.5
-                });
-            }
+            bulletWeapon === WeaponType.WAVE && (context.eventType === undefined || context.eventType === 'hit')) {
+            results.push({
+                type: SynergyType.WAVE_PLASMA,
+                effect: SynergyEffectType.DAMAGE_BOOST,
+                value: 1.5,
+                color: SYNERGY_CONFIGS[SynergyType.WAVE_PLASMA].color,
+                multiplier: 1.5
+            });
         }
 
         // MISSILE + VULCAN: 弹幕覆盖
         if (this.isSynergyActive(SynergyType.MISSILE_VULCAN) &&
-            bulletWeapon === WeaponType.MISSILE) {
-            // 检查目标是否同时被VULCAN子弹命中
-            // 通过检查目标身上的"被击中标记"
-            const targetHitByVulcan = context.targetEnemy.state === 1; // 简化标记
+            bulletWeapon === WeaponType.MISSILE && (context.eventType === undefined || context.eventType === 'hit')) {
+            const targetHitByVulcan = !!context.targetEnemy.tags && context.targetEnemy.tags['hitByVulcan'] && context.targetEnemy.tags['hitByVulcan'] > Date.now();
             if (targetHitByVulcan) {
                 results.push({
                     type: SynergyType.MISSILE_VULCAN,
-                    effect: 'damage_boost',
+                    effect: SynergyEffectType.DAMAGE_BOOST,
                     value: 1.3, // 伤害×1.3
                     color: SYNERGY_CONFIGS[SynergyType.MISSILE_VULCAN].color,
                     multiplier: 1.3
@@ -238,18 +268,33 @@ export class WeaponSynergySystem {
 
         // MAGMA + SHURIKEN: 熔火飞刃
         if (this.isSynergyActive(SynergyType.MAGMA_SHURIKEN) &&
-            bulletWeapon === WeaponType.SHURIKEN) {
-            // 检查SHURIKEN是否发生过反弹
-            // 通过检查子弹的速度方向变化(简化)
-            const hasBounced = context.targetEnemy.state === 1; // 反弹标记
+            bulletWeapon === WeaponType.SHURIKEN && (context.eventType === undefined || context.eventType === 'hit')) {
+            const hasBounced = !!context.shurikenBounced;
             if (hasBounced) {
                 results.push({
                     type: SynergyType.MAGMA_SHURIKEN,
-                    effect: 'burn',
+                    effect: SynergyEffectType.BURN,
                     value: 5, // 每秒5点灼烧伤害
                     color: SYNERGY_CONFIGS[SynergyType.MAGMA_SHURIKEN].color
                 });
             }
+        }
+
+        // TESLA + PLASMA: 等离子风暴（防守）：爆炸事件触发护盾回复与短暂无敌
+        if (this.isSynergyActive(SynergyType.TESLA_PLASMA) &&
+            bulletWeapon === WeaponType.PLASMA && context.eventType === 'explode') {
+            results.push({
+                type: SynergyType.TESLA_PLASMA,
+                effect: SynergyEffectType.SHIELD_REGEN,
+                value: 6,
+                color: SYNERGY_CONFIGS[SynergyType.TESLA_PLASMA].color
+            });
+            results.push({
+                type: SynergyType.TESLA_PLASMA,
+                effect: SynergyEffectType.INVULNERABLE,
+                value: 200,
+                color: SYNERGY_CONFIGS[SynergyType.TESLA_PLASMA].color
+            });
         }
 
         return results;
@@ -289,7 +334,7 @@ export interface SynergyTriggerResult {
     /** 触发的组合技类型 */
     type: SynergyType;
     /** 效果类型 */
-    effect: 'chain_lightning' | 'damage_boost' | 'burn';
+    effect: SynergyEffectType;
     /** 效果数值 */
     value: number;
     /** 效果颜色(用于视觉特效) */

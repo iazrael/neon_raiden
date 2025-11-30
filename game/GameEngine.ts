@@ -1,5 +1,5 @@
 import { AudioSystem } from './systems/AudioSystem';
-import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize, FighterEntity } from '@/types';
+import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize, FighterEntity, CombatEventType, SynergyEffectType } from '@/types';
 import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals, WeaponConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
@@ -12,6 +12,7 @@ import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
 import { EliteAISystem } from './systems/EliteAISystem'; // P3 Elite AI System
 import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
+import { CombatTag } from './utils/CombatTag';
 
 export class GameEngine {
     canvas: HTMLCanvasElement;
@@ -50,6 +51,9 @@ export class GameEngine {
     boss: Entity | null = null;
     bossWingmen: Entity[] = [];
     plasmaExplosions: { x: number, y: number, range: number, life: number }[] = [];
+    slowFields: { x: number, y: number, range: number, life: number }[] = [];
+    tagSys: CombatTag;
+    playerSpeedBoostTimer: number = 0;
 
     // Player Stats
     weaponType: WeaponType = WeaponType.VULCAN;
@@ -97,6 +101,10 @@ export class GameEngine {
     debugEnemyKillCount: number = 0;
     debugModeEnabled: boolean = false;
 
+    // Alternate fire toggle
+    alternateFireEnabled: boolean = false;
+    fireAlternateToggle: boolean = false;
+
     // Callbacks
     onScoreChange: (score: number) => void;
     onLevelChange: (level: number) => void;
@@ -140,6 +148,7 @@ export class GameEngine {
         this.bossPhaseSys = new BossPhaseSystem(this.audio); // P2 Boss Phase System
         this.difficultySys = new DifficultySystem(); // P3 Difficulty System
         this.eliteAISys = new EliteAISystem(canvas.width, canvas.height); // P3 Elite AI System
+        this.tagSys = new CombatTag();
 
         // Bind Input Actions
         this.input.onAction = (action) => {
@@ -387,7 +396,7 @@ export class GameEngine {
         }
 
         // Player Movement
-        let speed = this.playerConfig.speed * playerTimeScale;
+        let speed = this.playerConfig.speed * playerTimeScale * (this.playerSpeedBoostTimer > 0 ? 1.1 : 1.0);
 
 
         const kb = this.input.getKeyboardVector();
@@ -429,10 +438,13 @@ export class GameEngine {
         const baseFireRate = this.weaponSys.getFireRate(this.weaponType, this.weaponLevel);
         const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.playerFireRateBonusPct)));
         if (this.fireTimer > fireRate) {
+            const canAlt = this.alternateFireEnabled && this.secondaryWeapon && this.synergySys.canCombine(this.weaponType, this.secondaryWeapon);
+            const fireType = canAlt ? (this.fireAlternateToggle ? this.secondaryWeapon! : this.weaponType) : this.weaponType;
             this.weaponSys.firePlayerWeapon(
-                this.player, this.weaponType, this.weaponLevel,
+                this.player, fireType, this.weaponLevel,
                 this.options, this.bullets, this.enemies
             );
+            if (canAlt) this.fireAlternateToggle = !this.fireAlternateToggle;
             this.fireTimer = 0;
         }
 
@@ -633,9 +645,37 @@ export class GameEngine {
                     b.markedForDeletion = true;
                 }
             }
+
+            // Apply slow fields to enemy bullets
+            if (this.slowFields.length > 0) {
+                const inSlow = this.slowFields.some(s => Math.hypot(b.x - s.x, b.y - s.y) < s.range);
+                if (inSlow) {
+                    b.vx *= 0.75;
+                    b.vy *= 0.75;
+                }
+            }
         });
 
         this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
+
+        // Apply slow fields to enemies
+        if (this.slowFields.length > 0) {
+            this.enemies.forEach(e => {
+                const inSlow = this.slowFields.some(s => Math.hypot(e.x - s.x, e.y - s.y) < s.range);
+                if (inSlow) {
+                    e.vx *= 0.8;
+                    e.vy *= 0.8;
+                }
+            });
+        }
+
+        // Apply burn DOT to enemies
+        this.enemies.forEach(e => {
+            if (this.tagSys.hasTag(e, 'burn_dot')) {
+                e.hp -= (5 * dt / 1000);
+                if (e.hp <= 0 && !e.markedForDeletion) this.killEnemy(e);
+            }
+        });
 
         // P3 Update difficulty system
         const currentWeapons = this.getPlayerWeapons();
@@ -683,6 +723,8 @@ export class GameEngine {
             p.life -= dt;
         });
         this.plasmaExplosions = this.plasmaExplosions.filter(p => p.life > 0);
+        this.slowFields.forEach(s => { s.life -= dt; });
+        this.slowFields = this.slowFields.filter(s => s.life > 0);
 
         this.checkCollisions();
 
@@ -831,10 +873,44 @@ export class GameEngine {
                 if (e.x < 0 || e.x > this.render.width) {
                     e.vx *= -1;
                     e.x = Math.max(0, Math.min(this.render.width, e.x));
+                    this.tagSys.setTag(e, 'shuriken_bounced', 600);
+                    const bounceContext: SynergyTriggerContext = {
+                        weaponType: WeaponType.SHURIKEN,
+                        bulletX: e.x,
+                        bulletY: e.y,
+                        targetEnemy: this.player,
+                        enemies: this.enemies,
+                        player: this.player,
+                        eventType: CombatEventType.BOUNCE,
+                        shurikenBounced: true
+                    };
+                    const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
+                    bounceResults.forEach(r => {
+                        if (r.effect === SynergyEffectType.SPEED_BOOST) {
+                            this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
+                        }
+                    });
                 }
                 if (e.y < 0) {
                     e.vy *= -1;
                     e.y = 0;
+                    this.tagSys.setTag(e, 'shuriken_bounced', 600);
+                    const bounceContext: SynergyTriggerContext = {
+                        weaponType: WeaponType.SHURIKEN,
+                        bulletX: e.x,
+                        bulletY: e.y,
+                        targetEnemy: this.player,
+                        enemies: this.enemies,
+                        player: this.player,
+                        eventType: CombatEventType.BOUNCE,
+                        shurikenBounced: true
+                    };
+                    const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
+                    bounceResults.forEach(r => {
+                        if (r.effect === SynergyEffectType.SPEED_BOOST) {
+                            this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
+                        }
+                    });
                 }
             }
         });
@@ -998,13 +1074,15 @@ export class GameEngine {
             targetEnemy: target,
             enemies: this.enemies,
             player: this.player,
-            plasmaExplosions: this.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range }))
+            plasmaExplosions: this.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range })),
+            eventType: CombatEventType.HIT,
+            shurikenBounced: !!(b.tags && b.tags['shuriken_bounced'] && b.tags['shuriken_bounced'] > Date.now())
         };
         const synergyResults = this.synergySys.tryTriggerSynergies(synergyContext);
 
         // Apply synergy effects
         synergyResults.forEach(result => {
-            if (result.effect === 'chain_lightning') {
+            if (result.effect === SynergyEffectType.CHAIN_LIGHTNING) {
                 // LASER+TESLA: Spawn chain lightning
                 const angle = Math.random() * Math.PI * 2;
                 const speed = 15;
@@ -1027,15 +1105,34 @@ export class GameEngine {
                     weaponType: WeaponType.TESLA
                 });
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
-            } else if (result.effect === 'damage_boost') {
+            } else if (result.effect === SynergyEffectType.DAMAGE_BOOST) {
                 // WAVE+PLASMA or MISSILE+VULCAN: Apply damage multiplier
                 finalDamage *= result.multiplier || 1.0;
-            } else if (result.effect === 'burn') {
+            } else if (result.effect === SynergyEffectType.BURN) {
                 // MAGMA+SHURIKEN: Apply burn DOT (simplified: instant extra damage)
-                target.hp -= 30; // Burn damage
+                this.tagSys.setTag(target, 'burn_dot', 3000);
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
+            } else if (result.effect === SynergyEffectType.SHIELD_REGEN) {
+                const cap = this.getShieldCap();
+                this.shield = Math.min(cap, this.shield + result.value);
+            } else if (result.effect === SynergyEffectType.INVULNERABLE) {
+                this.player.invulnerable = true;
+                this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, result.value);
+            } else if (result.effect === SynergyEffectType.SLOW_FIELD) {
+                this.slowFields.push({ x: b.x, y: b.y, range: 120, life: result.value });
+            } else if (result.effect === SynergyEffectType.SPEED_BOOST) {
+                this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, result.value);
             }
         });
+
+        if (b.weaponType === WeaponType.WAVE && this.synergySys.isSynergyActive(SynergyType.WAVE_PLASMA)) {
+            const range = 80;
+            this.plasmaExplosions.push({ x: b.x, y: b.y, range, life: 1200 });
+        }
+
+        if (b.weaponType === WeaponType.VULCAN) {
+            this.tagSys.setTag(target, 'hitByVulcan', 800);
+        }
 
         target.hp -= finalDamage;
         this.audio.playHit();
@@ -1133,6 +1230,27 @@ export class GameEngine {
             this.createExplosion(x, y, ExplosionSize.LARGE, '#a855f7');
         }
 
+        const context: SynergyTriggerContext = {
+            weaponType: WeaponType.PLASMA,
+            bulletX: x,
+            bulletY: y,
+            targetEnemy: this.player,
+            enemies: this.enemies,
+            player: this.player,
+            plasmaExplosions: this.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range })),
+            eventType: CombatEventType.EXPLODE
+        };
+        const defenseResults = this.synergySys.tryTriggerSynergies(context);
+        defenseResults.forEach(r => {
+            if (r.effect === SynergyEffectType.SHIELD_REGEN) {
+                const cap = this.getShieldCap();
+                this.shield = Math.min(cap, this.shield + r.value);
+            } else if (r.effect === SynergyEffectType.INVULNERABLE) {
+                this.player.invulnerable = true;
+                this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, r.value);
+            }
+        });
+
         this.enemies.forEach(e => {
             if (Math.hypot(e.x - x, e.y - y) < range) {
                 e.hp -= 50;
@@ -1203,8 +1321,8 @@ export class GameEngine {
                 }
                 break;
 
-            case PowerupType.TEMP_SHIELD:
-                // 临时护盾 - 给玩家5秒无敌时间
+            case PowerupType.INVINCIBILITY:
+                // 无敌时间 - 给玩家5秒无敌时间
                 this.player.invulnerable = true;
                 this.player.invulnerableTimer = 5000; // 5秒
                 break;
@@ -1350,6 +1468,20 @@ export class GameEngine {
         const primaryColor = WeaponConfig[this.weaponType]?.color;
         const secondaryColor = this.secondaryWeapon ? WeaponConfig[this.secondaryWeapon]?.color : undefined;
         const canCombine = this.secondaryWeapon ? this.synergySys.canCombine(this.weaponType, this.secondaryWeapon) : false;
+
+        // P2 Calculate synergy information for each powerup
+        const powerupSynergyInfo = new Map<Entity, { colors: string[], synergyType: SynergyType }>();
+        this.powerups.forEach(powerup => {
+            const powerupType = powerup.subType as PowerupType;
+            const weaponType = PowerupEffects.weaponTypeMap[powerupType];
+            if (weaponType !== undefined && weaponType !== null) {
+                const synergyInfo = this.synergySys.getPotentialSynergyColors(weaponType);
+                if (synergyInfo) {
+                    powerupSynergyInfo.set(powerup, synergyInfo);
+                }
+            }
+        });
+
         this.render.draw(
             this.state,
             this.player,
@@ -1373,7 +1505,8 @@ export class GameEngine {
             primaryColor,
             secondaryColor,
             canCombine,
-            this.timeSlowActive
+            this.timeSlowActive,
+            powerupSynergyInfo
         );
     }
 
