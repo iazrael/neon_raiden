@@ -239,7 +239,7 @@ function updateDynamicDropWeights(): void {
 ## 验证步骤
 
 1. 将现有的概率系统替换为权重系统
-2. 实现别名方法或洗牌算法来优化道具选择过程
+2. 实现别名方法来优化道具选择过程
 3. 将TEMP_SHIELD重命名为INVINCIBILITY以提高可理解性
 4. 保留并适配动态掉率调整逻辑
 5. 在测试环境中验证所有道具都能正常掉落

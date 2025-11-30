@@ -124,8 +124,8 @@ export enum PowerupType {
     OPTION = 'option',  // 僚机
 
     // 新增容错道具
-    TEMP_SHIELD = 'temp_shield',  // 临时护盾
-    TIME_SLOW = 'time_slow'       // 时间减缓
+    INVINCIBILITY = 'invincibility',  // 原TEMP_SHIELD，临时护盾/无敌时间
+    TIME_SLOW = 'time_slow'           // 时间减缓
 }
 
 /**
