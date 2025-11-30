@@ -30,7 +30,7 @@ export const BossListItem: React.FC<BossListItemProps> = ({ boss, isSelected, on
       }}
     >
       <div className="flex justify-between items-center">
-        <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : boss.name}</div>
+        <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : boss.chineseName || boss.name}</div>
         <div className="text-sm font-mono px-2 py-0.5 bg-purple-500/20 rounded">LV.{boss.level}</div>
       </div>
       <div className="text-xs opacity-70 mt-2">

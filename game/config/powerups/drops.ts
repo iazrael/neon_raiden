@@ -5,8 +5,8 @@ import { PowerupSelector } from './selector';
 
 // ==================== 道具掉落配置 ====================
 export const PowerupDropConfig = {
-    elitePowerupDropRate: 0.6,
-    normalPowerupDropRate: 0.1,
+    elitePowerupDropRate: 0.8,
+    normalPowerupDropRate: 0.2,
     bossDropRate: 1.0,
 };
 
@@ -24,7 +24,7 @@ export const PowerupDropWeights: Record<PowerupType, number> = {
     [PowerupType.PLASMA]: 2,
     [PowerupType.BOMB]: 10,
     [PowerupType.OPTION]: 2,
-    [PowerupType.INVINCIBILITY]: 10,  // 原TEMP_SHIELD
+    [PowerupType.INVINCIBILITY]: 10,  
     [PowerupType.TIME_SLOW]: 10
 };
 

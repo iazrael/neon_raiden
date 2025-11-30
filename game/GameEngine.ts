@@ -562,25 +562,36 @@ export class GameEngine {
         this.updateEntities(this.bullets, timeScale, dt);
 
         // Update player bullets with weapon-specific logic
+
         this.bullets.forEach(b => {
             // Missile homing logic
             if (b.weaponType === WeaponType.MISSILE) {
-                let target: Entity | null = null;
-                let minDist = 300; // Homing range
-                this.enemies.forEach(e => {
-                    const dist = Math.sqrt((e.x - b.x) ** 2 + (e.y - b.y) ** 2);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        target = e;
+                // Lifetime management
+                if (b.lifetime !== undefined) {
+                    b.lifetime -= dt;
+                    if (b.lifetime <= 0) {
+                        b.markedForDeletion = true;
+                        this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ca0ac7ff');
                     }
-                });
+                }
 
-                if (target) {
-                    const dx = target.x - b.x;
-                    const dy = target.y - b.y;
+                // Bounds check (since they can fly anywhere)
+                if (b.x < -50 || b.x > this.render.width + 50 || b.y > this.render.height + 50 || b.y < -100) {
+                    b.markedForDeletion = true;
+                }
+
+                // If target is dead or invalid, stop tracking (fly straight)
+                if (b.target && (b.target.hp <= 0 || b.target.markedForDeletion)) {
+                    b.target = undefined;
+                }
+
+                // Only track if we have a valid target
+                if (b.target) {
+                    const dx = b.target.x - b.x;
+                    const dy = b.target.y - b.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist > 0) {
-                        const turnSpeed = 0.5; // Increased from 0.15 for better tracking
+                        const turnSpeed = b.turnSpeed || 0.15;
                         b.vx += (dx / dist) * turnSpeed;
                         b.vy += (dy / dist) * turnSpeed;
                         const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
@@ -966,13 +977,19 @@ export class GameEngine {
             if (this.isPlayerColliding(this.player, e)) {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
-                this.takeDamage(10);
+                // Only take damage if player is not invulnerable
+                if (!this.player.invulnerable) {
+                    this.takeDamage(10);
+                }
                 this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
             }
         });
 
         if (this.boss && this.isPlayerColliding(this.player, this.boss)) {
-            this.takeDamage(1);
+            // Only take damage if player is not invulnerable
+            if (!this.player.invulnerable) {
+                this.takeDamage(1);
+            }
         }
 
         // Powerups

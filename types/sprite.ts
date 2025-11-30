@@ -124,7 +124,7 @@ export enum PowerupType {
     OPTION = 'option',  // 僚机
 
     // 新增容错道具
-    INVINCIBILITY = 'invincibility',  // 原TEMP_SHIELD，临时护盾/无敌时间
+    INVINCIBILITY = 'invincibility',  // 无敌时间
     TIME_SLOW = 'time_slow'           // 时间减缓
 }
 
@@ -337,4 +337,6 @@ export interface WeaponUpgradeEnhancements {
     heightMultiplier?: number;
     chainCount?: number;
     chainRange?: number;
+    searchRange?: number;       // 索敌范围 (Missile)
+    turnSpeed?: number;         // 转向速度 (Missile)
 }

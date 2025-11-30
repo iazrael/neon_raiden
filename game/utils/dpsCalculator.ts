@@ -3,7 +3,8 @@ import { WeaponEntity } from '@/types';
 /**
  * DPS计算器 - 计算武器的每秒伤害
  * 
- * DPS = (基础伤害 + 等级伤害加成) × (1000 / 射击间隔) × (子弹速度 / 基准速度)
+ * 有效伤害 = (基础伤害 + 等级伤害加成) × (子弹宽度 / 基准宽度)
+ * DPS = 有效伤害 × (1000 / 射击间隔) × (子弹速度 / 基准速度)
  * 
  * @param weapon 武器配置
  * @param level 武器等级 (默认为0)
@@ -13,6 +14,11 @@ export function calculateDPS(weapon: WeaponEntity, level: number = 0): number {
     // 计算实际伤害
     const actualDamage = weapon.baseDamage + (level * weapon.damagePerLevel);
     
+    // 计算子弹宽度修正（基准宽度为10像素）
+    const baseWidth = 10;
+    const widthMultiplier = weapon.bullet.size.width / baseWidth;
+    const effectiveDamage = actualDamage * widthMultiplier;
+    
     // 计算射击间隔（毫秒）
     const fireRate = Math.max(30, weapon.baseFireRate - (level * weapon.ratePerLevel));
     
@@ -20,8 +26,8 @@ export function calculateDPS(weapon: WeaponEntity, level: number = 0): number {
     const baseSpeed = weapon.baseSpeed || 15;
     
     // 计算DPS
-    // (伤害) × (射击频率) × (速度修正)
-    const dps = actualDamage * (1000 / fireRate) * (weapon.speed / baseSpeed);
+    // (有效伤害) × (射击频率) × (速度修正)
+    const dps = effectiveDamage * (1000 / fireRate) * (weapon.speed / baseSpeed);
     
     return Math.round(dps * 100) / 100; // 保留两位小数
 }

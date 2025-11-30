@@ -8,7 +8,9 @@ export class RenderSystem {
     width: number = 0;
     height: number = 0;
     sprites: SpriteMap = {};
+
     spriteGen: SpriteGenerator;
+    timeSlowLines: { x: number, y: number, length: number, speed: number, alpha: number }[] = [];
 
     constructor(canvas: HTMLCanvasElement) {
         this.ctx = canvas.getContext('2d', { alpha: false })!;
@@ -128,13 +130,39 @@ export class RenderSystem {
             this.ctx.stroke();
         });
 
-        // Slow Motion Effect (Screen Tint/Blur)
+        // Slow Motion Effect (Screen Tint/Blur + Falling Lines)
         if (timeSlowActive) {
             this.ctx.save();
             this.ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
             this.ctx.fillRect(0, 0, this.width, this.height);
-            // Optional: Add a subtle chromatic aberration or scanline effect here if desired
+
+            // Update and draw falling lines
+            if (this.timeSlowLines.length < 20) {
+                this.timeSlowLines.push({
+                    x: Math.random() * this.width,
+                    y: -50,
+                    length: Math.random() * 100 + 50,
+                    speed: Math.random() * 5 + 2,
+                    alpha: Math.random() * 0.5 + 0.2
+                });
+            }
+
+            this.timeSlowLines.forEach(line => {
+                line.y += line.speed;
+                this.ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`; // Pale blue
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(line.x, line.y);
+                this.ctx.lineTo(line.x, line.y + line.length);
+                this.ctx.stroke();
+            });
+
+            // Cleanup off-screen lines
+            this.timeSlowLines = this.timeSlowLines.filter(line => line.y < this.height + 100);
+
             this.ctx.restore();
+        } else {
+            this.timeSlowLines = [];
         }
 
         if (gameState !== GameState.MENU) {
@@ -153,6 +181,32 @@ export class RenderSystem {
                     this.ctx.beginPath();
                     this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
                     this.ctx.stroke();
+                    this.ctx.restore();
+                }
+
+                // Draw Invulnerability Visual (Golden Shield) - Rendered AFTER shield to cover it
+                if (player.invulnerable) {
+                    this.ctx.save();
+                    this.ctx.translate(player.x, player.y);
+
+                    const t = Date.now() / 100;
+                    const alpha = 0.6 + Math.sin(t) * 0.4; // Pulsing
+
+                    // Match Shield size (radius 40)
+                    this.ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.shadowBlur = 20;
+                    this.ctx.shadowColor = '#ffd700';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    this.ctx.restore();
+
+                    // Golden Screen Edge Flash
+                    this.ctx.save();
+                    this.ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.5})`;
+                    this.ctx.lineWidth = 10;
+                    this.ctx.strokeRect(0, 0, this.width, this.height);
                     this.ctx.restore();
                 }
 
@@ -316,22 +370,8 @@ export class RenderSystem {
 
         if (e.type === EntityType.PLAYER) {
 
-            // Draw Golden Outline for Invulnerability (Shield Powerup)
-            if (e.invulnerable) {
-                const t = Date.now() / 100;
-                const alpha = 0.6 + Math.sin(t) * 0.4; // Pulsing
-                const radius = Math.max(e.width, e.height) / 2 + 5;
+            // Invulnerability visual is now handled in the main draw loop to ensure correct render order
 
-                this.ctx.save();
-                this.ctx.shadowColor = '#ffd700';
-                this.ctx.shadowBlur = 15;
-                this.ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
-                this.ctx.lineWidth = 3;
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                this.ctx.stroke();
-                this.ctx.restore();
-            }
 
             // this.drawPlayerGlow(player, playerPrimaryColor || '#00ffff');
 

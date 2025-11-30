@@ -25,7 +25,7 @@ export const FighterListItem: React.FC<FighterListItemProps> = ({ fighter, isSel
         }
       }}
     >
-      <div className="font-bold text-cyan-300 text-lg sm:text-base">{fighter.name}</div>
+      <div className="font-bold text-cyan-300 text-lg sm:text-base">{fighter.chineseName || fighter.name}</div>
     </div>
   );
 };

@@ -33,14 +33,18 @@ export class WeaponSystem {
         const upgradeConfig = WeaponUpgradeConfig[weaponType][weaponLevel] || {};
 
         // Helper to spawn bullet
-        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, sprite: string, w: number, h: number, chainCount?: number, chainRange?: number, rotationSpeed?: number) => {
+        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, 
+            sprite: string, w: number, h: number, chainCount?: number, chainRange?: number, 
+            rotationSpeed?: number, searchRange?: number, turnSpeed?: number): Entity => {
             const bullet: Entity = {
                 x, y, width: w, height: h, vx, vy,
                 hp: type === WeaponType.WAVE || type === WeaponType.LASER ? 999 : 1,
                 maxHp: 1, type: EntityType.BULLET, color: config.color, markedForDeletion: false,
                 spriteKey: sprite, damage: dmg,
                 chainCount, chainRange,
-                weaponType: type
+                weaponType: type,
+                target: undefined,
+                searchRange, turnSpeed
             };
 
             // Add rotation properties if specified
@@ -50,6 +54,7 @@ export class WeaponSystem {
             }
 
             bullets.push(bullet);
+            return bullet;
         }; // Main Gun Logic
         if (weaponType === WeaponType.VULCAN) {
             // 使用配置中的子弹数量
@@ -78,10 +83,32 @@ export class WeaponSystem {
         } else if (weaponType === WeaponType.MISSILE) {
             // 使用配置中的子弹数量
             const count = upgradeConfig.bulletCount || 2;
+            const searchRange = (upgradeConfig.searchRange || 400);
+            const turnSpeed = (upgradeConfig.turnSpeed || 0.15);
 
             for (let i = 0; i < count; i++) {
                 const offsetX = (i - (count - 1) / 2) * 15;
-                spawn(player.x + offsetX, player.y, (i - (count - 1) / 2) * 0.5, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height);
+                const b = spawn(player.x + offsetX, player.y, (i - (count - 1) / 2) * 0.5, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height, undefined, undefined, undefined, searchRange, turnSpeed);
+
+                // Lock on to nearest enemy immediately
+                let nearest: Entity | undefined;
+                let minDist = searchRange;
+                enemies.forEach(e => {
+                    if (e.hp > 0 && !e.markedForDeletion) {
+                        const dist = Math.sqrt((e.x - b.x) ** 2 + (e.y - b.y) ** 2);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            nearest = e;
+                        }
+                    }
+                });
+
+                if (nearest) {
+                    b.target = nearest;
+                }
+
+                // Set lifetime to prevent infinite circling (e.g. 3 seconds)
+                b.lifetime = 3000;
             }
         } else if (weaponType === WeaponType.WAVE) {
             // 使用配置中的宽度增量

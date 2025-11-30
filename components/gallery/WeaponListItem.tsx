@@ -1,5 +1,6 @@
 import React from 'react';
 import { WeaponItem } from './types';
+import { calculateDPS } from '@/game/utils/dpsCalculator';
 
 interface WeaponListItemProps {
   weapon: WeaponItem;
@@ -29,9 +30,9 @@ export const WeaponListItem: React.FC<WeaponListItemProps> = ({ weapon, isSelect
         }
       }}
     >
-      <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : weapon.name}</div>
+      <div className="font-bold text-base sm:text-sm">{isLocked ? '???' : weapon.chineseName || weapon.name}</div>
       <div className="text-xs opacity-70 mt-1.5">
-        {isLocked ? `Pick up this weapon to unlock` : `DMG: ${weapon.config.baseDamage}`}
+        {isLocked ? `Pick up this weapon to unlock` : `DPS: ${calculateDPS(weapon.config, 1)}`}
       </div>
     </div>
   );

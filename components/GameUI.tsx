@@ -113,7 +113,7 @@ export const GameUI: React.FC<GameUIProps> = ({
                 <span className="ml-1 text-gray-300">
                   {(() => {
                     const max = (weaponType ? WeaponConfig[weaponType!]?.maxLevel : undefined) ?? PowerupEffects.maxWeaponLevel;
-                    return `Lv.${weaponLevel >= max ? 'max' : weaponLevel}`;
+                    return `(${weaponLevel >= max ? 'Max' : weaponLevel})`;
                   })()}
                 </span>
               )}

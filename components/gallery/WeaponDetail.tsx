@@ -37,8 +37,12 @@ export const WeaponDetail: React.FC<WeaponDetailProps> = ({ weapon }) => {
         <span className="text-cyan-300 font-semibold">-{weapon.config.ratePerLevel}ms</span>
       </div>
       <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">SIZE</span>
-        <span className="text-gray-300 font-semibold">{weapon.config.bullet.size.width}×{weapon.config.bullet.size.height}</span>
+        <span className="text-gray-500 text-xs">BULLET WIDTH</span>
+        <span className="text-gray-300 font-semibold">{weapon.config.bullet.size.width}px</span>
+      </div>
+      <div className="flex justify-between border-b border-gray-800 py-2">
+        <span className="text-gray-500 text-xs">BULLET HEIGHT</span>
+        <span className="text-gray-300 font-semibold">{weapon.config.bullet.size.height}px</span>
       </div>
       <div className="flex justify-between border-b border-gray-800 py-2 col-span-2">
         <span className="text-gray-500 text-xs">DPS (LV.1 / LV.max)</span>

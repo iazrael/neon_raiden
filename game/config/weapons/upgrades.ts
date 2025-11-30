@@ -32,15 +32,15 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 9, beamCount: 3 }
     },
     [WeaponType.MISSILE]: {
-        1: { bulletCount: 1 },
-        2: { bulletCount: 2 },
-        3: { bulletCount: 3 },
-        4: { bulletCount: 4 },
-        5: { bulletCount: 4 },
-        6: { bulletCount: 4 },
-        7: { bulletCount: 6 },
-        8: { bulletCount: 6 },
-        9: { bulletCount: 8 }
+        1: { bulletCount: 1, searchRange: 600, turnSpeed: 2 },
+        2: { bulletCount: 2, searchRange: 600, turnSpeed: 2 },
+        3: { bulletCount: 3, searchRange: 700, turnSpeed: 2 },
+        4: { bulletCount: 3, searchRange: 700, turnSpeed: 2 },
+        5: { bulletCount: 3, searchRange: 800, turnSpeed: 2 },
+        6: { bulletCount: 3, searchRange: 800, turnSpeed: 2 },
+        7: { bulletCount: 4, searchRange: 800, turnSpeed: 2 },
+        8: { bulletCount: 4, searchRange: 1000, turnSpeed: 2 },
+        9: { bulletCount: 4, searchRange: 1000, turnSpeed: 2 }
     },
     [WeaponType.WAVE]: {
         1: { bulletWidth: 12 },

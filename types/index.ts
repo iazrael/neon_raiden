@@ -105,6 +105,10 @@ export interface Entity {
   hitFlashUntil?: number;
   playerLevel?: number;
   defensePct?: number;
+  target?: Entity; // For homing missiles
+  searchRange?: number;
+  turnSpeed?: number; // Override rotationSpeed for steering logic
+  lifetime?: number; // Time in milliseconds before entity expires
 }
 
 export enum CombatEventType {

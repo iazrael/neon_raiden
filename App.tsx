@@ -6,6 +6,7 @@ import type { ComboState } from './game/systems/ComboSystem';
 import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
 import { SpriteGenerator } from './game/SpriteGenerator';
+import { GameConfig } from './game/config';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,10 +48,8 @@ function App() {
 
     // 如果是master模式且debug=1，则启用调试模式
     if (isMaster && debugMode) {
-      import('./game/config/game').then((configModule) => {
-        configModule.GameConfig.debug = true;
-        configModule.GameConfig.debugBossDivisor = Math.max(1, bossDivisor);
-      });
+        GameConfig.debug = true;
+        GameConfig.debugBossDivisor = Math.max(1, bossDivisor);
     }
 
     if (!canvasRef.current) return;
