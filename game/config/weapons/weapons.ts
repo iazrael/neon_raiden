@@ -55,7 +55,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         damagePerLevel: 3,
         speed: 20,
         baseSpeed: 15,
-        baseFireRate: 400,
+        baseFireRate: 500,
         ratePerLevel: 10,
         bullet: BulletConfigs[BulletType.MISSILE],
         sprite: 'bullet_missile',

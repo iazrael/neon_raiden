@@ -33,8 +33,8 @@ export class WeaponSystem {
         const upgradeConfig = WeaponUpgradeConfig[weaponType][weaponLevel] || {};
 
         // Helper to spawn bullet
-        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType, 
-            sprite: string, w: number, h: number, chainCount?: number, chainRange?: number, 
+        const spawn = (x: number, y: number, vx: number, vy: number, dmg: number, type: WeaponType,
+            sprite: string, w: number, h: number, chainCount?: number, chainRange?: number,
             rotationSpeed?: number, searchRange?: number, turnSpeed?: number): Entity => {
             const bullet: Entity = {
                 x, y, width: w, height: h, vx, vy,
@@ -89,23 +89,6 @@ export class WeaponSystem {
             for (let i = 0; i < count; i++) {
                 const offsetX = (i - (count - 1) / 2) * 15;
                 const b = spawn(player.x + offsetX, player.y, (i - (count - 1) / 2) * 0.5, -config.speed, damage, weaponType, config.sprite, config.bullet.size.width, config.bullet.size.height, undefined, undefined, undefined, searchRange, turnSpeed);
-
-                // Lock on to nearest enemy immediately
-                let nearest: Entity | undefined;
-                let minDist = searchRange;
-                enemies.forEach(e => {
-                    if (e.hp > 0 && !e.markedForDeletion) {
-                        const dist = Math.sqrt((e.x - b.x) ** 2 + (e.y - b.y) ** 2);
-                        if (dist < minDist) {
-                            minDist = dist;
-                            nearest = e;
-                        }
-                    }
-                });
-
-                if (nearest) {
-                    b.target = nearest;
-                }
 
                 // Set lifetime to prevent infinite circling (e.g. 3 seconds)
                 b.lifetime = 3000;

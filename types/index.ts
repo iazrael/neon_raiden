@@ -109,6 +109,7 @@ export interface Entity {
   searchRange?: number;
   turnSpeed?: number; // Override rotationSpeed for steering logic
   lifetime?: number; // Time in milliseconds before entity expires
+  incomingMissiles?: number; // Track number of missiles targeting this entity
 }
 
 export enum CombatEventType {

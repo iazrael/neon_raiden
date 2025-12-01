@@ -575,17 +575,30 @@ export class GameEngine {
                     }
                 }
 
-                // Bounds check (since they can fly anywhere)
+                // Bounds check
                 if (b.x < -50 || b.x > this.render.width + 50 || b.y > this.render.height + 50 || b.y < -100) {
                     b.markedForDeletion = true;
                 }
 
-                // If target is dead or invalid, stop tracking (fly straight)
+                // If target is dead or invalid, stop tracking
                 if (b.target && (b.target.hp <= 0 || b.target.markedForDeletion)) {
+                    // Decrement counter on old target
+                    if (b.target.incomingMissiles && b.target.incomingMissiles > 0) {
+                        b.target.incomingMissiles--;
+                    }
                     b.target = undefined;
                 }
 
-                // Only track if we have a valid target
+                // Try to find a target if we don't have one
+                if (!b.target) {
+                    const newTarget = this.findMissileTarget(b);
+                    if (newTarget) {
+                        b.target = newTarget;
+                        b.target.incomingMissiles = (b.target.incomingMissiles || 0) + 1;
+                    }
+                }
+
+                // Track target
                 if (b.target) {
                     const dx = b.target.x - b.x;
                     const dy = b.target.y - b.y;
@@ -738,6 +751,16 @@ export class GameEngine {
         this.slowFields = this.slowFields.filter(s => s.life > 0);
 
         this.checkCollisions();
+
+        // Cleanup missile tracking counters for deleted bullets
+        this.bullets.forEach(b => {
+            if (b.markedForDeletion && b.weaponType === WeaponType.MISSILE && b.target) {
+                if (b.target.incomingMissiles && b.target.incomingMissiles > 0) {
+                    b.target.incomingMissiles--;
+                }
+                b.target = undefined;
+            }
+        });
 
         // Clean up
         this.bullets = this.bullets.filter(e => !e.markedForDeletion && e.y > -100);
@@ -1570,5 +1593,34 @@ export class GameEngine {
             this.player.hitFlashUntil = Date.now() + 300;
             this.audio.playLevelUp();
         }
+    }
+
+    findMissileTarget(missile: Entity): Entity | undefined {
+        const potentialTargets: Entity[] = [];
+
+        // 1. Add active enemies
+        this.enemies.forEach(e => {
+            if (e.hp > 0 && !e.markedForDeletion && (e.incomingMissiles || 0) < 2) {
+                potentialTargets.push(e);
+            }
+        });
+
+        // 2. Add Boss if active
+        if (this.boss && this.boss.hp > 0 && !this.boss.markedForDeletion && !this.boss.invulnerable && (this.boss.incomingMissiles || 0) < 2) {
+            potentialTargets.push(this.boss);
+        }
+
+        // 3. Sort by Priority: Closest -> Lowest HP
+        potentialTargets.sort((a, b) => {
+            const distA = (a.x - missile.x) ** 2 + (a.y - missile.y) ** 2;
+            const distB = (b.x - missile.x) ** 2 + (b.y - missile.y) ** 2;
+
+            if (Math.abs(distA - distB) > 100) { // Epsilon for float comparison (squared distance)
+                return distA - distB; // Closest first
+            }
+            return a.hp - b.hp; // Lowest HP first
+        });
+
+        return potentialTargets[0];
     }
 }
