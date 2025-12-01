@@ -17,7 +17,7 @@ export const EnemySpawnWeights: Record<number, Record<EnemyType, number>> = {
     // 第4关: 1大(KAMIKAZE), 2中(MINE_LAYER, STALKER), 3小(NORMAL, FORTRESS, BARRAGE)
     4: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 1, [EnemyType.TANK]: 0, [EnemyType.KAMIKAZE]: 10, [EnemyType.STALKER]: 1, [EnemyType.FORTRESS]: 1, [EnemyType.BARRAGE]: 0, [EnemyType.PULSAR]: 0, [EnemyType.ELITE_GUNBOAT]: 1, [EnemyType.LASER_INTERCEPTOR]: 0, [EnemyType.MINE_LAYER]: 0 },
     // 第5关: 1大(ELITE_GUNBOAT), 2中(FAST, FORTRESS), 3小(NORMAL, KAMIKAZE, BARRAGE)
-    5: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 1, [EnemyType.TANK]: 0, [EnemyType.KAMIKAZE]: 1, [EnemyType.ELITE_GUNBOAT]: 10, [EnemyType.FORTRESS]: 1, [EnemyType.BARRAGE]: 0, [EnemyType.PULSAR]: 0, [EnemyType.STALKER]: 1, [EnemyType.LASER_INTERCEPTOR]: 1, [EnemyType.MINE_LAYER]: 0 },
+    5: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 1, [EnemyType.TANK]: 0, [EnemyType.KAMIKAZE]: 5, [EnemyType.ELITE_GUNBOAT]: 5, [EnemyType.FORTRESS]: 1, [EnemyType.BARRAGE]: 0, [EnemyType.PULSAR]: 0, [EnemyType.STALKER]: 1, [EnemyType.LASER_INTERCEPTOR]: 1, [EnemyType.MINE_LAYER]: 0 },
     // 第6关: 1大(LASER_INTERCEPTOR), 2中(FAST, PULSAR), 3小(NORMAL, KAMIKAZE, BARRAGE, STALKER)
     6: { [EnemyType.NORMAL]: 1, [EnemyType.FAST]: 1, [EnemyType.TANK]: 0, [EnemyType.KAMIKAZE]: 1, [EnemyType.ELITE_GUNBOAT]: 1, [EnemyType.LASER_INTERCEPTOR]: 10, [EnemyType.BARRAGE]: 1, [EnemyType.PULSAR]: 0, [EnemyType.FORTRESS]: 0, [EnemyType.STALKER]: 1, [EnemyType.MINE_LAYER]: 0 },
 

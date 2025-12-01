@@ -19,8 +19,6 @@ export const PlayerConfig: FighterEntity = {
     speed: 7,
     initialHp: 150,
     maxHp: 200,
-    initialBombs: 3,
-    maxBombs: 9,
     maxShield: 100,
     initialLevel: 1,
     hitboxShrink: 0.2,

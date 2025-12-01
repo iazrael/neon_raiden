@@ -59,7 +59,7 @@ export class GameEngine {
     weaponType: WeaponType = WeaponType.VULCAN;
     secondaryWeapon: WeaponType | null = null; // P2 Secondary weapon for synergy
     weaponLevel: number = 1;
-    bombs: number = PlayerConfig.initialBombs;
+    bombs: number = 0;
     shield: number = 0;
     playerLevel: number = 1;
     nextLevelScore: number = PlayerConfig.leveling.baseScoreForLevel1 ?? 1000;
@@ -228,7 +228,7 @@ export class GameEngine {
         this.levelingShieldBonus = 0;
         this.weaponType = WeaponType.VULCAN;
         this.secondaryWeapon = null; // P2 Reset secondary weapon
-        this.bombs = this.playerConfig.initialBombs;
+        this.bombs = PowerupEffects.initialBombs;
         this.shield = 0;
         this.timeSlowActive = false;
         this.timeSlowTimer = 0;

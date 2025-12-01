@@ -7,7 +7,8 @@ import { WeaponType } from '@/types';
 export const PowerupEffects = {
     maxWeaponLevel: 9,
     maxOptions: 3,
-    maxBombs: 6,
+    initialBombs: 3,
+    maxBombs: 9,
     hpRestoreAmount: 30,
     shieldRestoreAmount: 25,
     weaponTypeMap: {

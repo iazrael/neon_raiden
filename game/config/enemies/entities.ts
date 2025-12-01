@@ -100,7 +100,7 @@ export const EnemyConfig: Record<EnemyType, EnemyEntity> = {
         sprite: 'enemy_interceptor',
         size: { width: 50, height: 50 },
         score: 600,
-        weapon: { bulletType: EnemyBulletType.BEAM, speed: 20, damage: 30, chargeTime: 1000, cooldownTime: 1000 }
+        weapon: { bulletType: EnemyBulletType.BEAM, speed: 20, damage: 50, chargeTime: 500, cooldownTime: 1000 }
     },
     [EnemyType.MINE_LAYER]: {
         type: EnemyType.MINE_LAYER,

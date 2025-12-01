@@ -51,15 +51,6 @@ export const FighterDetail: React.FC<FighterDetailProps> = ({ fighter }) => {
         <span className="text-gray-500 text-xs">HEIGHT</span>
         <span className="text-gray-300 font-semibold">{fighter.config.size.height}</span>
       </div>
-
-      <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">BOMBS</span>
-        <span className="text-yellow-300 font-semibold">{fighter.config.initialBombs}</span>
-      </div>
-      <div className="flex justify-between border-b border-gray-800 py-2">
-        <span className="text-gray-500 text-xs">BOMBS (MAX)</span>
-        <span className="text-yellow-300 font-semibold">{fighter.config.maxBombs}</span>
-      </div>
       <div className="flex justify-between border-b border-gray-800 py-2">
         <span className="text-gray-500 text-xs">SHIELD (MAX)</span>
         <span className="text-blue-300 font-semibold">{maxShieldFinal}</span>

@@ -187,8 +187,6 @@ export interface FighterEntity extends BaseEntityMeta {
     speed: number;              // 移动速度
     initialHp: number;          // 初始生命值
     maxHp: number;              // 最大生命值
-    initialBombs: number;       // 初始炸弹数量
-    maxBombs: number;           // 最大炸弹数量
     maxShield: number;          // 最大护盾值
     hitboxShrink: number;       // 碰撞箱缩小比例
     sprite: string;             // 精灵图名称
