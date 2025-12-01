@@ -63,8 +63,8 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Electromagnetic Refraction',
         chineseName: '电磁折射',
         requiredWeapons: [WeaponType.LASER, WeaponType.TESLA],
-        description: '激光击中敌人时15%概率触发连锁闪电',
-        triggerChance: 0.15,
+        description: '激光击中敌人时触发连锁闪电',
+        triggerChance: 1.0,
         color: '#a855f7' // 紫色
     },
     [SynergyType.WAVE_PLASMA]: {
