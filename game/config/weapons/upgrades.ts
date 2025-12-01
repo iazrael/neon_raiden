@@ -43,15 +43,15 @@ export const WeaponUpgradeConfig: {
         9: { bulletCount: 9, searchRange: 1000, turnSpeed: 9 }
     },
     [WeaponType.WAVE]: {
-        1: { bulletWidth: 12 },
-        2: { bulletWidth: 24 },
-        3: { bulletWidth: 36 },
-        4: { bulletWidth: 48 },
-        5: { bulletWidth: 60 },
-        6: { bulletWidth: 72 },
-        7: { bulletWidth: 84 },
-        8: { bulletWidth: 96 },
-        9: { bulletWidth: 108 }
+        1: { bulletWidth: 60 },
+        2: { bulletWidth: 65 },
+        3: { bulletWidth: 70 },
+        4: { bulletWidth: 80 },
+        5: { bulletWidth: 80 },
+        6: { bulletWidth: 80 },
+        7: { bulletWidth: 80 },
+        8: { bulletWidth: 80 },
+        9: { bulletWidth: 80 }
     },
     [WeaponType.PLASMA]: {
         1: { bulletWidth: 8, bulletHeight: 8 },

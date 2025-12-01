@@ -564,122 +564,10 @@ export class GameEngine {
 
         // Update player bullets with weapon-specific logic
 
-        this.bullets.forEach(b => {
-            // Missile homing logic
-            if (b.weaponType === WeaponType.MISSILE) {
-                // Lifetime management
-                if (b.lifetime !== undefined) {
-                    b.lifetime -= dt;
-                    if (b.lifetime <= 0) {
-                        b.markedForDeletion = true;
-                        this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ca0ac7ff');
-                    }
-                }
-
-                // Bounds check
-                if (b.x < -50 || b.x > this.render.width + 50 || b.y > this.render.height + 50 || b.y < -100) {
-                    b.markedForDeletion = true;
-                }
-
-                // If target is dead or invalid, stop tracking
-                if (b.target && (b.target.hp <= 0 || b.target.markedForDeletion)) {
-                    // Decrement counter on old target
-                    if (b.target.incomingMissiles && b.target.incomingMissiles > 0) {
-                        b.target.incomingMissiles--;
-                    }
-                    b.target = undefined;
-                }
-
-                // Try to find a target if we don't have one
-                if (!b.target) {
-                    const newTarget = this.findMissileTarget(b);
-                    if (newTarget) {
-                        b.target = newTarget;
-                        b.target.incomingMissiles = (b.target.incomingMissiles || 0) + 1;
-                    }
-                }
-
-                // Track target
-                if (b.target) {
-                    const dx = b.target.x - b.x;
-                    const dy = b.target.y - b.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist > 0) {
-                        const turnSpeed = b.turnSpeed || 0.15;
-                        b.vx += (dx / dist) * turnSpeed;
-                        b.vy += (dy / dist) * turnSpeed;
-                        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-                        const maxSpeed = 15;
-                        if (speed > maxSpeed) {
-                            b.vx = (b.vx / speed) * maxSpeed;
-                            b.vy = (b.vy / speed) * maxSpeed;
-                        }
-                    }
-                }
-            }
-
-            // Update all player bullets rotation to face flight direction
-            // Skip plasma as it has its own spinning animation
-            if (b.weaponType !== WeaponType.PLASMA && b.vx !== undefined && b.vy !== undefined) {
-                b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
-            }
-
-            // Update rotation angle for plasma bullets
-            if (b.weaponType === WeaponType.PLASMA && b.rotationSpeed !== undefined) {
-                b.angle = (b.angle || 0) + b.rotationSpeed;
-            }
-        });
+        this.updateBulletsProp(dt);
 
         // Update enemy bullets with homing logic
-        this.enemyBullets.forEach(b => {
-            b.x += b.vx * timeScale;
-            b.y += b.vy * timeScale;
-
-            // Homing missile AI - only for bullets marked with isHoming flag
-            if (b.isHoming) {
-                const dx = this.player.x - b.x;
-                const dy = this.player.y - b.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist > 0) {
-                    const turnSpeed = 0.1;
-                    b.vx += (dx / dist) * turnSpeed;
-                    b.vy += (dy / dist) * turnSpeed;
-                    const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-                    const maxSpeed = 6;
-                    if (speed > maxSpeed) {
-                        b.vx = (b.vx / speed) * maxSpeed;
-                        b.vy = (b.vy / speed) * maxSpeed;
-                    }
-                }
-            }
-
-            // Update all enemy bullets rotation to face flight direction
-            if (b.vx !== undefined && b.vy !== undefined && b.spriteKey !== 'bullet_enemy_spiral') {
-                b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
-            }
-
-            // Update rotation angle for spiral bullets
-            if (b.spriteKey === 'bullet_enemy_spiral' && b.rotationSpeed !== undefined) {
-                b.angle = (b.angle || 0) + b.rotationSpeed;
-            }
-
-            // Laser timer countdown
-            if (b.timer !== undefined) {
-                b.timer -= dt;
-                if (b.timer <= 0) {
-                    b.markedForDeletion = true;
-                }
-            }
-
-            // Apply slow fields to enemy bullets
-            if (this.slowFields.length > 0) {
-                const inSlow = this.slowFields.some(s => Math.hypot(b.x - s.x, b.y - s.y) < s.range);
-                if (inSlow) {
-                    b.vx *= 0.75;
-                    b.vy *= 0.75;
-                }
-            }
-        });
+        this.updateEnemyBullets(timeScale, dt);
 
         this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
 
@@ -783,6 +671,126 @@ export class GameEngine {
             this.state = GameState.GAME_OVER;
             this.onStateChange(this.state);
         }
+    }
+
+    private updateEnemyBullets(timeScale: number, dt: number) {
+        this.enemyBullets.forEach(b => {
+            b.x += b.vx * timeScale;
+            b.y += b.vy * timeScale;
+
+            // Homing missile AI - only for bullets marked with isHoming flag
+            if (b.isHoming) {
+                const dx = this.player.x - b.x;
+                const dy = this.player.y - b.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > 0) {
+                    const turnSpeed = 0.1;
+                    b.vx += (dx / dist) * turnSpeed;
+                    b.vy += (dy / dist) * turnSpeed;
+                    const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                    const maxSpeed = 6;
+                    if (speed > maxSpeed) {
+                        b.vx = (b.vx / speed) * maxSpeed;
+                        b.vy = (b.vy / speed) * maxSpeed;
+                    }
+                }
+            }
+
+            // Update all enemy bullets rotation to face flight direction
+            if (b.vx !== undefined && b.vy !== undefined && b.spriteKey !== 'bullet_enemy_spiral') {
+                b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
+            }
+
+            // Update rotation angle for spiral bullets
+            if (b.spriteKey === 'bullet_enemy_spiral' && b.rotationSpeed !== undefined) {
+                b.angle = (b.angle || 0) + b.rotationSpeed;
+            }
+
+            // Laser timer countdown
+            if (b.timer !== undefined) {
+                b.timer -= dt;
+                if (b.timer <= 0) {
+                    b.markedForDeletion = true;
+                }
+            }
+
+            // Apply slow fields to enemy bullets
+            if (this.slowFields.length > 0) {
+                const inSlow = this.slowFields.some(s => Math.hypot(b.x - s.x, b.y - s.y) < s.range);
+                if (inSlow) {
+                    b.vx *= 0.75;
+                    b.vy *= 0.75;
+                }
+            }
+        });
+    }
+
+    private updateBulletsProp(dt: number) {
+        this.bullets.forEach(b => {
+            // Missile homing logic
+            if (b.weaponType === WeaponType.MISSILE) {
+                // Lifetime management
+                if (b.lifetime !== undefined) {
+                    b.lifetime -= dt;
+                    if (b.lifetime <= 0) {
+                        b.markedForDeletion = true;
+                        this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ca0ac7ff');
+                    }
+                }
+
+                // Bounds check
+                if (b.x < -50 || b.x > this.render.width + 50 || b.y > this.render.height + 50 || b.y < -100) {
+                    b.markedForDeletion = true;
+                }
+
+                // If target is dead or invalid, stop tracking
+                if (b.target && (b.target.hp <= 0 || b.target.markedForDeletion)) {
+                    // Decrement counter on old target
+                    if (b.target.incomingMissiles && b.target.incomingMissiles > 0) {
+                        b.target.incomingMissiles--;
+                    }
+                    b.target = undefined;
+                }
+
+                // Try to find a target if we don't have one
+                if (!b.target) {
+                    const newTarget = this.findMissileTarget(b);
+                    if (newTarget) {
+                        b.target = newTarget;
+                        b.target.incomingMissiles = (b.target.incomingMissiles || 0) + 1;
+                    }
+                }
+
+                // Track target
+                if (b.target) {
+                    const dx = b.target.x - b.x;
+                    const dy = b.target.y - b.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 0) {
+                        const turnSpeed = b.turnSpeed || 0.15;
+                        b.vx += (dx / dist) * turnSpeed;
+                        b.vy += (dy / dist) * turnSpeed;
+                        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                        const maxSpeed = 15;
+                        if (speed > maxSpeed) {
+                            b.vx = (b.vx / speed) * maxSpeed;
+                            b.vy = (b.vy / speed) * maxSpeed;
+                        }
+                    }
+                }
+            }
+
+            // Update all player bullets rotation to face flight direction
+            // Skip plasma as it has its own spinning animation
+            if (b.weaponType !== WeaponType.PLASMA && b.vx !== undefined && b.vy !== undefined) {
+                b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
+            }
+
+            // Update rotation angle for plasma bullets
+            if (b.weaponType === WeaponType.PLASMA && b.rotationSpeed !== undefined) {
+                b.angle = (b.angle || 0) + b.rotationSpeed;
+            }
+        });
     }
 
     spawnBoss() {
@@ -1051,7 +1059,7 @@ export class GameEngine {
         this.audio.playHit();
         this.onHpChange(this.player.hp);
     }
-
+    // 子弹击中的处理
     handleBulletHit(b: Entity, target: Entity) {
         if (b.weaponType === WeaponType.PLASMA) {
             this.createPlasmaExplosion(b.x, b.y);
