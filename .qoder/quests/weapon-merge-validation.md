@@ -66,6 +66,7 @@
    - 装备LASER和TESLA武器
    - 发射LASER子弹命中敌人
    - 验证是否按15%概率触发连锁闪电效果
+   - 验证连锁闪电是否正确从被击中的敌人跳跃到附近的敌人
 
 2. **WAVE_PLASMA（能量共鸣）**
    - 装备WAVE和PLASMA武器
@@ -271,6 +272,22 @@
 3. **UI调试**
    - 添加调试信息显示面板
    - 实时显示当前装备武器、激活组合技等信息
+
+### 4.3 LASER_TESLA组合技专项调试
+
+1. **验证激活状态**
+   - 确认同时装备LASER和TESLA武器
+   - 检查`isSynergyActive(SynergyType.LASER_TESLA)`返回值是否为true
+
+2. **验证触发条件**
+   - 发射LASER子弹并命中敌人
+   - 检查`tryTriggerSynergies()`方法是否被调用
+   - 验证传入的参数是否正确（weaponType应为WeaponType.LASER，eventType应为'hit'）
+
+3. **验证连锁效果**
+   - 检查是否按15%概率生成连锁闪电
+   - 验证连锁闪电是否正确从被击中的敌人跳跃到附近的敌人
+   - 检查生成的闪电子弹是否具有正确的属性（chainCount、chainRange等）
 
 ## 5. 验证报告模板
 
