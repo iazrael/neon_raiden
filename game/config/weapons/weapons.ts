@@ -50,7 +50,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         chineseName: '幽影追踪弹',
         describe: '自主学习型量子计算机同时锁定多个高价值目标,复合推进技术在接近时加速至亚光速,高爆核心产生定向能爆炸,即使最敏捷的敌机也难逃毁灭。',
 
-        color: '#ca0ac7ff',
+        color: '#ec6f73',
         baseDamage: 30,
         damagePerLevel: 3,
         speed: 20,
