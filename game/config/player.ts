@@ -27,11 +27,11 @@ export const PlayerConfig: FighterEntity = {
         baseScoreForLevel1: 20000,
         scoreGrowthFactor: 2,
         bonusesPerLevel: {
-            maxHpFlat: 30,
+            maxHpFlat: 50,
             maxShieldFlat: 10,
-            defensePct: 1,
-            fireRatePct: 0.5,
-            damagePct: 0.5,
+            defensePct: 2,
+            fireRatePct: 0.1,
+            damagePct: 0.1,
             defensePctMax: 15,
             fireRatePctMax: 15,
             damagePctMax: 15

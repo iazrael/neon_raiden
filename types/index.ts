@@ -72,6 +72,7 @@ export interface Entity {
   height: number;
   vx: number;
   vy: number;
+  speed?: number;
   hp: number;
   maxHp: number;
   type: EntityType;

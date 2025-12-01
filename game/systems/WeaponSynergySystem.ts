@@ -99,7 +99,7 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Plasma Storm',
         chineseName: '等离子风暴',
         requiredWeapons: [WeaponType.TESLA, WeaponType.PLASMA],
-        description: 'PLASMA爆炸触发3道闪电，并为玩家护盾+6与200ms无敌',
+        description: 'PLASMA爆炸触发1道闪电，并为玩家护盾+60与1s无敌',
         triggerChance: 1.0, // 爆炸触发,不需要概率
         color: '#8b5cf6' // 紫罗兰色
     }
@@ -286,13 +286,13 @@ export class WeaponSynergySystem {
             results.push({
                 type: SynergyType.TESLA_PLASMA,
                 effect: SynergyEffectType.SHIELD_REGEN,
-                value: 6,
+                value: 60,
                 color: SYNERGY_CONFIGS[SynergyType.TESLA_PLASMA].color
             });
             results.push({
                 type: SynergyType.TESLA_PLASMA,
                 effect: SynergyEffectType.INVULNERABLE,
-                value: 200,
+                value: 1000,
                 color: SYNERGY_CONFIGS[SynergyType.TESLA_PLASMA].color
             });
         }

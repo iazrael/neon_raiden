@@ -35,12 +35,12 @@ export const WeaponUpgradeConfig: {
         1: { bulletCount: 1, searchRange: 600, turnSpeed: 1 },
         2: { bulletCount: 2, searchRange: 600, turnSpeed: 2 },
         3: { bulletCount: 3, searchRange: 700, turnSpeed: 3 },
-        4: { bulletCount: 3, searchRange: 700, turnSpeed: 4 },
-        5: { bulletCount: 3, searchRange: 800, turnSpeed: 5 },
-        6: { bulletCount: 3, searchRange: 800, turnSpeed: 6 },
-        7: { bulletCount: 4, searchRange: 800, turnSpeed: 7 },
-        8: { bulletCount: 4, searchRange: 1000, turnSpeed: 8 },
-        9: { bulletCount: 4, searchRange: 1000, turnSpeed: 9 }
+        4: { bulletCount: 4, searchRange: 700, turnSpeed: 4 },
+        5: { bulletCount: 5, searchRange: 800, turnSpeed: 5 },
+        6: { bulletCount: 6, searchRange: 800, turnSpeed: 6 },
+        7: { bulletCount: 7, searchRange: 800, turnSpeed: 7 },
+        8: { bulletCount: 8, searchRange: 1000, turnSpeed: 8 },
+        9: { bulletCount: 9, searchRange: 1000, turnSpeed: 9 }
     },
     [WeaponType.WAVE]: {
         1: { bulletWidth: 12 },
@@ -65,15 +65,15 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 72, bulletHeight: 72 }
     },
     [WeaponType.TESLA]: {
-        1: { chainCount: 1, chainRange: 500 },
-        2: { chainCount: 1, chainRange: 600 },
-        3: { chainCount: 2, chainRange: 700 },
-        4: { chainCount: 2, chainRange: 800 },
-        5: { chainCount: 3, chainRange: 900 },
-        6: { chainCount: 3, chainRange: 1000 },
-        7: { chainCount: 4, chainRange: 1000 },
-        8: { chainCount: 4, chainRange: 1000 },
-        9: { chainCount: 5, chainRange: 1000 }
+        1: { chainCount: 2, chainRange: 500 },
+        2: { chainCount: 3, chainRange: 700 },
+        3: { chainCount: 3, chainRange: 1000 },
+        4: { chainCount: 4, chainRange: 1200 },
+        5: { chainCount: 4, chainRange: 1500 },
+        6: { chainCount: 5, chainRange: 1700 },
+        7: { chainCount: 5, chainRange: 2000 },
+        8: { chainCount: 5, chainRange: 2000 },
+        9: { chainCount: 5, chainRange: 2000 }
     },
     [WeaponType.MAGMA]: {
         1: { bulletCount: 2 },

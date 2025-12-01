@@ -53,7 +53,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         color: '#ec6f73',
         baseDamage: 30,
         damagePerLevel: 3,
-        speed: 20,
+        speed: 30,
         baseSpeed: 15,
         baseFireRate: 500,
         ratePerLevel: 10,
@@ -110,7 +110,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         speed: 25,
         baseSpeed: 15,
         baseFireRate: 200,
-        ratePerLevel: 10,
+        ratePerLevel: 1,
         bullet: BulletConfigs[BulletType.TESLA],
         sprite: 'bullet_tesla',
         maxLevel: 6

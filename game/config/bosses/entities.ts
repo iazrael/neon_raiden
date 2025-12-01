@@ -86,7 +86,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_destroyer',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 8,
+            bulletCount: 6,
             bulletSpeed: 5,
             fireRate: 0.05,
             targetedShotSpeed: 3
@@ -117,10 +117,10 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_annihilator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 4,
+            bulletCount: 6,
             bulletSpeed: 5.0,
             fireRate: 0.07,
-            targetedShotSpeed: 6
+            targetedShotSpeed: 3
         },
         movement: {
             pattern: BossMovementPattern.RANDOM_TELEPORT,
@@ -148,7 +148,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_dominator',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
         weaponConfigs: {
-            bulletCount: 10,
+            bulletCount: 6,
             bulletSpeed: 5.0,
             fireRate: 0.08,
             targetedShotSpeed: 1
@@ -179,7 +179,7 @@ export const BossConfig: Record<BossType, BossEntity> = {
         sprite: 'boss_overlord',
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
         weaponConfigs: {
-            bulletCount: 10,
+            bulletCount: 6,
             bulletSpeed: 5.2,
             fireRate: 0.07,
             targetedShotSpeed: 3

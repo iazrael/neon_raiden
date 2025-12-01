@@ -1,6 +1,6 @@
 import { AudioSystem } from './systems/AudioSystem';
 import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize, FighterEntity, CombatEventType, SynergyEffectType } from '@/types';
-import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals, WeaponConfig } from './config';
+import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals, WeaponConfig, WeaponUpgradeConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -205,6 +205,7 @@ export class GameEngine {
             height: this.playerConfig.size.height,
             vx: 0,
             vy: 0,
+            speed: this.playerConfig.speed,
             hp: this.playerConfig.initialHp,
             maxHp: this.playerConfig.maxHp,
             type: EntityType.PLAYER,
@@ -1059,61 +1060,8 @@ export class GameEngine {
             // Piercing
         } else if (b.weaponType === WeaponType.TESLA && (b.chainCount || 0) > 0) {
             // Tesla Chain Logic
+            this.createTeslaChain(b, target);
             b.markedForDeletion = true;
-            const range = b.chainRange || 150;
-            let nearest: Entity | null = null;
-            let minDist = range;
-
-            // Build list of all potential bounce targets (enemies, boss, wingmen)
-            const potentialTargets: Entity[] = [...this.enemies];
-
-            // Add boss if it exists and is vulnerable
-            if (this.boss && !this.boss.invulnerable && this.boss.hp > 0 && !this.boss.markedForDeletion) {
-                potentialTargets.push(this.boss);
-            }
-
-            // Add all live wingmen
-            this.bossWingmen.forEach(wingman => {
-                if (wingman.hp > 0 && !wingman.markedForDeletion) {
-                    potentialTargets.push(wingman);
-                }
-            });
-
-            // Find nearest target within range (excluding the current hit target)
-            potentialTargets.forEach(e => {
-                if (e === target || e.hp <= 0 || e.markedForDeletion) return; // Skip current target and dead entities
-                const dist = Math.sqrt((e.x - target.x) ** 2 + (e.y - target.y) ** 2);
-                if (dist < minDist) {
-                    minDist = dist;
-                    nearest = e;
-                }
-            });
-
-            if (nearest) {
-                const t = nearest as Entity;
-                const angle = Math.atan2(t.y - target.y, t.x - target.x);
-                const speed = 20; // Fast chain speed
-
-                // Spawn chain bullet from current target to next target
-                this.bullets.push({
-                    x: target.x,
-                    y: target.y,
-                    width: b.width,
-                    height: b.height,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    hp: 1,
-                    maxHp: 1,
-                    type: EntityType.BULLET,
-                    color: b.color,
-                    markedForDeletion: false,
-                    spriteKey: b.spriteKey,
-                    damage: b.damage,
-                    chainCount: (b.chainCount || 0) - 1,
-                    chainRange: b.chainRange,
-                    weaponType: WeaponType.TESLA
-                });
-            }
         } else {
             b.markedForDeletion = true;
         }
@@ -1135,29 +1083,35 @@ export class GameEngine {
             shurikenBounced: !!(b.tags && b.tags['shuriken_bounced'] && b.tags['shuriken_bounced'] > Date.now())
         };
         const synergyResults = this.synergySys.tryTriggerSynergies(synergyContext);
-
+        console.log(`synergy results:`, synergyResults)
         // Apply synergy effects
         synergyResults.forEach(result => {
             if (result.effect === SynergyEffectType.CHAIN_LIGHTNING) {
                 // LASER+TESLA: Spawn chain lightning
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 15;
+                // 只使用一级配置
+                const config = WeaponConfig[WeaponType.TESLA];
+                const upgradeConfig = WeaponUpgradeConfig[WeaponType.TESLA]
+                if (!config || !upgradeConfig) return;
+                const level1 = upgradeConfig[1];
+                const speed = config.speed;
                 this.bullets.push({
                     x: target.x,
                     y: target.y,
-                    width: 8,
-                    height: 8,
+                    width: config.bullet.size.width,
+                    height: config.bullet.size.height,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
+                    speed,
                     hp: 1,
                     maxHp: 1,
                     type: EntityType.BULLET,
                     color: result.color,
                     markedForDeletion: false,
-                    spriteKey: 'bullet',
-                    damage: 25,
-                    chainCount: 2,
-                    chainRange: 120,
+                    spriteKey: config.sprite,
+                    damage: config.baseDamage,
+                    chainCount: level1.chainCount,
+                    chainRange: level1.chainRange,
                     weaponType: WeaponType.TESLA
                 });
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
@@ -1201,6 +1155,65 @@ export class GameEngine {
             }
         } else if (b.type !== 'bullet' || b.weaponType !== WeaponType.PLASMA) {
             this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ffe066');
+        }
+    }
+
+    private createTeslaChain(b: Entity, target: Entity) {
+        const range = b.chainRange || 150;
+        let nearest: Entity | null = null;
+        let minDist = range;
+
+        // Build list of all potential bounce targets (enemies, boss, wingmen)
+        const potentialTargets: Entity[] = [...this.enemies];
+
+        // Add boss if it exists and is vulnerable
+        if (this.boss && !this.boss.invulnerable && this.boss.hp > 0 && !this.boss.markedForDeletion) {
+            potentialTargets.push(this.boss);
+        }
+
+        // Add all live wingmen
+        this.bossWingmen.forEach(wingman => {
+            if (wingman.hp > 0 && !wingman.markedForDeletion) {
+                potentialTargets.push(wingman);
+            }
+        });
+
+        // Find nearest target within range (excluding the current hit target)
+        potentialTargets.forEach(e => {
+            if (e === target || e.hp <= 0 || e.markedForDeletion) return; // Skip current target and dead entities
+            const dist = Math.sqrt((e.x - target.x) ** 2 + (e.y - target.y) ** 2);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = e;
+            }
+        });
+
+        if (nearest) {
+            const t = nearest as Entity;
+            const angle = Math.atan2(t.y - target.y, t.x - target.x);
+            const speed = b.speed || 20; // Fast chain speed
+
+
+            // Spawn chain bullet from current target to next target
+            this.bullets.push({
+                x: target.x,
+                y: target.y,
+                width: b.width,
+                height: b.height,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                speed,
+                hp: 1,
+                maxHp: 1,
+                type: EntityType.BULLET,
+                color: b.color,
+                markedForDeletion: false,
+                spriteKey: b.spriteKey,
+                damage: b.damage,
+                chainCount: (b.chainCount || 0) - 1,
+                chainRange: b.chainRange,
+                weaponType: WeaponType.TESLA
+            });
         }
     }
 
@@ -1265,7 +1278,12 @@ export class GameEngine {
             // Generate lightning bolts to affected enemies
             affectedEnemies.forEach(e => {
                 const angle = Math.atan2(e.y - y, e.x - x);
-                const speed = 18;
+                // 只使用一级配置
+                const config = WeaponConfig[WeaponType.TESLA];
+                const upgradeConfig = WeaponUpgradeConfig[WeaponType.TESLA]
+                if (!config || !upgradeConfig) return;
+                const level1 = upgradeConfig[1];
+                const speed = config.speed;
                 this.bullets.push({
                     x: x,
                     y: y,
@@ -1273,13 +1291,16 @@ export class GameEngine {
                     height: 10,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
+                    speed,
                     hp: 1,
                     maxHp: 1,
                     type: EntityType.BULLET,
                     color: '#a855f7',
                     markedForDeletion: false,
-                    spriteKey: 'bullet',
-                    damage: 40,
+                    spriteKey: config.sprite,
+                    damage: config.baseDamage,
+                    chainCount: level1.chainCount,
+                    chainRange: level1.chainRange,
                     weaponType: WeaponType.TESLA
                 });
             });
