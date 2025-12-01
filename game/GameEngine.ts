@@ -1041,8 +1041,24 @@ export class GameEngine {
             let nearest: Entity | null = null;
             let minDist = range;
 
-            this.enemies.forEach(e => {
-                if (e === target || e.hp <= 0 || e.markedForDeletion) return; // Skip current target and dead enemies
+            // Build list of all potential bounce targets (enemies, boss, wingmen)
+            const potentialTargets: Entity[] = [...this.enemies];
+
+            // Add boss if it exists and is vulnerable
+            if (this.boss && !this.boss.invulnerable && this.boss.hp > 0 && !this.boss.markedForDeletion) {
+                potentialTargets.push(this.boss);
+            }
+
+            // Add all live wingmen
+            this.bossWingmen.forEach(wingman => {
+                if (wingman.hp > 0 && !wingman.markedForDeletion) {
+                    potentialTargets.push(wingman);
+                }
+            });
+
+            // Find nearest target within range (excluding the current hit target)
+            potentialTargets.forEach(e => {
+                if (e === target || e.hp <= 0 || e.markedForDeletion) return; // Skip current target and dead entities
                 const dist = Math.sqrt((e.x - target.x) ** 2 + (e.y - target.y) ** 2);
                 if (dist < minDist) {
                     minDist = dist;

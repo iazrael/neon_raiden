@@ -32,15 +32,15 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 9, beamCount: 3 }
     },
     [WeaponType.MISSILE]: {
-        1: { bulletCount: 1, searchRange: 600, turnSpeed: 2 },
+        1: { bulletCount: 1, searchRange: 600, turnSpeed: 1 },
         2: { bulletCount: 2, searchRange: 600, turnSpeed: 2 },
-        3: { bulletCount: 3, searchRange: 700, turnSpeed: 2 },
-        4: { bulletCount: 3, searchRange: 700, turnSpeed: 2 },
-        5: { bulletCount: 3, searchRange: 800, turnSpeed: 2 },
-        6: { bulletCount: 3, searchRange: 800, turnSpeed: 2 },
-        7: { bulletCount: 4, searchRange: 800, turnSpeed: 2 },
-        8: { bulletCount: 4, searchRange: 1000, turnSpeed: 2 },
-        9: { bulletCount: 4, searchRange: 1000, turnSpeed: 2 }
+        3: { bulletCount: 3, searchRange: 700, turnSpeed: 3 },
+        4: { bulletCount: 3, searchRange: 700, turnSpeed: 4 },
+        5: { bulletCount: 3, searchRange: 800, turnSpeed: 5 },
+        6: { bulletCount: 3, searchRange: 800, turnSpeed: 6 },
+        7: { bulletCount: 4, searchRange: 800, turnSpeed: 7 },
+        8: { bulletCount: 4, searchRange: 1000, turnSpeed: 8 },
+        9: { bulletCount: 4, searchRange: 1000, turnSpeed: 9 }
     },
     [WeaponType.WAVE]: {
         1: { bulletWidth: 12 },
@@ -65,12 +65,12 @@ export const WeaponUpgradeConfig: {
         9: { bulletWidth: 72, bulletHeight: 72 }
     },
     [WeaponType.TESLA]: {
-        1: { chainCount: 1, chainRange: 400 },
-        2: { chainCount: 1, chainRange: 500 },
-        3: { chainCount: 2, chainRange: 600 },
-        4: { chainCount: 2, chainRange: 700 },
-        5: { chainCount: 3, chainRange: 800 },
-        6: { chainCount: 3, chainRange: 900 },
+        1: { chainCount: 1, chainRange: 500 },
+        2: { chainCount: 1, chainRange: 600 },
+        3: { chainCount: 2, chainRange: 700 },
+        4: { chainCount: 2, chainRange: 800 },
+        5: { chainCount: 3, chainRange: 900 },
+        6: { chainCount: 3, chainRange: 1000 },
         7: { chainCount: 4, chainRange: 1000 },
         8: { chainCount: 4, chainRange: 1000 },
         9: { chainCount: 5, chainRange: 1000 }
