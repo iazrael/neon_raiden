@@ -113,21 +113,5 @@ export interface Entity {
   incomingMissiles?: number; // Track number of missiles targeting this entity
 }
 
-export enum CombatEventType {
-  HIT = 'hit',
-  EXPLODE = 'explode',
-  BOUNCE = 'bounce',
-  KILL = 'kill'
-}
-
-export enum SynergyEffectType {
-  CHAIN_LIGHTNING = 'chain_lightning',
-  DAMAGE_BOOST = 'damage_boost',
-  BURN = 'burn',
-  SHIELD_REGEN = 'shield_regen',
-  INVULNERABLE = 'invulnerable',
-  SLOW_FIELD = 'slow_field',
-  SPEED_BOOST = 'speed_boost'
-}
 
 export type SpriteMap = { [key: string]: HTMLCanvasElement | HTMLImageElement };

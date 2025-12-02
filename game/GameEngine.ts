@@ -1,5 +1,5 @@
 import { AudioSystem } from './systems/AudioSystem';
-import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize, FighterEntity, CombatEventType, SynergyEffectType } from '@/types';
+import { GameState, WeaponType, Particle, Shockwave, Entity, PowerupType, BossType, EnemyType, EntityType, ExplosionSize, FighterEntity } from '@/types';
 import { GameConfig, PlayerConfig, BossSpawnConfig, selectPowerupType, PowerupEffects, PowerupDropConfig, BossConfig, EnemyConfig, EnemyCommonConfig, resetDropContext, validatePowerupVisuals, WeaponConfig, WeaponUpgradeConfig } from './config';
 import { InputSystem } from './systems/InputSystem';
 import { RenderSystem } from './systems/RenderSystem';
@@ -7,7 +7,7 @@ import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
-import { WeaponSynergySystem, SynergyTriggerContext, SynergyType } from './systems/WeaponSynergySystem';
+import { WeaponSynergySystem, SynergyTriggerContext, SynergyType,CombatEventType, SynergyEffectType } from './systems/WeaponSynergySystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
 import { EliteAISystem } from './systems/EliteAISystem'; // P3 Elite AI System
@@ -725,6 +725,7 @@ export class GameEngine {
         });
     }
 
+    // 处理导弹追踪目标和特殊武器效果
     private updateBulletsProp(dt: number) {
         this.bullets.forEach(b => {
             // Missile homing logic
@@ -777,6 +778,17 @@ export class GameEngine {
                             b.vy = (b.vy / speed) * maxSpeed;
                         }
                     }
+                }
+            } else if (b.weaponType === WeaponType.SHURIKEN) {
+                if (b.x < 0 || b.x > this.render.width) {
+                    b.vx *= -1;
+                    b.x = Math.max(0, Math.min(this.render.width, b.x));
+                    this.handleShurikenBounce(b);
+                }
+                if (b.y < 0) {
+                    b.vy *= -1;
+                    b.y = 0;
+                    this.handleShurikenBounce(b);
                 }
             }
 
@@ -911,50 +923,33 @@ export class GameEngine {
         entities.forEach(e => {
             e.x += e.vx * timeScale;
             e.y += e.vy * timeScale;
+        });
+    }
 
-            if (e.type === 'bullet' && e.weaponType === WeaponType.SHURIKEN) {
-                if (e.x < 0 || e.x > this.render.width) {
-                    e.vx *= -1;
-                    e.x = Math.max(0, Math.min(this.render.width, e.x));
-                    this.tagSys.setTag(e, 'shuriken_bounced', 600);
-                    const bounceContext: SynergyTriggerContext = {
-                        weaponType: WeaponType.SHURIKEN,
-                        bulletX: e.x,
-                        bulletY: e.y,
-                        targetEnemy: this.player,
-                        enemies: this.enemies,
-                        player: this.player,
-                        eventType: CombatEventType.BOUNCE,
-                        shurikenBounced: true
-                    };
-                    const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
-                    bounceResults.forEach(r => {
-                        if (r.effect === SynergyEffectType.SPEED_BOOST) {
-                            this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
-                        }
-                    });
-                }
-                if (e.y < 0) {
-                    e.vy *= -1;
-                    e.y = 0;
-                    this.tagSys.setTag(e, 'shuriken_bounced', 600);
-                    const bounceContext: SynergyTriggerContext = {
-                        weaponType: WeaponType.SHURIKEN,
-                        bulletX: e.x,
-                        bulletY: e.y,
-                        targetEnemy: this.player,
-                        enemies: this.enemies,
-                        player: this.player,
-                        eventType: CombatEventType.BOUNCE,
-                        shurikenBounced: true
-                    };
-                    const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
-                    bounceResults.forEach(r => {
-                        if (r.effect === SynergyEffectType.SPEED_BOOST) {
-                            this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
-                        }
-                    });
-                }
+    /**
+     * 处理SHURIKEN子弹反弹逻辑
+     * @param shuriken SHURIKEN子弹实体
+     */
+    private handleShurikenBounce(shuriken: Entity) {
+        // 设置反弹标记
+        this.tagSys.setTag(shuriken, 'shuriken_bounced', 600);
+        
+        // 触发协同效果
+        const bounceContext: SynergyTriggerContext = {
+            weaponType: WeaponType.SHURIKEN,
+            bulletX: shuriken.x,
+            bulletY: shuriken.y,
+            targetEnemy: this.player,
+            enemies: this.enemies,
+            player: this.player,
+            eventType: CombatEventType.BOUNCE,
+            shurikenBounced: true
+        };
+        
+        const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
+        bounceResults.forEach(r => {
+            if (r.effect === SynergyEffectType.SPEED_BOOST) {
+                this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
             }
         });
     }

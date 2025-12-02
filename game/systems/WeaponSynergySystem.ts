@@ -6,18 +6,92 @@
  * - 检测玩家当前装备的武器组合
  * - 在特定条件下触发组合技效果
  * - 提供视觉和数值反馈
+ * 
+ * 系统职责:
+ * - 管理协同状态（激活/未激活）
+ * - 维护装备武器列表
+ * - 提供协同检测接口
+ * - 协调各子模块工作流程
  */
 
-import { WeaponType, Entity, EntityType, CombatEventType, SynergyEffectType } from '@/types';
+import { WeaponType, Entity, EntityType } from '@/types';
 
-export enum SynergyType {
-    LASER_TESLA = 'LASER_TESLA',           // 电磁折射
-    WAVE_PLASMA = 'WAVE_PLASMA',           // 能量共鸣
-    MISSILE_VULCAN = 'MISSILE_VULCAN',     // 弹幕覆盖
-    MAGMA_SHURIKEN = 'MAGMA_SHURIKEN',     // 熔火飞刃
-    TESLA_PLASMA = 'TESLA_PLASMA'          // 等离子风暴
+
+export enum CombatEventType {
+  HIT = 'hit',
+  EXPLODE = 'explode',
+  BOUNCE = 'bounce',
+  KILL = 'kill'
 }
 
+/**
+ * 协同效果类型
+ * 
+ * SynergyEffectType 定义了协同触发后产生的具体效果类型，每种效果类型代表一种具体的游戏机制变化。
+ * 例如：
+ * - CHAIN_LIGHTNING：连锁闪电效果
+ * - DAMAGE_BOOST：伤害加成效果
+ * - SLOW_FIELD：减速场效果
+ * 
+ * 与 SynergyType 的关系：
+ * - SynergyType 和 SynergyEffectType 是一对多的关系
+ * - 一种协同类型（SynergyType）可以产生多种效果类型（SynergyEffectType）
+ * - 多种协同类型可能产生相同的效果类型
+ * 
+ * 例如，TESLA_PLASMA 协同类型可以同时产生 SHIELD_REGEN 和 INVULNERABLE 两种效果类型，
+ * 而其他协同类型也可能单独产生其中一种效果。
+ */
+export enum SynergyEffectType {
+  /** 连锁闪电效果 */
+  CHAIN_LIGHTNING = 'chain_lightning',
+  /** 伤害加成效果 */
+  DAMAGE_BOOST = 'damage_boost',
+  /** 燃烧效果 */
+  BURN = 'burn',
+  /** 护盾回复效果 */
+  SHIELD_REGEN = 'shield_regen',
+  /** 无敌效果 */
+  INVULNERABLE = 'invulnerable',
+  /** 减速场效果 */
+  SLOW_FIELD = 'slow_field',
+  /** 速度提升效果 */
+  SPEED_BOOST = 'speed_boost'
+}
+/**
+ * 协同类型
+ * 
+ * SynergyType 定义了游戏中支持的武器协同组合类型，每种类型代表一种特定的武器组合及其触发条件。
+ * 例如：
+ * - LASER_TESLA：激光武器与特斯拉武器的组合
+ * - WAVE_PLASMA：波纹武器与等离子武器的组合
+ * 
+ * 每种协同类型都有其特定的配置信息，包括所需的武器组合、触发概率、效果颜色等。
+ * 
+ * 与 SynergyEffectType 的关系：
+ * - SynergyType 和 SynergyEffectType 是一对多的关系
+ * - 一种协同类型（SynergyType）可以产生多种效果类型（SynergyEffectType）
+ * - 多种协同类型可能产生相同的效果类型
+ */
+export enum SynergyType {
+    /** 电磁折射: 激光击中敌人时触发连锁闪电 */
+    LASER_TESLA = 'LASER_TESLA',
+    /** 能量共鸣: WAVE命中后沿路径生成涡流区，处于该区的波段伤害+50% */
+    WAVE_PLASMA = 'WAVE_PLASMA',
+    /** 弹幕覆盖: MISSILE锁定目标同时被VULCAN命中时伤害+30% */
+    MISSILE_VULCAN = 'MISSILE_VULCAN',
+    /** 熔火飞刃: SHURIKEN反弹时附加灼烧效果 */
+    MAGMA_SHURIKEN = 'MAGMA_SHURIKEN',
+    /** 等离子风暴: PLASMA爆炸触发1道闪电，并为玩家护盾+60与1s无敌 */
+    TESLA_PLASMA = 'TESLA_PLASMA',
+    /** 冰川波涌: WAVE与MAGMA结合产生减速场 */
+    WAVE_MAGMA = 'WAVE_MAGMA'
+}
+
+/**
+ * 协同配置结构
+ * 
+ * 定义协同效果的配置信息，包括所需的武器组合、触发概率、效果颜色等
+ */
 export interface SynergyConfig {
     /** 组合技类型 */
     type: SynergyType;
@@ -35,6 +109,11 @@ export interface SynergyConfig {
     color: string;
 }
 
+/**
+ * 触发上下文结构
+ * 
+ * 包含触发协同效果所需的所有上下文信息
+ */
 export interface SynergyTriggerContext {
     /** 当前武器类型 */
     weaponType: WeaponType;
@@ -56,7 +135,11 @@ export interface SynergyTriggerContext {
     shurikenBounced?: boolean;
 }
 
-// 组合技配置表
+/**
+ * 组合技配置表
+ * 
+ * 管理所有协同类型的配置信息，提供配置查询接口
+ */
 export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
     [SynergyType.LASER_TESLA]: {
         type: SynergyType.LASER_TESLA,
@@ -102,6 +185,15 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         description: 'PLASMA爆炸触发1道闪电，并为玩家护盾+60与1s无敌',
         triggerChance: 1.0, // 爆炸触发,不需要概率
         color: '#8b5cf6' // 紫罗兰色
+    },
+    [SynergyType.WAVE_MAGMA]: {
+        type: SynergyType.WAVE_MAGMA,
+        name: 'Glacial Wave',
+        chineseName: '冰川波涌',
+        requiredWeapons: [WeaponType.WAVE, WeaponType.MAGMA],
+        description: 'WAVE与MAGMA结合产生减速场',
+        triggerChance: 1.0,
+        color: '#00ffff' // 青色
     }
 };
 
@@ -112,12 +204,18 @@ export class WeaponSynergySystem {
     /** 玩家当前装备的武器列表 */
     private equippedWeapons: Set<WeaponType> = new Set();
 
+    /**
+     * 构造函数
+     * 初始化武器协同系统并重置状态
+     */
     constructor() {
         this.reset();
     }
 
     /**
      * 重置组合技系统
+     * 
+     * 清空激活协同集合和装备武器集合，重置内部状态
      */
     reset() {
         this.activeSynergies.clear();
@@ -126,8 +224,11 @@ export class WeaponSynergySystem {
 
     /**
      * 更新玩家装备的武器列表
+     * 
      * 注意: 游戏中玩家当前只有一个主武器,但可能需要扩展为多武器系统
      * 目前简化为: 将玩家获得过的所有武器都视为"装备"
+     * 
+     * @param weapons 当前装备的武器列表
      */
     updateEquippedWeapons(weapons: WeaponType[]) {
         this.equippedWeapons.clear();
@@ -137,7 +238,9 @@ export class WeaponSynergySystem {
 
     /**
      * 更新激活的组合技
+     * 
      * 检查当前装备是否满足任何组合技的条件
+     * 遍历所有协同配置，如果当前装备满足某个协同的武器要求，则激活该协同效果
      */
     private updateActiveSynergies() {
         this.activeSynergies.clear();
@@ -151,6 +254,9 @@ export class WeaponSynergySystem {
 
     /**
      * 检查是否装备了所需的武器
+     * 
+     * @param required 所需的武器类型数组
+     * @returns 是否装备了所有所需武器
      */
     private hasRequiredWeapons(required: WeaponType[]): boolean {
         return required.every(weapon => this.equippedWeapons.has(weapon));
@@ -158,6 +264,10 @@ export class WeaponSynergySystem {
 
     /**
      * 检查两个武器是否可以组合成协同效果
+     * 
+     * @param w1 武器类型1
+     * @param w2 武器类型2
+     * @returns 是否可以组合成协同效果
      */
     canCombine(w1: WeaponType, w2: WeaponType): boolean {
         if (!w1 || !w2 || w1 === w2) return false;
@@ -171,9 +281,11 @@ export class WeaponSynergySystem {
 
     /**
      * 获取潜在的协同效果颜色
+     * 
      * 用于在道具上显示视觉提示，表明该武器可以与当前装备的武器形成协同效果
+     * 
      * @param weaponType 待检查的武器类型（通常是道具的武器类型）
-     * @returns 如果可以形成协同效果，返回包含两种武器颜色的数组；否则返回null
+     * @returns 如果可以形成协同效果，返回包含协同效果颜色和类型的对象；否则返回null
      */
     getPotentialSynergyColors(weaponType: WeaponType): { colors: string[], synergyType: SynergyType } | null {
         if (!weaponType) return null;
@@ -203,6 +315,9 @@ export class WeaponSynergySystem {
 
     /**
      * 检查特定组合技是否激活
+     * 
+     * @param type 要检查的协同类型
+     * @returns 协同是否激活
      */
     isSynergyActive(type: SynergyType): boolean {
         return this.activeSynergies.has(type);
@@ -210,6 +325,8 @@ export class WeaponSynergySystem {
 
     /**
      * 获取所有激活的组合技
+     * 
+     * @returns 激活的协同配置数组
      */
     getActiveSynergies(): SynergyConfig[] {
         return Array.from(this.activeSynergies).map(type => SYNERGY_CONFIGS[type]);
@@ -217,7 +334,10 @@ export class WeaponSynergySystem {
 
     /**
      * 尝试触发组合技效果
-     * @param context 触发上下文
+     * 
+     * 根据触发上下文判断可触发的协同效果，生成对应的协同效果对象
+     * 
+     * @param context 触发上下文，包含武器类型、位置、目标等信息
      * @returns 触发的组合技列表及其效果
      */
     tryTriggerSynergies(context: SynergyTriggerContext): SynergyTriggerResult[] {
@@ -297,12 +417,30 @@ export class WeaponSynergySystem {
             });
         }
 
+        // WAVE + MAGMA: 冰川波涌：命中事件触发减速场效果
+        if (this.isSynergyActive(SynergyType.WAVE_MAGMA) &&
+            bulletWeapon === WeaponType.WAVE && (context.eventType === undefined || context.eventType === 'hit')) {
+            results.push({
+                type: SynergyType.WAVE_MAGMA,
+                effect: SynergyEffectType.SLOW_FIELD,
+                value: 1200, // 减速场持续时间（毫秒）
+                color: SYNERGY_CONFIGS[SynergyType.WAVE_MAGMA].color
+            });
+        }
+
         return results;
     }
 
     /**
      * 触发TESLA + PLASMA组合技: 等离子风暴
+     * 
      * 专门的方法,在PLASMA爆炸时调用
+     * 
+     * @param explosionX 爆炸位置X坐标
+     * @param explosionY 爆炸位置Y坐标
+     * @param explosionRange 爆炸范围
+     * @param enemies 敌人数组
+     * @returns 受影响的敌人数组
      */
     triggerPlasmaStorm(
         explosionX: number,
@@ -330,6 +468,11 @@ export class WeaponSynergySystem {
     }
 }
 
+/**
+ * 协同效果结果结构
+ * 
+ * 表示触发的协同效果的详细信息
+ */
 export interface SynergyTriggerResult {
     /** 触发的组合技类型 */
     type: SynergyType;
