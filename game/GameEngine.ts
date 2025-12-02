@@ -890,6 +890,7 @@ export class GameEngine {
 
         this.boss = null;
         this.bossWingmen = [];
+        this.enemyBullets = []; // Clear all enemy bullets on boss death
         this.isLevelTransitioning = true; // Block new boss spawns
 
         setTimeout(() => {
