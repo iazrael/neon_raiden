@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
 import checker from 'vite-plugin-checker';
-import { swInjectPlugin } from './vite-plugins/sw-inject-plugin';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // 读取package.json中的版本号
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
@@ -31,11 +31,85 @@ export default defineConfig(({ mode }) => {
             checker({
                 typescript: true
             }),
-            // Service Worker 注入插件
-            swInjectPlugin({
-                appName: 'neon-raiden',
-                version: { major, minor, patch },
-            }),
+            VitePWA({
+                registerType: 'prompt',
+                includeAssets: ['favicon.svg', 'logo.svg', 'logo-180.png', 'logo-192.png', 'logo-512.png', 'assets/splashs/*.png'],
+                manifest: {
+                    name: "霓电战记",
+                    short_name: "霓电战记",
+                    description: "A cyberpunk action game with neon aesthetics",
+                    start_url: "./",
+                    scope: "./",
+                    display: "standalone",
+                    orientation: "portrait-primary",
+                    background_color: "#0a0a0a",
+                    theme_color: "#00ff88",
+                    categories: [
+                        "games"
+                    ],
+                    icons: [
+                        {
+                            src: "./logo.svg",
+                            sizes: "any",
+                            type: "image/svg+xml",
+                            purpose: "any maskable"
+                        },
+                        {
+                            src: "./logo-192.png",
+                            sizes: "192x192",
+                            type: "image/png",
+                            purpose: "any maskable"
+                        },
+                        {
+                            src: "./logo-512.png",
+                            sizes: "512x512",
+                            type: "image/png",
+                            purpose: "any maskable"
+                        }
+                    ],
+                    shortcuts: [
+                        {
+                            name: "Start Game",
+                            short_name: "Play",
+                            description: "Start playing Neon Raiden",
+                            url: "./?mode=play",
+                            icons: [
+                                {
+                                    src: "./logo-192.png",
+                                    sizes: "192x192",
+                                    type: "image/png",
+                                    purpose: "any maskable"
+                                }
+                            ]
+                        }
+                    ],
+                    prefer_related_applications: false
+                },
+                workbox: {
+                    globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3,wav}'],
+                    clientsClaim: true,
+                    skipWaiting: true,
+                    runtimeCaching: [
+                        {
+                            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                            handler: 'CacheFirst',
+                            options: {
+                                cacheName: 'google-fonts-cache',
+                                expiration: {
+                                    maxEntries: 10,
+                                    maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                                },
+                                cacheableResponse: {
+                                    statuses: [0, 200]
+                                }
+                            }
+                        }
+                    ]
+                },
+                devOptions: {
+                    enabled: true
+                }
+            })
         ],
         define: {
             '__APP_VERSION__': JSON.stringify(appVersion),

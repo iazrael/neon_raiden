@@ -1,5 +1,5 @@
-import { WeaponSynergySystem, SynergyType } from '@/game/systems/WeaponSynergySystem';
-import { WeaponType, Entity, EntityType, CombatEventType, SynergyEffectType } from '@/types';
+import { WeaponSynergySystem, SynergyType, CombatEventType, SynergyEffectType } from '@/game/systems/WeaponSynergySystem';
+import { WeaponType, Entity, EntityType } from '@/types';
 
 const enemy: Entity = {
   x: 100, y: 100, width: 20, height: 20, vx: 0, vy: 0,
