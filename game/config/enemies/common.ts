@@ -24,4 +24,6 @@ export const EnemyCommonConfig = {
     eliteScoreMultiplier: 3,
     eliteDamageMultiplier: 1.5,
     eliteFireRateMultiplier: 1.5,
+    // boss 战时刷怪概率降低
+    enemySpawnIntervalInBossMultiplier: 1.15,
 };

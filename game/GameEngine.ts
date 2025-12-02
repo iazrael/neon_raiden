@@ -77,7 +77,6 @@ export class GameEngine {
     fireTimer: number = 0;
     meteorTimer: number = 0;
     screenShake: number = 0;
-    bossTransitionTimer: number = 0;
     levelStartTime: number = 0; // Track when level started
     regenTimer: number = 0;
 
@@ -253,7 +252,6 @@ export class GameEngine {
         this.showLevelTransition = false;
         this.isLevelTransitioning = false;
         this.levelTransitionTimer = 0;
-        this.bossTransitionTimer = 0;
         this.isBossWarningActive = false;
         this.bossWarningTimer = 0;
         this.onBossWarning(false);
@@ -531,18 +529,15 @@ export class GameEngine {
             }
         } else {
             // Continue spawning enemies for a short time after boss appears
-            if (this.bossTransitionTimer < 10000) {
-                this.bossTransitionTimer += dt;
-                this.enemySpawnTimer += dt;
-                const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000) * 1.8);
-                if (this.enemySpawnTimer > spawnRate) {
-                    const baseEliteChance = EnemyCommonConfig.eliteChance;
-                    const eliteMod = this.difficultySys.getEliteChanceModifier();
-                    const bossFactor = EnemyCommonConfig.eliteChanceBossMultiplier ?? 1.0;
-                    const effectiveEliteChance = Math.max(0, Math.min(1, (baseEliteChance + eliteMod) * bossFactor));
-                    this.enemySys.spawnEnemy(this.level, this.enemies, effectiveEliteChance);
-                    this.enemySpawnTimer = 0;
-                }
+            this.enemySpawnTimer += dt;
+            const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000) * EnemyCommonConfig.enemySpawnIntervalInBossMultiplier);
+            if (this.enemySpawnTimer > spawnRate) {
+                const baseEliteChance = EnemyCommonConfig.eliteChance;
+                const eliteMod = this.difficultySys.getEliteChanceModifier();
+                const bossFactor = EnemyCommonConfig.eliteChanceBossMultiplier ?? 1.0;
+                const effectiveEliteChance = Math.max(0, Math.min(1, (baseEliteChance + eliteMod) * bossFactor));
+                this.enemySys.spawnEnemy(this.level, this.enemies, effectiveEliteChance);
+                this.enemySpawnTimer = 0;
             }
 
             this.bossSys.update(this.boss, dt, timeScale, this.player, this.enemyBullets, this.level);
@@ -831,7 +826,6 @@ export class GameEngine {
         this.boss = this.bossSys.spawn(this.level, this.render.sprites);
         this.bossWingmen = this.bossSys.spawnWingmen(this.level, this.boss, this.render.sprites);
         this.screenShake = 20;
-        this.bossTransitionTimer = 0;
 
         // P2 Initialize boss phase system
         if (this.boss) {
