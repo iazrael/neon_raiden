@@ -9,6 +9,8 @@ export const PowerupEffects = {
     maxOptions: 3,
     initialBombs: 3,
     maxBombs: 9,
+    bombDamage: 999,        // 炸弹伤害值
+    bombDamageToBossPct: 0.08, // 炸弹对Boss造成的最大生命值百分比伤害
     hpRestoreAmount: 30,
     shieldRestoreAmount: 25,
     weaponTypeMap: {

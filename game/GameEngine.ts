@@ -7,7 +7,7 @@ import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
-import { WeaponSynergySystem, SynergyTriggerContext, SynergyType,CombatEventType, SynergyEffectType } from './systems/WeaponSynergySystem';
+import { WeaponSynergySystem, SynergyTriggerContext, SynergyType, CombatEventType, SynergyEffectType } from './systems/WeaponSynergySystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
 import { EliteAISystem } from './systems/EliteAISystem'; // P3 Elite AI System
@@ -302,14 +302,16 @@ export class GameEngine {
             this.enemyBullets = [];
             this.enemies.forEach(e => {
                 this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.color);
-                e.hp = 0;
-                e.markedForDeletion = true;
-                this.score += EnemyConfig[e.subType]?.score || 100;
+                e.hp -= PowerupEffects.bombDamage;
+                if (e.hp <= 0) {
+                    this.killEnemy(e);
+                }
             });
             this.onScoreChange(this.score);
 
             if (this.boss) {
-                this.damageBoss(GameConfig.bombDamage);
+                const damage = this.boss.maxHp * PowerupEffects.bombDamageToBossPct;
+                this.damageBoss(damage);
             }
         }
     }
@@ -933,7 +935,7 @@ export class GameEngine {
     private handleShurikenBounce(shuriken: Entity) {
         // 设置反弹标记
         this.tagSys.setTag(shuriken, 'shuriken_bounced', 600);
-        
+
         // 触发协同效果
         const bounceContext: SynergyTriggerContext = {
             weaponType: WeaponType.SHURIKEN,
@@ -945,7 +947,7 @@ export class GameEngine {
             eventType: CombatEventType.BOUNCE,
             shurikenBounced: true
         };
-        
+
         const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
         bounceResults.forEach(r => {
             if (r.effect === SynergyEffectType.SPEED_BOOST) {
