@@ -79,7 +79,7 @@ export enum SynergyType {
     WAVE_PLASMA = 'WAVE_PLASMA',
     /** 弹幕覆盖: MISSILE锁定目标同时被VULCAN命中时伤害+50% */
     MISSILE_VULCAN = 'MISSILE_VULCAN',
-    /** 熔火飞刃: SHURIKEN反弹时附加灼烧效果 */
+    /** 熔火飞刃: SHURIKEN 附加灼烧效果 */
     MAGMA_SHURIKEN = 'MAGMA_SHURIKEN',
     /** 等离子风暴: PLASMA爆炸触发1道闪电，并为玩家护盾+60与1s无敌 */
     TESLA_PLASMA = 'TESLA_PLASMA',
@@ -178,8 +178,8 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Molten Blade',
         chineseName: '熔火飞刃',
         requiredWeapons: [WeaponType.MAGMA, WeaponType.SHURIKEN],
-        description: 'SHURIKEN 反弹时附加灼烧效果',
-        triggerChance: 1.0, // 反弹检测,不需要概率
+        description: 'SHURIKEN 附加灼烧效果',
+        triggerChance: 1.0, // 命中触发,不需要概率
         color: '#f97316', // 橙红色
         mainWeapon: WeaponType.SHURIKEN
     },
@@ -404,18 +404,15 @@ export class WeaponSynergySystem {
             }
         }
 
-        // MAGMA + SHURIKEN: 熔火飞刃
+        // MAGMA + SHURIKEN: 熔火飞刃（命中即附加灼烧）
         if (this.isSynergyActive(SynergyType.MAGMA_SHURIKEN) &&
             bulletWeapon === WeaponType.SHURIKEN && (context.eventType === undefined || context.eventType === 'hit')) {
-            const hasBounced = !!context.shurikenBounced;
-            if (hasBounced) {
-                results.push({
-                    type: SynergyType.MAGMA_SHURIKEN,
-                    effect: SynergyEffectType.BURN,
-                    value: 5, // 每秒5点灼烧伤害
-                    color: SYNERGY_CONFIGS[SynergyType.MAGMA_SHURIKEN].color
-                });
-            }
+            results.push({
+                type: SynergyType.MAGMA_SHURIKEN,
+                effect: SynergyEffectType.BURN,
+                value: 5,
+                color: SYNERGY_CONFIGS[SynergyType.MAGMA_SHURIKEN].color
+            });
         }
 
         // TESLA + PLASMA: 等离子风暴（防守）：爆炸事件触发护盾回复与短暂无敌
