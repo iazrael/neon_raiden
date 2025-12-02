@@ -18,7 +18,7 @@ export const WeaponDetail: React.FC<WeaponDetailProps> = ({ weapon }) => {
 
   // 获取该武器的组合技信息
   const getSynergiesForWeapon = () => {
-    const synergies: Array<{ partnerWeapon: string; effect: string }> = [];
+    const synergies: Array<{ partnerWeapon: string; effect: string, name: string }> = [];
 
     Object.values(SYNERGY_CONFIGS).forEach(config => {
       if (config.requiredWeapons.includes(weapon.type)) {
@@ -26,8 +26,10 @@ export const WeaponDetail: React.FC<WeaponDetailProps> = ({ weapon }) => {
         const partnerWeaponType = config.requiredWeapons.find(w => w !== weapon.type);
         if (partnerWeaponType) {
           const partnerWeapon = WeaponConfig[partnerWeaponType];
+          
           synergies.push({
             partnerWeapon: partnerWeapon.chineseName,
+            name: config.chineseName,
             effect: config.description
           });
         }
@@ -79,17 +81,31 @@ export const WeaponDetail: React.FC<WeaponDetailProps> = ({ weapon }) => {
       {/* 组合技信息 */}
       {synergies.length > 0 && (
         <div className="mt-4 pt-4 border-t border-cyan-500/30">
-          <h4 className="text-cyan-400 font-bold text-sm mb-3 tracking-wider">组合技</h4>
-          <div className="space-y-2">
+          <h4 className="text-cyan-400 font-bold text-sm mb-3 tracking-wider">武器协同</h4>
+          <div className="space-y-4">
             {synergies.map((synergy, index) => (
-              <div key={index} className="text-sm">
-                <div className="flex items-start gap-2">
-                  <span className="text-purple-400 flex-shrink-0">+</span>
-                  <div className="flex-1">
-                    <span className="text-cyan-300 font-semibold">{synergy.partnerWeapon}</span>
-                    <span className="text-gray-400">: </span>
-                    <span className="text-gray-300">{synergy.effect}</span>
+              <div key={index} className="pb-3 border-b border-gray-800 last:border-0 last:pb-0">
+                {/* 组合技名称 */}
+                <div className="mb-2">
+                  <div className="inline-block border-2 border-orange-500/70 rounded-lg px-2 py-1">
+                    <span className="text-orange-400 font-bold text-base">{synergy.name}</span>
                   </div>
+                </div>
+                
+                {/* 武器组合 */}
+                <div className="flex items-center gap-2 mb-2 ml-1">
+                  <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/30 rounded text-blue-300 text-xs">
+                    {weapon.config.chineseName}
+                  </div>
+                  <span className="text-orange-400/70 text-sm">×</span>
+                  <div className="px-2 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-300 text-xs">
+                    {synergy.partnerWeapon}
+                  </div>
+                </div>
+                      
+                {/* 效果说明 */}
+                <div className="text-gray-300 text-xs">
+                  {synergy.effect}
                 </div>
               </div>
             ))}

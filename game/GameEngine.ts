@@ -1487,9 +1487,8 @@ export class GameEngine {
                         // 2. 旧主武器仅在可协同时保留为副武器,否则丢弃
                         // 3. 旧副武器总是被丢弃
                         const oldPrimary = this.weaponType;
+                        const oldWeaponType = this.weaponType;
                         this.weaponType = weaponType;
-                        this.weaponLevel = 1;
-
                         // 判断是否能与旧主武器协同,并一次性处理副武器、装备更新和主武器校正
                         if (this.synergySys.canCombine(this.weaponType, oldPrimary)) {
                             // 可以协同:保留旧主武器为副武器
@@ -1508,8 +1507,13 @@ export class GameEngine {
                                     this.weaponType = synergy.mainWeapon;
                                 }
                             }
+                            if (this.weaponType !== oldWeaponType) {
+                                // 如果最终主武器没变化，要保留武器等级
+                                this.weaponLevel = 1;
+                            }
                         } else {
                             // 不能协同:丢弃旧武器
+                            this.weaponLevel = 1; // 重置武器等级
                             this.secondaryWeapon = null;
                             this.synergySys.updateEquippedWeapons([this.weaponType]);
                         }
