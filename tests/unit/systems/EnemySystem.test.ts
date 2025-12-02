@@ -58,6 +58,16 @@ describe('EnemySystem', () => {
       // Restore original Math.random
       Math.random = originalRandom;
     });
+
+    it('should respect eliteChanceOverride parameter', () => {
+      enemySystem.spawnEnemy(1, enemies, 0);
+      const e1 = enemies[enemies.length - 1];
+      expect(e1.isElite).toBe(false);
+
+      enemySystem.spawnEnemy(1, enemies, 1);
+      const e2 = enemies[enemies.length - 1];
+      expect(e2.isElite).toBe(true);
+    });
   });
 
   describe('update', () => {

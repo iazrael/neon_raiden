@@ -7,7 +7,7 @@ import { WeaponSystem } from './systems/WeaponSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
-import { WeaponSynergySystem, SynergyTriggerContext, SynergyType, CombatEventType, SynergyEffectType } from './systems/WeaponSynergySystem';
+import { WeaponSynergySystem, SynergyTriggerContext, SynergyType, CombatEventType, SynergyEffectType, SynergyConfig } from './systems/WeaponSynergySystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
 import { EliteAISystem } from './systems/EliteAISystem'; // P3 Elite AI System
@@ -472,7 +472,10 @@ export class GameEngine {
             const spawnRate = Math.round(baseSpawnRate * difficultyConfig.spawnIntervalMultiplier);
 
             if (this.enemySpawnTimer > spawnRate) {
-                this.enemySys.spawnEnemy(this.level, this.enemies);
+                const baseEliteChance = EnemyCommonConfig.eliteChance;
+                const eliteMod = this.difficultySys.getEliteChanceModifier();
+                const effectiveEliteChance = Math.max(0, Math.min(1, baseEliteChance + eliteMod));
+                this.enemySys.spawnEnemy(this.level, this.enemies, effectiveEliteChance);
 
                 // P3 Check if newly spawned enemy is elite and initialize AI
                 const newEnemy = this.enemies[this.enemies.length - 1];
@@ -533,7 +536,11 @@ export class GameEngine {
                 this.enemySpawnTimer += dt;
                 const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000) * 1.8);
                 if (this.enemySpawnTimer > spawnRate) {
-                    this.enemySys.spawnEnemy(this.level, this.enemies);
+                    const baseEliteChance = EnemyCommonConfig.eliteChance;
+                    const eliteMod = this.difficultySys.getEliteChanceModifier();
+                    const bossFactor = EnemyCommonConfig.eliteChanceBossMultiplier ?? 1.0;
+                    const effectiveEliteChance = Math.max(0, Math.min(1, (baseEliteChance + eliteMod) * bossFactor));
+                    this.enemySys.spawnEnemy(this.level, this.enemies, effectiveEliteChance);
                     this.enemySpawnTimer = 0;
                 }
             }
@@ -1288,8 +1295,7 @@ export class GameEngine {
         const difficultyConfig = this.difficultySys.getConfig();
         const baseDropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
         const finalDropRate = baseDropRate * difficultyConfig.powerupDropMultiplier;
-
-        if (Math.random() < finalDropRate) this.spawnPowerup(e.x, e.y);
+        if (Math.random() < finalDropRate || this.difficultySys.consumePityDrop()) this.spawnPowerup(e.x, e.y);
 
         // Debug Mode: Increment enemy kill count
         if (this.debugModeEnabled) {
@@ -1469,23 +1475,37 @@ export class GameEngine {
                     } else {
                         // Different weapon - switch primary
                         // Logic: New weapon becomes Primary. Old Primary becomes Secondary ONLY if it synergizes.
-                        // Old Secondary is always discarded.
+                        // 武器切换逻辑:
+                        // 1. 新武器成为主武器,等级重置为1
+                        // 2. 旧主武器仅在可协同时保留为副武器,否则丢弃
+                        // 3. 旧副武器总是被丢弃
                         const oldPrimary = this.weaponType;
                         this.weaponType = weaponType;
                         this.weaponLevel = 1;
 
-                        // Check synergy with old primary
+                        // 判断是否能与旧主武器协同,并一次性处理副武器、装备更新和主武器校正
                         if (this.synergySys.canCombine(this.weaponType, oldPrimary)) {
+                            // 可以协同:保留旧主武器为副武器
                             this.secondaryWeapon = oldPrimary;
-                        } else {
-                            this.secondaryWeapon = null;
-                        }
 
-                        // P2 Update synergy system with equipped weapons
-                        const equippedWeapons = this.secondaryWeapon
-                            ? [this.weaponType, this.secondaryWeapon]
-                            : [this.weaponType];
-                        this.synergySys.updateEquippedWeapons(equippedWeapons);
+                            // 更新协同系统装备状态
+                            this.synergySys.updateEquippedWeapons([this.weaponType, this.secondaryWeapon]);
+
+                            // 检查协同是否指定了主武器,如果是则校正主副武器位置
+                            const activeSynergies = this.synergySys.getActiveSynergies();
+                            if (activeSynergies.length > 0) {
+                                const synergy = activeSynergies[0];
+                                if (synergy.mainWeapon && this.weaponType !== synergy.mainWeapon) {
+                                    // 交换主副武器,确保协同的主武器在主武器槽
+                                    this.secondaryWeapon = this.weaponType;
+                                    this.weaponType = synergy.mainWeapon;
+                                }
+                            }
+                        } else {
+                            // 不能协同:丢弃旧武器
+                            this.secondaryWeapon = null;
+                            this.synergySys.updateEquippedWeapons([this.weaponType]);
+                        }
                     }
                 }
                 break;
@@ -1500,6 +1520,7 @@ export class GameEngine {
             type: EntityType.POWERUP, subType: type, color: '#fff', markedForDeletion: false,
             spriteKey: `powerup_${type}`
         });
+        this.difficultySys.recordPowerupDrop();
     }
 
     createExplosion(x: number, y: number, size: ExplosionSize, color: string) {
@@ -1563,7 +1584,9 @@ export class GameEngine {
 
     getShieldCap(): number {
         const base = this.playerConfig.maxShield + this.levelingShieldBonus;
-        const comboLevel = this.comboSys.getState().level;
+        const comboLevel = this.comboSys && typeof this.comboSys.getState === 'function'
+            ? this.comboSys.getState().level
+            : 0;
         let bonus = 0;
         if (comboLevel >= 2) bonus += 25;
         if (comboLevel >= 3) bonus += 25;

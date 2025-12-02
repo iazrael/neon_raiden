@@ -18,10 +18,10 @@ import { WeaponType, Entity, EntityType } from '@/types';
 
 
 export enum CombatEventType {
-  HIT = 'hit',
-  EXPLODE = 'explode',
-  BOUNCE = 'bounce',
-  KILL = 'kill'
+    HIT = 'hit',
+    EXPLODE = 'explode',
+    BOUNCE = 'bounce',
+    KILL = 'kill'
 }
 
 /**
@@ -42,20 +42,20 @@ export enum CombatEventType {
  * 而其他协同类型也可能单独产生其中一种效果。
  */
 export enum SynergyEffectType {
-  /** 连锁闪电效果 */
-  CHAIN_LIGHTNING = 'chain_lightning',
-  /** 伤害加成效果 */
-  DAMAGE_BOOST = 'damage_boost',
-  /** 燃烧效果 */
-  BURN = 'burn',
-  /** 护盾回复效果 */
-  SHIELD_REGEN = 'shield_regen',
-  /** 无敌效果 */
-  INVULNERABLE = 'invulnerable',
-  /** 减速场效果 */
-  SLOW_FIELD = 'slow_field',
-  /** 速度提升效果 */
-  SPEED_BOOST = 'speed_boost'
+    /** 连锁闪电效果 */
+    CHAIN_LIGHTNING = 'chain_lightning',
+    /** 伤害加成效果 */
+    DAMAGE_BOOST = 'damage_boost',
+    /** 燃烧效果 */
+    BURN = 'burn',
+    /** 护盾回复效果 */
+    SHIELD_REGEN = 'shield_regen',
+    /** 无敌效果 */
+    INVULNERABLE = 'invulnerable',
+    /** 减速场效果 */
+    SLOW_FIELD = 'slow_field',
+    /** 速度提升效果 */
+    SPEED_BOOST = 'speed_boost'
 }
 /**
  * 协同类型
@@ -77,7 +77,7 @@ export enum SynergyType {
     LASER_TESLA = 'LASER_TESLA',
     /** 能量共鸣: WAVE命中后沿路径生成涡流区，处于该区的波段伤害+50% */
     WAVE_PLASMA = 'WAVE_PLASMA',
-    /** 弹幕覆盖: MISSILE锁定目标同时被VULCAN命中时伤害+30% */
+    /** 弹幕覆盖: MISSILE锁定目标同时被VULCAN命中时伤害+50% */
     MISSILE_VULCAN = 'MISSILE_VULCAN',
     /** 熔火飞刃: SHURIKEN反弹时附加灼烧效果 */
     MAGMA_SHURIKEN = 'MAGMA_SHURIKEN',
@@ -107,6 +107,8 @@ export interface SynergyConfig {
     triggerChance: number;
     /** 效果颜色(用于视觉特效) */
     color: string;
+    /** 主武器类型(组合后自动切换为此武器) */
+    mainWeapon: WeaponType;
 }
 
 /**
@@ -146,54 +148,60 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Electromagnetic Refraction',
         chineseName: '电磁折射',
         requiredWeapons: [WeaponType.LASER, WeaponType.TESLA],
-        description: '激光击中敌人时触发连锁闪电',
+        description: 'LASER 击中敌人时触发连锁闪电',
         triggerChance: 1.0,
-        color: '#a855f7' // 紫色
+        color: '#a855f7', // 紫色
+        mainWeapon: WeaponType.LASER
     },
     [SynergyType.WAVE_PLASMA]: {
         type: SynergyType.WAVE_PLASMA,
         name: 'Energy Resonance',
         chineseName: '能量共鸣',
         requiredWeapons: [WeaponType.WAVE, WeaponType.PLASMA],
-        description: 'WAVE命中后沿路径生成涡流区，处于该区的波段伤害+50%',
+        description: 'WAVE 命中后沿路径生成涡流区，处于该区的波段伤害+50%',
         triggerChance: 1.0, // 位置判定,不需要概率
-        color: '#ec4899' // 粉色
+        color: '#ec4899', // 粉色
+        mainWeapon: WeaponType.WAVE
     },
     [SynergyType.MISSILE_VULCAN]: {
         type: SynergyType.MISSILE_VULCAN,
         name: 'Barrage Coverage',
         chineseName: '弹幕覆盖',
         requiredWeapons: [WeaponType.MISSILE, WeaponType.VULCAN],
-        description: 'MISSILE锁定目标同时被VULCAN命中时伤害+30%',
+        description: 'MISSILE 锁定目标同时被 VULCAN 命中时伤害+50%',
         triggerChance: 1.0, // 状态判定,不需要概率
-        color: '#f59e0b' // 橙色
+        color: '#f59e0b', // 橙色
+        mainWeapon: WeaponType.MISSILE
     },
     [SynergyType.MAGMA_SHURIKEN]: {
         type: SynergyType.MAGMA_SHURIKEN,
         name: 'Molten Blade',
         chineseName: '熔火飞刃',
         requiredWeapons: [WeaponType.MAGMA, WeaponType.SHURIKEN],
-        description: 'SHURIKEN反弹时附加灼烧效果',
+        description: 'SHURIKEN 反弹时附加灼烧效果',
         triggerChance: 1.0, // 反弹检测,不需要概率
-        color: '#f97316' // 橙红色
+        color: '#f97316', // 橙红色
+        mainWeapon: WeaponType.SHURIKEN
     },
     [SynergyType.TESLA_PLASMA]: {
         type: SynergyType.TESLA_PLASMA,
         name: 'Plasma Storm',
         chineseName: '等离子风暴',
         requiredWeapons: [WeaponType.TESLA, WeaponType.PLASMA],
-        description: 'PLASMA爆炸触发1道闪电，并为玩家护盾+60与1s无敌',
+        description: 'PLASMA 爆炸触发1道闪电，并为玩家护盾+60与1s无敌',
         triggerChance: 1.0, // 爆炸触发,不需要概率
-        color: '#8b5cf6' // 紫罗兰色
+        color: '#8b5cf6', // 紫罗兰色
+        mainWeapon: WeaponType.PLASMA
     },
     [SynergyType.WAVE_MAGMA]: {
         type: SynergyType.WAVE_MAGMA,
         name: 'Glacial Wave',
         chineseName: '冰川波涌',
         requiredWeapons: [WeaponType.WAVE, WeaponType.MAGMA],
-        description: 'WAVE与MAGMA结合产生减速场',
+        description: 'WAVE 与 MAGMA 结合产生减速场',
         triggerChance: 1.0,
-        color: '#00ffff' // 青色
+        color: '#00ffff', // 青色
+        mainWeapon: WeaponType.WAVE
     }
 };
 
@@ -333,6 +341,16 @@ export class WeaponSynergySystem {
     }
 
     /**
+     * 获取协同的主武器
+     * 
+     * @param type 协同类型
+     * @returns 主武器类型
+     */
+    getMainWeapon(type: SynergyType): WeaponType | undefined {
+        return SYNERGY_CONFIGS[type]?.mainWeapon;
+    }
+
+    /**
      * 尝试触发组合技效果
      * 
      * 根据触发上下文判断可触发的协同效果，生成对应的协同效果对象
@@ -379,9 +397,9 @@ export class WeaponSynergySystem {
                 results.push({
                     type: SynergyType.MISSILE_VULCAN,
                     effect: SynergyEffectType.DAMAGE_BOOST,
-                    value: 1.3, // 伤害×1.3
+                    value: 1.5, // 伤害×1.5
                     color: SYNERGY_CONFIGS[SynergyType.MISSILE_VULCAN].color,
-                    multiplier: 1.3
+                    multiplier: 1.5
                 });
             }
         }

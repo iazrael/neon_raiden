@@ -18,7 +18,7 @@ export class EnemySystem {
         this.height = height;
     }
 
-    spawnEnemy(level: number, enemies: Entity[]) {
+    spawnEnemy(level: number, enemies: Entity[], eliteChanceOverride?: number) {
         const x = Math.random() * (this.width - 60) + 30;
 
         // Use weighted spawning system
@@ -40,7 +40,8 @@ export class EnemySystem {
         const config = EnemyConfig[type];
 
         // Elite Chance
-        const isElite = Math.random() < EnemyCommonConfig.eliteChance;
+        const chance = eliteChanceOverride !== undefined ? eliteChanceOverride : EnemyCommonConfig.eliteChance;
+        const isElite = Math.random() < chance;
 
         let enemy: Entity = {
             x,

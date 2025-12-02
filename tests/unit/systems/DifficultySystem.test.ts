@@ -211,6 +211,33 @@ describe('DifficultySystem', () => {
       expect(multiplier).toBe(DIFFICULTY_CONFIGS[DifficultyMode.NORMAL].scoreMultiplier);
     });
   });
+
+  describe('pity drop', () => {
+    it('should trigger pity drop after timeout without drops', () => {
+      const player = { hp: 100, maxHp: 100 } as any;
+      const weapons: any[] = [];
+      const combo = 0;
+      const level = 1;
+
+      const timeout = difficultySystem.getConfig().pityDropTimeoutMs;
+      difficultySystem.update(timeout + 1000, player, weapons, combo, level);
+      const triggered = (difficultySystem as any).consumePityDrop();
+      expect(triggered).toBe(true);
+    });
+
+    it('should reset pity drop timer on actual drop', () => {
+      const player = { hp: 100, maxHp: 100 } as any;
+      const weapons: any[] = [];
+      const combo = 0;
+      const level = 1;
+
+      const timeout = difficultySystem.getConfig().pityDropTimeoutMs;
+      difficultySystem.update(timeout + 500, player, weapons, combo, level);
+      difficultySystem.recordPowerupDrop();
+      const triggeredAfterReset = (difficultySystem as any).consumePityDrop();
+      expect(triggeredAfterReset).toBe(false);
+    });
+  });
   
   describe('setEnabled', () => {
     it('should enable dynamic difficulty', () => {

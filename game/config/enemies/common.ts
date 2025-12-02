@@ -18,10 +18,10 @@ export const EnemyCommonConfig = {
     },
     // 精英怪配置
     eliteChance: 0.1, // 变精英的概率
+    eliteChanceBossMultiplier: 0.5, // Boss期间精英概率系数
     eliteHpMultiplier: 3,
     eliteSizeMultiplier: 1.3,
     eliteScoreMultiplier: 3,
     eliteDamageMultiplier: 1.5,
     eliteFireRateMultiplier: 1.5,
-    enemyCountMultiplier: 1.15,
 };

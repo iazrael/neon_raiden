@@ -34,6 +34,7 @@ export interface DifficultyConfig {
     scoreMultiplier: number;          // 得分倍率
     bossDifficultyMultiplier: number; // Boss难度倍率
     description: string;              // 难度描述
+    pityDropTimeoutMs: number;        // 无道具掉落触发保底的时间阈值
 }
 
 // ==================== 玩家表现评估 ====================
@@ -58,7 +59,8 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyMode, DifficultyConfig> = {
         powerupDropMultiplier: 1.0,      // 道具掉落率不变
         scoreMultiplier: 1.2,            // 得分+20% (奖励高技术玩家)
         bossDifficultyMultiplier: 1.1,   // Boss难度+10%
-        description: '高手模式 - 挑战增强,得分加成'
+        description: '高手模式 - 挑战增强,得分加成',
+        pityDropTimeoutMs: 25000
     },
     [DifficultyMode.NORMAL]: {
         mode: DifficultyMode.NORMAL,
@@ -69,7 +71,8 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyMode, DifficultyConfig> = {
         powerupDropMultiplier: 1.0,      // 道具掉落率不变
         scoreMultiplier: 1.0,            // 标准得分
         bossDifficultyMultiplier: 1.0,   // Boss标准难度
-        description: '标准模式 - 原始平衡'
+        description: '标准模式 - 原始平衡',
+        pityDropTimeoutMs: 30000
     },
     [DifficultyMode.HARD]: {
         mode: DifficultyMode.HARD,
@@ -80,7 +83,8 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyMode, DifficultyConfig> = {
         powerupDropMultiplier: 1.20,     // 道具掉落率+20%
         scoreMultiplier: 1.0,            // 得分不变
         bossDifficultyMultiplier: 0.9,   // Boss难度-10%
-        description: '新手模式 - 难度降低,道具增加'
+        description: '新手模式 - 难度降低,道具增加',
+        pityDropTimeoutMs: 20000
     }
 };
 
@@ -119,6 +123,10 @@ export class DifficultySystem {
     
     // Boss击败次数记录
     private playerDefeatCounts: Record<number, number> = {}; // 关卡 -> 击败次数
+
+    // 保底掉落计时与状态
+    private noDropTimerMs: number = 0;
+    private pityDropReady: boolean = false;
     
     constructor() {
         // 初始化为标准模式
@@ -133,6 +141,8 @@ export class DifficultySystem {
         this.currentConfig = DIFFICULTY_CONFIGS[DifficultyMode.NORMAL];
         this.evaluationTimer = 0;
         this.levelStartTime = Date.now();
+        this.noDropTimerMs = 0;
+        this.pityDropReady = false;
     }
     
     /**
@@ -142,6 +152,10 @@ export class DifficultySystem {
         if (!this.isEnabled) return;
         
         this.evaluationTimer += dt;
+        this.noDropTimerMs += dt;
+        if (!this.pityDropReady && this.noDropTimerMs >= this.currentConfig.pityDropTimeoutMs) {
+            this.pityDropReady = true;
+        }
         
         // 每15秒评估一次玩家表现
         if (this.evaluationTimer >= this.EVALUATION_INTERVAL) {
@@ -253,6 +267,26 @@ export class DifficultySystem {
      */
     getPowerupDropMultiplier(): number {
         return this.currentConfig.powerupDropMultiplier;
+    }
+
+    /**
+     * 记录一次实际的道具掉落，重置保底状态
+     */
+    recordPowerupDrop(): void {
+        this.noDropTimerMs = 0;
+        this.pityDropReady = false;
+    }
+
+    /**
+     * 消耗一次保底掉落触发
+     */
+    consumePityDrop(): boolean {
+        if (this.pityDropReady) {
+            this.pityDropReady = false;
+            this.noDropTimerMs = 0;
+            return true;
+        }
+        return false;
     }
     
     /**
