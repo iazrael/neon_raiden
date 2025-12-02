@@ -1,4 +1,7 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tail -->
+  <path d="M32 47 L40 62 L24 62 Z" fill="#940505ff"/>
+  
   <!-- Wings -->
   <path d="M32 12 L56 47 L56 57 L40 42 L24 42 L8 57 L8 47 Z" fill="#4a5568" stroke="#63b3ed" stroke-width="1"/>
   
@@ -7,9 +10,6 @@
   
   <!-- Cockpit -->
   <ellipse cx="32" cy="27" rx="3" ry="6" fill="#0bc5ea" filter="url(#glow)"/>
-  
-  <!-- Tail -->
-  <path d="M32 47 L40 60 L24 60 Z" fill="#2d3748"/>
   
   <!-- Definitions -->
   <defs>
