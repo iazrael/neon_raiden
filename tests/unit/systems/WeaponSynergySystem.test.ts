@@ -133,7 +133,7 @@ describe('WeaponSynergySystem - Basic Synergy Activation', () => {
     expect(res.find(r => r.type === SynergyType.MAGMA_SHURIKEN)?.value).toBe(5);
   });
 
-  test('MAGMA+SHURIKEN does not trigger without bounce', () => {
+  test('MAGMA+SHURIKEN triggers burn without bounce', () => {
     const sys = new WeaponSynergySystem();
     sys.updateEquippedWeapons([WeaponType.MAGMA, WeaponType.SHURIKEN]);
 
@@ -148,7 +148,7 @@ describe('WeaponSynergySystem - Basic Synergy Activation', () => {
       shurikenBounced: false
     });
 
-    expect(res.some(r => r.type === SynergyType.MAGMA_SHURIKEN)).toBeFalsy();
+    expect(res.some(r => r.type === SynergyType.MAGMA_SHURIKEN && r.effect === SynergyEffectType.BURN)).toBeTruthy();
   });
 });
 

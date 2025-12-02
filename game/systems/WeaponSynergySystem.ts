@@ -168,10 +168,10 @@ export const SYNERGY_CONFIGS: Record<SynergyType, SynergyConfig> = {
         name: 'Barrage Coverage',
         chineseName: '弹幕覆盖',
         requiredWeapons: [WeaponType.MISSILE, WeaponType.VULCAN],
-        description: 'MISSILE 锁定目标同时被 VULCAN 命中时伤害+50%',
+        description: 'VULCAN 发射的同时，发射一颗 MISSILE',
         triggerChance: 1.0, // 状态判定,不需要概率
         color: '#f59e0b', // 橙色
-        mainWeapon: WeaponType.MISSILE
+        mainWeapon: WeaponType.VULCAN
     },
     [SynergyType.MAGMA_SHURIKEN]: {
         type: SynergyType.MAGMA_SHURIKEN,

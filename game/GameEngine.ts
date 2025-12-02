@@ -449,14 +449,27 @@ export class GameEngine {
         const baseFireRate = this.weaponSys.getFireRate(this.weaponType, this.weaponLevel);
         const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.playerFireRateBonusPct)));
         if (this.fireTimer > fireRate) {
-            const canAlt = this.alternateFireEnabled && this.secondaryWeapon && this.synergySys.canCombine(this.weaponType, this.secondaryWeapon);
-            const fireType = canAlt ? (this.fireAlternateToggle ? this.secondaryWeapon! : this.weaponType) : this.weaponType;
-            this.weaponSys.firePlayerWeapon(
-                this.player, fireType, this.weaponLevel,
-                this.options, this.bullets, this.enemies
-            );
-            if (canAlt) this.fireAlternateToggle = !this.fireAlternateToggle;
-            this.fireTimer = 0;
+            const isMissileVulcan = this.synergySys.isSynergyActive(SynergyType.MISSILE_VULCAN);
+            if (isMissileVulcan) {
+                this.weaponSys.firePlayerWeapon(
+                    this.player, WeaponType.VULCAN, this.weaponLevel,
+                    this.options, this.bullets, this.enemies
+                );
+                this.weaponSys.firePlayerWeapon(
+                    this.player, WeaponType.MISSILE, 1,
+                    [], this.bullets, this.enemies
+                );
+                this.fireTimer = 0;
+            } else {
+                const canAlt = this.alternateFireEnabled && this.secondaryWeapon && this.synergySys.canCombine(this.weaponType, this.secondaryWeapon);
+                const fireType = canAlt ? (this.fireAlternateToggle ? this.secondaryWeapon! : this.weaponType) : this.weaponType;
+                this.weaponSys.firePlayerWeapon(
+                    this.player, fireType, this.weaponLevel,
+                    this.options, this.bullets, this.enemies
+                );
+                if (canAlt) this.fireAlternateToggle = !this.fireAlternateToggle;
+                this.fireTimer = 0;
+            }
         }
 
         // Level Logic
