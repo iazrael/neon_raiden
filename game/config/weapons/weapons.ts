@@ -59,7 +59,7 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.MISSILE],
         sprite: 'bullet_missile',
-        maxLevel: 5,
+        maxLevel: 3,
     },
     [WeaponType.WAVE]: {
         type: WeaponType.WAVE,
