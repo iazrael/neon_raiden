@@ -41,7 +41,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 5,
         bullet: BulletConfigs[BulletType.LASER],
         sprite: 'bullet_laser',
-        maxLevel: 3
+        maxLevel: 3,
+        attenuation: 0.25
     },
     [WeaponType.MISSILE]: {
         type: WeaponType.MISSILE,
@@ -77,7 +78,8 @@ export const WeaponConfig: Record<WeaponType, WeaponEntity> = {
         ratePerLevel: 20,
         bullet: BulletConfigs[BulletType.WAVE],
         sprite: 'bullet_wave',
-        maxLevel: 3
+        maxLevel: 3,
+        attenuation: 0.5
     },
     [WeaponType.PLASMA]: {
         type: WeaponType.PLASMA,

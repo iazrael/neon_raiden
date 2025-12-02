@@ -44,7 +44,8 @@ export class WeaponSystem {
                 chainCount, chainRange,
                 weaponType: type,
                 target: undefined,
-                searchRange, turnSpeed
+                searchRange, turnSpeed,
+                attenuation: config.attenuation
             };
 
             // Add rotation properties if specified

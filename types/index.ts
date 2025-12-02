@@ -111,6 +111,7 @@ export interface Entity {
   turnSpeed?: number; // Override rotationSpeed for steering logic
   lifetime?: number; // Time in milliseconds before entity expires
   incomingMissiles?: number; // Track number of missiles targeting this entity
+  attenuation?: number; // Damage attenuation per hit (0-1)
 }
 
 

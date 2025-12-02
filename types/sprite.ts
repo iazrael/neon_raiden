@@ -239,6 +239,7 @@ export interface WeaponEntity extends BaseEntityMeta {
     sprite: string;             // 精灵图名称
     baseSpeed?: number;         // 基准速度（用于DPS计算，默认为15）
     maxLevel?: number;          // 最高等级（默认9，用于展示与约束）
+    attenuation?: number;       // 穿透伤害衰减比例 (0-1)
 }
 
 /**

@@ -1182,6 +1182,15 @@ export class GameEngine {
         } else if (b.type !== 'bullet' || b.weaponType !== WeaponType.PLASMA) {
             this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ffe066');
         }
+
+        // Apply damage attenuation for piercing weapons
+        if (b.attenuation && b.damage !== undefined) {
+            b.damage *= (1 - b.attenuation);
+            // If damage becomes too low, destroy the bullet
+            if (b.damage < 1) {
+                b.markedForDeletion = true;
+            }
+        }
     }
 
     private createTeslaChain(b: Entity, target: Entity) {
