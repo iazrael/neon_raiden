@@ -2,6 +2,7 @@ import { SpriteGenerator } from '@/game/SpriteGenerator';
 import { SpriteMap, Entity, Particle, Shockwave, GameState, BulletType, EnemyType, PowerupType, WeaponType, EntityType } from '@/types';
 import { BossConfig, EnemyConfig } from '../config';
 import { EnvironmentElement, EnvironmentType } from './EnvironmentSystem';
+import { SynergyType } from './WeaponSynergySystem';
 
 export class RenderSystem {
     ctx: CanvasRenderingContext2D;
@@ -83,7 +84,11 @@ export class RenderSystem {
         playerSecondaryColor?: string,
         playerCombine?: boolean,
         timeSlowActive: boolean = false,
-        powerupSynergyInfo?: Map<Entity, { colors: string[], synergyType: any }>
+        powerupSynergyInfo?: Map<Entity, { colors: string[], synergyType: any }>,
+        slowFields?: { x: number, y: number, range: number, life: number }[],
+        playerSpeedBoostTimer?: number,
+        shieldRegenTimer?: number,
+        plasmaExplosions?: { x: number, y: number, range: number, life: number }[]
     ) {
         this.ctx.save();
 
@@ -168,19 +173,42 @@ export class RenderSystem {
         if (gameState !== GameState.MENU) {
             if (gameState !== GameState.GAME_OVER) {
 
-                this.drawEntity(player, weaponLevel, playerLevel, playerPrimaryColor, playerSecondaryColor, playerCombine);
+                this.drawEntity(player, weaponLevel, playerLevel, playerPrimaryColor, playerSecondaryColor, playerCombine, undefined, playerSpeedBoostTimer);
 
                 // Draw Shield
                 if (shield > 0) {
                     this.ctx.save();
                     this.ctx.translate(player.x, player.y);
-                    this.ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(1, shield / 50)})`;
-                    this.ctx.lineWidth = 3;
-                    this.ctx.shadowBlur = 10;
-                    this.ctx.shadowColor = '#00ffff';
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
-                    this.ctx.stroke();
+                    
+                    // Check if shield regen effect is active
+                    if (shieldRegenTimer && shieldRegenTimer > 0) {
+                        // Add pulsing effect for shield regen
+                        const pulse = Math.sin(Date.now() / 100) * 0.2 + 1;
+                        this.ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(1, shield / 50)})`;
+                        this.ctx.lineWidth = 3 + pulse; // Pulsing line width
+                        this.ctx.shadowBlur = 15 + pulse * 5; // Pulsing shadow
+                        this.ctx.shadowColor = '#00ffff';
+                        
+                        // Draw multiple concentric circles for enhanced effect
+                        for (let i = 0; i < 3; i++) {
+                            const radius = 40 + i * 3;
+                            const alpha = Math.min(1, shield / 50) * (1 - i * 0.3);
+                            this.ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+                            this.ctx.beginPath();
+                            this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                            this.ctx.stroke();
+                        }
+                    } else {
+                        // Normal shield rendering
+                        this.ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(1, shield / 50)})`;
+                        this.ctx.lineWidth = 3;
+                        this.ctx.shadowBlur = 10;
+                        this.ctx.shadowColor = '#00ffff';
+                        this.ctx.beginPath();
+                        this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                    
                     this.ctx.restore();
                 }
 
@@ -200,12 +228,28 @@ export class RenderSystem {
                     this.ctx.beginPath();
                     this.ctx.arc(0, 0, 40, 0, Math.PI * 2);
                     this.ctx.stroke();
+                    
+                    // Add particle effects for extra visual impact
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (t + i * Math.PI * 2 / 5) % (Math.PI * 2);
+                        const radius = 45 + Math.sin(t * 2 + i) * 5;
+                        const px = Math.cos(angle) * radius;
+                        const py = Math.sin(angle) * radius;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(px, py, 3 + Math.sin(t * 3 + i) * 2, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(255, 215, 0, ${alpha * 0.7})`;
+                        this.ctx.fill();
+                    }
+                    
                     this.ctx.restore();
 
-                    // Golden Screen Edge Flash
+                    // Golden Screen Edge Flash with enhanced effect
                     this.ctx.save();
                     this.ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.5})`;
                     this.ctx.lineWidth = 10;
+                    this.ctx.shadowBlur = 30;
+                    this.ctx.shadowColor = '#ffd700';
                     this.ctx.strokeRect(0, 0, this.width, this.height);
                     this.ctx.restore();
                 }
@@ -221,6 +265,88 @@ export class RenderSystem {
 
             // P2 Draw environment elements
             environmentElements.forEach(elem => this.drawEnvironmentElement(elem));
+
+            // Draw slow fields
+            if (slowFields && slowFields.length > 0) {
+                slowFields.forEach(field => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = Math.min(1, field.life / 1000); // Fade out as life decreases
+                    this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)'; // Cyan color with transparency
+                    this.ctx.lineWidth = 2;
+
+                    // Draw pulsing circle
+                    const t = Date.now() / 200;
+                    const pulse = Math.sin(t) * 0.1 + 1; // Pulsing effect
+                    this.ctx.setLineDash([5, 5]); // Dashed line
+                    this.ctx.beginPath();
+                    this.ctx.arc(field.x, field.y, field.range * pulse, 0, Math.PI * 2);
+                    this.ctx.stroke();
+
+                    // Draw inner circle
+                    this.ctx.setLineDash([]); // Solid line
+                    this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(field.x, field.y, field.range * 0.7, 0, Math.PI * 2);
+                    this.ctx.stroke();
+
+                    this.ctx.restore();
+                });
+            }
+
+            // Draw plasma explosions for WAVE_PLASMA synergy effect
+            if (plasmaExplosions && plasmaExplosions.length > 0) {
+                plasmaExplosions.forEach(explosion => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = Math.min(1, explosion.life / 1200); // Fade out as life decreases
+                    
+                    // Draw outer ring with pulsing effect
+                    const t = Date.now() / 200;
+                    const pulse = Math.sin(t) * 0.2 + 1; // Pulsing effect
+                    this.ctx.strokeStyle = 'rgba(237, 100, 166, 0.7)'; // Pink color with transparency
+                    this.ctx.lineWidth = 3;
+                    this.ctx.setLineDash([10, 5]); // Dashed line
+                    this.ctx.beginPath();
+                    this.ctx.arc(explosion.x, explosion.y, explosion.range * pulse, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    
+                    // Draw inner energy swirl
+                    this.ctx.setLineDash([]); // Solid line
+                    this.ctx.strokeStyle = 'rgba(237, 100, 166, 0.3)';
+                    this.ctx.lineWidth = 2;
+                    
+                    // Create a spiral effect
+                    const segments = 20;
+                    const rotation = t * 2; // Rotation speed
+                    this.ctx.beginPath();
+                    for (let i = 0; i <= segments; i++) {
+                        const angle = (i / segments) * Math.PI * 4 + rotation;
+                        const radius = (i / segments) * explosion.range * 0.8;
+                        const x = explosion.x + Math.cos(angle) * radius;
+                        const y = explosion.y + Math.sin(angle) * radius;
+                        if (i === 0) {
+                            this.ctx.moveTo(x, y);
+                        } else {
+                            this.ctx.lineTo(x, y);
+                        }
+                    }
+                    this.ctx.stroke();
+                    
+                    // Draw energy particles
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (t + i * Math.PI * 2 / 8) % (Math.PI * 2);
+                        const radius = explosion.range * 0.6;
+                        const px = explosion.x + Math.cos(angle) * radius;
+                        const py = explosion.y + Math.sin(angle) * radius;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(px, py, 4 + Math.sin(t * 3 + i) * 2, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(237, 100, 166, ${0.6 + Math.sin(t * 2 + i) * 0.4})`;
+                        this.ctx.fill();
+                    }
+                    
+                    this.ctx.restore();
+                });
+            }
 
             enemies.forEach(e => this.drawEntity(e));
             if (boss) this.drawEntity(boss);
@@ -304,7 +430,7 @@ export class RenderSystem {
         this.ctx.restore();
     }
 
-    drawEntity(e: Entity, weaponLevel?: number, playerLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean, synergyInfo?: { colors: string[], synergyType: any }) {
+    drawEntity(e: Entity, weaponLevel?: number, playerLevel?: number, playerPrimaryColor?: string, playerSecondaryColor?: string, playerCombine?: boolean, synergyInfo?: { colors: string[], synergyType: any }, playerSpeedBoostTimer?: number) {
         this.ctx.save();
         this.ctx.translate(Math.round(e.x), Math.round(e.y));
 
@@ -339,6 +465,52 @@ export class RenderSystem {
             this.ctx.restore();
         }
 
+        // MAGMA_SHURIKEN effect: Add red appearance to SHURIKEN bullets
+        if (e.type === EntityType.BULLET && e.weaponType === WeaponType.SHURIKEN) {
+            // Check if MAGMA_SHURIKEN synergy is active by looking for a special tag
+            if (e.tags && e.tags['magma_shuriken']) {
+                // Modify the bullet's color to red
+                const originalColor = e.color;
+                e.color = '#ef4444'; // Red color for magma effect
+
+                // Store original color to restore later if needed
+                (e as any).originalColor = originalColor;
+            }
+        }
+        
+        // DAMAGE_BOOST effect: Add glow to bullets when damage boost synergy is active
+        if (e.type === EntityType.BULLET) {
+            // Check if any damage boost synergy is active by looking for special tags or weapon combinations
+            // For now, we'll add a simple glow effect to all bullets as a base effect
+            // In a more advanced implementation, we could check specific synergies
+            
+            // Add a more pronounced glow effect to all bullets
+            this.ctx.save();
+            this.ctx.shadowBlur = 15;
+            this.ctx.shadowColor = e.color || '#ffffff';
+            this.ctx.restore();
+            
+            // Add special effect for damage boost synergy
+            if (e.tags && (e.tags['damage_boost'] || e.tags['critical_hit'])) {
+                // Add a stronger glow
+                this.ctx.save();
+                this.ctx.shadowBlur = 25;
+                this.ctx.shadowColor = '#ff0000'; // Red glow for critical hits
+                this.ctx.restore();
+                
+                // Draw critical hit indicator
+                this.ctx.save();
+                this.ctx.fillStyle = '#ff0000';
+                this.ctx.font = 'bold 14px monospace';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.shadowColor = '#ff0000';
+                this.ctx.shadowBlur = 10;
+                this.ctx.fillText('CRIT!', 0, -20);
+                this.ctx.restore();
+            }
+        }
+
         if (e.type === EntityType.PLAYER) {
             const t = Date.now();
             const tintColor = playerCombine && playerSecondaryColor ? ((Math.floor(t / 300) % 2) === 0 ? playerPrimaryColor : playerSecondaryColor) : playerPrimaryColor;
@@ -365,6 +537,50 @@ export class RenderSystem {
                 this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.globalCompositeOperation = 'source-over';
+            }
+
+            // SPEED_BOOST effect: Add light trail and glow when speed boost is active
+            if (playerSpeedBoostTimer && playerSpeedBoostTimer > 0) {
+                // Add motion blur effect
+                this.ctx.save();
+                this.ctx.globalAlpha = Math.min(0.5, playerSpeedBoostTimer / 1000); // Fade based on remaining time
+                this.ctx.globalCompositeOperation = 'lighter';
+
+                // Draw multiple trailing copies of the player with decreasing opacity
+                for (let i = 0; i < 3; i++) {
+                    const offset = i * 3;
+                    this.ctx.globalAlpha = Math.min(0.3, playerSpeedBoostTimer / 1000) * (1 - i * 0.3);
+                    this.ctx.translate(-offset, 0);
+
+                    if (e.spriteKey && this.sprites[e.spriteKey]) {
+                        const sprite = this.sprites[e.spriteKey];
+                        if (sprite instanceof HTMLImageElement) {
+                            if (sprite.complete && sprite.naturalWidth > 0) {
+                                this.ctx.drawImage(sprite, -e.width / 2, -e.height / 2, e.width, e.height);
+                            }
+                        } else {
+                            this.ctx.drawImage(sprite, -sprite.width / 2, -sprite.height / 2);
+                        }
+                    } else {
+                        this.ctx.fillStyle = e.color;
+                        this.ctx.fillRect(-e.width / 2, -e.height / 2, e.width, e.height);
+                    }
+                }
+                this.ctx.restore();
+
+                // Add glow effect
+                this.ctx.save();
+                this.ctx.globalAlpha = Math.min(0.4, playerSpeedBoostTimer / 1000);
+                this.ctx.globalCompositeOperation = 'screen';
+                const radius = Math.max(e.width, e.height) / 2;
+                const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, radius * 2);
+                gradient.addColorStop(0, '#00ffff');
+                gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+                this.ctx.fillStyle = gradient;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, radius * 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
             }
         }
 
@@ -512,6 +728,20 @@ export class RenderSystem {
             this.ctx.strokeStyle = '#ffd700';
             this.ctx.lineWidth = 2;
             this.ctx.strokeRect(-e.width / 2, -e.height / 2, e.width, e.height);
+        }
+
+        // Slow Field effect: Add slow motion effect to enemies in slow fields
+        if (e.type === EntityType.ENEMY && e.slowed) {
+            // Add a blue tint to indicate the enemy is slowed
+            this.ctx.globalAlpha = 0.5;
+            this.ctx.fillStyle = 'rgba(0, 255, 255, 0.3)'; // Cyan color
+            this.ctx.fillRect(-e.width / 2, -e.height / 2, e.width, e.height);
+            this.ctx.globalAlpha = 1.0;
+
+            // Add a slow motion effect with a wavy distortion
+            const t = Date.now() / 500;
+            const wave = Math.sin(t) * 0.1;
+            this.ctx.translate(wave, wave);
         }
         this.ctx.restore();
     }

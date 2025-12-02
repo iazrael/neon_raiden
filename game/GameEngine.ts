@@ -54,6 +54,7 @@ export class GameEngine {
     slowFields: { x: number, y: number, range: number, life: number }[] = [];
     tagSys: CombatTag;
     playerSpeedBoostTimer: number = 0;
+    shieldRegenTimer: number = 0;
 
     // Player Stats
     weaponType: WeaponType = WeaponType.VULCAN;
@@ -233,6 +234,7 @@ export class GameEngine {
         this.shield = 0;
         this.timeSlowActive = false;
         this.timeSlowTimer = 0;
+        this.shieldRegenTimer = 0;
         resetDropContext();
 
 
@@ -370,6 +372,14 @@ export class GameEngine {
             // Cleanup if timer is missing or invalid but flag is set (safety)
             this.player.invulnerable = false;
             this.audio.stopShieldLoop();
+        }
+
+        // Handle Shield Regen Timer
+        if (this.shieldRegenTimer > 0) {
+            this.shieldRegenTimer -= dt;
+            if (this.shieldRegenTimer < 0) {
+                this.shieldRegenTimer = 0;
+            }
         }
 
         // P2 Update combo timer
@@ -580,6 +590,9 @@ export class GameEngine {
                 if (inSlow) {
                     e.vx *= 0.8;
                     e.vy *= 0.8;
+                    e.slowed = true;
+                } else {
+                    e.slowed = false;
                 }
             });
         }
@@ -954,6 +967,11 @@ export class GameEngine {
                 this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
             }
         });
+
+        // 如果MAGMA_SHURIKEN协同效果激活，为SHURIKEN子弹添加标记
+        if (this.synergySys.isSynergyActive(SynergyType.MAGMA_SHURIKEN)) {
+            this.tagSys.setTag(shuriken, 'magma_shuriken', 600);
+        }
     }
 
     checkCollisions() {
@@ -1123,6 +1141,8 @@ export class GameEngine {
             } else if (result.effect === SynergyEffectType.DAMAGE_BOOST) {
                 // WAVE+PLASMA or MISSILE+VULCAN: Apply damage multiplier
                 finalDamage *= result.multiplier || 1.0;
+                // Tag the bullet for visual effect
+                this.tagSys.setTag(b, 'damage_boost', 1000);
             } else if (result.effect === SynergyEffectType.BURN) {
                 // MAGMA+SHURIKEN: Apply burn DOT (simplified: instant extra damage)
                 this.tagSys.setTag(target, 'burn_dot', 3000);
@@ -1130,6 +1150,7 @@ export class GameEngine {
             } else if (result.effect === SynergyEffectType.SHIELD_REGEN) {
                 const cap = this.getShieldCap();
                 this.shield = Math.min(cap, this.shield + result.value);
+                this.shieldRegenTimer = 1000; // Set timer for 1 second to show visual effect
             } else if (result.effect === SynergyEffectType.INVULNERABLE) {
                 this.player.invulnerable = true;
                 this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, result.value);
@@ -1588,7 +1609,11 @@ export class GameEngine {
             secondaryColor,
             canCombine,
             this.timeSlowActive,
-            powerupSynergyInfo
+            powerupSynergyInfo,
+            this.slowFields,
+            this.playerSpeedBoostTimer,
+            this.shieldRegenTimer,
+            this.plasmaExplosions
         );
     }
 
