@@ -26,12 +26,12 @@ export enum LevelEventType {
 }
 
 export type EventPayloads = {
-  [CollisionEventType.BulletHitEnemy]: { bulletId?: string; enemyId?: string };
-  [CollisionEventType.BulletHitBoss]: { bulletId?: string; bossId?: string };
-  [CollisionEventType.EnemyBulletHitPlayer]: { bulletId?: string };
-  [CollisionEventType.PowerupCollected]: { powerupId?: string };
-  [CollisionEventType.PlayerCollideEnemy]: { enemyId?: string };
-  [CollisionEventType.PlayerCollideBoss]: { bossId?: string };
+  [CollisionEventType.BulletHitEnemy]: { bullet: import('@/types').Entity; enemy: import('@/types').Entity };
+  [CollisionEventType.BulletHitBoss]: { bullet: import('@/types').Entity; boss: import('@/types').Entity };
+  [CollisionEventType.EnemyBulletHitPlayer]: { bullet: import('@/types').Entity };
+  [CollisionEventType.PowerupCollected]: { powerup: import('@/types').Entity };
+  [CollisionEventType.PlayerCollideEnemy]: { enemy: import('@/types').Entity };
+  [CollisionEventType.PlayerCollideBoss]: { boss: import('@/types').Entity };
   [CombatEventTypeBus.WeaponFired]: { weaponType: string };
   [CombatEventTypeBus.ExplosionCreated]: { x: number; y: number };
   [CombatEventTypeBus.ShieldChanged]: { value: number; percent: number };
@@ -45,4 +45,3 @@ export type EventPayloads = {
   [LevelEventType.LevelCompleted]: { level: number };
   [LevelEventType.Victory]: {};
 };
-

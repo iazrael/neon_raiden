@@ -6,6 +6,7 @@ import { AudioSystem } from '@/game/systems/AudioSystem';
 export class WeaponSystem {
     audio: AudioSystem;
     alternateFireEnabled: boolean;
+    private fireTimer: number = 0;
 
     constructor(audio: AudioSystem) {
         this.audio = audio;
@@ -188,5 +189,32 @@ export class WeaponSystem {
 
     playShootSound(weaponType: WeaponType) {
         this.audio.playShoot(weaponType);
+    }
+
+    updateFire(
+        player: Entity,
+        options: Entity[],
+        bullets: Entity[],
+        enemies: Entity[],
+        getFireRate: (type: WeaponType, level: number) => number,
+        weaponPrimary: WeaponType,
+        weaponLevel: number,
+        synergyCanCombine: (a: WeaponType, b: WeaponType) => boolean,
+        secondaryWeapon: WeaponType | null,
+        toggleAlt: () => void,
+        isAltEnabled: boolean,
+        dt: number,
+        timeSlowActive: boolean
+    ) {
+        this.fireTimer += (timeSlowActive ? dt * 2 : dt);
+        const baseFireRate = getFireRate(weaponPrimary, weaponLevel);
+        const fireRate = Math.max(50, Math.round(baseFireRate));
+        if (this.fireTimer > fireRate) {
+            const canAlt = isAltEnabled && secondaryWeapon && synergyCanCombine(weaponPrimary, secondaryWeapon);
+            const fireType = canAlt ? (secondaryWeapon as WeaponType) : weaponPrimary;
+            this.firePlayerWeapon(player, fireType, weaponLevel, options, bullets, enemies);
+            if (canAlt) toggleAlt();
+            this.fireTimer = 0;
+        }
     }
 }

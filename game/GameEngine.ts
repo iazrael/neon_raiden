@@ -140,26 +140,47 @@ export class GameEngine {
         this.tagSys = new CombatTag();
         this.bus = new EventBus<EventPayloads>();
         this.entityManager = new EntityManager();
-        this.collision = new CollisionSystem(this.bus, {
-            onBulletHit: (b, target) => this.handleBulletHit(b, target),
-            onPlayerHit: (player, source) => {
-                source.markedForDeletion = true;
-                if (source.type === 'enemy') source.hp = 0;
-                if (!this.player.invulnerable) this.takeDamage( source.type === EntityType.BOSS ? 1 : 10 );
-                this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
-            },
-            onPowerup: (p) => {
-                p.markedForDeletion = true;
-                this.audio.playPowerUp();
-                this.score += 100;
-                this.onScoreChange(this.score);
-                this.checkAndApplyLevelUp();
-                this.applyPowerup(p.subType as PowerupType);
-            }
-        });
+        this.collision = new CollisionSystem(this.bus);
         this.levelManager = new LevelManager(this.bus, GameConfig.debug);
         this.bulletSystem = new BulletSystem();
         this.powerupSystem = new PowerupSystem(this.bus);
+
+        this.bus.subscribe('bullet_hit_enemy' as any, ({ bullet, enemy }) => {
+            this.handleBulletHit(bullet, enemy);
+        });
+        this.bus.subscribe('bullet_hit_boss' as any, ({ bullet, boss }) => {
+            if (!boss.invulnerable) this.handleBulletHit(bullet, boss);
+        });
+        this.bus.subscribe('enemy_bullet_hit_player' as any, ({ bullet }) => {
+            bullet.markedForDeletion = true;
+            if (!this.player.invulnerable) this.takeDamage(bullet.damage ?? 10);
+            this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
+        });
+        this.bus.subscribe('powerup_collected' as any, ({ powerup }) => {
+            powerup.markedForDeletion = true;
+            this.audio.playPowerUp();
+            this.score += 100;
+            this.onScoreChange(this.score);
+            this.checkAndApplyLevelUp();
+            this.applyPowerup(powerup.subType as PowerupType);
+        });
+        this.bus.subscribe('player_collide_enemy' as any, ({ enemy }) => {
+            enemy.markedForDeletion = true;
+            if (enemy.type === 'enemy') enemy.hp = 0;
+            if (!this.player.invulnerable) this.takeDamage(10);
+            this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
+        });
+        this.bus.subscribe('player_collide_boss' as any, ({ boss }) => {
+            if (!this.player.invulnerable) this.takeDamage(1);
+        });
+        this.bus.subscribe('boss_spawned' as any, ({ level }) => {
+            this.onBossWarning(true);
+            this.audio.playWarning();
+            this.spawnBoss();
+        });
+        this.bus.subscribe('boss_warning' as any, ({ show }) => {
+            this.onBossWarning(show);
+        });
 
         // Bind Input Actions
         this.input.onAction = (action) => {
@@ -444,7 +465,7 @@ export class GameEngine {
         const kb = this.input.getKeyboardVector();
         const touch = this.input.touch.active ? this.input.getTouchDelta() : { active: false } as any;
         const speedScale = playerTimeScale * (this.playerSpeedBoostTimer > 0 ? 1.1 : 1.0);
-        this.player.updatePosition(kb, { active: this.input.touch.active, dx: (touch as any).x, dy: (touch as any).y }, dt, this.render.width, this.render.height, speedScale);
+        this.player.update({ kb, touch: { active: this.input.touch.active, dx: (touch as any).x, dy: (touch as any).y } }, dt, { width: this.render.width, height: this.render.height }, speedScale);
 
         // Options
         this.entityManager.options.forEach((opt, index) => {
@@ -457,32 +478,21 @@ export class GameEngine {
         });
 
         // Fire
-        this.fireTimer += (this.timeSlowActive ? dt * 2 : dt); // Fire rate based on real time
-        const baseFireRate = this.weaponSys.getFireRate(this.player.weaponPrimary, this.player.weaponLevel);
-        const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.player.fireRateBonusPct)));
-        if (this.fireTimer > fireRate) {
-            const isMissileVulcan = this.synergySys.isSynergyActive(SynergyType.MISSILE_VULCAN);
-            if (isMissileVulcan) {
-                this.weaponSys.firePlayerWeapon(
-                    this.player, WeaponType.VULCAN, this.player.weaponLevel,
-                    this.entityManager.options, this.entityManager.bullets, this.entityManager.enemies
-                );
-                this.weaponSys.firePlayerWeapon(
-                    this.player, WeaponType.MISSILE, 1,
-                    [], this.entityManager.bullets, this.entityManager.enemies
-                );
-                this.fireTimer = 0;
-            } else {
-                const canAlt = this.alternateFireEnabled && this.player.weaponSecondary && this.synergySys.canCombine(this.player.weaponPrimary, this.player.weaponSecondary);
-                const fireType = canAlt ? (this.fireAlternateToggle ? this.player.weaponSecondary! : this.player.weaponPrimary) : this.player.weaponPrimary;
-                this.weaponSys.firePlayerWeapon(
-                    this.player, fireType, this.player.weaponLevel,
-                    this.entityManager.options, this.entityManager.bullets, this.entityManager.enemies
-                );
-                if (canAlt) this.fireAlternateToggle = !this.fireAlternateToggle;
-                this.fireTimer = 0;
-            }
-        }
+        this.weaponSys.updateFire(
+            this.player,
+            this.entityManager.options,
+            this.entityManager.bullets,
+            this.entityManager.enemies,
+            (type, lvl) => Math.max(50, Math.round(this.weaponSys.getFireRate(type, lvl) * (1 - this.player.fireRateBonusPct))),
+            this.player.weaponPrimary,
+            this.player.weaponLevel,
+            (a, b) => this.synergySys.canCombine(a, b),
+            this.player.weaponSecondary ?? null,
+            () => { this.fireAlternateToggle = !this.fireAlternateToggle; },
+            this.alternateFireEnabled,
+            dt,
+            this.timeSlowActive
+        );
 
         // Level Logic
         if (!this.entityManager.boss) {
@@ -522,11 +532,7 @@ export class GameEngine {
             // 1. Level progress >= 90%
             // 2. Minimum level duration has passed (60 seconds)
             // 3. Not currently transitioning levels
-            if (this.levelManager.trySpawnBoss()) {
-                this.onBossWarning(true);
-                this.audio.playWarning();
-                this.spawnBoss();
-            }
+            this.levelManager.trySpawnBoss();
         } else {
             // Continue spawning enemies for a short time after boss appears
             const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000) * EnemyCommonConfig.enemySpawnIntervalInBossMultiplier);

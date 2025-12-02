@@ -88,22 +88,31 @@ export class Starfighter implements Entity {
     this.nextLevelScore = config.leveling.baseScoreForLevel1;
   }
 
-  updatePosition(kb: { x: number; y: number }, touch: { active: boolean; dx?: number; dy?: number }, dt: number, width: number, height: number, speedScale: number) {
+  update(input: { kb: { x: number; y: number }; touch: { active: boolean; dx?: number; dy?: number } }, dt: number, bounds: { width: number; height: number }, speedScale: number) {
     const s = (this.speed ?? 0) * speedScale;
-    if (touch.active && touch.dx !== undefined && touch.dy !== undefined) {
-      this.vx = touch.dx;
-      this.x += touch.dx * 1.5;
-      this.y += touch.dy * 1.5;
+    if (input.touch.active && input.touch.dx !== undefined && input.touch.dy !== undefined) {
+      this.vx = input.touch.dx;
+      this.x += input.touch.dx * 1.5;
+      this.y += input.touch.dy * 1.5;
     }
+    const kb = input.kb;
     if (kb.x !== 0 || kb.y !== 0) {
       this.x += kb.x * s;
       this.y += kb.y * s;
       this.vx = kb.x * s;
-    } else if (!touch.active) {
+    } else if (!input.touch.active) {
       this.vx *= 0.8;
     }
-    this.x = Math.max(32, Math.min(width - 32, this.x));
-    this.y = Math.max(32, Math.min(height - 32, this.y));
+    this.x = Math.max(32, Math.min(bounds.width - 32, this.x));
+    this.y = Math.max(32, Math.min(bounds.height - 32, this.y));
+    if (this.invulnerable && this.invulnerableTimer && this.invulnerableTimer > 0) {
+      this.invulnerableTimer -= dt;
+      if (this.invulnerableTimer <= 0) this.invulnerable = false;
+    }
+    if (this.shieldRegenTimer && this.shieldRegenTimer > 0) {
+      this.shieldRegenTimer -= dt;
+      if (this.shieldRegenTimer < 0) this.shieldRegenTimer = 0;
+    }
   }
 
   takeDamage(amount: number) {
@@ -154,4 +163,3 @@ export class Starfighter implements Entity {
     return WeaponConfig[this.weaponPrimary]?.color;
   }
 }
-

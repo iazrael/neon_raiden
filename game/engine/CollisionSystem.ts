@@ -4,19 +4,9 @@ import { EventPayloads, CollisionEventType } from './events';
 
 export class CollisionSystem {
   private bus: EventBus<EventPayloads>;
-  private handlers?: {
-    onBulletHit: (b: Entity, target: Entity) => void;
-    onPlayerHit: (player: Entity, source: Entity) => void;
-    onPowerup: (p: Entity) => void;
-  };
 
-  constructor(bus: EventBus<EventPayloads>, handlers?: {
-    onBulletHit: (b: Entity, target: Entity) => void;
-    onPlayerHit: (player: Entity, source: Entity) => void;
-    onPowerup: (p: Entity) => void;
-  }) {
+  constructor(bus: EventBus<EventPayloads>) {
     this.bus = bus;
-    this.handlers = handlers;
   }
 
   private aabb(a: Entity, b: Entity) {
@@ -53,47 +43,26 @@ export class CollisionSystem {
 
     for (const b of snapshot.bullets) {
       for (const e of snapshot.enemies) {
-        if (this.aabb(b, e)) {
-          if (this.handlers) this.handlers.onBulletHit(b, e);
-          await this.bus.publish(CollisionEventType.BulletHitEnemy, {});
-        }
+        if (this.aabb(b, e)) await this.bus.publish(CollisionEventType.BulletHitEnemy, { bullet: b, enemy: e });
       }
       for (const w of snapshot.bossWingmen) {
-        if (this.aabb(b, w)) {
-          if (this.handlers) this.handlers.onBulletHit(b, w);
-          await this.bus.publish(CollisionEventType.BulletHitEnemy, {});
-        }
+        if (this.aabb(b, w)) await this.bus.publish(CollisionEventType.BulletHitEnemy, { bullet: b, enemy: w });
       }
-      if (snapshot.boss && this.aabb(b, snapshot.boss)) {
-        if (this.handlers) this.handlers.onBulletHit(b, snapshot.boss);
-        await this.bus.publish(CollisionEventType.BulletHitBoss, {});
-      }
+      if (snapshot.boss && this.aabb(b, snapshot.boss)) await this.bus.publish(CollisionEventType.BulletHitBoss, { bullet: b, boss: snapshot.boss });
     }
 
     for (const e of [...snapshot.enemyBullets, ...snapshot.enemies, ...snapshot.bossWingmen]) {
       if (e.type === EntityType.BULLET) {
-        if (this.playerAabb(player, e, playerHitboxShrink)) {
-          if (this.handlers) this.handlers.onPlayerHit(player, e);
-          await this.bus.publish(CollisionEventType.EnemyBulletHitPlayer, {});
-        }
+        if (this.playerAabb(player, e, playerHitboxShrink)) await this.bus.publish(CollisionEventType.EnemyBulletHitPlayer, { bullet: e });
       } else {
-        if (this.playerAabb(player, e, playerHitboxShrink)) {
-          if (this.handlers) this.handlers.onPlayerHit(player, e);
-          await this.bus.publish(CollisionEventType.PlayerCollideEnemy, {});
-        }
+        if (this.playerAabb(player, e, playerHitboxShrink)) await this.bus.publish(CollisionEventType.PlayerCollideEnemy, { enemy: e });
       }
     }
 
-    if (snapshot.boss && this.playerAabb(player, snapshot.boss, playerHitboxShrink)) {
-      if (this.handlers) this.handlers.onPlayerHit(player, snapshot.boss);
-      await this.bus.publish(CollisionEventType.PlayerCollideBoss, {});
-    }
+    if (snapshot.boss && this.playerAabb(player, snapshot.boss, playerHitboxShrink)) await this.bus.publish(CollisionEventType.PlayerCollideBoss, { boss: snapshot.boss });
 
     for (const p of snapshot.powerups) {
-      if (this.playerAabb(player, p, playerHitboxShrink)) {
-        if (this.handlers) this.handlers.onPowerup(p);
-        await this.bus.publish(CollisionEventType.PowerupCollected, {});
-      }
+      if (this.playerAabb(player, p, playerHitboxShrink)) await this.bus.publish(CollisionEventType.PowerupCollected, { powerup: p });
     }
   }
 }
