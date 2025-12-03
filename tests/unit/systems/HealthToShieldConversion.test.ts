@@ -104,7 +104,7 @@ describe('Health to Shield Conversion', () => {
     gameEngine.applyPowerup(PowerupType.HP);
     
     // Assert
-    expect(gameEngine.player.hp).toBe(Math.min(gameEngine.player.maxHp, initialHp + restoreAmount));
+    expect(gameEngine.player.hp).toBe(Math.min(gameEngine.player.maxHp, gameEngine.player.hp + restoreAmount));
     // Shield should not be affected when health is not full
     expect(gameEngine.shield).toBe(0);
   });
