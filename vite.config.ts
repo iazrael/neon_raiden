@@ -25,6 +25,14 @@ export default defineConfig(({ mode }) => {
             port: 3000,
             host: '0.0.0.0',
         },
+        build: {
+            rollupOptions: {
+                input: {
+                    main: path.resolve(__dirname, 'index.html'),
+                    // refactor: path.resolve(__dirname, 'refactor.html'),
+                }
+            }
+        },
         plugins: [
             react(),
             tailwindcss(),
