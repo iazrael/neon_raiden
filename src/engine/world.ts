@@ -1,10 +1,6 @@
-import { EntityId, Component, ComponentType } from './types';
+import { World, EntityId, Component, ComponentType } from './types';
 
 // ========== 世界与工具 ==========
-export interface World {
-    entities: Map<EntityId, Component[]>;
-    playerId: EntityId;
-}
 
 export function createWorld(): World {
     return { entities: new Map(), playerId: 0 };
