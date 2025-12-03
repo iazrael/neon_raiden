@@ -4,7 +4,7 @@ import { HUD } from './HUD';
 import { useEngine } from './hooks/useEngine';
 import { createWorld, setWorldForEngine } from '../engine';
 import { spawnPlayer } from '../engine/factory';
-import { FIGHTER_LIGHT, BOMBER_HEAVY } from '../engine/blueprints';
+import { FIGHTER_LIGHT, BOMBER_HEAVY } from '../engine/blueprints/player';
 import { keys } from '../engine/systems/InputSystem';
 
 function Loading() {
