@@ -1,7 +1,13 @@
-前端 2D 太空射击游戏引擎设计文档（React + TypeScript）
-目标：在浏览器里用 React 做 UI，用 TypeScript 写一套可配置、可回放、可测试的 2D 太空射击游戏引擎，并保证游戏循环与 React 生命周期完全解耦。
-1. 整体架构
-复制
+User: 把所有前面的讨论结果，写成一份完整的 md 文档
+Kimi: # 前端 2D 太空射击游戏引擎设计文档（React + TypeScript）
+
+> 目标：在浏览器里用 React 做 UI，用 TypeScript 写一套**可配置、可回放、可测试**的 2D 太空射击游戏引擎，并保证**游戏循环与 React 生命周期完全解耦**。
+
+---
+
+## 1. 整体架构
+
+```
 ┌-------------------------┐
 │      React 渲染层        │  ← 只订阅快照，纯函数渲染
 │  HUD / Menu / GameOver  │
@@ -22,8 +28,13 @@
 ┌-------------------------┐
 │   Blueprint + Factory    │  ← 不同战机、不同武器
 └-------------------------┘
-2. 目录结构
-复制
+```
+
+---
+
+## 2. 目录结构
+
+```
 src/
 ├─ engine/
 │  ├─ index.ts              # 引擎入口：startEngine
@@ -46,10 +57,15 @@ src/
 │     └─ useEngine.ts
 ├─ index.tsx
 └─ ...
-3. 数据层设计
-3.1 组件（纯数据）
-TypeScript
-复制
+```
+
+---
+
+## 3. 数据层设计
+
+### 3.1 组件（纯数据）
+
+```typescript
 export interface Transform {
   x: number;
   y: number;
@@ -79,17 +95,21 @@ export interface Shield {
   value: number;
   regen: number;    // 每秒回复量
 }
-3.2 实体与 World
-TypeScript
-复制
+```
+
+### 3.2 实体与 World
+
+```typescript
 export type EntityId = number;
 export interface World {
   entities: Map<EntityId, Component[]>;
   playerId: EntityId;
 }
+```
+
 工具函数（保证 O(1) 查表）：
-TypeScript
-复制
+
+```typescript
 export function createWorld(): World {
   return { entities: new Map(), playerId: 0 };
 }
@@ -103,9 +123,11 @@ export function* view(w: World, types: any[]) {
     if (bucket.length === types.length) yield [id, bucket] as const;
   }
 }
-3.3 不可变快照
-TypeScript
-复制
+```
+
+### 3.3 不可变快照
+
+```typescript
 export interface GameSnapshot {
   t: number;
   player: {
@@ -120,9 +142,11 @@ export interface GameSnapshot {
   bullets: Array<{ x: number; y: number }>;
   enemies: Array<{ x: number; y: number; hp: number }>;
 }
+```
+
 生成函数（只读，不污染 World）：
-TypeScript
-复制
+
+```typescript
 export function snapshot(world: World, t: number): GameSnapshot {
   const player = world.entities.get(world.playerId)!;
   const tr = player.find(Transform.check)!;
@@ -145,9 +169,13 @@ export function snapshot(world: World, t: number): GameSnapshot {
       .map(([, [h, t]) => ({ x: t.x, y: t.y, hp: h.hp })),
   };
 }
-4. 引擎调度器
-TypeScript
-复制
+```
+
+---
+
+## 4. 引擎调度器
+
+```typescript
 import { snapshot$ } from './store';
 import { World, snapshot } from './world';
 
@@ -177,19 +205,26 @@ export function startEngine(canvas: HTMLCanvasElement) {
   }
   requestAnimationFrame(loop);
 }
-5. Systems（函数式，无内部状态）
-5.1 MovementSystem
-TypeScript
-复制
+```
+
+---
+
+## 5. Systems（函数式，无内部状态）
+
+### 5.1 MovementSystem
+
+```typescript
 export function MovementSystem(w: World, dt: number) {
   for (const [, [tr, vl]] of view(w, [Transform, Velocity])) {
     tr.x += vl.vx * dt;
     tr.y += vl.vy * dt;
   }
 }
-5.2 WeaponSystem（发射冷却 & 生成子弹）
-TypeScript
-复制
+```
+
+### 5.2 WeaponSystem（发射冷却 & 生成子弹）
+
+```typescript
 export function WeaponSystem(w: World, dt: number) {
   for (const [id, [wp, tr]] of view(w, [Weapon, Transform])) {
     if (wp.curCD > 0) wp.curCD -= dt;
@@ -199,9 +234,11 @@ export function WeaponSystem(w: World, dt: number) {
     }
   }
 }
-5.3 CollisionSystem（受伤 & 销毁）
-TypeScript
-复制
+```
+
+### 5.3 CollisionSystem（受伤 & 销毁）
+
+```typescript
 export function CollisionSystem(w: World, dt: number) {
   for (const [bid, [bl, bt]] of view(w, [Bullet, Transform])) {
     for (const [eid, [hl, et]] of view(w, [Health, Transform])) {
@@ -214,10 +251,14 @@ export function CollisionSystem(w: World, dt: number) {
     }
   }
 }
-6. 配置化创建（Blueprint & Factory）
+```
+
+---
+
+## 6. 配置化创建（Blueprint & Factory）
+
 blueprints.ts
-TypeScript
-复制
+```typescript
 import { Transform, Health, Weapon, Shield, Sprite } from './types';
 
 export const FIGHTER_LIGHT = {
@@ -234,9 +275,10 @@ export const BOMBER_HEAVY = {
   [Shield]: { value: 100, regen: 20 },
   [Sprite]: { texture: 'bomber.png' },
 };
+```
+
 factory.ts
-TypeScript
-复制
+```typescript
 import { world, addComponent, generateId } from './world';
 
 export function spawnPlayer(bp: any): EntityId {
@@ -247,17 +289,22 @@ export function spawnPlayer(bp: any): EntityId {
   world.playerId = id;
   return id;
 }
+```
+
 入口调用
-TypeScript
-复制
+```typescript
 const bp = new URLSearchParams(location.search).get('ship') === 'heavy'
   ? BOMBER_HEAVY : FIGHTER_LIGHT;
 spawnPlayer(bp);
 startEngine(canvas);
-7. React 层（只订阅快照）
+```
+
+---
+
+## 7. React 层（只订阅快照）
+
 useEngine.ts
-TypeScript
-复制
+```typescript
 import { useEffect, useState } from 'react';
 import { snapshot$ } from '../engine/store';
 
@@ -269,9 +316,10 @@ export function useEngine() {
   }, []);
   return snap;
 }
+```
+
 App.tsx
-TypeScript
-复制
+```typescript
 export default function App() {
   const snap = useEngine();
   if (!snap) return <Loading />;
@@ -283,9 +331,10 @@ export default function App() {
     </div>
   );
 }
+```
+
 HUD.tsx
-TypeScript
-复制
+```typescript
 export function HUD({ player }: { player: GameSnapshot['player'] }) {
   return (
     <div className="hud">
@@ -294,20 +343,32 @@ export function HUD({ player }: { player: GameSnapshot['player'] }) {
     </div>
   );
 }
-8. 性能与扩展
-表格
-复制
-需求	方案
-回放	把每帧 snapshot(world, t) 压入环形数组；拖动时间轴直接 world = history[tick]
-预测 & 回滚	复制 World → 做客户端预测 → 收到服务器权威帧再覆盖
-多线程	把 World 拆成 SOA 块，System 在 Worker 里跑，主线程只拿快照
-画布性能	使用 OffscreenCanvas + WebWorker；React 端只画 HUD
-状态节流	snapshot$.pipe(auditTime(50)) 或 distinctUntilChanged(keyOf('player.shield'))
-9. 常见坑
-把实体当 React state → 每帧 setState 卡爆。
-在组件里 requestAnimationFrame → 生命周期反复挂载导致掉帧。
-用 useRef 存最新快照但 UI 不刷新 → 需 useSyncExternalStore 或强制渲染。
-把 canvas 精灵也用 JSX 画 → 性能差且难维护；画布层保持原生 API 或 Pixi/Three。
-10. 一句话总结
-React 不是游戏引擎，它最适合做仪表盘。
-把「世界」做成快照流，React 只订阅 → 映射 → 纯函数渲染，即可在保持函数式、可测试、可配置的前提下，让「战机配置」「武器装配」「受伤判定」全部自然落地，并随时扩展回放、预测、多线程等高级功能。
+```
+
+---
+
+## 8. 性能与扩展
+
+| 需求 | 方案 |
+|---|---|
+| 回放 | 把每帧 `snapshot(world, t)` 压入环形数组；拖动时间轴直接 `world = history[tick]` |
+| 预测 & 回滚 | 复制 World → 做客户端预测 → 收到服务器权威帧再覆盖 |
+| 多线程 | 把 World 拆成 SOA 块，System 在 Worker 里跑，主线程只拿快照 |
+| 画布性能 | 使用 `OffscreenCanvas` + WebWorker；React 端只画 HUD |
+| 状态节流 | `snapshot$.pipe(auditTime(50))` 或 `distinctUntilChanged(keyOf('player.shield'))` |
+
+---
+
+## 9. 常见坑
+
+1. 把实体当 React state → 每帧 setState 卡爆。  
+2. 在组件里 `requestAnimationFrame` → 生命周期反复挂载导致掉帧。  
+3. 用 `useRef` 存最新快照但 UI 不刷新 → 需 `useSyncExternalStore` 或强制渲染。  
+4. 把 canvas 精灵也用 JSX 画 → 性能差且难维护；画布层保持原生 API 或 Pixi/Three。
+
+---
+
+## 10. 一句话总结
+
+> **React 不是游戏引擎，它最适合做仪表盘。**  
+> 把「世界」做成快照流，React 只订阅 → 映射 → 纯函数渲染，即可在保持函数式、可测试、可配置的前提下，让「战机配置」「武器装配」「受伤判定」全部自然落地，并随时扩展回放、预测、多线程等高级功能。
