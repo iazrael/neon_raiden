@@ -9,13 +9,16 @@ import { BossSystem } from './systems/BossSystem';
 import { ComboSystem, ComboState } from './systems/ComboSystem';
 import { WeaponSynergySystem, SynergyTriggerContext, SynergyType, CombatEventType, SynergyEffectType, SynergyConfig } from './systems/WeaponSynergySystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
-import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem'; // P3 Difficulty System
-import { EliteAISystem } from './systems/EliteAISystem'; // P3 Elite AI System
+import { DifficultySystem, DifficultyConfig } from './systems/DifficultySystem';
+import { EliteAISystem } from './systems/EliteAISystem';
 import { unlockWeapon, unlockEnemy, unlockBoss } from './unlockedItems';
 import { CombatTag } from './utils/CombatTag';
+import { World, createWorld, snapshot } from './world';
+import { snapshot$ } from './store';
 
 export class GameEngine {
     canvas: HTMLCanvasElement;
+    world: World;
 
     // Systems
     audio: AudioSystem;
@@ -24,117 +27,16 @@ export class GameEngine {
     weaponSys: WeaponSystem;
     enemySys: EnemySystem;
     bossSys: BossSystem;
-    comboSys: ComboSystem; // P2 Combo System
-    synergySys: WeaponSynergySystem; // P2 Weapon Synergy System
-    bossPhaseSys: BossPhaseSystem; // P2 Boss Phase System
-    difficultySys: DifficultySystem; // P3 Difficulty System
-    eliteAISys: EliteAISystem; // P3 Elite AI System
-
-    // Game State
-    state: GameState = GameState.MENU;
-    score: number = 0;
-    level: number = 1;
-    maxLevels: number = GameConfig.maxLevels;
-    levelProgress: number = 0;
-    maxLevelReached: number = 1;
-
-    // Entities
-    player: Entity;
-    options: Entity[] = [];
-    enemies: Entity[] = [];
-    bullets: Entity[] = [];
-    enemyBullets: Entity[] = [];
-    particles: Particle[] = [];
-    shockwaves: Shockwave[] = [];
-    powerups: Entity[] = [];
-    meteors: { x: number, y: number, length: number, vx: number, vy: number }[] = [];
-    boss: Entity | null = null;
-    bossWingmen: Entity[] = [];
-    plasmaExplosions: { x: number, y: number, range: number, life: number }[] = [];
-    slowFields: { x: number, y: number, range: number, life: number }[] = [];
+    comboSys: ComboSystem;
+    synergySys: WeaponSynergySystem;
+    bossPhaseSys: BossPhaseSystem;
+    difficultySys: DifficultySystem;
+    eliteAISys: EliteAISystem;
     tagSys: CombatTag;
-    playerSpeedBoostTimer: number = 0;
-    shieldRegenTimer: number = 0;
 
-    // Player Stats
-    weaponType: WeaponType = WeaponType.VULCAN;
-    secondaryWeapon: WeaponType | null = null; // P2 Secondary weapon for synergy
-    weaponLevel: number = 1;
-    bombs: number = 0;
-    shield: number = 0;
-    playerLevel: number = 1;
-    nextLevelScore: number = PlayerConfig.leveling.baseScoreForLevel1 ?? 1000;
-    playerDefensePct: number = 0;
-    playerFireRateBonusPct: number = 0;
-    playerDamageBonusPct: number = 0;
-    levelingShieldBonus: number = 0;
-
-    // Instance PlayerConfig (deep clone per start)
-    playerConfig: FighterEntity = JSON.parse(JSON.stringify(PlayerConfig));
-
-    // Timers
-    enemySpawnTimer: number = 0;
-    fireTimer: number = 0;
-    meteorTimer: number = 0;
-    screenShake: number = 0;
-    levelStartTime: number = 0; // Track when level started
-    regenTimer: number = 0;
-
-    // Time Slow Effect
-    timeSlowActive: boolean = false;
-    timeSlowTimer: number = 0;
-
-    // Level transition
-    showLevelTransition: boolean = false;
-    isLevelTransitioning: boolean = false; // Flag to prevent actions during transition
-    levelTransitionTimer: number = 0;
-
-    // Boss Warning
-    isBossWarningActive: boolean = false;
-    bossWarningTimer: number = 0;
-
-    // Boss Defeat Celebration
-    showBossDefeatAnimation: boolean = false;
-    bossDefeatTimer: number = 0;
-
-    // Debug Mode Variables
-    debugEnemyKillCount: number = 0;
-    debugModeEnabled: boolean = false;
-
-    // Alternate fire toggle
-    alternateFireEnabled: boolean = false;
-    fireAlternateToggle: boolean = false;
-
-    // Callbacks
-    onScoreChange: (score: number) => void;
-    onLevelChange: (level: number) => void;
-    onStateChange: (state: GameState) => void;
-    onHpChange: (hp: number) => void;
-    onBombChange: (bombs: number) => void;
-    onMaxLevelChange: (level: number) => void;
-    onBossWarning: (show: boolean) => void;
-    onComboChange: (state: ComboState) => void; // P2 Combo callback
-
-    constructor(
-        canvas: HTMLCanvasElement,
-        onScoreChange: (s: number) => void,
-        onLevelChange: (l: number) => void,
-        onStateChange: (s: GameState) => void,
-        onHpChange: (hp: number) => void,
-        onBombChange: (bombs: number) => void,
-        onMaxLevelChange: (level: number) => void,
-        onBossWarning: (show: boolean) => void,
-        onComboChange: (state: ComboState) => void // P2 Combo callback
-    ) {
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.onScoreChange = onScoreChange;
-        this.onLevelChange = onLevelChange;
-        this.onStateChange = onStateChange;
-        this.onHpChange = onHpChange;
-        this.onBombChange = onBombChange;
-        this.onMaxLevelChange = onMaxLevelChange;
-        this.onBossWarning = onBossWarning;
-        this.onComboChange = onComboChange;
+        this.world = createWorld(canvas.width, canvas.height);
 
         // Initialize Systems
         this.audio = new AudioSystem();
@@ -142,46 +44,66 @@ export class GameEngine {
         this.render = new RenderSystem(canvas);
         this.weaponSys = new WeaponSystem(this.audio);
         this.enemySys = new EnemySystem(this.audio, canvas.width, canvas.height);
-        this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height, this.difficultySys);
-        this.comboSys = new ComboSystem(undefined, (state) => this.onComboChange(state)); // P2 Combo System
-        this.synergySys = new WeaponSynergySystem(); // P2 Weapon Synergy System
-        this.bossPhaseSys = new BossPhaseSystem(this.audio); // P2 Boss Phase System
-        this.difficultySys = new DifficultySystem(); // P3 Difficulty System
-        this.eliteAISys = new EliteAISystem(canvas.width, canvas.height); // P3 Elite AI System
+        this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height, this.difficultySys); // difficultySys is undefined here!
+        // Wait, difficultySys needs to be initialized before bossSys?
+        // In original code:
+        // this.bossSys = new BossSystem(..., this.difficultySys);
+        // this.difficultySys = new DifficultySystem();
+        // This means bossSys received undefined! That's a bug in original code or JS hoisting?
+        // JS classes don't hoist property initialization like that if they are in constructor.
+        // In original code:
+        // this.bossSys = new BossSystem(..., this.difficultySys);
+        // this.difficultySys = new DifficultySystem();
+        // Yes, this.difficultySys was undefined when passed to BossSystem.
+        // I should fix this order.
+
+        this.comboSys = new ComboSystem(undefined, (state) => {
+            this.world.comboState = state;
+        });
+        this.synergySys = new WeaponSynergySystem();
+        this.bossPhaseSys = new BossPhaseSystem(this.audio);
+        this.difficultySys = new DifficultySystem();
+        // Re-initialize BossSystem with valid difficultySys if needed, or fix order.
+        // I'll fix the order.
+
+        this.eliteAISys = new EliteAISystem(canvas.width, canvas.height);
         this.tagSys = new CombatTag();
+
+        // Fix order:
+        this.difficultySys = new DifficultySystem();
+        this.bossSys = new BossSystem(this.audio, canvas.width, canvas.height, this.difficultySys);
 
         // Bind Input Actions
         this.input.onAction = (action) => {
             if (action === 'bomb_or_fire') {
-                if (this.state === GameState.PLAYING) this.triggerBomb();
+                if (this.world.state === GameState.PLAYING) this.triggerBomb();
             } else if (action === 'touch_start') {
-                // Removed auto-start on touch. Game now only starts via UI button.
+                // Removed auto-start on touch.
             }
         };
 
         this.input.onMouseMove = (x, y) => {
-            if (this.state === GameState.PLAYING && this.player) {
-                this.player.x = x;
-                this.player.y = y;
+            if (this.world.state === GameState.PLAYING && this.world.player) {
+                this.world.player.x = x;
+                this.world.player.y = y;
             }
         };
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // this.player = this.createPlayer();
-
         // Load progress
         const savedMaxLevel = localStorage.getItem('neon_raiden_max_level');
         if (savedMaxLevel) {
-            this.maxLevelReached = parseInt(savedMaxLevel, 10);
+            this.world.maxLevelReached = parseInt(savedMaxLevel, 10);
         }
-        // Notify initial max level
-        setTimeout(() => this.onMaxLevelChange(this.maxLevelReached), 0);
 
         // Ensure first weapon is always available
         unlockWeapon(WeaponType.VULCAN);
         validatePowerupVisuals(Object.values(PowerupType));
+
+        // Emit initial snapshot
+        snapshot$.next(snapshot(this.world));
     }
 
     resize() {
@@ -191,417 +113,316 @@ export class GameEngine {
         this.render.resize(width, height);
         this.enemySys.resize(width, height);
         this.bossSys.resize(width, height);
-        this.eliteAISys.resize(width, height); // P3 Resize elite AI system
-
-        // Update config if needed, though config is static, systems hold dimensions
-    }
-
-    createPlayer(): Entity {
-        this.playerConfig = JSON.parse(JSON.stringify(PlayerConfig));
-        return {
-            x: this.render.width / 2,
-            y: this.render.height - 100,
-            width: this.playerConfig.size.width,
-            height: this.playerConfig.size.height,
-            vx: 0,
-            vy: 0,
-            speed: this.playerConfig.speed,
-            hp: this.playerConfig.initialHp,
-            maxHp: this.playerConfig.maxHp,
-            type: EntityType.PLAYER,
-            color: this.playerConfig.color,
-            markedForDeletion: false,
-            spriteKey: 'player'
-        };
+        this.eliteAISys.resize(width, height);
     }
 
     startGame() {
-        this.player = this.createPlayer();
-        this.state = GameState.PLAYING;
-        this.score = 0;
-        this.level = 1;
-        this.weaponLevel = 1;
-        this.playerLevel = 1;
-        this.nextLevelScore = this.playerConfig.leveling?.baseScoreForLevel1 ?? 1000;
-        this.playerDefensePct = 0;
-        this.playerFireRateBonusPct = 0;
-        this.playerDamageBonusPct = 0;
-        this.levelingShieldBonus = 0;
-        this.weaponType = WeaponType.VULCAN;
-        this.secondaryWeapon = null; // P2 Reset secondary weapon
-        this.bombs = PowerupEffects.initialBombs;
-        this.shield = 0;
-        this.timeSlowActive = false;
-        this.timeSlowTimer = 0;
-        this.shieldRegenTimer = 0;
-        resetDropContext();
+        // Reset world but keep some persistent state if needed?
+        // Original startGame reset everything including score, level, etc.
+        // It kept maxLevelReached (which is loaded in constructor).
+        // So we can just create a new world, but we need to preserve maxLevelReached.
+        const maxLevel = this.world.maxLevelReached;
+        this.world = createWorld(this.render.width, this.render.height);
+        this.world.maxLevelReached = maxLevel;
 
-
-        this.options = [];
-        this.enemies = [];
-        this.bullets = [];
-        this.enemyBullets = [];
-        this.particles = [];
-        this.shockwaves = [];
-        this.powerups = [];
-        this.meteors = [];
-        this.boss = null;
-        this.bossWingmen = [];
-        this.levelProgress = 0;
-        this.screenShake = 0;
-        this.showLevelTransition = false;
-        this.isLevelTransitioning = false;
-        this.levelTransitionTimer = 0;
-        this.isBossWarningActive = false;
-        this.bossWarningTimer = 0;
-        this.onBossWarning(false);
-        this.showBossDefeatAnimation = false;
-        this.bossDefeatTimer = 0;
-        this.levelStartTime = Date.now(); // Initialize level start time
+        this.world.state = GameState.PLAYING;
+        this.world.levelStartTime = Date.now();
         this.audio.resume();
 
-        // Debug Mode: Set debug mode enabled flag based on GameConfig
-        this.debugModeEnabled = GameConfig.debug;
-        this.debugEnemyKillCount = 0;
+        this.world.debugModeEnabled = GameConfig.debug;
+        this.world.debugEnemyKillCount = 0;
 
-        // P2 Reset combo system
         this.comboSys.reset();
-
-        // P2 Reset environment system
-
         this.synergySys.reset();
-
-        // P3 Reset difficulty system
         this.difficultySys.reset();
 
-        this.onStateChange(this.state);
-        this.onScoreChange(this.score);
-        this.onLevelChange(this.level);
-        this.onHpChange(100);
-        this.onBombChange(this.bombs);
+        snapshot$.next(snapshot(this.world));
     }
 
     triggerBomb(targetX?: number, targetY?: number) {
-        if (this.bombs > 0 && this.state === GameState.PLAYING && this.player.hp > 0) {
-            this.bombs--;
-            this.onBombChange(this.bombs);
+        if (this.world.bombs > 0 && this.world.state === GameState.PLAYING && this.world.player.hp > 0) {
+            this.world.bombs--;
 
-            // Jump to target position if provided
             if (targetX !== undefined && targetY !== undefined) {
-                this.player.x = Math.max(32, Math.min(this.render.width - 32, targetX));
-                this.player.y = Math.max(32, Math.min(this.render.height - 32, targetY));
-                // Reset velocity
-                this.player.vx = 0;
-                this.player.vy = 0;
+                this.world.player.x = Math.max(32, Math.min(this.render.width - 32, targetX));
+                this.world.player.y = Math.max(32, Math.min(this.render.height - 32, targetY));
+                this.world.player.vx = 0;
+                this.world.player.vy = 0;
             }
 
             this.audio.playBomb();
-            this.screenShake = 40;
+            this.world.screenShake = 40;
             this.addShockwave(this.render.width / 2, this.render.height / 2, '#fff', 500, 30);
 
-            this.enemyBullets = [];
-            this.enemies.forEach(e => {
+            this.world.enemyBullets = [];
+            this.world.enemies.forEach(e => {
                 this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.color);
                 e.hp -= PowerupEffects.bombDamage;
                 if (e.hp <= 0) {
                     this.killEnemy(e);
                 }
             });
-            this.onScoreChange(this.score);
 
-            if (this.boss) {
-                const damage = this.boss.maxHp * PowerupEffects.bombDamageToBossPct;
+            if (this.world.boss) {
+                const damage = this.world.boss.maxHp * PowerupEffects.bombDamageToBossPct;
                 this.damageBoss(damage);
             }
         }
     }
 
     pause() {
-        if (this.state === GameState.PLAYING) {
-            this.state = GameState.PAUSED;
-            // Suspend audio context to stop all sounds
+        if (this.world.state === GameState.PLAYING) {
+            this.world.state = GameState.PAUSED;
             this.audio.pause();
+            snapshot$.next(snapshot(this.world));
         }
     }
 
     resume() {
-        if (this.state === GameState.PAUSED) {
-            this.state = GameState.PLAYING;
-            // Resume audio context
+        if (this.world.state === GameState.PAUSED) {
+            this.world.state = GameState.PLAYING;
             this.audio.resume();
+            snapshot$.next(snapshot(this.world));
         }
     }
 
     stop() {
-        this.state = GameState.GAME_OVER;
+        this.world.state = GameState.GAME_OVER;
         this.audio.pause();
-        this.onStateChange(this.state);
+        snapshot$.next(snapshot(this.world));
     }
 
     update(dt: number) {
-        if (this.state !== GameState.PLAYING) return;
+        if (this.world.state !== GameState.PLAYING) return;
 
-        // 处理时间减缓效果
-        if (this.timeSlowActive) {
-            this.timeSlowTimer -= dt;
-            if (this.timeSlowTimer <= 0) {
-                this.timeSlowActive = false;
+        // Handle Time Slow
+        if (this.world.timeSlowActive) {
+            this.world.timeSlowTimer -= dt;
+            if (this.world.timeSlowTimer <= 0) {
+                this.world.timeSlowActive = false;
             }
-            // 减缓时间为原来的一半
             dt *= 0.5;
         }
 
         const timeScale = dt / 16.66;
-        // Player's time scale (unaffected by slow motion)
-        // If timeSlowActive is true, dt was halved, so we need to double it back for player to be normal speed relative to real time
-        const playerTimeScale = this.timeSlowActive ? timeScale * 2 : timeScale;
+        const playerTimeScale = this.world.timeSlowActive ? timeScale * 2 : timeScale;
 
         // Handle Shield Timer & Audio
-        if (this.player.invulnerable && this.player.invulnerableTimer && this.player.invulnerableTimer > 0) {
-            this.player.invulnerableTimer -= (this.timeSlowActive ? dt * 2 : dt); // Shield timer runs in real time
+        if (this.world.player.invulnerable && this.world.player.invulnerableTimer && this.world.player.invulnerableTimer > 0) {
+            this.world.player.invulnerableTimer -= (this.world.timeSlowActive ? dt * 2 : dt);
             this.audio.playShieldLoop();
 
-            if (this.player.invulnerableTimer <= 0) {
-                this.player.invulnerable = false;
-                this.player.invulnerableTimer = 0;
+            if (this.world.player.invulnerableTimer <= 0) {
+                this.world.player.invulnerable = false;
+                this.world.player.invulnerableTimer = 0;
                 this.audio.stopShieldLoop();
             }
-        } else if (this.player.invulnerable && (!this.player.invulnerableTimer || this.player.invulnerableTimer <= 0)) {
-            // Cleanup if timer is missing or invalid but flag is set (safety)
-            this.player.invulnerable = false;
+        } else if (this.world.player.invulnerable && (!this.world.player.invulnerableTimer || this.world.player.invulnerableTimer <= 0)) {
+            this.world.player.invulnerable = false;
             this.audio.stopShieldLoop();
         }
 
         // Handle Shield Regen Timer
-        if (this.shieldRegenTimer > 0) {
-            this.shieldRegenTimer -= dt;
-            if (this.shieldRegenTimer < 0) {
-                this.shieldRegenTimer = 0;
+        if (this.world.shieldRegenTimer > 0) {
+            this.world.shieldRegenTimer -= dt;
+            if (this.world.shieldRegenTimer < 0) {
+                this.world.shieldRegenTimer = 0;
             }
         }
 
-        // P2 Update combo timer
+        // Update combo timer
         this.comboSys.update(dt);
+        this.world.comboState = this.comboSys.getState();
 
-
-        if (this.screenShake > 0) {
-            this.screenShake *= 0.9;
-            if (this.screenShake < 0.5) this.screenShake = 0;
+        if (this.world.screenShake > 0) {
+            this.world.screenShake *= 0.9;
+            if (this.world.screenShake < 0.5) this.world.screenShake = 0;
         }
 
         // Level transition UI
-        if (this.showLevelTransition) {
-            this.levelTransitionTimer += dt;
-            if (this.levelTransitionTimer > 1500) { // Reduced from 3000ms
-                this.showLevelTransition = false;
-                this.levelTransitionTimer = 0;
+        if (this.world.showLevelTransition) {
+            this.world.levelTransitionTimer += dt;
+            if (this.world.levelTransitionTimer > 1500) {
+                this.world.showLevelTransition = false;
+                this.world.levelTransitionTimer = 0;
             }
         }
 
         // Boss Defeat Animation
-        if (this.showBossDefeatAnimation) {
-            this.bossDefeatTimer -= dt;
-            if (this.bossDefeatTimer <= 0) {
-                this.showBossDefeatAnimation = false;
+        if (this.world.showBossDefeatAnimation) {
+            this.world.bossDefeatTimer -= dt;
+            if (this.world.bossDefeatTimer <= 0) {
+                this.world.showBossDefeatAnimation = false;
             }
         }
 
         // Player Movement
-        let speed = this.playerConfig.speed * playerTimeScale * (this.playerSpeedBoostTimer > 0 ? 1.1 : 1.0);
-
+        let speed = this.world.playerConfig.speed * playerTimeScale * (this.world.playerSpeedBoostTimer > 0 ? 1.1 : 1.0);
 
         const kb = this.input.getKeyboardVector();
 
         // Touch
         if (this.input.touch.active) {
             const delta = this.input.getTouchDelta();
-            this.player.vx = delta.x;
-            this.player.x += delta.x * 1.5;
-            this.player.y += delta.y * 1.5;
+            this.world.player.vx = delta.x;
+            this.world.player.x += delta.x * 1.5;
+            this.world.player.y += delta.y * 1.5;
         }
 
         // Keyboard
         if (kb.x !== 0 || kb.y !== 0) {
-            this.player.x += kb.x * speed;
-            this.player.y += kb.y * speed;
-            this.player.vx = kb.x * speed;
+            this.world.player.x += kb.x * speed;
+            this.world.player.y += kb.y * speed;
+            this.world.player.vx = kb.x * speed;
         } else if (!this.input.touch.active) {
-            this.player.vx *= 0.8;
+            this.world.player.vx *= 0.8;
         }
 
-
         // Boundary
-        this.player.x = Math.max(32, Math.min(this.render.width - 32, this.player.x));
-        this.player.y = Math.max(32, Math.min(this.render.height - 32, this.player.y));
+        this.world.player.x = Math.max(32, Math.min(this.render.width - 32, this.world.player.x));
+        this.world.player.y = Math.max(32, Math.min(this.render.height - 32, this.world.player.y));
 
         // Options
-        this.options.forEach((opt, index) => {
-            const targetAngle = (Date.now() / 1000) * 2 + (index * (Math.PI * 2 / this.options.length));
+        this.world.options.forEach((opt, index) => {
+            const targetAngle = (Date.now() / 1000) * 2 + (index * (Math.PI * 2 / this.world.options.length));
             const radius = 60;
-            const tx = this.player.x + Math.cos(targetAngle) * radius;
-            const ty = this.player.y + Math.sin(targetAngle) * radius;
+            const tx = this.world.player.x + Math.cos(targetAngle) * radius;
+            const ty = this.world.player.y + Math.sin(targetAngle) * radius;
             opt.x += (tx - opt.x) * 0.2 * timeScale;
             opt.y += (ty - opt.y) * 0.2 * timeScale;
         });
 
         // Fire
-        this.fireTimer += (this.timeSlowActive ? dt * 2 : dt); // Fire rate based on real time
-        const baseFireRate = this.weaponSys.getFireRate(this.weaponType, this.weaponLevel);
-        const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.playerFireRateBonusPct)));
-        if (this.fireTimer > fireRate) {
+        this.world.fireTimer += (this.world.timeSlowActive ? dt * 2 : dt);
+        const baseFireRate = this.weaponSys.getFireRate(this.world.weaponType, this.world.weaponLevel);
+        const fireRate = Math.max(50, Math.round(baseFireRate * (1 - this.world.playerFireRateBonusPct)));
+        if (this.world.fireTimer > fireRate) {
             const isMissileVulcan = this.synergySys.isSynergyActive(SynergyType.MISSILE_VULCAN);
             if (isMissileVulcan) {
                 this.weaponSys.firePlayerWeapon(
-                    this.player, WeaponType.VULCAN, this.weaponLevel,
-                    this.options, this.bullets, this.enemies
+                    this.world.player, WeaponType.VULCAN, this.world.weaponLevel,
+                    this.world.options, this.world.bullets, this.world.enemies
                 );
                 this.weaponSys.firePlayerWeapon(
-                    this.player, WeaponType.MISSILE, 1,
-                    [], this.bullets, this.enemies
+                    this.world.player, WeaponType.MISSILE, 1,
+                    [], this.world.bullets, this.world.enemies
                 );
-                this.fireTimer = 0;
+                this.world.fireTimer = 0;
             } else {
-                const canAlt = this.alternateFireEnabled && this.secondaryWeapon && this.synergySys.canCombine(this.weaponType, this.secondaryWeapon);
-                const fireType = canAlt ? (this.fireAlternateToggle ? this.secondaryWeapon! : this.weaponType) : this.weaponType;
+                const canAlt = this.world.alternateFireEnabled && this.world.secondaryWeapon && this.synergySys.canCombine(this.world.weaponType, this.world.secondaryWeapon);
+                const fireType = canAlt ? (this.world.fireAlternateToggle ? this.world.secondaryWeapon! : this.world.weaponType) : this.world.weaponType;
                 this.weaponSys.firePlayerWeapon(
-                    this.player, fireType, this.weaponLevel,
-                    this.options, this.bullets, this.enemies
+                    this.world.player, fireType, this.world.weaponLevel,
+                    this.world.options, this.world.bullets, this.world.enemies
                 );
-                if (canAlt) this.fireAlternateToggle = !this.fireAlternateToggle;
-                this.fireTimer = 0;
+                if (canAlt) this.world.fireAlternateToggle = !this.world.fireAlternateToggle;
+                this.world.fireTimer = 0;
             }
         }
 
         // Level Logic
-        if (!this.boss) {
-            this.levelProgress += 0.05 * timeScale;
-            this.enemySpawnTimer += dt;
+        if (!this.world.boss) {
+            this.world.levelProgress += 0.05 * timeScale;
+            this.world.enemySpawnTimer += dt;
 
-            // P3 Get dynamic difficulty configuration
             const difficultyConfig = this.difficultySys.getConfig();
-            const baseSpawnRate = EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000;
+            const baseSpawnRate = EnemyCommonConfig.enemySpawnIntervalByLevel[this.world.level] || 1000;
             const spawnRate = Math.round(baseSpawnRate * difficultyConfig.spawnIntervalMultiplier);
 
-            if (this.enemySpawnTimer > spawnRate) {
+            if (this.world.enemySpawnTimer > spawnRate) {
                 const baseEliteChance = EnemyCommonConfig.eliteChance;
                 const eliteMod = this.difficultySys.getEliteChanceModifier();
                 const effectiveEliteChance = Math.max(0, Math.min(1, baseEliteChance + eliteMod));
-                this.enemySys.spawnEnemy(this.level, this.enemies, effectiveEliteChance);
+                this.enemySys.spawnEnemy(this.world.level, this.world.enemies, effectiveEliteChance);
 
-                // P3 Check if newly spawned enemy is elite and initialize AI
-                const newEnemy = this.enemies[this.enemies.length - 1];
+                const newEnemy = this.world.enemies[this.world.enemies.length - 1];
                 if (newEnemy && newEnemy.isElite) {
-                    this.eliteAISys.initializeElite(newEnemy, this.enemies);
+                    this.eliteAISys.initializeElite(newEnemy, this.world.enemies);
                 }
 
-                // P3 Apply difficulty multipliers to newly spawned enemy
                 if (newEnemy) {
-                    // Apply HP multiplier
                     newEnemy.hp *= difficultyConfig.enemyHpMultiplier;
                     newEnemy.maxHp = newEnemy.hp;
-
-                    // Apply speed multiplier
                     newEnemy.vy *= difficultyConfig.enemySpeedMultiplier;
                     if (newEnemy.vx !== 0) {
                         newEnemy.vx *= difficultyConfig.enemySpeedMultiplier;
                     }
                 }
 
-                this.enemySpawnTimer = 0;
+                this.world.enemySpawnTimer = 0;
             }
 
-            // Spawn boss when both conditions are met:
-            // 1. Level progress >= 90%
-            // 2. Minimum level duration has passed (60 seconds)
-            // 3. Not currently transitioning levels
-            const levelDuration = (Date.now() - this.levelStartTime) / 1000; // in seconds
+            const levelDuration = (Date.now() - this.world.levelStartTime) / 1000;
             const minDuration = BossSpawnConfig.minLevelDuration;
             const minProgress = BossSpawnConfig.minLevelProgress;
 
-            // Debug Mode: Spawn boss after 10 seconds and 10 enemy kills
-            if (this.debugModeEnabled) {
-                if (levelDuration >= 10 && this.debugEnemyKillCount >= 10 && !this.isLevelTransitioning) {
-                    if (!this.isBossWarningActive) {
-                        this.isBossWarningActive = true;
-                        this.bossWarningTimer = 3000; // 3 seconds warning
-                        this.onBossWarning(true);
+            if (this.world.debugModeEnabled) {
+                if (levelDuration >= 10 && this.world.debugEnemyKillCount >= 10 && !this.world.isLevelTransitioning) {
+                    if (!this.world.isBossWarningActive) {
+                        this.world.isBossWarningActive = true;
+                        this.world.bossWarningTimer = 3000;
                         this.audio.playWarning();
-                        // Spawn boss immediately, warning will show during entrance
                         this.spawnBoss();
                     }
                 }
-            } else if (this.levelProgress >= minProgress && levelDuration >= minDuration && !this.isLevelTransitioning) {
-                if (!this.isBossWarningActive) {
-                    this.isBossWarningActive = true;
-                    this.bossWarningTimer = 3000; // 3 seconds warning
-                    this.onBossWarning(true);
+            } else if (this.world.levelProgress >= minProgress && levelDuration >= minDuration && !this.world.isLevelTransitioning) {
+                if (!this.world.isBossWarningActive) {
+                    this.world.isBossWarningActive = true;
+                    this.world.bossWarningTimer = 3000;
                     this.audio.playWarning();
-                    // Spawn boss immediately, warning will show during entrance
                     this.spawnBoss();
                 }
             }
         } else {
-            // Continue spawning enemies for a short time after boss appears
-            this.enemySpawnTimer += dt;
-            const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.level] || 1000) * EnemyCommonConfig.enemySpawnIntervalInBossMultiplier);
-            if (this.enemySpawnTimer > spawnRate) {
+            this.world.enemySpawnTimer += dt;
+            const spawnRate = Math.round((EnemyCommonConfig.enemySpawnIntervalByLevel[this.world.level] || 1000) * EnemyCommonConfig.enemySpawnIntervalInBossMultiplier);
+            if (this.world.enemySpawnTimer > spawnRate) {
                 const baseEliteChance = EnemyCommonConfig.eliteChance;
                 const eliteMod = this.difficultySys.getEliteChanceModifier();
                 const bossFactor = EnemyCommonConfig.eliteChanceBossMultiplier ?? 1.0;
                 const effectiveEliteChance = Math.max(0, Math.min(1, (baseEliteChance + eliteMod) * bossFactor));
-                this.enemySys.spawnEnemy(this.level, this.enemies, effectiveEliteChance);
-                this.enemySpawnTimer = 0;
+                this.enemySys.spawnEnemy(this.world.level, this.world.enemies, effectiveEliteChance);
+                this.world.enemySpawnTimer = 0;
             }
 
-            this.bossSys.update(this.boss, dt, timeScale, this.player, this.enemyBullets, this.level);
+            this.bossSys.update(this.world.boss, dt, timeScale, this.world.player, this.world.enemyBullets, this.world.level);
+            this.bossPhaseSys.update(this.world.boss, dt);
 
-            // P2 Update boss phase system
-            this.bossPhaseSys.update(this.boss, dt);
-
-            // Update wingmen
-            this.bossWingmen.forEach(wingman => {
-                wingman.x = this.boss!.x + (wingman.x - this.boss!.x) * 0.95;
-                wingman.y = this.boss!.y + 80;
+            this.world.bossWingmen.forEach(wingman => {
+                wingman.x = this.world.boss!.x + (wingman.x - this.world.boss!.x) * 0.95;
+                wingman.y = this.world.boss!.y + 80;
             });
         }
 
-        // Handle boss warning timer countdown (outside boss check so it works after spawn)
-        if (this.isBossWarningActive) {
-            this.bossWarningTimer -= dt;
-            if (this.bossWarningTimer <= 0) {
-                this.isBossWarningActive = false;
-                this.onBossWarning(false);
+        if (this.world.isBossWarningActive) {
+            this.world.bossWarningTimer -= dt;
+            if (this.world.bossWarningTimer <= 0) {
+                this.world.isBossWarningActive = false;
             }
         }
 
         // Meteors
-        this.meteorTimer += dt;
-        if (this.meteorTimer > 200) {
+        this.world.meteorTimer += dt;
+        if (this.world.meteorTimer > 200) {
             if (Math.random() < 0.1) this.spawnMeteor();
-            this.meteorTimer = 0;
+            this.world.meteorTimer = 0;
         }
-        this.meteors.forEach(m => {
+        this.world.meteors.forEach(m => {
             m.x += m.vx * timeScale;
             m.y += m.vy * timeScale;
         });
-        this.meteors = this.meteors.filter(m => m.y < this.render.height + 100 && m.x > -100);
+        this.world.meteors = this.world.meteors.filter(m => m.y < this.render.height + 100 && m.x > -100);
 
-        // Updates
-        this.updateEntities(this.bullets, timeScale, dt);
-
-        // Update player bullets with weapon-specific logic
-
+        this.updateEntities(this.world.bullets, timeScale, dt);
         this.updateBulletsProp(dt);
-
-        // Update enemy bullets with homing logic
         this.updateEnemyBullets(timeScale, dt);
 
-        this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
+        this.enemySys.update(dt, timeScale, this.world.enemies, this.world.player, this.world.enemyBullets);
 
-        // Apply slow fields to enemies
-        if (this.slowFields.length > 0) {
-            this.enemies.forEach(e => {
-                const inSlow = this.slowFields.some(s => Math.hypot(e.x - s.x, e.y - s.y) < s.range);
+        // Slow fields
+        if (this.world.slowFields.length > 0) {
+            this.world.enemies.forEach(e => {
+                const inSlow = this.world.slowFields.some(s => Math.hypot(e.x - s.x, e.y - s.y) < s.range);
                 if (inSlow) {
                     e.vx *= 0.8;
                     e.vy *= 0.8;
@@ -612,67 +433,67 @@ export class GameEngine {
             });
         }
 
-        // Apply burn DOT to enemies
-        this.enemies.forEach(e => {
+        // Burn DOT
+        this.world.enemies.forEach(e => {
             if (this.tagSys.hasTag(e, 'burn_dot')) {
                 e.hp -= (5 * dt / 1000);
                 if (e.hp <= 0 && !e.markedForDeletion) this.killEnemy(e);
             }
         });
 
-        // P3 Update difficulty system
+        // Difficulty System
         const currentWeapons = this.getPlayerWeapons();
-        this.difficultySys.update(dt, this.player, currentWeapons, this.comboSys.getState().count, this.level);
+        this.difficultySys.update(dt, this.world.player, currentWeapons, this.world.comboState.count, this.world.level);
 
-        this.regenTimer += dt;
-        const comboLevel = this.comboSys.getState().level;
+        // Regen
+        this.world.regenTimer += dt;
+        const comboLevel = this.world.comboState.level;
         let regenAmount = 0;
         if (this.synergySys.isSynergyActive(SynergyType.MAGMA_SHURIKEN)) {
             if (comboLevel >= 4) regenAmount = 3;
             else if (comboLevel >= 3) regenAmount = 2;
             else if (comboLevel >= 2) regenAmount = 1;
         }
-        if (this.regenTimer >= 1000 && regenAmount > 0 && this.player.hp > 0 && this.player.hp < this.player.maxHp) {
-            this.player.hp = Math.min(this.player.maxHp, this.player.hp + regenAmount);
-            this.onHpChange(this.player.hp);
-            this.regenTimer = 0;
+        if (this.world.regenTimer >= 1000 && regenAmount > 0 && this.world.player.hp > 0 && this.world.player.hp < this.world.player.maxHp) {
+            this.world.player.hp = Math.min(this.world.player.maxHp, this.world.player.hp + regenAmount);
+            this.world.regenTimer = 0;
         }
 
-        // P3 Update elite AI for all elite enemies
-        this.enemies.forEach(enemy => {
+        // Elite AI
+        this.world.enemies.forEach(enemy => {
             if (enemy.isElite) {
-                this.eliteAISys.update(enemy, dt, this.enemies, this.enemyBullets, this.player);
+                this.eliteAISys.update(enemy, dt, this.world.enemies, this.world.enemyBullets, this.world.player);
             }
         });
 
-        this.updateEntities(this.powerups, timeScale, dt);
+        this.updateEntities(this.world.powerups, timeScale, dt);
 
         // Particles
-        this.particles.forEach(p => {
+        this.world.particles.forEach(p => {
             p.x += p.vx * timeScale;
             p.y += p.vy * timeScale;
             p.life -= dt;
         });
-        this.particles = this.particles.filter(p => p.life > 0);
+        this.world.particles = this.world.particles.filter(p => p.life > 0);
 
         // Shockwaves
-        this.shockwaves.forEach(s => {
+        this.world.shockwaves.forEach(s => {
             s.radius += (s.maxRadius - s.radius) * 0.1 * timeScale;
             s.life -= 0.02 * timeScale;
         });
-        this.shockwaves = this.shockwaves.filter(s => s.life > 0);
+        this.world.shockwaves = this.world.shockwaves.filter(s => s.life > 0);
 
-        this.plasmaExplosions.forEach(p => {
+        this.world.plasmaExplosions.forEach(p => {
             p.life -= dt;
         });
-        this.plasmaExplosions = this.plasmaExplosions.filter(p => p.life > 0);
-        this.slowFields.forEach(s => { s.life -= dt; });
-        this.slowFields = this.slowFields.filter(s => s.life > 0);
+        this.world.plasmaExplosions = this.world.plasmaExplosions.filter(p => p.life > 0);
+        this.world.slowFields.forEach(s => { s.life -= dt; });
+        this.world.slowFields = this.world.slowFields.filter(s => s.life > 0);
 
         this.checkCollisions();
 
-        // Cleanup missile tracking counters for deleted bullets
-        this.bullets.forEach(b => {
+        // Cleanup missile tracking
+        this.world.bullets.forEach(b => {
             if (b.markedForDeletion && b.weaponType === WeaponType.MISSILE && b.target) {
                 if (b.target.incomingMissiles && b.target.incomingMissiles > 0) {
                     b.target.incomingMissiles--;
@@ -682,36 +503,40 @@ export class GameEngine {
         });
 
         // Clean up
-        this.bullets = this.bullets.filter(e => !e.markedForDeletion && e.y > -100);
-        this.enemyBullets = this.enemyBullets.filter(e => !e.markedForDeletion && e.y < this.render.height + 50 && e.x > -50 && e.x < this.render.width + 50);
-        this.enemies = this.enemies.filter(e => !e.markedForDeletion && e.y < this.render.height + 100);
-        this.bossWingmen = this.bossWingmen.filter(e => !e.markedForDeletion);
-        this.powerups = this.powerups.filter(e => !e.markedForDeletion && e.y < this.render.height + 50);
+        this.world.bullets = this.world.bullets.filter(e => !e.markedForDeletion && e.y > -100);
+        this.world.enemyBullets = this.world.enemyBullets.filter(e => !e.markedForDeletion && e.y < this.render.height + 50 && e.x > -50 && e.x < this.render.width + 50);
+        this.world.enemies = this.world.enemies.filter(e => !e.markedForDeletion && e.y < this.render.height + 100);
+        this.world.bossWingmen = this.world.bossWingmen.filter(e => !e.markedForDeletion);
+        this.world.powerups = this.world.powerups.filter(e => !e.markedForDeletion && e.y < this.render.height + 50);
 
-        if (this.player.hp <= 0) {
-            // P3 Record player defeated by boss for dynamic difficulty adjustment
-            // Only record if there's a boss present
-            if (this.boss) {
-                this.difficultySys.recordPlayerDefeatedByBoss(this.level);
+        if (this.world.player.hp <= 0) {
+            if (this.world.boss) {
+                this.difficultySys.recordPlayerDefeatedByBoss(this.world.level);
             }
 
-            this.createExplosion(this.player.x, this.player.y, ExplosionSize.LARGE, '#00ffff');
+            this.createExplosion(this.world.player.x, this.world.player.y, ExplosionSize.LARGE, '#00ffff');
             this.audio.playExplosion(ExplosionSize.LARGE);
             this.audio.playDefeat();
-            this.state = GameState.GAME_OVER;
-            this.onStateChange(this.state);
+            this.world.state = GameState.GAME_OVER;
         }
     }
 
+    get snapshot$() {
+        return snapshot$;
+    }
+
+    getSnapshot() {
+        return snapshot$.value;
+    }
+
     private updateEnemyBullets(timeScale: number, dt: number) {
-        this.enemyBullets.forEach(b => {
+        this.world.enemyBullets.forEach(b => {
             b.x += b.vx * timeScale;
             b.y += b.vy * timeScale;
 
-            // Homing missile AI - only for bullets marked with isHoming flag
             if (b.isHoming) {
-                const dx = this.player.x - b.x;
-                const dy = this.player.y - b.y;
+                const dx = this.world.player.x - b.x;
+                const dy = this.world.player.y - b.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist > 0) {
                     const turnSpeed = 0.1;
@@ -726,17 +551,14 @@ export class GameEngine {
                 }
             }
 
-            // Update all enemy bullets rotation to face flight direction
             if (b.vx !== undefined && b.vy !== undefined && b.spriteKey !== 'bullet_enemy_spiral') {
                 b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
             }
 
-            // Update rotation angle for spiral bullets
             if (b.spriteKey === 'bullet_enemy_spiral' && b.rotationSpeed !== undefined) {
                 b.angle = (b.angle || 0) + b.rotationSpeed;
             }
 
-            // Laser timer countdown
             if (b.timer !== undefined) {
                 b.timer -= dt;
                 if (b.timer <= 0) {
@@ -744,9 +566,8 @@ export class GameEngine {
                 }
             }
 
-            // Apply slow fields to enemy bullets
-            if (this.slowFields.length > 0) {
-                const inSlow = this.slowFields.some(s => Math.hypot(b.x - s.x, b.y - s.y) < s.range);
+            if (this.world.slowFields.length > 0) {
+                const inSlow = this.world.slowFields.some(s => Math.hypot(b.x - s.x, b.y - s.y) < s.range);
                 if (inSlow) {
                     b.vx *= 0.75;
                     b.vy *= 0.75;
@@ -755,12 +576,9 @@ export class GameEngine {
         });
     }
 
-    // 处理导弹追踪目标和特殊武器效果
     private updateBulletsProp(dt: number) {
-        this.bullets.forEach(b => {
-            // Missile homing logic
+        this.world.bullets.forEach(b => {
             if (b.weaponType === WeaponType.MISSILE) {
-                // Lifetime management
                 if (b.lifetime !== undefined) {
                     b.lifetime -= dt;
                     if (b.lifetime <= 0) {
@@ -769,21 +587,17 @@ export class GameEngine {
                     }
                 }
 
-                // Bounds check
                 if (b.x < -50 || b.x > this.render.width + 50 || b.y > this.render.height + 50 || b.y < -100) {
                     b.markedForDeletion = true;
                 }
 
-                // If target is dead or invalid, stop tracking
                 if (b.target && (b.target.hp <= 0 || b.target.markedForDeletion)) {
-                    // Decrement counter on old target
                     if (b.target.incomingMissiles && b.target.incomingMissiles > 0) {
                         b.target.incomingMissiles--;
                     }
                     b.target = undefined;
                 }
 
-                // Try to find a target if we don't have one
                 if (!b.target) {
                     const newTarget = this.findMissileTarget(b);
                     if (newTarget) {
@@ -792,7 +606,6 @@ export class GameEngine {
                     }
                 }
 
-                // Track target
                 if (b.target) {
                     const dx = b.target.x - b.x;
                     const dy = b.target.y - b.y;
@@ -822,13 +635,10 @@ export class GameEngine {
                 }
             }
 
-            // Update all player bullets rotation to face flight direction
-            // Skip plasma as it has its own spinning animation
             if (b.weaponType !== WeaponType.PLASMA && b.vx !== undefined && b.vy !== undefined) {
                 b.angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
             }
 
-            // Update rotation angle for plasma bullets
             if (b.weaponType === WeaponType.PLASMA && b.rotationSpeed !== undefined) {
                 b.angle = (b.angle || 0) + b.rotationSpeed;
             }
@@ -836,111 +646,98 @@ export class GameEngine {
     }
 
     spawnBoss() {
-        this.boss = this.bossSys.spawn(this.level, this.render.sprites);
-        this.bossWingmen = this.bossSys.spawnWingmen(this.level, this.boss, this.render.sprites);
-        this.screenShake = 20;
+        this.world.boss = this.bossSys.spawn(this.world.level, this.render.sprites);
+        this.world.bossWingmen = this.bossSys.spawnWingmen(this.world.level, this.world.boss, this.render.sprites);
+        this.world.screenShake = 20;
 
-        // P2 Initialize boss phase system
-        if (this.boss) {
-            this.bossPhaseSys.initializeBoss(this.boss, this.boss.subType as BossType);
+        if (this.world.boss) {
+            this.bossPhaseSys.initializeBoss(this.world.boss, this.world.boss.subType as BossType);
         }
     }
 
     damageBoss(amount: number) {
-        if (!this.boss) return;
+        if (!this.world.boss) return;
 
-        // Boss cannot take damage while invulnerable
-        if (this.boss.invulnerable) {
+        if (this.world.boss.invulnerable) {
             return;
         }
 
-        // Boss can only take damage if all wingmen are destroyed
-        if (this.bossWingmen.length > 0) {
+        if (this.world.bossWingmen.length > 0) {
             return;
         }
 
-        this.boss.hp -= amount;
-        if (this.boss.hp <= 0 && !this.boss.markedForDeletion) {
+        this.world.boss.hp -= amount;
+        if (this.world.boss.hp <= 0 && !this.world.boss.markedForDeletion) {
             this.killBoss();
         }
     }
 
     killBoss() {
-        if (!this.boss) return;
-        const bx = this.boss.x;
-        const by = this.boss.y;
-        const bossLevel = this.level;
+        if (!this.world.boss) return;
+        const bx = this.world.boss.x;
+        const by = this.world.boss.y;
+        const bossLevel = this.world.level;
 
         this.createExplosion(bx, by, ExplosionSize.LARGE, '#ffffff');
         this.addShockwave(bx, by);
-        this.screenShake = 30;
+        this.world.screenShake = 30;
 
         for (let i = 0; i < 15; i++) {
             setTimeout(() => {
-                if (this.state === GameState.VICTORY) return;
+                if (this.world.state === GameState.VICTORY) return;
                 this.createExplosion(bx + (Math.random() - 0.5) * 150, by + (Math.random() - 0.5) * 150, ExplosionSize.LARGE, '#fff');
             }, i * 100);
         }
         this.audio.playExplosion(ExplosionSize.LARGE);
-        this.audio.playBossDefeat(); // Play victory fanfare
-        this.showBossDefeatAnimation = true;
-        this.bossDefeatTimer = 3000; // Show for 3 seconds
+        this.audio.playBossDefeat();
+        this.world.showBossDefeatAnimation = true;
+        this.world.bossDefeatTimer = 3000;
 
-        this.score += BossConfig[this.boss.subType]?.score || (5000 * this.level);
-        this.onScoreChange(this.score);
+        this.world.score += BossConfig[this.world.boss.subType]?.score || (5000 * this.world.level);
         this.checkAndApplyLevelUp();
 
-        // Boss guaranteed drop
         if (Math.random() < PowerupDropConfig.bossDropRate) {
             this.spawnPowerup(bx, by);
         }
 
-        // Unlock boss when defeated
         unlockBoss(bossLevel);
 
+        this.bossPhaseSys.cleanupBoss(this.world.boss);
 
-        // P2 Cleanup boss phase state
-        this.bossPhaseSys.cleanupBoss(this.boss);
-
-        this.boss = null;
-        this.bossWingmen = [];
-        this.enemyBullets = []; // Clear all enemy bullets on boss death
-        this.isLevelTransitioning = true; // Block new boss spawns
+        this.world.boss = null;
+        this.world.bossWingmen = [];
+        this.world.enemyBullets = [];
+        this.world.isLevelTransitioning = true;
 
         setTimeout(() => {
-            if (this.level < this.maxLevels) {
-                this.level++;
-                this.levelProgress = 0;
-                this.levelStartTime = Date.now(); // Reset level start time for new level
-                this.enemySpawnTimer = 0; // Reset enemy spawn timer
-                this.onLevelChange(this.level);
+            if (this.world.level < this.world.maxLevels) {
+                this.world.level++;
+                this.world.levelProgress = 0;
+                this.world.levelStartTime = Date.now();
+                this.world.enemySpawnTimer = 0;
 
-                if (this.level > this.maxLevelReached) {
-                    this.maxLevelReached = this.level;
-                    localStorage.setItem('neon_raiden_max_level', this.maxLevelReached.toString());
-                    this.onMaxLevelChange(this.maxLevelReached);
+                if (this.world.level > this.world.maxLevelReached) {
+                    this.world.maxLevelReached = this.world.level;
+                    localStorage.setItem('neon_raiden_max_level', this.world.maxLevelReached.toString());
                 }
 
-                this.player.hp = this.player.maxHp;
-                this.shield = this.getShieldCap();
-                this.onHpChange(this.player.hp);
+                this.world.player.hp = this.world.player.maxHp;
+                this.world.shield = this.getShieldCap();
 
-                // Show level transition UI
-                this.showLevelTransition = true;
-                this.levelTransitionTimer = 0;
-                this.isLevelTransitioning = false; // Allow spawns again (though level progress is 0)
+                this.world.showLevelTransition = true;
+                this.world.levelTransitionTimer = 0;
+                this.world.isLevelTransitioning = false;
             } else {
                 this.audio.playVictory();
-                this.state = GameState.VICTORY;
-                this.onStateChange(this.state);
-                this.isLevelTransitioning = false;
+                this.world.state = GameState.VICTORY;
+                this.world.isLevelTransitioning = false;
             }
         }, 3000);
     }
 
     spawnMeteor() {
         const speed = Math.random() * 10 + 10;
-        this.meteors.push({
+        this.world.meteors.push({
             x: Math.random() * this.render.width,
             y: -100,
             length: Math.random() * 50 + 20,
@@ -956,22 +753,16 @@ export class GameEngine {
         });
     }
 
-    /**
-     * 处理SHURIKEN子弹反弹逻辑
-     * @param shuriken SHURIKEN子弹实体
-     */
     private handleShurikenBounce(shuriken: Entity) {
-        // 设置反弹标记
         this.tagSys.setTag(shuriken, 'shuriken_bounced', 600);
 
-        // 触发协同效果
         const bounceContext: SynergyTriggerContext = {
             weaponType: WeaponType.SHURIKEN,
             bulletX: shuriken.x,
             bulletY: shuriken.y,
-            targetEnemy: this.player,
-            enemies: this.enemies,
-            player: this.player,
+            targetEnemy: this.world.player,
+            enemies: this.world.enemies,
+            player: this.world.player,
             eventType: CombatEventType.BOUNCE,
             shurikenBounced: true
         };
@@ -979,11 +770,10 @@ export class GameEngine {
         const bounceResults = this.synergySys.tryTriggerSynergies(bounceContext);
         bounceResults.forEach(r => {
             if (r.effect === SynergyEffectType.SPEED_BOOST) {
-                this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, r.value);
+                this.world.playerSpeedBoostTimer = Math.max(this.world.playerSpeedBoostTimer, r.value);
             }
         });
 
-        // 如果MAGMA_SHURIKEN协同效果激活，为SHURIKEN子弹添加标记
         if (this.synergySys.isSynergyActive(SynergyType.MAGMA_SHURIKEN)) {
             this.tagSys.setTag(shuriken, 'magma_shuriken', 600);
         }
@@ -992,8 +782,7 @@ export class GameEngine {
     checkCollisions() {
         const obstacles: Entity[] = [];
 
-        // Bullets vs Enemies
-        this.bullets.forEach(b => {
+        this.world.bullets.forEach(b => {
             let blockedByObstacle = false;
             obstacles.forEach(obstacle => {
                 if (this.isColliding(b, obstacle)) {
@@ -1004,29 +793,26 @@ export class GameEngine {
             });
             if (blockedByObstacle) return;
 
-            this.enemies.forEach(e => {
+            this.world.enemies.forEach(e => {
                 if (this.isColliding(b, e)) {
                     this.handleBulletHit(b, e);
                 }
             });
 
-            // Bullets vs Wingmen
-            this.bossWingmen.forEach(wingman => {
+            this.world.bossWingmen.forEach(wingman => {
                 if (this.isColliding(b, wingman)) {
                     this.handleBulletHit(b, wingman);
                 }
             });
 
-            if (this.boss && this.isColliding(b, this.boss)) {
-                // Only handle collision if boss is not invulnerable
-                if (!this.boss.invulnerable) {
-                    this.handleBulletHit(b, this.boss);
+            if (this.world.boss && this.isColliding(b, this.world.boss)) {
+                if (!this.world.boss.invulnerable) {
+                    this.handleBulletHit(b, this.world.boss);
                 }
             }
         });
 
-        // Enemy Stuff vs Player
-        [...this.enemyBullets, ...this.enemies, ...this.bossWingmen].forEach(e => {
+        [...this.world.enemyBullets, ...this.world.enemies, ...this.world.bossWingmen].forEach(e => {
             if (e.type === EntityType.BULLET) {
                 obstacles.forEach(obstacle => {
                     if (this.isColliding(e, obstacle)) {
@@ -1036,31 +822,27 @@ export class GameEngine {
                 });
             }
 
-            if (this.isPlayerColliding(this.player, e)) {
+            if (this.isPlayerColliding(this.world.player, e)) {
                 e.markedForDeletion = true;
                 if (e.type === 'enemy') e.hp = 0;
-                // Only take damage if player is not invulnerable
-                if (!this.player.invulnerable) {
+                if (!this.world.player.invulnerable) {
                     this.takeDamage(10);
                 }
-                this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
+                this.createExplosion(this.world.player.x, this.world.player.y, ExplosionSize.SMALL, '#00ffff');
             }
         });
 
-        if (this.boss && this.isPlayerColliding(this.player, this.boss)) {
-            // Only take damage if player is not invulnerable
-            if (!this.player.invulnerable) {
+        if (this.world.boss && this.isPlayerColliding(this.world.player, this.world.boss)) {
+            if (!this.world.player.invulnerable) {
                 this.takeDamage(1);
             }
         }
 
-        // Powerups
-        this.powerups.forEach(p => {
-            if (this.isPlayerColliding(this.player, p)) {
+        this.world.powerups.forEach(p => {
+            if (this.isPlayerColliding(this.world.player, p)) {
                 p.markedForDeletion = true;
                 this.audio.playPowerUp();
-                this.score += 100;
-                this.onScoreChange(this.score);
+                this.world.score += 100;
                 this.checkAndApplyLevelUp();
                 this.applyPowerup(p.subType as PowerupType);
             }
@@ -1068,28 +850,27 @@ export class GameEngine {
     }
 
     takeDamage(amount: number) {
-        const defenseMultiplier = Math.max(0, 1 - this.playerDefensePct);
+        const defenseMultiplier = Math.max(0, 1 - this.world.playerDefensePct);
         const effective = Math.ceil(amount * defenseMultiplier);
-        const prevShield = this.shield;
-        if (this.shield > 0) {
-            this.shield -= effective;
-            if (this.shield < 0) {
-                this.player.hp += this.shield;
-                this.shield = 0;
+        const prevShield = this.world.shield;
+        if (this.world.shield > 0) {
+            this.world.shield -= effective;
+            if (this.world.shield < 0) {
+                this.world.player.hp += this.world.shield;
+                this.world.shield = 0;
             }
-            this.screenShake = 5;
+            this.world.screenShake = 5;
         } else {
-            this.player.hp -= effective;
-            this.screenShake = 10;
+            this.world.player.hp -= effective;
+            this.world.screenShake = 10;
         }
-        if (prevShield > 0 && this.shield === 0) {
+        if (prevShield > 0 && this.world.shield === 0) {
             this.audio.playShieldBreak();
         }
-        this.player.hitFlashUntil = Date.now() + 150;
+        this.world.player.hitFlashUntil = Date.now() + 150;
         this.audio.playHit();
-        this.onHpChange(this.player.hp);
     }
-    // 子弹击中的处理
+
     handleBulletHit(b: Entity, target: Entity) {
         if (b.weaponType === WeaponType.PLASMA) {
             this.createPlasmaExplosion(b.x, b.y);
@@ -1097,43 +878,37 @@ export class GameEngine {
         } else if (b.weaponType === WeaponType.WAVE || b.weaponType === WeaponType.LASER) {
             // Piercing
         } else if (b.weaponType === WeaponType.TESLA && (b.chainCount || 0) > 0) {
-            // Tesla Chain Logic
             this.createTeslaChain(b, target);
             b.markedForDeletion = true;
         } else {
             b.markedForDeletion = true;
         }
 
-        // P2 Apply combo damage multiplier
         const comboDamageMultiplier = this.comboSys.getDamageMultiplier();
-        let finalDamage = (b.damage || 10) * comboDamageMultiplier * (1 + this.playerDamageBonusPct);
+        let finalDamage = (b.damage || 10) * comboDamageMultiplier * (1 + this.world.playerDamageBonusPct);
 
-        // P2 Try to trigger weapon synergies
         const synergyContext: SynergyTriggerContext = {
-            weaponType: b.weaponType || this.weaponType,
+            weaponType: b.weaponType || this.world.weaponType,
             bulletX: b.x,
             bulletY: b.y,
             targetEnemy: target,
-            enemies: this.enemies,
-            player: this.player,
-            plasmaExplosions: this.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range })),
+            enemies: this.world.enemies,
+            player: this.world.player,
+            plasmaExplosions: this.world.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range })),
             eventType: CombatEventType.HIT,
             shurikenBounced: !!(b.tags && b.tags['shuriken_bounced'] && b.tags['shuriken_bounced'] > Date.now())
         };
         const synergyResults = this.synergySys.tryTriggerSynergies(synergyContext);
-        console.log(`synergy results:`, synergyResults)
-        // Apply synergy effects
+
         synergyResults.forEach(result => {
             if (result.effect === SynergyEffectType.CHAIN_LIGHTNING) {
-                // LASER+TESLA: Spawn chain lightning
                 const angle = Math.random() * Math.PI * 2;
-                // 只使用一级配置
                 const config = WeaponConfig[WeaponType.TESLA];
                 const upgradeConfig = WeaponUpgradeConfig[WeaponType.TESLA]
                 if (!config || !upgradeConfig) return;
                 const level1 = upgradeConfig[1];
                 const speed = config.speed;
-                this.bullets.push({
+                this.world.bullets.push({
                     x: target.x,
                     y: target.y,
                     width: config.bullet.size.width,
@@ -1154,31 +929,28 @@ export class GameEngine {
                 });
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
             } else if (result.effect === SynergyEffectType.DAMAGE_BOOST) {
-                // WAVE+PLASMA or MISSILE+VULCAN: Apply damage multiplier
                 finalDamage *= result.multiplier || 1.0;
-                // Tag the bullet for visual effect
                 this.tagSys.setTag(b, 'damage_boost', 1000);
             } else if (result.effect === SynergyEffectType.BURN) {
-                // MAGMA+SHURIKEN: Apply burn DOT (simplified: instant extra damage)
                 this.tagSys.setTag(target, 'burn_dot', 3000);
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
             } else if (result.effect === SynergyEffectType.SHIELD_REGEN) {
                 const cap = this.getShieldCap();
-                this.shield = Math.min(cap, this.shield + result.value);
-                this.shieldRegenTimer = 1000; // Set timer for 1 second to show visual effect
+                this.world.shield = Math.min(cap, this.world.shield + result.value);
+                this.world.shieldRegenTimer = 1000;
             } else if (result.effect === SynergyEffectType.INVULNERABLE) {
-                this.player.invulnerable = true;
-                this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, result.value);
+                this.world.player.invulnerable = true;
+                this.world.player.invulnerableTimer = Math.max(this.world.player.invulnerableTimer || 0, result.value);
             } else if (result.effect === SynergyEffectType.SLOW_FIELD) {
-                this.slowFields.push({ x: b.x, y: b.y, range: 120, life: result.value });
+                this.world.slowFields.push({ x: b.x, y: b.y, range: 120, life: result.value });
             } else if (result.effect === SynergyEffectType.SPEED_BOOST) {
-                this.playerSpeedBoostTimer = Math.max(this.playerSpeedBoostTimer, result.value);
+                this.world.playerSpeedBoostTimer = Math.max(this.world.playerSpeedBoostTimer, result.value);
             }
         });
 
         if (b.weaponType === WeaponType.WAVE && this.synergySys.isSynergyActive(SynergyType.WAVE_PLASMA)) {
             const range = 80;
-            this.plasmaExplosions.push({ x: b.x, y: b.y, range, life: 1200 });
+            this.world.plasmaExplosions.push({ x: b.x, y: b.y, range, life: 1200 });
         }
 
         if (b.weaponType === WeaponType.VULCAN) {
@@ -1198,10 +970,8 @@ export class GameEngine {
             this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ffe066');
         }
 
-        // Apply damage attenuation for piercing weapons
         if (b.attenuation && b.damage !== undefined) {
             b.damage *= (1 - b.attenuation);
-            // If damage becomes too low, destroy the bullet
             if (b.damage < 1) {
                 b.markedForDeletion = true;
             }
@@ -1213,24 +983,20 @@ export class GameEngine {
         let nearest: Entity | null = null;
         let minDist = range;
 
-        // Build list of all potential bounce targets (enemies, boss, wingmen)
-        const potentialTargets: Entity[] = [...this.enemies];
+        const potentialTargets: Entity[] = [...this.world.enemies];
 
-        // Add boss if it exists and is vulnerable
-        if (this.boss && !this.boss.invulnerable && this.boss.hp > 0 && !this.boss.markedForDeletion) {
-            potentialTargets.push(this.boss);
+        if (this.world.boss && !this.world.boss.invulnerable && this.world.boss.hp > 0 && !this.world.boss.markedForDeletion) {
+            potentialTargets.push(this.world.boss);
         }
 
-        // Add all live wingmen
-        this.bossWingmen.forEach(wingman => {
+        this.world.bossWingmen.forEach(wingman => {
             if (wingman.hp > 0 && !wingman.markedForDeletion) {
                 potentialTargets.push(wingman);
             }
         });
 
-        // Find nearest target within range (excluding the current hit target)
         potentialTargets.forEach(e => {
-            if (e === target || e.hp <= 0 || e.markedForDeletion) return; // Skip current target and dead entities
+            if (e === target || e.hp <= 0 || e.markedForDeletion) return;
             const dist = Math.sqrt((e.x - target.x) ** 2 + (e.y - target.y) ** 2);
             if (dist < minDist) {
                 minDist = dist;
@@ -1241,11 +1007,9 @@ export class GameEngine {
         if (nearest) {
             const t = nearest as Entity;
             const angle = Math.atan2(t.y - target.y, t.x - target.x);
-            const speed = b.speed || 20; // Fast chain speed
+            const speed = b.speed || 20;
 
-
-            // Spawn chain bullet from current target to next target
-            this.bullets.push({
+            this.world.bullets.push({
                 x: target.x,
                 y: target.y,
                 width: b.width,
@@ -1270,70 +1034,60 @@ export class GameEngine {
     killEnemy(e: Entity) {
         e.markedForDeletion = true;
 
-        // P2 Add combo kill and apply score multiplier
         const leveledUp = this.comboSys.addKill();
         const comboScoreMultiplier = this.comboSys.getScoreMultiplier();
 
         const baseScore = EnemyConfig[e.subType]?.score || 100;
         const eliteMultiplier = e.isElite ? EnemyCommonConfig.eliteScoreMultiplier : 1;
-        // P3 Apply difficulty score multiplier
         const difficultyScoreMultiplier = this.difficultySys.getScoreMultiplier();
         const finalScore = Math.floor(baseScore * eliteMultiplier * comboScoreMultiplier * difficultyScoreMultiplier);
 
-        this.score += finalScore;
-        this.onScoreChange(this.score);
+        this.world.score += finalScore;
         this.checkAndApplyLevelUp();
         this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion(ExplosionSize.SMALL);
 
-        // P2 Visual feedback for combo level up
         if (leveledUp) {
             const tier = this.comboSys.getCurrentTier();
-            this.addShockwave(this.player.x, this.player.y, tier.color, 200, 8);
-            this.screenShake = 15;
+            this.addShockwave(this.world.player.x, this.world.player.y, tier.color, 200, 8);
+            this.world.screenShake = 15;
         }
 
-        // Unlock enemy when defeated
         if (e.subType !== undefined) {
             unlockEnemy(e.subType as EnemyType);
         }
 
-        // P3 Apply difficulty drop rate multiplier
         const difficultyConfig = this.difficultySys.getConfig();
         const baseDropRate = e.isElite ? PowerupDropConfig.elitePowerupDropRate : PowerupDropConfig.normalPowerupDropRate;
         const finalDropRate = baseDropRate * difficultyConfig.powerupDropMultiplier;
         if (Math.random() < finalDropRate || this.difficultySys.consumePityDrop()) this.spawnPowerup(e.x, e.y);
 
-        // Debug Mode: Increment enemy kill count
-        if (this.debugModeEnabled) {
-            this.debugEnemyKillCount++;
+        if (this.world.debugModeEnabled) {
+            this.world.debugEnemyKillCount++;
         }
     }
 
     createPlasmaExplosion(x: number, y: number) {
         this.createExplosion(x, y, ExplosionSize.LARGE, '#ed64a6');
         this.addShockwave(x, y, '#ed64a6');
-        this.screenShake = 15;
+        this.world.screenShake = 15;
         this.audio.playExplosion(ExplosionSize.LARGE);
 
-        const range = 100 + (this.weaponLevel * 15);
+        const range = 100 + (this.world.weaponLevel * 15);
 
-        this.plasmaExplosions.push({ x, y, range, life: 1200 });
+        this.world.plasmaExplosions.push({ x, y, range, life: 1200 });
 
-        // P2 Check for TESLA+PLASMA synergy (Plasma Storm)
-        const affectedEnemies = this.synergySys.triggerPlasmaStorm(x, y, range, this.enemies);
+        const affectedEnemies = this.synergySys.triggerPlasmaStorm(x, y, range, this.world.enemies);
 
         if (affectedEnemies.length > 0) {
-            // Generate lightning bolts to affected enemies
             affectedEnemies.forEach(e => {
                 const angle = Math.atan2(e.y - y, e.x - x);
-                // 只使用一级配置
                 const config = WeaponConfig[WeaponType.TESLA];
                 const upgradeConfig = WeaponUpgradeConfig[WeaponType.TESLA]
                 if (!config || !upgradeConfig) return;
                 const level1 = upgradeConfig[1];
                 const speed = config.speed;
-                this.bullets.push({
+                this.world.bullets.push({
                     x: x,
                     y: y,
                     width: 10,
@@ -1360,30 +1114,30 @@ export class GameEngine {
             weaponType: WeaponType.PLASMA,
             bulletX: x,
             bulletY: y,
-            targetEnemy: this.player,
-            enemies: this.enemies,
-            player: this.player,
-            plasmaExplosions: this.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range })),
+            targetEnemy: this.world.player,
+            enemies: this.world.enemies,
+            player: this.world.player,
+            plasmaExplosions: this.world.plasmaExplosions.map(({ x, y, range }) => ({ x, y, range })),
             eventType: CombatEventType.EXPLODE
         };
         const defenseResults = this.synergySys.tryTriggerSynergies(context);
         defenseResults.forEach(r => {
             if (r.effect === SynergyEffectType.SHIELD_REGEN) {
                 const cap = this.getShieldCap();
-                this.shield = Math.min(cap, this.shield + r.value);
+                this.world.shield = Math.min(cap, this.world.shield + r.value);
             } else if (r.effect === SynergyEffectType.INVULNERABLE) {
-                this.player.invulnerable = true;
-                this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer || 0, r.value);
+                this.world.player.invulnerable = true;
+                this.world.player.invulnerableTimer = Math.max(this.world.player.invulnerableTimer || 0, r.value);
             }
         });
 
-        this.enemies.forEach(e => {
+        this.world.enemies.forEach(e => {
             if (Math.hypot(e.x - x, e.y - y) < range) {
                 e.hp -= 50;
                 if (e.hp <= 0) this.killEnemy(e);
             }
         });
-        this.enemyBullets.forEach(b => {
+        this.world.enemyBullets.forEach(b => {
             if (Math.hypot(b.x - x, b.y - y) < range) b.markedForDeletion = true;
         });
     }
@@ -1393,46 +1147,37 @@ export class GameEngine {
 
         switch (type) {
             case PowerupType.POWER:
-                // Generic power upgrade for current weapon
                 {
-                    const currentMax = (WeaponConfig[this.weaponType]?.maxLevel ?? effects.maxWeaponLevel);
-                    this.weaponLevel = Math.min(currentMax, this.weaponLevel + 1);
+                    const currentMax = (WeaponConfig[this.world.weaponType]?.maxLevel ?? effects.maxWeaponLevel);
+                    this.world.weaponLevel = Math.min(currentMax, this.world.weaponLevel + 1);
                 }
                 break;
 
             case PowerupType.HP:
-                // 生命值溢出转换为护盾能量
-                if (this.player.hp >= this.player.maxHp) {
-                    // 当生命值已满时，将溢出的生命值转换为护盾能量
+                if (this.world.player.hp >= this.world.player.maxHp) {
                     const overflowHp = effects.hpRestoreAmount;
-                    this.shield = Math.min(this.getShieldCap(), this.shield + overflowHp);
+                    this.world.shield = Math.min(this.getShieldCap(), this.world.shield + overflowHp);
                 } else {
-                    // 当生命值未满时，优先恢复生命值
-                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + effects.hpRestoreAmount);
-                    // 如果恢复生命值后仍有溢出，则将溢出部分转换为护盾能量
-                    const overflowHp = Math.max(0, this.player.hp + effects.hpRestoreAmount - this.player.maxHp);
+                    this.world.player.hp = Math.min(this.world.player.maxHp, this.world.player.hp + effects.hpRestoreAmount);
+                    const overflowHp = Math.max(0, this.world.player.hp + effects.hpRestoreAmount - this.world.player.maxHp);
                     if (overflowHp > 0) {
-                        this.shield = Math.min(this.getShieldCap(), this.shield + overflowHp);
+                        this.world.shield = Math.min(this.getShieldCap(), this.world.shield + overflowHp);
                     }
-                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + effects.hpRestoreAmount);
+                    this.world.player.hp = Math.min(this.world.player.maxHp, this.world.player.hp + effects.hpRestoreAmount);
                 }
-                this.onHpChange(this.player.hp);
                 break;
 
             case PowerupType.BOMB:
-                // Bomb pickup
-                if (this.bombs < effects.maxBombs) {
-                    this.bombs++;
-                    this.onBombChange(this.bombs);
+                if (this.world.bombs < effects.maxBombs) {
+                    this.world.bombs++;
                 }
                 break;
 
             case PowerupType.OPTION:
-                // Option/僚机 pickup
-                if (this.options.length < effects.maxOptions) {
-                    this.options.push({
-                        x: this.player.x,
-                        y: this.player.y,
+                if (this.world.options.length < effects.maxOptions) {
+                    this.world.options.push({
+                        x: this.world.player.x,
+                        y: this.world.player.y,
                         width: 16,
                         height: 16,
                         vx: 0,
@@ -1448,74 +1193,55 @@ export class GameEngine {
                 break;
 
             case PowerupType.INVINCIBILITY:
-                // 无敌时间 - 给玩家5秒无敌时间
-                this.player.invulnerable = true;
-                this.player.invulnerableTimer = 5000; // 5秒
+                this.world.player.invulnerable = true;
+                this.world.player.invulnerableTimer = 5000;
                 break;
 
             case PowerupType.TIME_SLOW:
-                // 时间减缓 - 减缓游戏速度3秒
-                this.timeSlowActive = true;
-                this.timeSlowTimer = 3000; // 3秒
+                this.world.timeSlowActive = true;
+                this.world.timeSlowTimer = 3000;
                 this.audio.playSlowMotionEnter();
                 break;
 
             default:
-                // Weapon-specific powerups
                 const weaponType = effects.weaponTypeMap[type];
                 if (weaponType !== undefined && weaponType !== null) {
-                    // Unlock weapon when picked up
                     unlockWeapon(weaponType);
 
-                    if (this.weaponType === weaponType) {
-                        // Same weapon type - upgrade level
+                    if (this.world.weaponType === weaponType) {
                         {
-                            const currentMax = (WeaponConfig[this.weaponType]?.maxLevel ?? effects.maxWeaponLevel);
-                            this.weaponLevel = Math.min(currentMax, this.weaponLevel + 1);
+                            const currentMax = (WeaponConfig[this.world.weaponType]?.maxLevel ?? effects.maxWeaponLevel);
+                            this.world.weaponLevel = Math.min(currentMax, this.world.weaponLevel + 1);
                         }
 
-                        // P2 Update synergy system to keep it in sync with current equipment
-                        const equippedWeapons = this.secondaryWeapon
-                            ? [this.weaponType, this.secondaryWeapon]
-                            : [this.weaponType];
+                        const equippedWeapons = this.world.secondaryWeapon
+                            ? [this.world.weaponType, this.world.secondaryWeapon]
+                            : [this.world.weaponType];
                         this.synergySys.updateEquippedWeapons(equippedWeapons);
                     } else {
-                        // Different weapon - switch primary
-                        // Logic: New weapon becomes Primary. Old Primary becomes Secondary ONLY if it synergizes.
-                        // 武器切换逻辑:
-                        // 1. 新武器成为主武器,等级重置为1
-                        // 2. 旧主武器仅在可协同时保留为副武器,否则丢弃
-                        // 3. 旧副武器总是被丢弃
-                        const oldPrimary = this.weaponType;
-                        const oldWeaponType = this.weaponType;
-                        this.weaponType = weaponType;
-                        // 判断是否能与旧主武器协同,并一次性处理副武器、装备更新和主武器校正
-                        if (this.synergySys.canCombine(this.weaponType, oldPrimary)) {
-                            // 可以协同:保留旧主武器为副武器
-                            this.secondaryWeapon = oldPrimary;
+                        const oldPrimary = this.world.weaponType;
+                        const oldWeaponType = this.world.weaponType;
+                        this.world.weaponType = weaponType;
+                        if (this.synergySys.canCombine(this.world.weaponType, oldPrimary)) {
+                            this.world.secondaryWeapon = oldPrimary;
 
-                            // 更新协同系统装备状态
-                            this.synergySys.updateEquippedWeapons([this.weaponType, this.secondaryWeapon]);
+                            this.synergySys.updateEquippedWeapons([this.world.weaponType, this.world.secondaryWeapon]);
 
-                            // 检查协同是否指定了主武器,如果是则校正主副武器位置
                             const activeSynergies = this.synergySys.getActiveSynergies();
                             if (activeSynergies.length > 0) {
                                 const synergy = activeSynergies[0];
-                                if (synergy.mainWeapon && this.weaponType !== synergy.mainWeapon) {
-                                    // 交换主副武器,确保协同的主武器在主武器槽
-                                    this.secondaryWeapon = this.weaponType;
-                                    this.weaponType = synergy.mainWeapon;
+                                if (synergy.mainWeapon && this.world.weaponType !== synergy.mainWeapon) {
+                                    this.world.secondaryWeapon = this.world.weaponType;
+                                    this.world.weaponType = synergy.mainWeapon;
                                 }
                             }
-                            if (this.weaponType !== oldWeaponType) {
-                                // 如果最终主武器没变化，要保留武器等级
-                                this.weaponLevel = 1;
+                            if (this.world.weaponType !== oldWeaponType) {
+                                this.world.weaponLevel = 1;
                             }
                         } else {
-                            // 不能协同:丢弃旧武器
-                            this.weaponLevel = 1; // 重置武器等级
-                            this.secondaryWeapon = null;
-                            this.synergySys.updateEquippedWeapons([this.weaponType]);
+                            this.world.weaponLevel = 1;
+                            this.world.secondaryWeapon = null;
+                            this.synergySys.updateEquippedWeapons([this.world.weaponType]);
                         }
                     }
                 }
@@ -1526,7 +1252,7 @@ export class GameEngine {
     spawnPowerup(x: number, y: number) {
         const type = selectPowerupType();
 
-        this.powerups.push({
+        this.world.powerups.push({
             x, y, width: 30, height: 30, vx: 0, vy: 2, hp: 1, maxHp: 1,
             type: EntityType.POWERUP, subType: type, color: '#fff', markedForDeletion: false,
             spriteKey: `powerup_${type}`
@@ -1539,7 +1265,7 @@ export class GameEngine {
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * (size === ExplosionSize.SMALL ? 4 : 10);
-            this.particles.push({
+            this.world.particles.push({
                 x, y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
@@ -1553,7 +1279,7 @@ export class GameEngine {
     }
 
     addShockwave(x: number, y: number, color: string = '#ffffff', maxRadius: number = 150, width: number = 5) {
-        this.shockwaves.push({
+        this.world.shockwaves.push({
             x, y, radius: 10, maxRadius, color, life: 1.0, width
         });
     }
@@ -1568,14 +1294,10 @@ export class GameEngine {
     }
 
     private isPlayerColliding(player: Entity, other: Entity): boolean {
-        // 获取玩家的碰撞箱收缩比例
-        const shrinkFactor = this.playerConfig.hitboxShrink || 0;
-
-        // 计算收缩后的宽度和高度
+        const shrinkFactor = this.world.playerConfig.hitboxShrink || 0;
         const playerWidth = player.width * (1 - shrinkFactor);
         const playerHeight = player.height * (1 - shrinkFactor);
 
-        // 使用收缩后的尺寸进行碰撞检测
         return (
             player.x - playerWidth / 2 < other.x + other.width / 2 &&
             player.x + playerWidth / 2 > other.x - other.width / 2 &&
@@ -1584,17 +1306,16 @@ export class GameEngine {
         );
     }
 
-    // P3 Helper method to get all equipped weapons for difficulty system
     private getPlayerWeapons(): { type: WeaponType, level: number }[] {
-        const weapons = [{ type: this.weaponType, level: this.weaponLevel }];
-        if (this.secondaryWeapon) {
-            weapons.push({ type: this.secondaryWeapon, level: this.weaponLevel });
+        const weapons = [{ type: this.world.weaponType, level: this.world.weaponLevel }];
+        if (this.world.secondaryWeapon) {
+            weapons.push({ type: this.world.secondaryWeapon, level: this.world.weaponLevel });
         }
         return weapons;
     }
 
     getShieldCap(): number {
-        const base = this.playerConfig.maxShield + this.levelingShieldBonus;
+        const base = this.world.playerConfig.maxShield + this.world.levelingShieldBonus;
         const comboLevel = this.comboSys && typeof this.comboSys.getState === 'function'
             ? this.comboSys.getState().level
             : 0;
@@ -1608,17 +1329,16 @@ export class GameEngine {
 
     getShieldPercent(): number {
         const cap = this.getShieldCap();
-        return cap > 0 ? Math.max(0, Math.min(100, Math.round((this.shield / cap) * 100))) : 0;
+        return cap > 0 ? Math.max(0, Math.min(100, Math.round((this.world.shield / cap) * 100))) : 0;
     }
 
     draw() {
-        const primaryColor = WeaponConfig[this.weaponType]?.color;
-        const secondaryColor = this.secondaryWeapon ? WeaponConfig[this.secondaryWeapon]?.color : undefined;
-        const canCombine = this.secondaryWeapon ? this.synergySys.canCombine(this.weaponType, this.secondaryWeapon) : false;
+        const primaryColor = WeaponConfig[this.world.weaponType]?.color;
+        const secondaryColor = this.world.secondaryWeapon ? WeaponConfig[this.world.secondaryWeapon]?.color : undefined;
+        const canCombine = this.world.secondaryWeapon ? this.synergySys.canCombine(this.world.weaponType, this.world.secondaryWeapon) : false;
 
-        // P2 Calculate synergy information for each powerup
         const powerupSynergyInfo = new Map<Entity, { colors: string[], synergyType: SynergyType }>();
-        this.powerups.forEach(powerup => {
+        this.world.powerups.forEach(powerup => {
             const powerupType = powerup.subType as PowerupType;
             const weaponType = PowerupEffects.weaponTypeMap[powerupType];
             if (weaponType !== undefined && weaponType !== null) {
@@ -1630,62 +1350,63 @@ export class GameEngine {
         });
 
         this.render.draw(
-            this.state,
-            this.player,
-            this.options,
-            this.enemies,
-            this.boss,
-            this.bossWingmen,
-            this.bullets,
-            this.enemyBullets,
-            this.particles,
-            this.shockwaves,
-            this.powerups,
-            this.meteors,
-            this.shield,
-            this.screenShake,
-            this.weaponLevel,
-            this.playerLevel,
-            [], //this.envSys.getAllElements(), // P2 Pass environment elements
-            this.showBossDefeatAnimation,
-            this.bossDefeatTimer,
+            this.world.state,
+            this.world.player,
+            this.world.options,
+            this.world.enemies,
+            this.world.boss,
+            this.world.bossWingmen,
+            this.world.bullets,
+            this.world.enemyBullets,
+            this.world.particles,
+            this.world.shockwaves,
+            this.world.powerups,
+            this.world.meteors,
+            this.world.shield,
+            this.world.screenShake,
+            this.world.weaponLevel,
+            this.world.playerLevel,
+            [],
+            this.world.showBossDefeatAnimation,
+            this.world.bossDefeatTimer,
             primaryColor,
             secondaryColor,
             canCombine,
-            this.timeSlowActive,
+            this.world.timeSlowActive,
             powerupSynergyInfo,
-            this.slowFields,
-            this.playerSpeedBoostTimer,
-            this.shieldRegenTimer,
-            this.plasmaExplosions
+            this.world.slowFields,
+            this.world.playerSpeedBoostTimer,
+            this.world.shieldRegenTimer,
+            this.world.plasmaExplosions
         );
     }
 
     loop(dt: number) {
         this.update(dt);
         this.draw();
+        snapshot$.next(snapshot(this.world));
     }
 
     private checkAndApplyLevelUp() {
-        const conf = this.playerConfig.leveling;
+        const conf = this.world.playerConfig.leveling;
         if (!conf) return;
-        while (this.score >= this.nextLevelScore && this.playerLevel < conf.maxLevel) {
-            this.playerLevel += 1;
-            this.nextLevelScore *= conf.scoreGrowthFactor;
-            this.player.maxHp += conf.bonusesPerLevel.maxHpFlat;
-            this.player.hp = this.player.maxHp;
-            this.levelingShieldBonus += conf.bonusesPerLevel.maxShieldFlat;
-            this.shield = this.getShieldCap();
+        while (this.world.score >= this.world.nextLevelScore && this.world.playerLevel < conf.maxLevel) {
+            this.world.playerLevel += 1;
+            this.world.nextLevelScore *= conf.scoreGrowthFactor;
+            this.world.player.maxHp += conf.bonusesPerLevel.maxHpFlat;
+            this.world.player.hp = this.world.player.maxHp;
+            this.world.levelingShieldBonus += conf.bonusesPerLevel.maxShieldFlat;
+            this.world.shield = this.getShieldCap();
             const defInc = (conf.bonusesPerLevel.defensePct || 0) / 100;
             const frInc = (conf.bonusesPerLevel.fireRatePct || 0) / 100;
             const dmgInc = (conf.bonusesPerLevel.damagePct || 0) / 100;
             const defCap = (conf.bonusesPerLevel.defensePctMax ?? Number.POSITIVE_INFINITY) / 100;
             const frCap = (conf.bonusesPerLevel.fireRatePctMax ?? Number.POSITIVE_INFINITY) / 100;
             const dmgCap = (conf.bonusesPerLevel.damagePctMax ?? Number.POSITIVE_INFINITY) / 100;
-            this.playerDefensePct = Math.min(this.playerDefensePct + defInc, defCap);
-            this.playerFireRateBonusPct = Math.min(this.playerFireRateBonusPct + frInc, frCap);
-            this.playerDamageBonusPct = Math.min(this.playerDamageBonusPct + dmgInc, dmgCap);
-            this.player.hitFlashUntil = Date.now() + 300;
+            this.world.playerDefensePct = Math.min(this.world.playerDefensePct + defInc, defCap);
+            this.world.playerFireRateBonusPct = Math.min(this.world.playerFireRateBonusPct + frInc, frCap);
+            this.world.playerDamageBonusPct = Math.min(this.world.playerDamageBonusPct + dmgInc, dmgCap);
+            this.world.player.hitFlashUntil = Date.now() + 300;
             this.audio.playLevelUp();
         }
     }
@@ -1693,27 +1414,24 @@ export class GameEngine {
     findMissileTarget(missile: Entity): Entity | undefined {
         const potentialTargets: Entity[] = [];
 
-        // 1. Add active enemies
-        this.enemies.forEach(e => {
+        this.world.enemies.forEach(e => {
             if (e.hp > 0 && !e.markedForDeletion && (e.incomingMissiles || 0) < 2) {
                 potentialTargets.push(e);
             }
         });
 
-        // 2. Add Boss if active
-        if (this.boss && this.boss.hp > 0 && !this.boss.markedForDeletion && !this.boss.invulnerable && (this.boss.incomingMissiles || 0) < 2) {
-            potentialTargets.push(this.boss);
+        if (this.world.boss && this.world.boss.hp > 0 && !this.world.boss.markedForDeletion && !this.world.boss.invulnerable && (this.world.boss.incomingMissiles || 0) < 2) {
+            potentialTargets.push(this.world.boss);
         }
 
-        // 3. Sort by Priority: Closest -> Lowest HP
         potentialTargets.sort((a, b) => {
             const distA = (a.x - missile.x) ** 2 + (a.y - missile.y) ** 2;
             const distB = (b.x - missile.x) ** 2 + (b.y - missile.y) ** 2;
 
-            if (Math.abs(distA - distB) > 100) { // Epsilon for float comparison (squared distance)
-                return distA - distB; // Closest first
+            if (Math.abs(distA - distB) > 100) {
+                return distA - distB;
             }
-            return a.hp - b.hp; // Lowest HP first
+            return a.hp - b.hp;
         });
 
         return potentialTargets[0];

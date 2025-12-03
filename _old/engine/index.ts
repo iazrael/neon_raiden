@@ -22,25 +22,25 @@ export function setWorldForEngine(w: World) {
 export function startEngine(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d')!;
   let last = performance.now();
-  
+
   function loop(t: number) {
     const dt = t - last;
     last = t;
-    
+
     // 1. 各系统按顺序运行
     InputSystem(world, dt);
     WeaponSystem(world, dt);
     MovementSystem(world, dt);
     CollisionSystem(world, dt);
-    
+
     // 2. 生成快照并广播
     snapshot$.next(snapshot(world, t));
-    
-    // 3. 可选：canvas 直接画
+
+    // 3. canvas 直接画
     RenderSystem(ctx, world);
-    
+
     requestAnimationFrame(loop);
   }
-  
+
   requestAnimationFrame(loop);
 }

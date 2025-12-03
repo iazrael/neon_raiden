@@ -57,15 +57,7 @@ function App() {
 
     // Initialize Engine
     const engine = new GameEngine(
-      canvasRef.current,
-      (newScore) => setScore(newScore),
-      (newLevel) => setLevel(newLevel),
-      (newState) => setGameState(newState),
-      (newHp) => setHp(newHp),
-      (newBombs) => setBombs(newBombs),
-      (maxLevel) => setMaxLevelReached(maxLevel),
-      (show) => setShowBossWarning(show),
-      (newComboState) => setComboState(newComboState) // P2 Combo
+      canvasRef.current
     );
     engineRef.current = engine;
 
@@ -79,25 +71,56 @@ function App() {
 
       engine.loop(Math.min(dt, 50)); // Cap dt to prevent huge jumps
 
-      // Sync level transition state
-      setShowLevelTransition(engine.showLevelTransition);
-      setLevelTransitionTimer(engine.levelTransitionTimer);
-
-      // P2 Sync weapon synergy state
-      setActiveSynergies(engine.synergySys.getActiveSynergies());
-      setWeaponType(engine.weaponType);
-      setSecondaryWeapon(engine.secondaryWeapon);
-      setWeaponLevel(engine.weaponLevel);
-
-      setShieldPercent(engine.getShieldPercent());
+      // Sync state from snapshot
+      const snap = engine.getSnapshot(); // We need to expose this or subscribe to snapshot$
+      // Actually, engine.loop calls update which emits snapshot.
+      // But here we are inside the loop.
+      // We should probably subscribe to snapshot$ in useEffect, OR just read it from engine if we want sync update.
+      // But the user pattern in New.md suggests React subscribes to snapshot$.
+      // However, for 60fps loop driving the engine, we might want to just let the engine drive and React update on frame or subscription.
+      // If we use subscription, we might trigger too many re-renders if we are not careful.
+      // But let's follow the pattern: React subscribes.
 
       animationId = requestAnimationFrame(loop);
     };
 
+    // We'll use a separate effect for subscription or just update state here if we have access to latest snapshot.
+    // Since we are in the loop, we can just get the latest snapshot from the engine if we expose it, or rely on the subscription.
+    // But wait, the loop is running in App.tsx.
+    // If we want to decouple, the loop should probably be in the engine or started by the engine, and App just subscribes.
+    // The user's New.md says: "React 渲染层 ← 只订阅快照".
+    // So App.tsx shouldn't necessarily run the loop?
+    // "startEngine(canvas)" in New.md runs the loop.
+    // But currently App.tsx runs the loop.
+    // I should probably move the loop into GameEngine and have App.tsx just subscribe.
+    // But for now, to minimize changes, I will keep the loop here but update state from snapshot$.
+
+    // Actually, let's just subscribe to snapshot$ in useEffect.
+
     animationId = requestAnimationFrame(loop);
+
+    const sub = engine.snapshot$.subscribe((snap) => {
+      if (!snap) return;
+      setScore(snap.score);
+      setLevel(snap.level);
+      setGameState(snap.state);
+      setHp(snap.player.hp);
+      setBombs(snap.player.bombs);
+      setShieldPercent(snap.player.shieldPercent);
+      setShowLevelTransition(snap.showLevelTransition);
+      setLevelTransitionTimer(snap.levelTransitionTimer);
+      setMaxLevelReached(snap.maxLevelReached);
+      setShowBossWarning(snap.showBossWarning);
+      setComboState(snap.comboState);
+      setActiveSynergies(snap.player.activeSynergies);
+      setWeaponType(snap.player.weaponType);
+      setSecondaryWeapon(snap.player.secondaryWeapon);
+      setWeaponLevel(snap.player.weaponLevel);
+    });
 
     return () => {
       cancelAnimationFrame(animationId);
+      sub.unsubscribe();
       window.removeEventListener('resize', () => engine.resize());
     };
   }, []);
