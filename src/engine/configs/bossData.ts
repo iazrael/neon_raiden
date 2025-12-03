@@ -1,0 +1,293 @@
+// configs/bossData.ts  （不是蓝图，只是常量表）
+import { BossType, BossEntity, BossMovementPattern, BossSpawnPosition, EnemyType, BossWeaponType } from '@/types';
+
+export const BossConfigData: Record<BossType, Omit<BossEntity, 'hp' | 'sprite' | 'size'>> = {
+    [BossType.GUARDIAN]: {
+        type: BossType.GUARDIAN,
+        id: 'boss_guardian',
+        name: 'Guardian',
+        chineseName: '赛博守护者',
+        describe: '赛博空间的初级守护程序,以优雅的正弦轨迹游弋于霓虹战场,全向弹幕系统是对新手飞行员的第一道试炼。',
+        color: '#4488ff',
+        level: 1,
+        score: 5000,
+        weapons: [BossWeaponType.RADIAL],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 4.0,
+            fireRate: 0.07,
+            targetedShotSpeed: 0
+        },
+        movement: {
+            pattern: BossMovementPattern.SINE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.INTERCEPTOR]: {
+        type: BossType.INTERCEPTOR,
+        id: 'boss_interceptor',
+        name: 'Interceptor',
+        chineseName: '疾风拦截者',
+        describe: '突击型战斗平台,以之字形轨迹高速机动,双模式火力系统兼顾区域封锁与精准打击,是速度与火力的完美结合。',
+        color: '#ff4488',
+        level: 2,
+        score: 10000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 4.2,
+            fireRate: 0.09,
+            targetedShotSpeed: 2
+        },
+        movement: {
+            pattern: BossMovementPattern.ZIGZAG,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.DESTROYER]: {
+        type: BossType.DESTROYER,
+        id: 'boss_destroyer',
+        name: 'Destroyer',
+        chineseName: '装甲毁灭者',
+        describe: '重型装甲作战单元,以八字轨迹碾压战场,三重进化形态层层解锁毁灭之力,每个阶段都更加致命。',
+        color: '#44ff88',
+        level: 3,
+        score: 15000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 5,
+            fireRate: 0.05,
+            targetedShotSpeed: 3
+        },
+        movement: {
+            pattern: BossMovementPattern.FIGURE_8,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.ANNIHILATOR]: {
+        type: BossType.ANNIHILATOR,
+        id: 'boss_annihilator',
+        name: 'Annihilator',
+        chineseName: '幽灵歼灭者',
+        describe: '装备光学迷彩的幽灵战斗机,空间跃迁轨迹如鬼魅般难以捉摸,全方位弹雨与锁定追踪的双重威胁令人防不胜防。',
+        color: '#ff8844',
+        level: 4,
+        score: 20000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 5.0,
+            fireRate: 0.07,
+            targetedShotSpeed: 3
+        },
+        movement: {
+            pattern: BossMovementPattern.RANDOM_TELEPORT,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.DOMINATOR]: {
+        type: BossType.DOMINATOR,
+        id: 'boss_dominator',
+        name: 'Dominator',
+        chineseName: '弹幕主宰者',
+        describe: '高能粒子壁垒,沿螺旋轨道释放无尽弹幕洪流,致密火力网封锁一切突破可能,是弹幕艺术的极致体现。',
+        color: '#8844ff',
+        level: 5,
+        score: 25000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 5.0,
+            fireRate: 0.08,
+            targetedShotSpeed: 1
+        },
+        movement: {
+            pattern: BossMovementPattern.CIRCLE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'none',
+            damage: 0,
+            cooldown: 0
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.OVERLORD]: {
+        type: BossType.OVERLORD,
+        id: 'boss_overlord',
+        name: 'Overlord',
+        chineseName: '战场霸主',
+        describe: '双体协同战舰,智能追踪锁定目标,融合扩散弹幕、制导武器与连续激光的复合火力系统,是战场的绝对统治者。',
+        color: '#ff44ff',
+        level: 6,
+        score: 30000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 5.2,
+            fireRate: 0.07,
+            targetedShotSpeed: 3
+        },
+        movement: {
+            pattern: BossMovementPattern.TRACKING,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'continuous',
+            damage: 35,
+            cooldown: 3000
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.TITAN]: {
+        type: BossType.TITAN,
+        id: 'boss_titan',
+        name: 'Titan',
+        chineseName: '泰坦要塞',
+        describe: '三角构型的空中要塞,缓慢降临碾压战场,三阶觉醒形态逐步释放激光风暴与制导毁灭,每次觉醒都是噩梦的升级。',
+        color: '#44ff44',
+        level: 7,
+        score: 35000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER],
+        weaponConfigs: {
+            bulletCount: 6,
+            bulletSpeed: 6,
+            fireRate: 0.065,
+            targetedShotSpeed: 3
+        },
+        movement: {
+            pattern: BossMovementPattern.SLOW_DESCENT,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'continuous',
+            damage: 30,
+            cooldown: 3500
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.COLOSSUS]: {
+        type: BossType.COLOSSUS,
+        id: 'boss_colossus',
+        name: 'Colossus',
+        chineseName: '钢铁巨像',
+        describe: '八足钢铁巨蛛,激进突进撕裂战线,多重武装系统配合激光护卫机提供防空掩护,是移动的死亡堡垒。',
+        color: '#ffff44',
+        level: 8,
+        score: 40000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD],
+        weaponConfigs: {
+            bulletCount: 3,
+            bulletSpeed: 7.0,
+            fireRate: 0.07,
+            targetedShotSpeed: 6
+        },
+        movement: {
+            pattern: BossMovementPattern.AGGRESSIVE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'pulsed',
+            damage: 50,
+            cooldown: 2500
+        },
+        wingmen: {
+            count: 1,
+            type: EnemyType.LASER_INTERCEPTOR
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.LEVIATHAN]: {
+        type: BossType.LEVIATHAN,
+        id: 'boss_leviathan',
+        name: 'Leviathan',
+        chineseName: '深渊利维坦',
+        describe: '环状中枢战体,以极限机动穿梭战场,五重武器矩阵配合双护卫机编队协防,构筑无法逃脱的死亡领域。',
+        color: '#44ffff',
+        level: 9,
+        score: 45000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
+        weaponConfigs: {
+            bulletCount: 5,
+            bulletSpeed: 7.5,
+            fireRate: 0.08,
+            targetedShotSpeed: 5
+        },
+        movement: {
+            pattern: BossMovementPattern.AGGRESSIVE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'pulsed',
+            damage: 45,
+            cooldown: 2200
+        },
+        wingmen: {
+            count: 2,
+            type: EnemyType.LASER_INTERCEPTOR
+        },
+        hitboxScale: 0.7
+    },
+    [BossType.APOCALYPSE]: {
+        type: BossType.APOCALYPSE,
+        id: 'boss_apocalypse',
+        name: 'Apocalypse',
+        chineseName: '天启审判',
+        describe: '终极龙王,轨迹莫测难寻,五维火力全域覆盖,双布雷机僚机协同,四重超载形态逐次显现,是霓虹战场的终极审判。',
+        color: '#ff0000',
+        level: 10,
+        score: 50000,
+        weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
+        weaponConfigs: {
+            bulletCount: 8,
+            bulletSpeed: 8.0,
+            fireRate: 0.10,
+            targetedShotSpeed: 3
+        },
+        movement: {
+            pattern: BossMovementPattern.ADAPTIVE,
+            spawnX: BossSpawnPosition.RANDOM
+        },
+        laser: {
+            type: 'pulsed',
+            damage: 55,
+            cooldown: 2000
+        },
+        wingmen: {
+            count: 2,
+            type: EnemyType.MINE_LAYER
+        },
+        hitboxScale: 0.7
+    }
+};
+
+// 根据关卡等级获取Boss配置
+export function getBossConfigByLevel(level: number): BossEntity | null {
+    const bossEntry = Object.values(BossConfigData).find((config) => config.level === level);
+    return bossEntry || null;
+}
