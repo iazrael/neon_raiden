@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
             }),
             VitePWA({
                 registerType: 'prompt',
-                includeAssets: ['favicon.svg', 'logo.svg', 'logo-180.png', 'logo-192.png', 'logo-512.png', 'assets/splashs/*.png'],
+                includeAssets: ['favicon.svg', 'logo.svg', 'logo-180.png', 'logo-192.png', 'logo-512.png'],
                 manifest: {
                     name: "霓电战记",
                     short_name: "霓电战记",
@@ -90,24 +90,11 @@ export default defineConfig(({ mode }) => {
                     clientsClaim: true,
                     skipWaiting: true,
                     runtimeCaching: [
-                        {
-                            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-                            handler: 'CacheFirst',
-                            options: {
-                                cacheName: 'google-fonts-cache',
-                                expiration: {
-                                    maxEntries: 10,
-                                    maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-                                },
-                                cacheableResponse: {
-                                    statuses: [0, 200]
-                                }
-                            }
-                        }
                     ]
                 },
                 devOptions: {
-                    enabled: true
+                    enabled: true,
+                    type: 'module'
                 }
             })
         ],
