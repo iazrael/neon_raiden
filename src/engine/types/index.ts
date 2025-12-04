@@ -1,7 +1,5 @@
-import { ComboState } from '@/game/systems/ComboSystem';
-import { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
-import { GameState, WeaponType } from '@/types';
 import * as Components from '../components';
+import { Event } from '../events';
 export * from './sprite'
 
 // ========== 基础类型 ==========

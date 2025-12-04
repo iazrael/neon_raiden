@@ -1,102 +1,261 @@
+//
+// 道具蓝图文件
+// 包含游戏中所有道具类型的蓝图定义
+//
+
 import { Transform, Sprite, PickupItem, HitBox } from '../components'
 import { Blueprint } from '../types';
 import { PowerupType } from '@/types';
 
 
+/**
+ * 能量提升道具蓝图
+ * 提升玩家武器能量等级
+ */
 export const BLUEPRINT_POWERUP_POWER: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_power', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('buff', 'powerup_power', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_power', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'buff', blueprint: 'powerup_power', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 生命恢复道具蓝图
+ * 恢复玩家生命值
+ */
 export const BLUEPRINT_POWERUP_HP: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_hp', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('buff', 'powerup_hp', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_hp', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'buff', blueprint: 'powerup_hp', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 炸弹道具蓝图
+ * 获得一枚炸弹
+ */
 export const BLUEPRINT_POWERUP_BOMB: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_bomb', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('buff', 'powerup_bomb', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_bomb', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'buff', blueprint: 'powerup_bomb', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 僚机单元道具蓝图
+ * 获得一个僚机
+ */
 export const BLUEPRINT_POWERUP_OPTION: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_option', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('buff', 'powerup_option', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_option', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'buff', blueprint: 'powerup_option', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 离子机炮道具蓝图
+ * 获得离子机炮武器
+ */
 export const BLUEPRINT_POWERUP_VULCAN: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_vulcan', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_vulcan', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_vulcan', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_vulcan', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 量子激光阵道具蓝图
+ * 获得量子激光阵武器
+ */
 export const BLUEPRINT_POWERUP_LASER: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_laser', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_laser', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_laser', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_laser', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 智能追踪系统道具蓝图
+ * 获得智能追踪系统武器
+ */
 export const BLUEPRINT_POWERUP_MISSILE: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_missile', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_missile', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_missile', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_missile', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 量子飞镖道具蓝图
+ * 获得量子飞镖武器
+ */
 export const BLUEPRINT_POWERUP_SHURIKEN: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_shuriken', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_shuriken', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_shuriken', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_shuriken', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 特斯拉线圈道具蓝图
+ * 获得特斯拉线圈武器
+ */
 export const BLUEPRINT_POWERUP_TESLA: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_tesla', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_tesla', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_tesla', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_tesla', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 恒星熔岩炮道具蓝图
+ * 获得恒星熔岩炮武器
+ */
 export const BLUEPRINT_POWERUP_MAGMA: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_magma', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_magma', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_magma', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_magma', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 相位波动炮道具蓝图
+ * 获得相位波动炮武器
+ */
 export const BLUEPRINT_POWERUP_WAVE: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_wave', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_wave', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_wave', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_wave', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 虚空等离子炮道具蓝图
+ * 获得虚空等离子炮武器
+ */
 export const BLUEPRINT_POWERUP_PLASMA: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_plasma', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('weapon', 'powerup_plasma', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_plasma', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'weapon', blueprint: 'powerup_plasma', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 无敌护盾道具蓝图
+ * 获得短暂的无敌护盾
+ */
 export const BLUEPRINT_POWERUP_INVINCIBILITY: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_invincibility', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('buff', 'powerup_invincibility', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_invincibility', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'buff', blueprint: 'powerup_invincibility', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };
 
+/**
+ * 时间减缓道具蓝图
+ * 短暂减缓游戏速度
+ */
 export const BLUEPRINT_POWERUP_TIME_SLOW: Blueprint = {
-  Transform: new Transform(0, 0, 0),
-  Sprite: new Sprite('powerup_time_slow', 0, 0, 24, 24, 1, 0.5, 0.5),
-  PickupItem: new PickupItem('buff', 'powerup_time_slow', true),
-  HitBox: new HitBox({ shape: 'circle', radius: 12 }),
+  /** 变换组件 - 设置道具的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 精灵组件 - 设置道具的纹理信息 */
+  Sprite: { texture: 'powerup_time_slow', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+  PickupItem: { kind: 'buff', blueprint: 'powerup_time_slow', autoPickup: true },
+  
+  /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+  HitBox: { shape: 'circle', radius: 12 },
 };

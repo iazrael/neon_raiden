@@ -2,13 +2,32 @@ import { Transform, Health, Weapon, Shield, Sprite, Velocity, HitBox, PlayerTag,
 import { Blueprint } from '../types';
 
 
+/**
+ * 玩家战机蓝图 - Neon战机
+ * 定义了玩家战机的基础属性和初始配置
+ */
 export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
-  Transform: {x: 0, y: 0, rot: 0},                    // 出生坐标（场景后期会重置）
-  Health: { hp: 150, max: 200 },                      // 初始 HP / 最大 HP
-  // Shield: [100, 0],                        // 初始护盾值 / 再生速率（这里 0，可后续 Buff 加）
-  // SpeedStat: [7 * 60, 5],                  // 7 格/秒 → 像素/秒（假设 1 格 = 60 像素）
-  // HitBox: [{ shape: 'circle', radius: 24 * (1 - 0.2) }], // 48×48 精灵 → 半径 24，再缩 0.2
-  // Sprite: ['player', 0, 0, 48, 48, 1, 0.5, 0.5], // 图集切 48×48，轴心居中
-  // PlayerTag: [],
-  // Weapon: ['neonLaser', 200, 0],           // 初始武器 ID 与冷却（ms）
+  /** 变换组件 - 设置战机的初始位置和旋转角度 */
+  Transform: {x: 0, y: 0, rot: 0},
+  
+  /** 生命值组件 - 设置战机的当前生命值和最大生命值 */
+  Health: { hp: 150, max: 200 },
+  
+  /** 护盾组件 - 设置战机的初始护盾值和再生速率 */
+  // Shield: { value: 100, regen: 0 },
+  
+  /** 速度状态组件 - 设置战机的最大线性速度和角速度 */
+  // SpeedStat: { maxLinear: 7 * 60, maxAngular: 5 },
+  
+  /** 碰撞盒组件 - 设置战机的碰撞检测区域 */
+  // HitBox: { shape: 'circle', radius: 24 * (1 - 0.2) },
+  
+  /** 精灵组件 - 设置战机的纹理信息 */
+  // Sprite: { texture: 'player', srcX: 0, srcY: 0, srcW: 48, srcH: 48, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  
+  /** 玩家标签组件 - 标识此实体为玩家 */
+  // PlayerTag: {},
+  
+  /** 武器组件 - 设置战机的初始武器 */
+  // Weapon: { ammoType: 'neonLaser', cooldown: 200, curCD: 0 },
 };

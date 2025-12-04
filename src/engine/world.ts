@@ -1,9 +1,18 @@
 import { World, EntityId, Component, ComponentType } from './types';
+import { Event } from './events';
 
 // ========== 世界与工具 ==========
 
 export function createWorld(): World {
-    return { entities: new Map(), playerId: 0 };
+    return {
+        entities: new Map(),
+        events: [],
+        score: 0,
+        level: 1,        // 关卡序号
+        playerId: 0,
+        playerLevel: 1,  // 战机等级
+        difficulty: 1    // 动态倍率
+    };
 }
 
 // ========== ID 生成器 ==========
@@ -46,4 +55,9 @@ export function addComponent<T extends Component>(w: World, id: EntityId, comp: 
 // ========== 删除实体 ==========
 export function removeEntity(w: World, id: EntityId) {
     w.entities.delete(id);
+}
+
+// ========== 事件推送 ==========
+export function pushEvent(w: World, event: Event) {
+    w.events.push(event);
 }
