@@ -433,68 +433,122 @@ export const BossConfigData: Record<BossType, Omit<BossEntity, 'hp' | 'sprite' |
         /** 碰撞箱缩放比例 */
         hitboxScale: 0.7
     },
+    /** 深渊利维坦Boss配置 */
     [BossType.LEVIATHAN]: {
+        /** Boss类型 */
         type: BossType.LEVIATHAN,
+        /** Boss唯一标识 */
         id: 'boss_leviathan',
+        /** 英文名称 */
         name: 'Leviathan',
+        /** 中文名称 */
         chineseName: '深渊利维坦',
+        /** Boss描述 */
         describe: '环状中枢战体,以极限机动穿梭战场,五重武器矩阵配合双护卫机编队协防,构筑无法逃脱的死亡领域。',
+        /** 主题颜色 */
         color: '#44ffff',
+        /** 关卡等级 */
         level: 9,
+        /** 移动速度 */
         speed: 1.4,
+        /** 击杀得分 */
         score: 45000,
+        /** 武器类型列表 */
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
+        /** 武器配置 */
         weaponConfigs: {
+            /** 子弹数量 */
             bulletCount: 5,
+            /** 子弹速度 */
             bulletSpeed: 7.5,
+            /** 开火频率 */
             fireRate: 0.08,
+            /** 瞄准射击速度 */
             targetedShotSpeed: 5
         },
+        /** 移动配置 */
         movement: {
+            /** 移动模式 */
             pattern: BossMovementPattern.AGGRESSIVE,
+            /** 生成位置 */
             spawnX: BossSpawnPosition.RANDOM
         },
+        /** 激光配置 */
         laser: {
+            /** 激光类型 */
             type: 'pulsed',
+            /** 激光伤害 */
             damage: 45,
+            /** 激光冷却时间 */
             cooldown: 2200
         },
+        /** 僚机配置 */
         wingmen: {
+            /** 僚机数量 */
             count: 2,
+            /** 僚机类型 */
             type: EnemyType.LASER_INTERCEPTOR
         },
+        /** 碰撞箱缩放比例 */
         hitboxScale: 0.7
     },
+    /** 天启审判Boss配置 */
     [BossType.APOCALYPSE]: {
+        /** Boss类型 */
         type: BossType.APOCALYPSE,
+        /** Boss唯一标识 */
         id: 'boss_apocalypse',
+        /** 英文名称 */
         name: 'Apocalypse',
+        /** 中文名称 */
         chineseName: '天启审判',
+        /** Boss描述 */
         describe: '终极龙王,轨迹莫测难寻,五维火力全域覆盖,双布雷机僚机协同,四重超载形态逐次显现,是霓虹战场的终极审判。',
+        /** 主题颜色 */
         color: '#ff0000',
+        /** 关卡等级 */
         level: 10,
+        /** 移动速度 */
         speed: 1.6,
+        /** 击杀得分 */
         score: 50000,
+        /** 武器类型列表 */
         weapons: [BossWeaponType.RADIAL, BossWeaponType.TARGETED, BossWeaponType.LASER, BossWeaponType.SPREAD, BossWeaponType.HOMING],
+        /** 武器配置 */
         weaponConfigs: {
+            /** 子弹数量 */
             bulletCount: 8,
+            /** 子弹速度 */
             bulletSpeed: 8.0,
+            /** 开火频率 */
             fireRate: 0.10,
+            /** 瞄准射击速度 */
             targetedShotSpeed: 3
         },
+        /** 移动配置 */
         movement: {
+            /** 移动模式 */
             pattern: BossMovementPattern.ADAPTIVE,
+            /** 生成位置 */
             spawnX: BossSpawnPosition.RANDOM
         },
+        /** 激光配置 */
         laser: {
+            /** 激光类型 */
             type: 'pulsed',
+            /** 激光伤害 */
             damage: 55,
+            /** 激光冷却时间 */
             cooldown: 2000
         },
+        /** 僚机配置 */
         wingmen: {
+            /** 僚机数量 */
             count: 2,
+            /** 僚机类型 */
             type: EnemyType.MINE_LAYER
         },
+        /** 碰撞箱缩放比例 */
         hitboxScale: 0.7
     }
 };
