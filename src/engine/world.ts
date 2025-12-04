@@ -5,6 +5,7 @@ import { Event } from './events';
 
 export function createWorld(): World {
     return {
+        time: 0,
         entities: new Map(),
         events: [],
         score: 0,
@@ -33,7 +34,6 @@ export function freeId(id: EntityId) {
  * @param types The component types to filter by.
  * @returns An iterable of [EntityId, Component[]] pairs.
  */
-
 export function* view<T extends ComponentType[]>(w: World, types: T): Iterable<[EntityId, InstanceType<T[number]>[]]> {
     for (const [id, comps] of w.entities) {
         const bucket: any[] = [];

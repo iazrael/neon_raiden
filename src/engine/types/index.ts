@@ -39,6 +39,7 @@ export interface World {
     playerId: EntityId;
     /** 事件队列 */
     events: Event[];
+    time: number;
     // 全局进度
     score: number;        
     level: number;        // 关卡序号
