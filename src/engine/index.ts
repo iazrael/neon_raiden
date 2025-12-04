@@ -1,6 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { createWorld } from './world';
-import { Blueprint, World } from './types';
+import {  World } from './types';
+import { Blueprint } from './blueprints';
 
 // 导入所有系统
 import { InputSystem } from './systems/InputSystem';
@@ -32,7 +33,7 @@ export class Engine {
     private world: World;
     private ctx: CanvasRenderingContext2D;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
-
+    
     start(canvas: HTMLCanvasElement, bp: Blueprint) {
         this.ctx = canvas.getContext('2d')!;
         this.world = createWorld();

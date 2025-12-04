@@ -9,7 +9,7 @@ import { WeaponType } from '@/types';
  * 武器成长数据配置
  * 定义了不同类型武器随等级提升的属性增长数据
  */
-export const WeaponGrowthData: Record<WeaponType, {
+export const WeaponGrowthData: Record<WeaponId, {
   /** 基础伤害 */
   baseDamage: number;
   /** 每级增加的伤害 */

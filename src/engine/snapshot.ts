@@ -1,6 +1,3 @@
-import { ComboState } from "@/game/systems/ComboSystem";
-import { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
-import { GameState, WeaponType } from "@/types";
 import { World } from './types';
 import { Health, Transform, Weapon } from './components';
 

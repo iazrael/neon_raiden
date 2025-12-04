@@ -4,7 +4,7 @@
 //
 
 import { Transform, Sprite, PickupItem, HitBox } from '../components'
-import { Blueprint } from '../types';
+import { Blueprint } from './types';
 import { PowerupType } from '@/types';
 
 

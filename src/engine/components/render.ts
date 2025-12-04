@@ -38,6 +38,7 @@ export class Sprite extends Component {
    */
   constructor(cfg: { 
     texture: string;        // 图集名
+    color?: string;         // 颜色
     srcX?: number;          // 切图起始（像素）
     srcY?: number;
     srcW?: number;          // 切图宽高（像素）
@@ -49,6 +50,7 @@ export class Sprite extends Component {
   }) { 
     super(); 
     this.texture = cfg.texture;
+    this.color = cfg.color ?? '';
     this.srcX = cfg.srcX ?? 0;
     this.srcY = cfg.srcY ?? 0;
     this.srcW = cfg.srcW ?? 1;
@@ -59,6 +61,7 @@ export class Sprite extends Component {
     this.rotate90 = cfg.rotate90 ?? 0;
   }
   public texture: string;        // 图集名
+  public color = '';
   public srcX = 0;               // 切图起始（像素）
   public srcY = 0;
   public srcW = 1;               // 切图宽高（像素）

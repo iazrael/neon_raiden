@@ -1,4 +1,4 @@
-import { Component, EntityId } from '../types';
+import { AmmoType, Component, EntityId, WeaponId } from '../types';
 
 // 「攻击 & 防御 & 增益」
 
@@ -30,8 +30,9 @@ export class Weapon extends Component {
      * @param cfg 武器配置
      */
     constructor(cfg: { 
+        id: WeaponId
         /** 弹药类型 */
-        ammoType: string; 
+        ammoType: AmmoType; 
         /** 冷却时间 */
         cooldown: number; 
         /** 当前冷却时间 */
@@ -42,7 +43,8 @@ export class Weapon extends Component {
         this.cooldown = cfg.cooldown;
         this.curCD = cfg.curCD ?? 0;
     }
-    public ammoType: string;
+    public id: WeaponId;
+    public ammoType: AmmoType;
     public cooldown: number;
     public curCD = 0;
     static check(c: any): c is Weapon { return c instanceof Weapon; }
@@ -58,7 +60,7 @@ export class Bullet extends Component {
         /** 子弹拥有者ID */
         owner: EntityId; 
         /** 弹药类型 */
-        ammoType: string; 
+        ammoType: AmmoType; 
         /** 穿透次数剩余 */
         pierceLeft?: number; 
         /** 弹跳次数剩余 */

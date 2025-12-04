@@ -1,224 +1,154 @@
 //
 // 子弹类型配置文件
-// 包含游戏中所有子弹类型的配置数据
 //
 
-import { BulletType, BulletEntity } from '@/types';
+import { AmmoSpec } from './types';
+import { AmmoType } from '../types';
 
-/**
- * 子弹配置记录
- * 定义了所有子弹类型的配置信息
- */
-export const BulletConfigs: Record<BulletType, Omit<BulletEntity, 'type' | 'id'>> = {
-    /** 火神炮子弹配置 */
-    [BulletType.VULCAN]: {
-        /** 英文名称 */
-        name: 'Vulcan Bullet',
-        /** 中文名称 */
-        chineseName: '中子火神炮',
-        /** 描述信息 */
-        describe: '采用超密度中子合金弹头,通过电磁加速器快速形成扇形弹幕网,每发子弹携带微型反应堆,在空间中划出炫目的等离子轨迹,是压制集群目标的终极火力方案。',
-        /** 显示颜色 */
-        color: '#ebdd17ff',
-        /** 尺寸 */
-        size: { width: 10, height: 20 },
-        /** 精灵键名 */
-        sprite: 'bullet_vulcan'
+
+// =============================================================================
+// 弹药规格总览表
+//
+// | 弹药类型        | 伤害 | 半径 | 速度  | 穿透 | 反弹 | 特殊效果     | 说明                         |
+// | --------------- | ---- | ---- | ----- | ---- | ---- | ------------ | ---------------------------- |
+// | VULCAN_SPREAD   | 12   | 6    | 800   | 0    | 0    | 无           | 标准子弹，散弹扇形           |
+// | LASER_BEAM      | 6    | 4    | 1200  | 99   | 0    | 无           | 高速光束，高穿透             |
+// | MISSILE_HOMING  | 35   | 8    | 400   | 0    | 0    | 无           | 追踪导弹                     |
+// | WAVE_PULSE      | 18   | 30   | 600   | 0    | 0    | 无           | 宽幅能量波，范围攻击         |
+// | PLASMA_ORB      | 45   | 16   | 300   | 0    | 0    | 爆炸         | 高威力等离子球               |
+// | TESLA_CHAIN     | 15   | 8    | 1200  | 5    | 0    | 无           | 连锁闪电，可跳跃5个目标      |
+// | MAGMA_POOL      | 15   | 12   | 500   | 0    | 0    | 持续伤害     | 熔岩弹，造成持续伤害         |
+// | SHURIKEN_BOUNCE | 15   | 12   | 700   | 0    | 3    | 无           | 反弹飞镖，可反弹3次          |
+// =============================================================================
+
+// 以 AMMO_TABLE 表格的形式导出
+export const AMMO_TABLE: Record<AmmoType, AmmoSpec> = {
+    [AmmoType.VULCAN_SPREAD]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.VULCAN_SPREAD,
+        /** 每发子弹的基础伤害值 */
+        damage: 12,
+        /** 碰撞盒半径（像素） */
+        radius: 6,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 800,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 0,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: [],
     },
-    /** 激光子弹配置 */
-    [BulletType.LASER]: {
-        /** 英文名称 */
-        name: 'Laser Beam',
-        /** 中文名称 */
-        chineseName: '量子穿刺光束',
-        /** 描述信息 */
-        describe: '通过量子纠缠技术聚焦的高能光束武器,能够无视常规护盾直接穿透目标核心,在空间中留下短暂的量子残影,对分子结构造成不可逆的解离,是精准狙击的科技结晶。',
-        /** 显示颜色 */
-        color: '#3fc4f0ff',
-        /** 尺寸 */
-        size: { width: 8, height: 50 },
-        /** 精灵键名 */
-        sprite: 'bullet_laser'
+    [AmmoType.LASER_BEAM]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.LASER_BEAM,
+        /** 每发子弹的基础伤害值 */
+        damage: 6,
+        /** 碰撞盒半径（像素） */
+        radius: 4,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 1200,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 99,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: [],
     },
-    /** 导弹子弹配置 */
-    [BulletType.MISSILE]: {
-        /** 英文名称 */
-        name: 'Homing Missile',
-        /** 中文名称 */
-        chineseName: '幽灵追踪导弹',
-        /** 描述信息 */
-        describe: '搭载第五代AI导航系统的智能导弹,通过量子雷达锁定目标生命信号,可进行多次空间折跃追击,弹头内置反物质炸药,接触瞬间释放强大的能量,绽放出致命的等离子爆炸。',
-        /** 显示颜色 */
-        color: '#ca0ac7ff',
-        /** 尺寸 */
-        size: { width: 16, height: 32 },
-        /** 精灵键名 */
-        sprite: 'bullet_missile'
+    [AmmoType.MISSILE_HOMING]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.MISSILE_HOMING,
+        /** 每发子弹的基础伤害值 */
+        damage: 35,
+        /** 碰撞盒半径（像素） */
+        radius: 8,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 400,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 0,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: [],
     },
-    /** 波浪炮子弹配置 */
-    [BulletType.WAVE]: {
-        /** 英文名称 */
-        name: 'Wave Cannon',
-        /** 中文名称 */
-        chineseName: '相位海啸炮',
-        /** 描述信息 */
-        describe: '通过大量共振水晶同步激发的宽频能量波,形成覆盖大范围扇区的相位潮汐,穿透目标时触发连锁共振反应,在战场上掀起蓝色的能量海啸,可同时瓦解密集阵型中的所有目标。',
-        /** 显示颜色 */
-        color: '#1e8de7ff',
-        /** 尺寸 */
-        size: { width: 60, height: 12 },
-        /** 精灵键名 */
-        sprite: 'bullet_wave'
+    [AmmoType.WAVE_PULSE]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.WAVE_PULSE,
+        /** 每发子弹的基础伤害值 */
+        damage: 18,
+        /** 碰撞盒半径（像素） */
+        radius: 30,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 600,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 0,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: [],
     },
-    /** 等离子炮子弹配置 */
-    [BulletType.PLASMA]: {
-        /** 英文名称 */
-        name: 'Plasma Orb',
-        /** 中文名称 */
-        chineseName: '虚空等离子球',
-        /** 描述信息 */
-        describe: '通过反物质约束场封装的超高温等离子体,内部温度达到极限,接触瞬间形成微型奇点,产生强大的引力坍缩效应,绽放出粉色的湮灭之光,是禁忌级的终极武器。',
-        /** 显示颜色 */
-        color: '#ed64a6',
-        /** 尺寸 */
-        size: { width: 32, height: 32 },
-        /** 精灵键名 */
-        sprite: 'bullet_plasma'
+    [AmmoType.PLASMA_ORB]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.PLASMA_ORB,
+        /** 每发子弹的基础伤害值 */
+        damage: 45,
+        /** 碰撞盒半径（像素） */
+        radius: 16,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 300,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 0,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: ['explosion'],
     },
-    /** 特斯拉子弹配置 */
-    [BulletType.TESLA]: {
-        /** 英文名称 */
-        name: 'Tesla Bolt',
-        /** 中文名称 */
-        chineseName: '特斯拉链式闪电',
-        /** 描述信息 */
-        describe: '释放超高压电弧武器,通过离子化空气在敌群间形成连锁传导,可多次跳跃目标并递增伤害,编织出覆盖全场的紫色闪电网络,对电子系统造成永久性瘫痪。',
-        /** 显示颜色 */
-        color: '#1053d9ff',
-        /** 尺寸 */
-        size: { width: 16, height: 64 },
-        /** 精灵键名 */
-        sprite: 'bullet_tesla'
+    [AmmoType.TESLA_CHAIN]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.TESLA_CHAIN,
+        /** 每发子弹的基础伤害值 */
+        damage: 15,
+        /** 碰撞盒半径（像素） */
+        radius: 8,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 1200,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 5,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: [],
     },
-    /** 熔岩炮子弹配置 */
-    [BulletType.MAGMA]: {
-        /** 英文名称 */
-        name: 'Magma Burst',
-        /** 中文名称 */
-        chineseName: '恒星熔岩弹',
-        /** 描述信息 */
-        describe: '封装恒星核心物质的超高温武器,弹体温度极高,命中后形成持续灼烧的熔岩区域,持续造成伤害,同时释放强辐射削弱敌方护盾再生,将战场化为橙色的炼狱熔炉。',
-        /** 显示颜色 */
-        color: '#f60',
-        /** 尺寸 */
-        size: { width: 24, height: 24 },
-        /** 精灵键名 */
-        sprite: 'bullet_magma'
+    [AmmoType.MAGMA_POOL]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.MAGMA_POOL,
+        /** 每发子弹的基础伤害值 */
+        damage: 15,
+        /** 碰撞盒半径（像素） */
+        radius: 12,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 500,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 0,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 0,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: ['dot'],
     },
-    /** 手里剑子弹配置 */
-    [BulletType.SHURIKEN]: {
-        /** 英文名称 */
-        name: 'Shuriken',
-        /** 中文名称 */
-        chineseName: '量子回旋刃',
-        /** 描述信息 */
-        describe: '采用单分子锋刃技术的回旋武器,边缘锋利度达原子级,可在战场边界间进行多次完美反弹,每次碰撞吸收动能使伤害递增,银色轨迹编织出无法躲避的死亡之网。',
-        /** 显示颜色 */
-        color: '#ccccccff',
-        /** 尺寸 */
-        size: { width: 24, height: 24 },
-        /** 精灵键名 */
-        sprite: 'bullet_shuriken'
+    [AmmoType.SHURIKEN_BOUNCE]: {
+        /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
+        id: AmmoType.SHURIKEN_BOUNCE,
+        /** 每发子弹的基础伤害值 */
+        damage: 15,
+        /** 碰撞盒半径（像素） */
+        radius: 12,
+        /** 子弹飞行速度（像素/秒） */
+        speed: 700,
+        /** 可穿透敌人数（0 = 不穿透） */
+        pierce: 0,
+        /** 可反弹次数（0 = 不反弹） */
+        bounces: 3,
+        /** 命中时触发的效果 ID 列表（字符串引用） */
+        onHit: [],
     },
-    // 敌人子弹
-    /** 敌人能量弹配置 */
-    [BulletType.ENEMY_ORB]: {
-        /** 英文名称 */
-        name: 'Enemy Orb',
-        /** 中文名称 */
-        chineseName: '能量弹',
-        /** 描述信息 */
-        describe: '敌军标准武器系统发射的不稳定能量体,接触时释放腐蚀性冲击波,虽然基础但仍具威胁。',
-        /** 显示颜色 */
-        color: '#ff9999',
-        /** 尺寸 */
-        size: { width: 14, height: 14 },
-        /** 精灵键名 */
-        sprite: 'bullet_enemy_orb'
-    },
-    /** 敌人光束弹配置 */
-    [BulletType.ENEMY_BEAM]: {
-        /** 英文名称 */
-        name: 'Enemy Beam',
-        /** 中文名称 */
-        chineseName: '光束',
-        /** 描述信息 */
-        describe: '聚焦水晶强化的高密度能量流,持续穿透装甲并形成高温熔蚀通道,对护盾系统造成持续压制。',
-        /** 显示颜色 */
-        color: '#f97316ff',
-        /** 尺寸 */
-        size: { width: 12, height: 32 },
-        /** 精灵键名 */
-        sprite: 'bullet_enemy_beam'
-    },
-    /** 敌人速射弹配置 */
-    [BulletType.ENEMY_RAPID]: {
-        /** 英文名称 */
-        name: 'Enemy Rapid',
-        /** 中文名称 */
-        chineseName: '速射弹',
-        /** 描述信息 */
-        describe: '轻量化弹头通过高频发射形成密集弹幕,单发伤害虽低但足以撕裂轻型护盾,数量即是力量。',
-        /** 显示颜色 */
-        color: '#ecc94b',
-        /** 尺寸 */
-        size: { width: 10, height: 20 },
-        /** 精灵键名 */
-        sprite: 'bullet_enemy_rapid'
-    },
-    /** 敌人重炮弹配置 */
-    [BulletType.ENEMY_HEAVY]: {
-        /** 英文名称 */
-        name: 'Enemy Heavy',
-        /** 中文名称 */
-        chineseName: '重炮弹',
-        /** 描述信息 */
-        describe: '敌方重装单位的主力武器,填充高爆炸药与穿甲核心,对重型装甲目标造成毁灭性打击。',
-        /** 显示颜色 */
-        color: '#9f7aea',
-        /** 尺寸 */
-        size: { width: 28, height: 28 },
-        /** 精灵键名 */
-        sprite: 'bullet_enemy_heavy'
-    },
-    /** 敌人追踪弹配置 */
-    [BulletType.ENEMY_HOMING]: {
-        /** 英文名称 */
-        name: 'Enemy Homing',
-        /** 中文名称 */
-        chineseName: '追踪弹',
-        /** 描述信息 */
-        describe: '配备双重锁定系统的智能导弹,追踪能量信号并调整轨迹,机动规避也难以摆脱。',
-        /** 显示颜色 */
-        color: '#48bb78',
-        /** 尺寸 */
-        size: { width: 16, height: 16 },
-        /** 精灵键名 */
-        sprite: 'bullet_enemy_homing'
-    },
-    /** 敌人螺旋弹配置 */
-    [BulletType.ENEMY_SPIRAL]: {
-        /** 英文名称 */
-        name: 'Enemy Spiral',
-        /** 中文名称 */
-        chineseName: '螺旋弹',
-        /** 描述信息 */
-        describe: '螺旋力场维持的高速旋转弹,干扰锁定系统并在接近时突然加速,编织难以躲避的弹幕之网。',
-        /** 显示颜色 */
-        color: '#4299e1',
-        /** 尺寸 */
-        size: { width: 14, height: 14 },
-        /** 精灵键名 */
-        sprite: 'bullet_enemy_spiral'
-    }
 };

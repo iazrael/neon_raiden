@@ -1,6 +1,6 @@
-import * as Components from '../components';
 import { Event } from '../events';
-export * from './sprite'
+export * from './consts'
+export * from '../configs/gallery/types'
 
 // ========== 基础类型 ==========
 /** 实体ID类型 */
@@ -12,23 +12,6 @@ export abstract class Component { }
 /** 组件类型 */
 export type ComponentType = new (...args: any[]) => Component;
 
-// ========== Blueprint 类型 ==========
-
-// /** 蓝图类型 - 组件映射 */
-// export type Blueprint = Partial<{
-//   [K in keyof typeof Components]: ConstructorParameters<typeof Components[K]>;
-// }>;
-
-export type Blueprint = Partial<{
-    [K in keyof typeof Components]: ComponentShape<typeof Components[K]>;
-}>;
-
-/** 把组件类映射成它自己的对象形状 */
-type ComponentShape<T> = T extends new (arg: infer P) => any
-    ? P extends any[]              // 是元组？
-    ? never                      // 禁止元组，强制用对象
-    : P                          // 返回对象本身
-    : never;
 
 // ========== 世界接口 ==========
 /** 世界接口 */

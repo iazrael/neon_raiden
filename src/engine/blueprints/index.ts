@@ -1,4 +1,5 @@
 // 导出所有蓝图
+export * from './types'
 export * from './player';
 export * from './enemies';
 export * from './bosses';
