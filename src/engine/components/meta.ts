@@ -6,13 +6,20 @@ import { Component } from '../types';
 export class DestroyTag extends Component {
     /**
      * 构造函数
-     * @param reason 销毁原因
-     * @param reusePool 重用池类型
+     * @param cfg 销毁标记配置
      */
-    constructor(
-        public reason: 'timeout' | 'killed' | 'consumed' | 'offscreen' = 'killed',
-        public reusePool?: 'bullet' | 'enemy' | 'pickup'
-    ) { super(); }
+    constructor(cfg: { 
+        /** 销毁原因 */
+        reason?: 'timeout' | 'killed' | 'consumed' | 'offscreen';
+        /** 重用池类型 */
+        reusePool?: 'bullet' | 'enemy' | 'pickup';
+    }) { 
+        super(); 
+        this.reason = cfg.reason ?? 'killed';
+        this.reusePool = cfg.reusePool;
+    }
+    public reason: 'timeout' | 'killed' | 'consumed' | 'offscreen' = 'killed';
+    public reusePool?: 'bullet' | 'enemy' | 'pickup';
     static check(c: any): c is DestroyTag { return c instanceof DestroyTag; }
 }
 
@@ -33,10 +40,20 @@ export class BossTag extends Component { }
 export class CameraShake extends Component {
     /**
      * 构造函数
-     * @param intensity 震动强度
-     * @param timer 震动持续时间
+     * @param cfg 震动配置
      */
-    constructor(public intensity: number, public timer: number) { super(); }
+    constructor(cfg: { 
+        /** 震动强度 */
+        intensity: number; 
+        /** 震动持续时间 */
+        timer: number; 
+    }) { 
+        super(); 
+        this.intensity = cfg.intensity;
+        this.timer = cfg.timer;
+    }
+    public intensity: number;
+    public timer: number;
     static check(c: any): c is CameraShake { return c instanceof CameraShake; }
 }
 
@@ -45,9 +62,19 @@ export class CameraShake extends Component {
 export class BossAI extends Component {
     /**
      * 构造函数
-     * @param phase 当前阶段
-     * @param nextPatternTime 下次行为模式切换时间
+     * @param cfg Boss AI配置
      */
-    constructor(public phase = 1, public nextPatternTime = 0) { super(); }
+    constructor(cfg: { 
+        /** 当前阶段 */
+        phase?: number; 
+        /** 下次行为模式切换时间 */
+        nextPatternTime?: number; 
+    }) { 
+        super(); 
+        this.phase = cfg.phase ?? 1;
+        this.nextPatternTime = cfg.nextPatternTime ?? 0;
+    }
+    public phase = 1;
+    public nextPatternTime = 0;
     static check(c: any): c is BossAI { return c instanceof BossAI; }
 }

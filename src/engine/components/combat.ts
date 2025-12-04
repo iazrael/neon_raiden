@@ -6,10 +6,20 @@ import { Component, EntityId } from '../types';
 export class Shield extends Component {
     /**
      * 构造函数
-     * @param value 当前护盾值
-     * @param regen 护盾恢复速度
+     * @param cfg 护盾配置
      */
-    constructor(public value = 0, public regen = 0) { super(); }
+    constructor(cfg: { 
+        /** 当前护盾值 */
+        value?: number; 
+        /** 护盾恢复速度 */
+        regen?: number; 
+    }) { 
+        super(); 
+        this.value = cfg.value ?? 0;
+        this.regen = cfg.regen ?? 0;
+    }
+    public value = 0;
+    public regen = 0;
     static check(c: any): c is Shield { return c instanceof Shield; }
 }
 
@@ -17,15 +27,24 @@ export class Shield extends Component {
 export class Weapon extends Component {
     /**
      * 构造函数
-     * @param ammoType 弹药类型
-     * @param cooldown 冷却时间
-     * @param curCD 当前冷却时间
+     * @param cfg 武器配置
      */
-    constructor(
-        public ammoType: string,
-        public cooldown: number,
-        public curCD = 0
-    ) { super(); }
+    constructor(cfg: { 
+        /** 弹药类型 */
+        ammoType: string; 
+        /** 冷却时间 */
+        cooldown: number; 
+        /** 当前冷却时间 */
+        curCD?: number; 
+    }) { 
+        super(); 
+        this.ammoType = cfg.ammoType;
+        this.cooldown = cfg.cooldown;
+        this.curCD = cfg.curCD ?? 0;
+    }
+    public ammoType: string;
+    public cooldown: number;
+    public curCD = 0;
     static check(c: any): c is Weapon { return c instanceof Weapon; }
 }
 
@@ -33,17 +52,28 @@ export class Weapon extends Component {
 export class Bullet extends Component {
     /**
      * 构造函数
-     * @param owner 子弹拥有者ID
-     * @param ammoType 弹药类型
-     * @param pierceLeft 穿透次数剩余
-     * @param bouncesLeft 弹跳次数剩余
+     * @param cfg 子弹配置
      */
-    constructor(
-        public owner: EntityId,
-        public ammoType: string,
-        public pierceLeft = 0,
-        public bouncesLeft = 0
-    ) { super(); }
+    constructor(cfg: { 
+        /** 子弹拥有者ID */
+        owner: EntityId; 
+        /** 弹药类型 */
+        ammoType: string; 
+        /** 穿透次数剩余 */
+        pierceLeft?: number; 
+        /** 弹跳次数剩余 */
+        bouncesLeft?: number; 
+    }) { 
+        super(); 
+        this.owner = cfg.owner;
+        this.ammoType = cfg.ammoType;
+        this.pierceLeft = cfg.pierceLeft ?? 0;
+        this.bouncesLeft = cfg.bouncesLeft ?? 0;
+    }
+    public owner: EntityId;
+    public ammoType: string;
+    public pierceLeft = 0;
+    public bouncesLeft = 0;
     static check(c: any): c is Bullet { return c instanceof Bullet; }
 }
 
@@ -51,11 +81,16 @@ export class Bullet extends Component {
 export class DropTable extends Component {
     /**
      * 构造函数
-     * @param table 掉落项数组
+     * @param cfg 掉落表配置
      */
-    constructor(public table: Array<{ item: string; weight: number; min?: number; max?: number }>) {
+    constructor(cfg: { 
+        /** 掉落项数组 */
+        table: Array<{ item: string; weight: number; min?: number; max?: number }>; 
+    }) {
         super();
+        this.table = cfg.table;
     }
+    public table: Array<{ item: string; weight: number; min?: number; max?: number }>;
     static check(c: any): c is DropTable { return c instanceof DropTable; }
 }
 
@@ -63,15 +98,24 @@ export class DropTable extends Component {
 export class PickupItem extends Component {
     /**
      * 构造函数
-     * @param kind 物品类型
-     * @param blueprint 蓝图名称
-     * @param autoPickup 是否自动拾取
+     * @param cfg 拾取物品配置
      */
-    constructor(
-        public kind: 'weapon' | 'buff' | 'coin',
-        public blueprint: string,
-        public autoPickup = false
-    ) { super(); }
+    constructor(cfg: { 
+        /** 物品类型 */
+        kind: 'weapon' | 'buff' | 'coin'; 
+        /** 蓝图名称 */
+        blueprint: string; 
+        /** 是否自动拾取 */
+        autoPickup?: boolean; 
+    }) { 
+        super(); 
+        this.kind = cfg.kind;
+        this.blueprint = cfg.blueprint;
+        this.autoPickup = cfg.autoPickup ?? false;
+    }
+    public kind: 'weapon' | 'buff' | 'coin';
+    public blueprint: string;
+    public autoPickup = false;
     static check(c: any): c is PickupItem { return c instanceof PickupItem; }
 }
 
@@ -79,15 +123,24 @@ export class PickupItem extends Component {
 export class Buff extends Component {
     /**
      * 构造函数
-     * @param type 增益类型
-     * @param value 效果数值
-     * @param timer 持续时间
+     * @param cfg 增益效果配置
      */
-    constructor(
-        public type: 'speed' | 'damage' | 'invincible',
-        public value: number,
-        public timer: number
-    ) { super(); }
+    constructor(cfg: { 
+        /** 增益类型 */
+        type: 'speed' | 'damage' | 'invincible'; 
+        /** 效果数值 */
+        value: number; 
+        /** 持续时间 */
+        timer: number; 
+    }) { 
+        super(); 
+        this.type = cfg.type;
+        this.value = cfg.value;
+        this.timer = cfg.timer;
+    }
+    public type: 'speed' | 'damage' | 'invincible';
+    public value: number;
+    public timer: number;
     static check(c: any): c is Buff { return c instanceof Buff; }
 }
 
@@ -97,14 +150,28 @@ export class Buff extends Component {
  * 用法：CollisionSystem 命中后挂上，DamageResolutionSystem 每帧扣血
  */
 export class DamageOverTime extends Component {
-  constructor(
-    public damagePerSecond: number,  // 每秒扣血量
-    public remaining: number,        // 剩余秒数
-    public interval = 0.2,           // 扣血间隔（秒），默认 0.2 秒一跳
-    private timer = 0                // 内部间隔计时器
-  ) {
+  /**
+   * 构造函数
+   * @param cfg 持续伤害配置
+   */
+  constructor(cfg: { 
+    /** 每秒扣血量 */
+    damagePerSecond: number;  
+    /** 剩余秒数 */
+    remaining: number;        
+    /** 扣血间隔（秒），默认 0.2 秒一跳 */
+    interval?: number;        
+  }) {
     super();
+    this.damagePerSecond = cfg.damagePerSecond;
+    this.remaining = cfg.remaining;
+    this.interval = cfg.interval ?? 0.2;
+    this.timer = 0;             // 内部间隔计时器
   }
+  public damagePerSecond: number;  // 每秒扣血量
+  public remaining: number;        // 剩余秒数
+  public interval = 0.2;           // 扣血间隔（秒），默认 0.2 秒一跳
+  private timer = 0;               // 内部间隔计时器
 
   /** 每帧由 DamageResolutionSystem 调用，返回本帧是否应扣血 */
   tick(dt: number): boolean {
@@ -132,11 +199,18 @@ export class DamageOverTime extends Component {
  * 用法：受伤瞬间挂上，DamageResolutionSystem 每帧减时；存在期间**跳过一切伤害逻辑**
  */
 export class InvincibleTimer extends Component {
-  constructor(
-    public remaining: number   // 剩余无敌时间（秒）
-  ) {
+  /**
+   * 构造函数
+   * @param cfg 无敌帧配置
+   */
+  constructor(cfg: { 
+    /** 剩余无敌时间（秒） */
+    remaining: number;  
+  }) {  // 剩余无敌时间（秒）
     super();
+    this.remaining = cfg.remaining;
   }
+  public remaining: number;   // 剩余无敌时间（秒）
 
   /** 每帧由 DamageResolutionSystem 调用 */
   tick(dt: number): void {

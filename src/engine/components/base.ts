@@ -7,11 +7,24 @@ import { Component } from '../types';
 export class Transform extends Component {
     /**
      * 构造函数
-     * @param x X坐标
-     * @param y Y坐标
-     * @param rot 旋转角度
+     * @param cfg 变换配置
      */
-    constructor(public x = 0, public y = 0, public rot = 0) { super(); }
+    constructor(cfg: { 
+        /** X坐标 */
+        x: number; 
+        /** Y坐标 */
+        y: number; 
+        /** 旋转角度 */
+        rot?: number; 
+    }) { 
+        super(); 
+        this.x = cfg.x;
+        this.y = cfg.y;
+        this.rot = cfg.rot ?? 0;
+    }
+    public x: number;
+    public y: number;
+    public rot: number = 0;
     static check(c: any): c is Transform { return c instanceof Transform; }
 }
 
@@ -19,11 +32,24 @@ export class Transform extends Component {
 export class Velocity extends Component {
     /**
      * 构造函数
-     * @param vx X轴速度
-     * @param vy Y轴速度
-     * @param vrot 旋转速度
+     * @param cfg 速度配置
      */
-    constructor(public vx = 0, public vy = 0, public vrot = 0) { super(); }
+    constructor(cfg: { 
+        /** X轴速度 */
+        vx?: number; 
+        /** Y轴速度 */
+        vy?: number; 
+        /** 旋转速度 */
+        vrot?: number; 
+    }) { 
+        super(); 
+        this.vx = cfg.vx ?? 0;
+        this.vy = cfg.vy ?? 0;
+        this.vrot = cfg.vrot ?? 0;
+    }
+    public vx = 0;
+    public vy = 0;
+    public vrot = 0;
     static check(c: any): c is Velocity { return c instanceof Velocity; }
 }
 
@@ -31,10 +57,20 @@ export class Velocity extends Component {
 export class SpeedStat extends Component {
     /**
      * 构造函数
-     * @param maxLinear 最大线性速度
-     * @param maxAngular 最大角速度
+     * @param cfg 速度状态配置
      */
-    constructor(public maxLinear = 400, public maxAngular = 5) { super(); }
+    constructor(cfg: { 
+        /** 最大线性速度 */
+        maxLinear?: number; 
+        /** 最大角速度 */
+        maxAngular?: number; 
+    }) { 
+        super(); 
+        this.maxLinear = cfg.maxLinear ?? 400;
+        this.maxAngular = cfg.maxAngular ?? 5;
+    }
+    public maxLinear = 400;
+    public maxAngular = 5;
     static check(c: any): c is SpeedStat { return c instanceof SpeedStat; }
 }
 
@@ -42,10 +78,20 @@ export class SpeedStat extends Component {
 export class Health extends Component {
     /**
      * 构造函数
-     * @param hp 当前生命值
-     * @param max 最大生命值
+     * @param cfg 生命值配置
      */
-    constructor(public hp: number, public max: number) { super(); }
+    constructor(cfg: { 
+        /** 当前生命值 */
+        hp: number; 
+        /** 最大生命值 */
+        max: number; 
+    }) { 
+        super(); 
+        this.hp = cfg.hp;
+        this.max = cfg.max;
+    }
+    public hp: number;
+    public max: number;
     static check(c: any): c is Health { return c instanceof Health; }
 }
 
@@ -80,9 +126,16 @@ export class HitBox extends Component {
 export class Lifetime extends Component {
     /**
      * 构造函数
-     * @param timer 倒计时时间
+     * @param cfg 生命周期配置
      */
-    constructor(public timer: number) { super(); }
+    constructor(cfg: { 
+        /** 倒计时时间 */
+        timer: number; 
+    }) { 
+        super(); 
+        this.timer = cfg.timer;
+    }
+    public timer: number;
     static check(c: any): c is Lifetime { return c instanceof Lifetime; }
 }
 
