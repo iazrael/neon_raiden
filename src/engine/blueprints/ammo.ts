@@ -5,6 +5,17 @@
 import { AmmoSpec } from './types';
 import { AmmoType } from '../types';
 
+// 弹药类型列表
+export const AMMO_TYPES = [
+    AmmoType.VULCAN_SPREAD,
+    AmmoType.LASER_BEAM,
+    AmmoType.MISSILE_HOMING,
+    AmmoType.WAVE_PULSE,
+    AmmoType.PLASMA_ORB,
+    AmmoType.TESLA_CHAIN,
+    AmmoType.MAGMA_POOL,
+    AmmoType.SHURIKEN_BOUNCE,
+] as const;
 
 // =============================================================================
 // 弹药规格总览表

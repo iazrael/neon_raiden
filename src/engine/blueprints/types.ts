@@ -15,7 +15,6 @@ type ComponentShape<T> = T extends new (arg: infer P) => any
 
 
 // ============== 武器 =================  
-// 重新定义一下武器，使其更符合Blueprint的类型
 export type WeaponSpec = {
     id: WeaponId;
     /** 弹药类型 */
