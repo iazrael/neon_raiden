@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "paths": {
+      "@/*": ["./*"],
+      "@/src/*": ["./src/*"],
+      "@/game/*": ["./game/*"],
+      "@/types/*": ["./types/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "_old/*"
+  ]
+}

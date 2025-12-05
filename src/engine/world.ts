@@ -1,4 +1,4 @@
-import { World, EntityId, Component, ComponentType } from './types';
+import { World, EntityId, Component, ComponentConstructor } from './types';
 import { Event } from './events';
 
 // ========== 世界与工具 ==========
@@ -34,7 +34,7 @@ export function freeId(id: EntityId) {
  * @param types The component types to filter by.
  * @returns An iterable of [EntityId, Component[]] pairs.
  */
-export function* view<T extends ComponentType[]>(w: World, types: T): Iterable<[EntityId, InstanceType<T[number]>[]]> {
+export function* view<T extends ComponentConstructor[]>(w: World, types: T): Iterable<[EntityId, InstanceType<T[number]>[]]> {
     for (const [id, comps] of w.entities) {
         const bucket: any[] = [];
         for (const T of types) {

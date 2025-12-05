@@ -9,8 +9,8 @@ export type EntityId = number;
 /** 组件基类 */
 export abstract class Component { }
 
-/** 组件类型 */
-export type ComponentType = new (...args: any[]) => Component;
+/** 组件构造函数 */
+export type ComponentConstructor = new (...args: any[]) => Component;
 
 
 // ========== 世界接口 ==========

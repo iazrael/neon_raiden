@@ -1,5 +1,5 @@
 import { Blueprint } from './blueprints';
-import { World, EntityId, Component } from './types';
+import { World, EntityId, Component, ComponentConstructor } from './types';
 import { addComponent, generateId, getFromPool } from './world';
 import * as Components from './components';
 
@@ -19,11 +19,13 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
 
     // 2. 按蓝图 push 组件
     for (const [key, args] of Object.entries(bp)) {
-        const Ctor = Components[key] as new (...a: any[]) => Component;
-        if (key === 'Transform') {
-            (args as [number, number, number])[0] = x;
+        const Ctor = Components[key] as ComponentConstructor;
+        const comp = new Ctor(args);
+        if (Components.Transform.check(comp)){
+            // 动态注入出生点
+            comp.x = x; comp.y = y;
         }
-        comps.push(new Ctor(args));
+        comps.push(comp);
     }
 
     world.entities.set(id, comps);

@@ -22,6 +22,15 @@
         "paths": {
             "@/*": [
                 "./*"
+            ],
+            "@/src/*": [
+                "./src/*"
+            ],
+            "@/game/*": [
+                "./game/*"
+            ],
+            "@/types/*": [
+                "./types/*"
             ]
         },
         "sourceMap": true,
@@ -30,6 +39,5 @@
     },
     "exclude": [
         "_old/*",
-        "tests/*"
     ]
 }

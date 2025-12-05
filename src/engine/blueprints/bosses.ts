@@ -4,7 +4,7 @@
 //
 
 import { Transform, Health, Sprite, BossTag, BossAI, HitBox } from '../components'
-import { Blueprint } from '../types';
+import { Blueprint } from './types';
 import { BossType } from '@/types';
 
 

@@ -4,7 +4,7 @@
 //
 
 import { Transform, Health, Velocity, Sprite, EnemyTag, HitBox } from '../components'
-import { Blueprint } from '../types';
+import { Blueprint } from './types';
 import { EnemyType } from '@/types';
 
 /**
