@@ -1,4 +1,5 @@
-import {  WeaponId } from '../types';
+import { ASSETS } from '../configs/global';
+import { WeaponId } from '../types';
 import { Blueprint } from './types';
 import { WEAPON_TABLE } from './weapons';
 
@@ -24,7 +25,7 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
   HitBox: { shape: 'circle', radius: 24 * (1 - 0.2) },
 
   /** 精灵组件 - 设置战机的纹理信息 */
-  Sprite: { texture: 'player', srcX: 0, srcY: 0, srcW: 48, srcH: 48, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+  Sprite: { texture: ASSETS.BASE_PATH + ASSETS.FIGHTERS.player, srcX: 0, srcY: 0, srcW: 48, srcH: 48, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
   /** 玩家标签组件 - 标识此实体为玩家 */
   PlayerTag: {},

@@ -36,17 +36,21 @@ export class Weapon extends Component {
         /** 冷却时间 */
         cooldown: number; 
         /** 当前冷却时间 */
-        curCD?: number; 
+        curCD?: number;
+        /** 武器等级 */
+        level?: number;
     }) { 
         super(); 
         this.ammoType = cfg.ammoType;
         this.cooldown = cfg.cooldown;
         this.curCD = cfg.curCD ?? 0;
+        this.level = cfg.level ?? 1;
     }
     public id: WeaponId;
     public ammoType: AmmoType;
     public cooldown: number;
     public curCD = 0;
+    public level = 1;
     static check(c: any): c is Weapon { return c instanceof Weapon; }
 }
 
