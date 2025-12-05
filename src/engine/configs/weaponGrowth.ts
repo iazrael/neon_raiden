@@ -4,6 +4,7 @@
 //
 
 import { WeaponType } from '@/types';
+import { WeaponId } from '../types';
 
 /**
  * 武器成长数据配置

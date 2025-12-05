@@ -20,7 +20,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.VULCAN_SPREAD,
     cooldown: 150,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 6
   },
 
   /**
@@ -33,7 +33,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.LASER_BEAM,
     cooldown: 180,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 3
   },
 
   /**
@@ -46,7 +46,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.MISSILE_HOMING,
     cooldown: 400,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 3
   },
 
   /**
@@ -59,7 +59,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.WAVE_PULSE,
     cooldown: 400,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 3
   },
 
   /**
@@ -72,7 +72,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.PLASMA_ORB,
     cooldown: 600,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 6
   },
 
   /**
@@ -85,7 +85,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.TESLA_CHAIN,
     cooldown: 200,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 6
   },
 
   /**
@@ -98,7 +98,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.MAGMA_POOL,
     cooldown: 220,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 6
   },
 
   /**
@@ -111,6 +111,6 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     ammoType: AmmoType.SHURIKEN_BOUNCE,
     cooldown: 300,
     curCD: 0,
-    maxLevel: 1
+    maxLevel: 6
   }
 };

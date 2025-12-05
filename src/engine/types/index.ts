@@ -1,6 +1,6 @@
 import { Event } from '../events';
 export * from './consts'
-export * from '../configs/gallery/types'
+export * from './types'
 
 // ========== 基础类型 ==========
 /** 实体ID类型 */

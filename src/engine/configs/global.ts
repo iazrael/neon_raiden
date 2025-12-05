@@ -40,6 +40,14 @@ export const ASSETS = {
         stalker: 'enemies/enemy_stalker.svg',
         tank: 'enemies/enemy_tank.svg',
     },
+    ENEMIE_BULLETS: {
+        orb: 'bullets/bullet_enemy_orb.png',
+        beam: 'bullets/bullet_enemy_beam.png',
+        rapid: 'bullets/bullet_enemy_rapid.png',
+        heavy: 'bullets/bullet_enemy_heavy.png',
+        homing: 'bullets/bullet_enemy_homing.png',
+        spiral: 'bullets/bullet_enemy_spiral.png',
+    },
     BOSSES: {
         annihilator: 'bosses/boss_annihilator.svg',
         apocalypse: 'bosses/boss_apocalypse.svg',
