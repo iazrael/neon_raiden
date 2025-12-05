@@ -9,7 +9,7 @@
  */
 export const PLAYER_GROWTH = {
   /** 玩家最大等级 */
-  maxLevel: 20,
+  maxLevel: 10,
   
   /** 基础分数要求 */
   baseScore: 20000,

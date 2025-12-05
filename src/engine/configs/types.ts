@@ -1,6 +1,3 @@
-import { WeaponId } from "../types";
-
-
 
 export type SpriteSpec = {
     texture: string; // 纹理地址
@@ -9,7 +6,7 @@ export type SpriteSpec = {
 }
 
 export type GalleryEntry = {
-    weaponId: WeaponId;
+    id: string;
     name: string;
     chineseName: string;
     description: string;

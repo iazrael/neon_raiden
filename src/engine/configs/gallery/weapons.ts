@@ -3,7 +3,7 @@ import { GalleryEntry } from "../types";
 
 export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
   [WeaponId.VULCAN]: {
-    weaponId: WeaponId.VULCAN,
+    id: WeaponId.VULCAN,
     name: 'Vulcan Gun',
     chineseName: '星裂火神炮',
     description: '智能弹道预测系统根据敌机密度自动调整扇形覆盖，纳米级表面处理确保远距离精准打击。',
@@ -12,7 +12,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 0,
   },
   [WeaponId.LASER]: {
-    weaponId: WeaponId.LASER,
+    id: WeaponId.LASER,
     name: 'Laser Cannon',
     chineseName: '裂空镭射炮',
     description: '量子纠缠技术聚焦的高能光束，无视护盾直接穿透目标核心。',
@@ -21,7 +21,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 5,
   },
   [WeaponId.PLASMA]: {
-    weaponId: WeaponId.PLASMA,
+    id: WeaponId.PLASMA,
     name: 'Plasma Cannon',
     chineseName: '等离子炮',
     description: '反物质约束场封装超高温等离子体，命中后形成微型奇点。',
@@ -30,7 +30,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 10001,
   },
   [WeaponId.MISSILE]: {
-    weaponId: WeaponId.MISSILE,
+    id: WeaponId.MISSILE,
     name: 'Homing Missile',
     chineseName: '幽灵追踪导弹',
     description: '搭载第五代AI导航系统的智能导弹，通过量子雷达锁定目标生命信号，可进行多次空间折跃追击。',
@@ -39,7 +39,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 3,
   },
   [WeaponId.WAVE]: {
-    weaponId: WeaponId.WAVE,
+    id: WeaponId.WAVE,
     name: 'Wave Cannon',
     chineseName: '相位海啸炮',
     description: '通过大量共振水晶同步激发的宽频能量波，形成覆盖大范围扇区的相位潮汐。',
@@ -48,7 +48,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 7,
   },
   [WeaponId.TESLA]: {
-    weaponId: WeaponId.TESLA,
+    id: WeaponId.TESLA,
     name: 'Tesla Cannon',
     chineseName: '特斯拉链式闪电',
     description: '释放超高压电弧武器，通过离子化空气在敌群间形成连锁传导。',
@@ -57,7 +57,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 20001,
   },
   [WeaponId.MAGMA]: {
-    weaponId: WeaponId.MAGMA,
+    id: WeaponId.MAGMA,
     name: 'Magma Cannon',
     chineseName: '恒星熔岩弹',
     description: '封装恒星核心物质的超高温武器，命中后形成持续灼烧的熔岩区域。',
@@ -66,7 +66,7 @@ export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
     unlockParam: 8,
   },
   [WeaponId.SHURIKEN]: {
-    weaponId: WeaponId.SHURIKEN,
+    id: WeaponId.SHURIKEN,
     name: 'Shuriken',
     chineseName: '量子回旋刃',
     description: '采用单分子锋刃技术的回旋武器，边缘锋利度达原子级。',

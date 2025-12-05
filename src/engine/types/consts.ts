@@ -1,6 +1,13 @@
 // 常量
 
 /**
+ * 战机 ID
+ */
+export enum FighterId {
+    NEON = 'neon_7'
+}
+
+/**
  * 武器 ID
  */
 export enum WeaponId {
