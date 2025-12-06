@@ -37,7 +37,7 @@ export class Sprite extends Component {
    * @param cfg 精灵配置
    */
   constructor(cfg: { 
-    texture: string;        // 图集名
+    texture?: string;        // 图集名
     color?: string;         // 颜色
     srcX?: number;          // 切图起始（像素）
     srcY?: number;

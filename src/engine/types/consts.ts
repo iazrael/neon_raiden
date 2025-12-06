@@ -45,3 +45,24 @@ export enum AmmoType {
     MAGMA_POOL = 'magmaPool',         // 熔岩池
     SHURIKEN_BOUNCE = 'shurikenBounce' // 手里剑反弹
 }
+
+/**
+ * buff 类型的 ID
+ */
+export enum BuffType {
+    HP = 'hp',                 // 生命值提升
+    POWER = 'power',           // 武器升级
+    OPTION = 'option',         // 僚机
+    BOMB = 'bomb',             // 炸弹
+    SPEED = 'speed',           // 速度提升
+    DAMAGE = 'damage',         // 伤害提升
+    SHIELD = 'shield',         // 护盾提升
+    INVINCIBILITY = 'invincibility', // 无敌
+    TIME_SLOW = 'timeSlow',    // 时间减速
+    RAPID_FIRE = 'rapidFire', // 射速提升
+    PENETRATION = 'penetration', // 穿透提升
+    CHAIN = 'chain',           // 连锁
+    AREA = 'area',             // 范围扩大
+    COOLDOWN = 'cooldown',     // 冷却减少
+    DURATION = 'duration',     // 持续时间延长
+}
