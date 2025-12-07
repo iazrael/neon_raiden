@@ -37,3 +37,12 @@ export interface AmmoSpec {
     bounces: number;          // 可反弹次数（0 = 不反弹）
     onHit: string[];          // 命中时触发的效果 ID 列表（字符串引用）
 }
+
+// =========== 效果 =================
+export interface EffectSpec {
+    id: string;     // 效果唯一键
+    type: string; // 效果类型
+    value: number; // 效果值
+    radius: number; // 效果半径
+    duration: number; // 效果持续时间
+}
