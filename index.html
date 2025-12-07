@@ -68,9 +68,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./logo-180.png">
     <link rel="apple-touch-icon" sizes="512x512" href="./logo-512.png">
 
-    <style>
-        @import "tailwindcss";
-    </style>
+    <link rel="stylesheet" href="./index.css">
     <style>
         body {
             overscroll-behavior: none;
@@ -81,40 +79,6 @@
 
         canvas {
             touch-action: none;
-        }
-
-        /* 从底部滑上来的动画 */
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* 从右侧滑出来的动画 */
-        @keyframes slideLeft {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .animate-slideUp {
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .animate-slideLeft {
-            animation: slideLeft 0.3s ease-out;
         }
 
         /* Loading indicator styles */
@@ -171,7 +135,6 @@
             }
         }
     </style>
-
 </head>
 
 <body>
