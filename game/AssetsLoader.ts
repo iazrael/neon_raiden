@@ -50,6 +50,14 @@ export class AssetsLoader {
         load(`${ASSETS_BASE_PATH}environment/energy_storm.svg`);
         load(`${ASSETS_BASE_PATH}environment/gravity_field.svg`);
 
+        // Powerup icons
+        load(`${ASSETS_BASE_PATH}powerups/invincibility.svg`);
+        load(`${ASSETS_BASE_PATH}powerups/time_slow.svg`);
+        load(`${ASSETS_BASE_PATH}powerups/power.svg`);
+        load(`${ASSETS_BASE_PATH}powerups/hp.svg`);
+        load(`${ASSETS_BASE_PATH}powerups/bomb.svg`);
+        load(`${ASSETS_BASE_PATH}powerups/option.svg`);
+
         await Promise.all(promises);
         console.log('All assets preloaded');
     }

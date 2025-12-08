@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 40 40" width="40" height="40">
+  <!-- Background -->
+  <rect x="-15" y="-15" width="30" height="30" rx="5" ry="5" fill="rgba(20, 20, 30, 0.8)" stroke="#00ff00" stroke-width="3"/>
+  
+  <!-- Bomb symbol -->
+  <circle cx="0" cy="0" r="6" fill="#333333"/>
+  <circle cx="0" cy="-8" r="2" fill="#ff0000"/>
+  <path d="M0,-6 L0,-9" stroke="#ff0000" stroke-width="2"/>
+</svg>

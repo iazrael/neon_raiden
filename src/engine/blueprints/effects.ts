@@ -22,14 +22,6 @@ export const EFFECT_TABLE: Record<string, EffectSpec> = {
     duration: 0.3,
   },
 
-  // 连锁
-  'teslaChain': { id: 'teslaChain',
-    type: 'chain',
-    value: 150,
-    radius: 80,
-    duration: 0.1,
-  },
-
   // 范围扩大
   'areaExpand': { id: 'areaExpand',
     type: 'area',

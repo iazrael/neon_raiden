@@ -61,7 +61,23 @@ export class SpriteGenerator {
     }
 
     // 生成掉落物,现在包含内部图标
-    generatePowerup(type: PowerupType): HTMLCanvasElement {
+    generatePowerup(type: PowerupType): HTMLCanvasElement | HTMLImageElement {
+        // 对于特定道具，直接返回SVG图像
+        if (type === PowerupType.INVINCIBILITY) {
+            return this.loadSVG(`${ASSETS_BASE_PATH}powerups/invincibility.svg`, 40, 40);
+        } else if (type === PowerupType.TIME_SLOW) {
+            return this.loadSVG(`${ASSETS_BASE_PATH}powerups/time_slow.svg`, 40, 40);
+        } else if (type === PowerupType.POWER) {
+            return this.loadSVG(`${ASSETS_BASE_PATH}powerups/power.svg`, 40, 40);
+        } else if (type === PowerupType.HP) {
+            return this.loadSVG(`${ASSETS_BASE_PATH}powerups/hp.svg`, 40, 40);
+        } else if (type === PowerupType.BOMB) {
+            return this.loadSVG(`${ASSETS_BASE_PATH}powerups/bomb.svg`, 40, 40);
+        } else if (type === PowerupType.OPTION) {
+            return this.loadSVG(`${ASSETS_BASE_PATH}powerups/option.svg`, 40, 40);
+        }
+
+        // 其他道具仍然使用Canvas绘制
         const { canvas, ctx } = this.createCanvas(40, 40);
 
         let iconSrc = '';
@@ -133,47 +149,6 @@ export class SpriteGenerator {
             } else {
                 img.addEventListener('load', drawIcon);
             }
-        } else if (type === PowerupType.INVINCIBILITY) {
-            // Draw Shield Icon
-            ctx.strokeStyle = '#00ff00';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            // Shield shape
-            ctx.moveTo(0, -10);
-            ctx.bezierCurveTo(10, -10, 10, -5, 10, 0);
-            ctx.bezierCurveTo(10, 10, 0, 12, 0, 12);
-            ctx.bezierCurveTo(0, 12, -10, 10, -10, 0);
-            ctx.bezierCurveTo(-10, -5, -10, -10, 0, -10);
-            ctx.stroke();
-
-            // Inner cross
-            ctx.beginPath();
-            ctx.moveTo(0, -6);
-            ctx.lineTo(0, 6);
-            ctx.moveTo(-6, 0);
-            ctx.lineTo(6, 0);
-            ctx.stroke();
-        } else if (type === PowerupType.TIME_SLOW) {
-            // Draw Hourglass Icon
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-8, -10);
-            ctx.lineTo(8, -10);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(8, 10);
-            ctx.lineTo(-8, 10);
-            ctx.lineTo(0, 0);
-            ctx.closePath();
-            ctx.stroke();
-
-            // Sand
-            ctx.fillStyle = '#00ffff';
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(4, 5);
-            ctx.lineTo(-4, 5);
-            ctx.fill();
         } else {
             ctx.fillStyle = color;
             ctx.font = 'bold 20px Arial';

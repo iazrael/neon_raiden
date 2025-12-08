@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 40 40" width="40" height="40">
+  <!-- Background -->
+  <rect x="-15" y="-15" width="30" height="30" rx="5" ry="5" fill="rgba(20, 20, 30, 0.8)" stroke="#ff0000" stroke-width="3"/>
+  
+  <!-- Heart symbol -->
+  <path d="M0,-6 C4,-10 8,-6 0,2 C-8,-6 -4,-10 0,-6 Z" 
+        fill="#ff0000"/>
+</svg>
