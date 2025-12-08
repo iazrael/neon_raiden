@@ -3,6 +3,7 @@
 // 包含游戏中所有道具类型的蓝图定义
 //
 
+import { ASSETS } from '../../configs';
 import { BuffType } from '../../types';
 import { Blueprint } from '../types';
 
@@ -16,7 +17,7 @@ export const BLUEPRINT_POWERUP_POWER: Blueprint = {
     Transform: { x: 0, y: 0, rot: 0 },
 
     /** 精灵组件 - 设置道具的纹理信息 */
-    Sprite: { texture: 'powerup_power', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    Sprite: { texture: ASSETS.POWERUPS.power, srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
     PickupItem: { kind: 'buff', blueprint: BuffType.POWER, autoPickup: true },
@@ -34,7 +35,7 @@ export const BLUEPRINT_POWERUP_HP: Blueprint = {
     Transform: { x: 0, y: 0, rot: 0 },
 
     /** 精灵组件 - 设置道具的纹理信息 */
-    Sprite: { texture: 'powerup_hp', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    Sprite: { texture: ASSETS.POWERUPS.hp, srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
     PickupItem: { kind: 'buff', blueprint: BuffType.HP, autoPickup: true },
@@ -52,7 +53,7 @@ export const BLUEPRINT_POWERUP_BOMB: Blueprint = {
     Transform: { x: 0, y: 0, rot: 0 },
 
     /** 精灵组件 - 设置道具的纹理信息 */
-    Sprite: { texture: 'powerup_bomb', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    Sprite: { texture: ASSETS.POWERUPS.bomb, srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
     PickupItem: { kind: 'buff', blueprint: BuffType.BOMB, autoPickup: true },
@@ -70,7 +71,7 @@ export const BLUEPRINT_POWERUP_OPTION: Blueprint = {
     Transform: { x: 0, y: 0, rot: 0 },
 
     /** 精灵组件 - 设置道具的纹理信息 */
-    Sprite: { texture: 'powerup_option', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    Sprite: { texture: ASSETS.POWERUPS.option, srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
     PickupItem: { kind: 'buff', blueprint: BuffType.OPTION, autoPickup: true },
@@ -88,7 +89,7 @@ export const BLUEPRINT_POWERUP_INVINCIBILITY: Blueprint = {
     Transform: { x: 0, y: 0, rot: 0 },
 
     /** 精灵组件 - 设置道具的纹理信息 */
-    Sprite: { texture: 'powerup_invincibility', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    Sprite: { texture: ASSETS.POWERUPS.invincibility, srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
     PickupItem: { kind: 'buff', blueprint: BuffType.INVINCIBILITY, autoPickup: true },
@@ -106,7 +107,7 @@ export const BLUEPRINT_POWERUP_TIME_SLOW: Blueprint = {
     Transform: { x: 0, y: 0, rot: 0 },
 
     /** 精灵组件 - 设置道具的纹理信息 */
-    Sprite: { texture: 'powerup_time_slow', srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    Sprite: { texture: ASSETS.POWERUPS.timeSlow, srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
     PickupItem: { kind: 'buff', blueprint: BuffType.TIME_SLOW, autoPickup: true },
