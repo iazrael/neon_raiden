@@ -19,8 +19,8 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
 
     // 2. 按蓝图 push 组件
     for (const [key, args] of Object.entries(bp)) {
-        const Ctor = Components[key] as ComponentConstructor;
-        const comp = new Ctor(args);
+        const ComponentClass = Components[key] as ComponentConstructor;
+        const comp = new ComponentClass(args);
         if (Components.Transform.check(comp)){
             // 动态注入出生点
             comp.x = x; comp.y = y;
@@ -32,45 +32,29 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
     return id;
 }
 
-// export function spawnPlayer(
-//     world: World,
-//     bp: Blueprint,
-//     x: number,
-//     y: number
-// ): EntityId {
-//     const id = generateId();
-//     const comps = Object.values(bp).map((data) => cloneComponent(data)); // 深拷贝
-//     const tr = comps.find(C.Transform.check)!;
-//     tr.x = x; tr.y = y;                       // 动态注入出生点
-//     world.entities.set(id, comps);
-//     world.playerId = id;
-//     return id;
-// }
 
-export function spawnPlayer(world: World, bp: any): EntityId {
-    const id = generateId();
-    if (bp.transform) addComponent(world, id, bp.transform);
-    if (bp.health) addComponent(world, id, bp.health);
-    if (bp.weapon) addComponent(world, id, bp.weapon);
-    if (bp.sprite) addComponent(world, id, bp.sprite);
-    if (bp.shield) addComponent(world, id, bp.shield);
-    if (bp.velocity) addComponent(world, id, bp.velocity);
-
+export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y);
     world.playerId = id;
     return id;
 }
 
-export function spawnEnemy(world: World, bp: any, x: number, y: number): EntityId {
-    const id = generateId();
-    if (bp.transform) {
-        const transform = { ...bp.transform, x, y };
-        addComponent(world, id, transform);
-    }
-    if (bp.health) addComponent(world, id, bp.health);
-    if (bp.weapon) addComponent(world, id, bp.weapon);
-    if (bp.sprite) addComponent(world, id, bp.sprite);
-    if (bp.shield) addComponent(world, id, bp.shield);
-    if (bp.velocity) addComponent(world, id, bp.velocity);
+export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, 'enemy');
+    return id;
+}
 
+export function spawnBoss(world: World, bp: Blueprint, x: number, y: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y);
+    return id;
+}
+
+export function spawnBullet(world: World, bp: Blueprint, x: number, y: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, 'bullet');
+    return id;
+}
+
+export function spawnPickup(world: World, bp: Blueprint, x: number, y: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, 'pickup');
     return id;
 }

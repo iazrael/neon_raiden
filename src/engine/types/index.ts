@@ -22,10 +22,9 @@ export interface World {
     playerId: EntityId;
     /** 事件队列 */
     events: Event[];
-    time: number;
-    // 全局进度
-    score: number;        
-    level: number;        // 关卡序号
+    time: number;   // 当前时间
+    score: number;  // 全局进度
+    level: number;  // 关卡序号
     playerLevel: number;  // 战机等级
     difficulty: number;   // 动态倍率
 }

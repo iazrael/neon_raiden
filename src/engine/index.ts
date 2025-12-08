@@ -37,7 +37,7 @@ export class Engine {
     start(canvas: HTMLCanvasElement, bp: Blueprint) {
         this.ctx = canvas.getContext('2d')!;
         this.world = createWorld();
-        // spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80);
+        spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80);
         this.loop();
     }
 

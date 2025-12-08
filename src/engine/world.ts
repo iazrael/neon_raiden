@@ -66,18 +66,18 @@ export function pushEvent(w: World, event: Event) {
 
 // 与 world 同文件即可
 export const pools: Record<string, Component[][]> = {
-  bullet: [],
-  enemy: [],
-  pickup: [],
+    bullet: [],
+    enemy: [],
+    pickup: [],
 };
 
 /** 把一整条组件数组回池（只清空引用，不删实体） */
 export function returnToPool(pool: string, comps: Component[]) {
-  comps.length = 0;                 // 清空引用，帮助 GC
-  pools[pool].push(comps);          // 回池
+    comps.length = 0;                 // 清空引用，帮助 GC
+    pools[pool].push(comps);          // 回池
 }
 
 /** 从池里拿一条空数组，无池则新建 */
 export function getFromPool(pool: string): Component[] {
-  return pools[pool].pop() ?? [];
+    return pools[pool].pop() ?? [];
 }
