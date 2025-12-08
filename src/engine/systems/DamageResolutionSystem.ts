@@ -1,5 +1,6 @@
-import { World, Health, Shield, DestroyTag } from '../types';
+import { World } from '../types';
 import { view, addComponent } from '../world';
+import { Health, Shield, DestroyTag } from '../components';
 
 /**
  * 伤害结算系统
@@ -8,10 +9,7 @@ import { view, addComponent } from '../world';
  */
 export function DamageResolutionSystem(w: World, dt: number) {
   // 处理护盾吸收伤害
-  for (const [, components] of view(w, ['Health', 'Shield'])) {
-    const health = components[0];
-    const shield = components[1];
-    
+  for (const [, [health, shield]] of view(w, [Health, Shield])) {
     // 简单的类型检查
     if ('hp' in health && 'max' in health && 'value' in shield && 'regen' in shield) {
       // 护盾每帧恢复
@@ -28,11 +26,10 @@ export function DamageResolutionSystem(w: World, dt: number) {
   }
   
   // 检查需要销毁的实体
-  for (const [id, components] of view(w, ['Health'])) {
-    const health = components[0];
+  for (const [id, [health]] of view(w, [Health])) {
     if ('hp' in health && health.hp <= 0) {
       // 为需要销毁的实体添加DestroyTag组件
-      addComponent(w, id, new DestroyTag('killed'));
+      addComponent(w, id, new DestroyTag({ reason: 'killed' }));
     }
   }
 }
