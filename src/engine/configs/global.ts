@@ -29,6 +29,15 @@ export const ASSETS = {
         vulcan: BASE_ASSET_PATH + 'bullets/bullet_vulcan.svg',
         wave: BASE_ASSET_PATH + 'bullets/bullet_wave.svg',
     },
+    POWERUPS: {
+        bomb: BASE_ASSET_PATH + 'powerups/powerup_bomb.svg',
+        hp: BASE_ASSET_PATH + 'powerups/powerup_hp.svg',
+        invincibility: BASE_ASSET_PATH + 'powerups/powerup_invincibility.svg',
+        option: BASE_ASSET_PATH + 'powerups/powerup_option.svg',
+        power: BASE_ASSET_PATH + 'powerups/powerup_power.svg',
+        timeSlow: BASE_ASSET_PATH + 'powerups/powerup_time_slow.svg',
+        // shield: BASE_ASSET_PATH + 'powerups/powerup_shield.svg',
+    },
     ENEMIES: {
         normal: BASE_ASSET_PATH + 'enemies/enemy_normal.svg',
         fast: BASE_ASSET_PATH + 'enemies/enemy_fast.svg',
