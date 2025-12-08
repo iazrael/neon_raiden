@@ -1,39 +1,39 @@
 import { BehaviorSubject } from 'rxjs';
 import { createWorld } from './world';
-import {  World } from './types';
+import { World } from './types';
 import { Blueprint } from './blueprints';
-
-// 导入所有系统
-import { InputSystem } from './systems/InputSystem';
-import { MovementSystem } from './systems/MovementSystem';
-import { WeaponSystem } from './systems/WeaponSystem';
-import { CollisionSystem } from './systems/CollisionSystem';
-import { DamageResolutionSystem } from './systems/DamageResolutionSystem';
-import { LifetimeSystem } from './systems/LifetimeSystem';
-import { LootSystem } from './systems/LootSystem';
-import { PickupSystem } from './systems/PickupSystem';
-import { AISteerSystem } from './systems/AISteerSystem';
-import { BuffSystem } from './systems/BuffSystem';
-import { EffectPlayer } from './systems/EffectPlayer';
-import { CameraSystem } from './systems/CameraSystem';
-import { SpawnSystem } from './systems/SpawnSystem';
-import { CleanupSystem } from './systems/CleanupSystem';
-import { RenderSystem } from './systems/RenderSystem';
-import { AudioSystem } from './systems/AudioSystem';
-import { BossSystem } from './systems/BossSystem';
-import { ComboSystem } from './systems/ComboSystem';
-import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
-import { DifficultySystem } from './systems/DifficultySystem';
 import { spawnPlayer } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
 
+// ============== 导入所有系统
+import { AISteerSystem } from './systems/AISteerSystem';
+import { AudioSystem } from './systems/AudioSystem';
+import { BossSystem } from './systems/BossSystem';
+import { BuffSystem } from './systems/BuffSystem';
+import { CameraSystem } from './systems/CameraSystem';
+import { CleanupSystem } from './systems/CleanupSystem';
+import { CollisionSystem } from './systems/CollisionSystem';
+import { ComboSystem } from './systems/ComboSystem';
+import { DamageResolutionSystem } from './systems/DamageResolutionSystem';
+import { DifficultySystem } from './systems/DifficultySystem';
+import { EffectPlayer } from './systems/EffectPlayer';
+import { InputSystem } from './systems/InputSystem';
+import { LifetimeSystem } from './systems/LifetimeSystem';
+import { LootSystem } from './systems/LootSystem';
+import { MovementSystem } from './systems/MovementSystem';
+import { PickupSystem } from './systems/PickupSystem';
+import { RenderSystem } from './systems/RenderSystem';
+import { SpawnSystem } from './systems/SpawnSystem';
+import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
+import { WeaponSystem } from './systems/WeaponSystem';
+// ==============
 
 export class Engine {
     private raf = 0;
     private world: World;
     private ctx: CanvasRenderingContext2D;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
-    
+
     start(canvas: HTMLCanvasElement, bp: Blueprint) {
         this.ctx = canvas.getContext('2d')!;
         this.world = createWorld();
@@ -80,6 +80,7 @@ export class Engine {
         DamageResolutionSystem(world, dt);
         ComboSystem(world, dt);
         DifficultySystem(world, dt);
+        SpawnSystem(world, dt);
         // EnvironmentSystem(world, dt);
         // BossPhaseSystem(world, dt);
         BossSystem(world, dt);
