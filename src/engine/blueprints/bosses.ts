@@ -4,6 +4,7 @@
 //
 
 import { ASSETS } from '../configs';
+import { DROPTABLE_BOSS } from '../configs/droptables/common';
 import { BossId } from '../types';
 import { Blueprint } from './types';
 
@@ -30,6 +31,8 @@ export const BLUEPRINT_BOSS_GUARDIAN: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 90 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -54,6 +57,8 @@ export const BLUEPRINT_BOSS_INTERCEPTOR: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 100 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -78,6 +83,8 @@ export const BLUEPRINT_BOSS_DESTROYER: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 110 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -102,6 +109,8 @@ export const BLUEPRINT_BOSS_ANNIHILATOR: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 120 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -126,6 +135,8 @@ export const BLUEPRINT_BOSS_DOMINATOR: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 130 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -150,6 +161,8 @@ export const BLUEPRINT_BOSS_OVERLORD: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 140 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -174,6 +187,8 @@ export const BLUEPRINT_BOSS_TITAN: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 150 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -198,6 +213,8 @@ export const BLUEPRINT_BOSS_COLOSSUS: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 160 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -222,6 +239,8 @@ export const BLUEPRINT_BOSS_LEVIATHAN: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 170 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 /**
@@ -246,6 +265,8 @@ export const BLUEPRINT_BOSS_APOCALYPSE: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 180 * 0.7 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_BOSS }
 };
 
 // 导出Boss蓝图表

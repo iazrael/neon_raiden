@@ -4,6 +4,7 @@
 //
 
 import { ASSETS } from '../configs';
+import { DROPTABLE_COMMON } from '../configs/droptables/common';
 import { EnemyId } from '../types';
 import { Blueprint } from './types';
 
@@ -29,6 +30,9 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 20 },
+
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -53,6 +57,8 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 15 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -77,6 +83,8 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 30 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -101,6 +109,8 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 15 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -125,6 +135,8 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -149,6 +161,8 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -173,6 +187,8 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 30 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -197,6 +213,8 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 16 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -221,6 +239,8 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -245,6 +265,8 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 18 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**
@@ -269,6 +291,8 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
+    // 挂载掉落表组件，直接引用配置数组
+    DropTable: { table: DROPTABLE_COMMON } 
 };
 
 /**

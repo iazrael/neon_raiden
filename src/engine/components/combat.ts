@@ -146,6 +146,22 @@ export class Buff extends Component {
   }
 }
 
+/** 掉落表组件 - 定义实体被销毁时的掉落物品 */
+export class DropTable extends Component {
+    /**
+     * 构造函数
+     * @param cfg 掉落表配置
+     */
+    constructor(cfg: { 
+        /** 掉落项数组 */
+        table: Array<{ item: string; weight: number; min?: number; max?: number }>; 
+    }) {
+        super();
+        this.table = cfg.table;
+    }
+    public table: Array<{ item: string; weight: number; min?: number; max?: number }>;
+    static check(c: any): c is DropTable { return c instanceof DropTable; }
+}
 
 /**
  * 持续伤害组件（DOT）

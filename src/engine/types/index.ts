@@ -1,5 +1,5 @@
 import { Event } from '../events';
-export * from './consts'
+export * from './ids'
 export * from './types'
 
 // ========== 基础类型 ==========

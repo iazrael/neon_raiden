@@ -98,3 +98,27 @@ export enum EnemyId {
     STALKER = 'stalker',         // 追踪者
     BARRAGE = 'barrage'          // 弹幕敌人
 }
+
+// 掉落物 ID
+export const PickupId = {
+    // 武器
+    VULCAN: 'pickup_weapon_vulcan',
+    LASER: 'pickup_weapon_laser',
+    MISSILE: 'pickup_weapon_missile',
+    SHURIKEN: 'pickup_weapon_shuriken',
+    TESLA: 'pickup_weapon_tesla',
+    MAGMA: 'pickup_weapon_magma',
+    WAVE: 'pickup_weapon_wave',
+    PLASMA: 'pickup_weapon_plasma',
+
+    // Buff
+    POWER: 'pickup_buff_power',
+    HP: 'pickup_buff_hp',
+    BOMB: 'pickup_buff_bomb',
+    OPTION: 'pickup_buff_option',
+    INVINCIBILITY: 'pickup_buff_invincibility',
+    TIME_SLOW: 'pickup_buff_time_slow',
+    
+    // 特殊
+    NONE: 'none', // 什么都不掉
+};
