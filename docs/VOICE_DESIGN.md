@@ -40,13 +40,13 @@ export interface SoundHandle {
 }
 ```
 
-### 2.2 核心引擎 (MiniAudioEngine.ts)
+### 2.2 核心引擎 (AudioEngine.ts)
 支持多层合成、循环控制、白噪 `playbackRate` 控制的完整版本。
 
 ```typescript
 import { SoundLayer, SoundOptions, SoundHandle } from "./AudioTypes";
 
-export class MiniAudioEngine {
+export class AudioEngine {
     private ctx: AudioContext;
     private masterGain: GainNode;
     private _noiseBuffer: AudioBuffer | null = null;
@@ -466,3 +466,72 @@ entity.addComponent(new AudioEmitter({
     *   加 **Triangle/Sine** 增加厚度。
     *   加 **Sawtooth** 增加锐利感。
 4.  **视觉配合**：声音不是孤立的。大爆炸必须配合震屏、闪白；时间停止必须配合画面变色；护盾破碎必须配合粒子炸裂和顿帧（Hit Stop）。
+
+# 附录. 旧版音效说明
+
+本文档描述了 AudioEngine 使用的音频配置数据。所有音效均采用声明式配置，通过波形合成（Synthesizer）实时生成，无需加载外部音频文件。
+
+## 1. UI 交互音效 (User Interface)
+
+此类音效用于界面的点击、确认及导航反馈。
+
+| ID | 名称 | 波形 | 频率变化 (Hz) | 听觉特征 |
+| :--- | :--- | :--- | :--- | :--- |
+| **click_default** | 默认点击 | Sine (正弦波) | 800 $\to$ 1200 | 短促明快的上升音调，通用按钮音。 |
+| **click_confirm** | 确认点击 | Sine (正弦波) | 800 $\to$ 1600 | 高音快速上升，比默认点击更激昂，表示成功或开始。 |
+| **click_cancel** | 取消点击 | Triangle (三角波) | 600 $\to$ 300 | 低音快速下降，柔和但带有否定感，表示返回或关闭。 |
+| **click_menu** | 菜单点击 | Sine (正弦波) | 1000 (恒定) | 极短促的定音，柔和不刺耳，适合高频次的导航切换。 |
+
+## 2. 武器发射音效 (Weapons)
+
+每种武器拥有独特的波形和频率包络，以区分其攻击特性。
+
+| ID | 名称 | 波形 | 频率特征 | 听觉特征 |
+| :--- | :--- | :--- | :--- | :--- |
+| **weapon_vulcan** | 火神炮 | Square (方波) | 400 $\to$ 100 (快降) | 金属质感，快速下降的“哒哒”声。 |
+| **weapon_laser** | 激光 | Sawtooth (锯齿波) | 800 $\to$ 1200 (上升) | 尖锐、充满能量的上升音束。 |
+| **weapon_missile** | 导弹 | Triangle (三角波) | 150 $\to$ 50 (慢降) | 低沉轰鸣，模拟推进器声音。 |
+| **weapon_wave** | 波动炮 | Sine (正弦波) | 300 $\to$ 800 (上升) | 纯净且厚实的能量扩散声。 |
+| **weapon_plasma** | 等离子炮 | Square (方波) | 100 $\to$ 50 (慢降) | 沉重的低频嗡嗡声，带有电离感。 |
+| **weapon_tesla** | 特斯拉炮 | Square (方波) | 1500 $\to$ 2000 $\to$ 1500 | 高频电流滋滋声，频率先升后降。 |
+| **weapon_magma** | 岩浆炮 | Sawtooth (锯齿波) | 200 $\to$ 80 (下降) | 粗糙的低频撕裂声，模拟岩浆喷发。 |
+| **weapon_shuriken** | 手里剑 | Triangle (三角波) | 1000 $\to$ 600 (下降) | 快速划破空气的高频哨音。 |
+
+## 3. 战斗与环境音效 (Combat & FX)
+
+包含爆炸、受击及特殊状态的音效。部分复杂音效由多层合成器叠加而成。
+
+### 爆炸效果 (Composite Sounds)
+爆炸音效由“高频噪声层”和“低频震动层”混合而成。
+
+| ID | 名称 | 构成 | 描述 |
+| :--- | :--- | :--- | :--- |
+| **EXPLOSION_SMALL** | 小爆炸 | **层1 (噪声):** 白噪声 + 1kHz-100Hz 低通扫频<br>**层2 (低音):** 锯齿波 100Hz-10Hz | 短促的冲击声伴随轻微的低音震动。 |
+| **EXPLOSION_LARGE** | 大爆炸 | **层1 (噪声):** 更大音量的白噪声扫频<br>**层2 (低音):** 更长时值(0.8s)的锯齿波 | 巨大的冲击声，伴随长时间的深沉轰鸣。 |
+
+### 单体效果
+| ID | 名称 | 波形 | 特征描述 |
+| :--- | :--- | :--- | :--- |
+| **hit** | 受击 | Triangle | 短促的低频(200Hz$\to$50Hz)闷响，表示受到轻微伤害。 |
+| **bomb** | 炸弹 | Sawtooth | 极长(1.5s)的低频扫频(100Hz$\to$10Hz)，全屏轰炸的余波感。 |
+| **shield_loop** | 护盾循环 | Sine | **持续音**。880Hz，叠加 8Hz 的 LFO (低频振荡) 调制，产生高频颤动的力场声。支持淡入淡出。 |
+| **slow_motion_enter** | 慢动作 | Sawtooth | 1.0秒的长时值下降音(400Hz$\to$50Hz)，模拟时间被拉长、扭曲的感觉。 |
+
+### 护盾破碎 (Composite Sounds)
+由三层声音叠加，模拟复杂的物理破碎效果：
+1.  **Pop:** 正弦波破裂声 (主音体)。
+2.  **Crisp:** 三角波高频清脆声 (碎片感)。
+3.  **Bubble:** 正弦波气泡声 (能量消散，频率微升后急降)。
+
+## 4. 游戏状态/旋律音效 (Game State)
+
+此类音效具有明显的旋律性，由多个音符按时间序列组合而成。
+
+| ID | 名称 | 构成/旋律 | 描述 |
+| :--- | :--- | :--- | :--- |
+| **power_up** | 拾取道具 | **Sine波双音:** <br>1. B5 (987Hz) <br>2. E6 (1318Hz) | 经典的“吃金币”音效，两个音符快速跳变，清脆悦耳。 |
+| **victory** | 胜利 | **Square波 (8-bit风格) 四音符:**<br>C $\to$ E $\to$ G $\to$ C (上行琶音) | 激昂的大调分解和弦，节奏紧凑。 |
+| **defeat** | 失败 | **Sawtooth波 (悲伤感) 四音符:**<br>300Hz $\to$ 250Hz $\to$ 200Hz $\to$ 150Hz | 下行音阶，音色粗糙，表达沮丧感。 |
+| **boss_defeat** | Boss击败 | **Square波 六音符:**<br>C5 $\to$ E5 $\to$ G5 $\to$ C6 $\to$ E6 $\to$ G6 | 马里奥风格的长上行琶音，最后一个音符长延音(1.0s)，极具成就感。 |
+| **level_up** | 升级 | **Square波 三音符:**<br>C5 $\to$ E5 $\to$ G5 | 类似马里奥吃蘑菇的“嘣~嘣~嘣”三连音，每个音符有独特的起伏包络。 |
+| **warning** | 警告 | **Sawtooth波 + 带通滤波器:**<br>滤波器频率在 200Hz 与 800Hz 之间往复扫描 | 模拟警报器的“哇-哇”声，配合复杂的增益包络产生紧迫感。 |
