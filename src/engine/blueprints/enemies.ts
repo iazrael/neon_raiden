@@ -3,32 +3,31 @@
 // 包含游戏中所有敌人类型的蓝图定义
 //
 
-import { Transform, Health, Velocity, Sprite, EnemyTag, HitBox } from '../components'
+import { ASSETS } from '../configs';
 import { Blueprint } from './types';
-import { EnemyType } from '@/types';
 
 /**
  * 普通敌人蓝图
  * 基础敌人单位，血量较少，移动速度中等
  */
 export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 30, max: 30 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 2, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_normal', srcX: 0, srcY: 0, srcW: 40, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为普通敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 20 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 30, max: 30 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 2, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.normal, srcX: 0, srcY: 0, srcW: 40, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为普通敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 20 },
 };
 
 /**
@@ -36,23 +35,23 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
  * 高速移动的敌人，血量较少但速度快
  */
 export const BLUEPRINT_ENEMY_FAST: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 10, max: 10 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 10, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_fast', srcX: 0, srcY: 0, srcW: 30, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为快速敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 15 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 10, max: 10 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 10, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.fast, srcX: 0, srcY: 0, srcW: 30, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为快速敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 15 },
 };
 
 /**
@@ -60,23 +59,23 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
  * 高血量低速度的敌人，具有较强的耐久性
  */
 export const BLUEPRINT_ENEMY_TANK: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 60, max: 60 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 1, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_tank', srcX: 0, srcY: 0, srcW: 60, srcH: 60, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为坦克敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 30 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 60, max: 60 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 1, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.tank, srcX: 0, srcY: 0, srcW: 60, srcH: 60, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为坦克敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 30 },
 };
 
 /**
@@ -84,23 +83,23 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
  * 血量极少但速度很快，通常用于自杀式攻击
  */
 export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 5, max: 5 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 10, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_kamikaze', srcX: 0, srcY: 0, srcW: 30, srcH: 30, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为自杀式敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 15 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 5, max: 5 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 10, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.kamikaze, srcX: 0, srcY: 0, srcW: 30, srcH: 30, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为自杀式敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 15 },
 };
 
 /**
@@ -108,23 +107,23 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
  * 精英单位，具有较高的血量和特殊能力
  */
 export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 100, max: 100 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 0.5, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_gunboat', srcX: 0, srcY: 0, srcW: 70, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为精英炮艇敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 35 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 100, max: 100 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 0.5, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.gunboat, srcX: 0, srcY: 0, srcW: 70, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为精英炮艇敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 35 },
 };
 
 /**
@@ -132,23 +131,23 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
  * 能够发射激光的敌人单位
  */
 export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 80, max: 80 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 5, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_interceptor', srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为激光拦截机敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 25 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 80, max: 80 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 5, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.interceptor, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为激光拦截机敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 25 },
 };
 
 /**
@@ -156,23 +155,23 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
  * 能够部署地雷的敌人单位
  */
 export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 60, max: 60 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 1.5, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_layer', srcX: 0, srcY: 0, srcW: 60, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为布雷船敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 30 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 60, max: 60 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 1.5, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.layer, srcX: 0, srcY: 0, srcW: 60, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为布雷船敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 30 },
 };
 
 /**
@@ -180,23 +179,23 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
  * 能够发射脉冲波的敌人单位
  */
 export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 15, max: 15 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 6, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_pulsar', srcX: 0, srcY: 0, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为脉冲敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 16 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 15, max: 15 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 6, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.pulsar, srcX: 0, srcY: 0, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为脉冲敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 16 },
 };
 
 /**
@@ -204,23 +203,23 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
  * 高血量的防御型敌人单位
  */
 export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 200, max: 200 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 0.8, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_fortress', srcX: 0, srcY: 0, srcW: 70, srcH: 70, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为堡垒敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 35 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 200, max: 200 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 0.8, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.fortress, srcX: 0, srcY: 0, srcW: 70, srcH: 70, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为堡垒敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 35 },
 };
 
 /**
@@ -228,23 +227,23 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
  * 能够追踪玩家的敌人单位
  */
 export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 30, max: 30 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 5, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_stalker', srcX: 0, srcY: 0, srcW: 36, srcH: 36, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为追踪者敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 18 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 30, max: 30 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 5, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.stalker, srcX: 0, srcY: 0, srcW: 36, srcH: 36, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为追踪者敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 18 },
 };
 
 /**
@@ -252,21 +251,21 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
  * 能够发射密集弹幕的敌人单位
  */
 export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
-  /** 变换组件 - 设置敌人的初始位置和旋转角度 */
-  Transform: {x: 0, y: 0, rot: 0},
-  
-  /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
-  Health: { hp: 100, max: 100 },
-  
-  /** 速度组件 - 设置敌人的移动速度 */
-  Velocity: { vx: 0, vy: 1.2, vrot: 0 },
-  
-  /** 精灵组件 - 设置敌人的纹理信息 */
-  Sprite: { texture: 'enemy_barrage', srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
-  
-  /** 敌人标签组件 - 标识此实体为弹幕敌人 */
-  EnemyTag: {},
-  
-  /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-  HitBox: { shape: 'circle', radius: 25 },
+    /** 变换组件 - 设置敌人的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 生命值组件 - 设置敌人的当前生命值和最大生命值 */
+    Health: { hp: 100, max: 100 },
+
+    /** 速度组件 - 设置敌人的移动速度 */
+    Velocity: { vx: 0, vy: 1.2, vrot: 0 },
+
+    /** 精灵组件 - 设置敌人的纹理信息 */
+    Sprite: { texture: ASSETS.ENEMIES.barrage, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+
+    /** 敌人标签组件 - 标识此实体为弹幕敌人 */
+    EnemyTag: {},
+
+    /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 25 },
 };

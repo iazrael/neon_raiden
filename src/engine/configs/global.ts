@@ -48,6 +48,8 @@ export const ASSETS = {
         pulsar: BASE_ASSET_PATH + 'enemies/enemy_pulsar.svg',
         stalker: BASE_ASSET_PATH + 'enemies/enemy_stalker.svg',
         tank: BASE_ASSET_PATH + 'enemies/enemy_tank.svg',
+        barrage: BASE_ASSET_PATH + 'enemies/enemy_barrage.svg',
+        layer: BASE_ASSET_PATH + 'enemies/enemy_layer.svg',
     },
     ENEMIE_BULLETS: {
         orb: BASE_ASSET_PATH + 'bullets/bullet_enemy_orb.png',
