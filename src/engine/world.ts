@@ -1,4 +1,4 @@
-import { World, EntityId, Component, ComponentConstructor } from './types';
+import { World, EntityId, Component } from './types';
 import { Event } from './events';
 
 // ========== 世界与工具 ==========
@@ -31,24 +31,63 @@ export function freeId(id: EntityId) {
 }
 
 // ========== 视图迭代器 ==========
+// ==========================================
+// 类型魔法区域
+// ==========================================
+
+// 1. 定义一个带泛型的构造函数类型，用于提取实例类型
+//    注意：这里如果不重新定义一个带泛型的 Ctor，TS 很难推导出具体的 T
+type Ctor<T = any> = new (...args: any[]) => T;
+
+// 2. 核心映射类型：把构造函数元组 [C1, C2] 转换为实例元组 [I1, I2]
+type InstanceTuple<T extends Ctor[]> = {
+    [K in keyof T]: T[K] extends Ctor<infer U> ? U : never;
+};
+
+// ==========================================
+// 视图函数
+// ==========================================
+
 /**
- * Creates a view over the world's entities, filtering by component type.
- * @param w The world to view.
- * @param types The component types to filter by.
- * @returns An iterable of [EntityId, Component[]] pairs.
+ * 视图迭代器
+ * @param w World 对象
+ * @param types 组件构造函数数组（元组）
+ * 
+ * 使用 [...T] 语法强制 TypeScript 将输入推导为元组，而不是数组。
+ * 这样 [Transform, Velocity] 就会被识别为 [Transform, Velocity]，
+ * 而不是 (Transform | Velocity)[]
  */
-export function* view<T extends ComponentConstructor[]>(w: World, types: T): Iterable<[EntityId, InstanceType<T[number]>[]]> {
+export function* view<T extends Ctor[]>(
+    w: World, 
+    types: [...T]
+): Iterable<[EntityId, InstanceTuple<T>]> {
+    
+    // 缓存长度，减少循环内的访问
+    const len = types.length;
+
     for (const [id, comps] of w.entities) {
+        // 预分配数组，但在 JS 中 push 通常也够快
         const bucket: any[] = [];
-        for (const T of types) {
-            const found = comps.find(c => c instanceof T);
-            if (!found) break;
+        let hasAll = true;
+
+        for (let i = 0; i < len; i++) {
+            const Ctor = types[i];
+            // 查找该实体是否有对应的组件
+            const found = comps.find(c => c instanceof Ctor);
+            
+            if (!found) {
+                hasAll = false;
+                break;
+            }
             bucket.push(found);
         }
-        if (bucket.length === types.length) yield [id, bucket] as const;
+
+        if (hasAll) {
+            // 强制类型断言：我们确信 bucket 里按顺序装好了对应的组件实例
+            yield [id, bucket as unknown as InstanceTuple<T>];
+        }
     }
 }
-
 // ========== 添加组件 ==========
 export function addComponent<T extends Component>(w: World, id: EntityId, comp: T) {
     if (!w.entities.has(id)) w.entities.set(id, []);
