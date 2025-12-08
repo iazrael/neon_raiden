@@ -41,6 +41,7 @@ export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number): 
 
 export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, 'enemy');
+    world.enemyCount++;
     return id;
 }
 

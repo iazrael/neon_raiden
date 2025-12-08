@@ -377,12 +377,28 @@ ECS 的执行顺序至关重要。我将它们分为 7 个阶段，确保数据�
 3.  **blueprints/**: 现在任何蓝图都可以使用 `Stealth: { duration: 5 }` 字段了（TypeScript 自动提示）。
 4.  **systems/**: 编写 `StealthSystem` 或在 `RenderSystem` 中处理透明度。
 
+### 场景 4：新增敌人
+1.  在 `blueprints/enemies.ts` 定义 `BLUEPRINT_ENEMY_NEW` (JSON)。
+2.  在 `SpawnSystem` 中配置生成时机。
+
+### 场景 5：新增武器
+    1.  在 `configs/weapons.ts` 定义 WeaponSpec。
+    2.  在 `configs/ammo.ts` 定义 AmmoSpec。
+    3.  在 `configs/audio/library.ts` 定义开火音效。
+
+### 场景 6：新增游戏机制 (如: 黑洞)
+    1.  新建组件 `BlackHoleComponent`。
+    2.  新建系统 `BlackHoleSystem` 处理吸力逻辑。
+    3.  在 `systems/loop.ts` 中将其插入到 **P3. 物理层** 之前。
+
+
 ---
 
-## 九、总结
 
-本架构方案的核心优势在于：
-1.  **类型安全**：TypeScript 自动推导蓝图类型，防止配置拼写错误。
-2.  **数据驱动**：90% 的游戏内容调整（数值、掉落、组合）仅需修改 `configs` 和 `blueprints`，无需触碰逻辑代码。
-3.  **逻辑清晰**：System 职责单一，Event 解耦复杂交互，Cleanup 统一管理内存。
-4.  **可维护性**：工厂模式一次性写死，后续扩展零成本。
+## 九、 关键检查清单 (Checklist)
+
+*   [ ] **组件纯度**: 检查所有 Component 类，确保里面**没有** `update()` 方法。
+*   [ ] **事件闭环**: 确保 `CleanupSystem` 放在 `RenderSystem` 之后，`AudioSystem` 之前没有被清空。
+*   [ ] **音频延迟**: 检查 `AudioEngine` 的时间调度是否基于 `startTime` (考虑 delay) 而非当前 `t`。
+*   [ ] **垃圾回收**: 确保 `DestroyTag` 标记的实体在同一帧内被物理移除，防止野指针。
+*   [ ] **React 性能**: 确保 UI 层只订阅 `World` 的低频快照 (Score, HP)，不订阅每帧变化的 Transform。

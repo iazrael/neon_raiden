@@ -27,6 +27,9 @@ export interface World {
     level: number;  // 关卡序号
     playerLevel: number;  // 战机等级
     difficulty: number;   // 动态倍率
+    spawnCredits: number; // 当前余额
+    spawnTimer: number;   // 用来控制刷怪检测频率
+    enemyCount: number;   // 当前敌人数量
 }
 
 

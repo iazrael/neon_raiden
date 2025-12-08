@@ -69,17 +69,21 @@ export class Bullet extends Component {
     pierceLeft?: number;
     /** 弹跳次数剩余 */
     bouncesLeft?: number;
+    /** 目标实体ID */
+    target?: EntityId;
   }) {
     super();
     this.owner = cfg.owner;
     this.ammoType = cfg.ammoType;
     this.pierceLeft = cfg.pierceLeft ?? 0;
     this.bouncesLeft = cfg.bouncesLeft ?? 0;
+    this.target = cfg.target;
   }
   public owner: EntityId;
   public ammoType: string;
   public pierceLeft = 0;
   public bouncesLeft = 0;
+  public target?: EntityId;
   static check(c: any): c is Bullet { return c instanceof Bullet; }
 }
 

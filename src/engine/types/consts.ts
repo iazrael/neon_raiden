@@ -66,3 +66,35 @@ export enum BuffType {
     COOLDOWN = 'cooldown',     // 冷却减少
     DURATION = 'duration',     // 持续时间延长
 }
+
+
+/**
+ * Boss ID
+ */
+export enum BossId {
+    GUARDIAN = 'guardian',         // 守护者
+    INTERCEPTOR = 'interceptor',   // 拦截者
+    DESTROYER = 'destroyer',       // 毁灭者
+    ANNIHILATOR = 'annihilator',   // 歼灭者
+    DOMINATOR = 'dominator',       // 主宰者
+    OVERLORD = 'overlord',         // 霸主
+    TITAN = 'titan',               // 泰坦
+    COLOSSUS = 'colossus',         // 巨像
+    LEVIATHAN = 'leviathan',       // 利维坦
+    APOCALYPSE = 'apocalypse'      // 天启
+}
+
+// 敌人 ID
+export enum EnemyId {
+    NORMAL = 'normal',           // 普通敌人
+    FAST = 'fast',               // 快速敌人
+    TANK = 'tank',               // 坦克敌人
+    KAMIKAZE = 'kamikaze',       // 自杀式敌人
+    ELITE_GUNBOAT = 'elite_gunboat', // 精英炮艇
+    LASER_INTERCEPTOR = 'laser_interceptor', // 激光拦截机
+    MINE_LAYER = 'mine_layer',   // 布雷船
+    PULSAR = 'pulsar',           // 脉冲敌人
+    FORTRESS = 'fortress',       // 堡垒敌人
+    STALKER = 'stalker',         // 追踪者
+    BARRAGE = 'barrage'          // 弹幕敌人
+}

@@ -3,10 +3,9 @@
 // 包含游戏中所有Boss类型的蓝图定义
 //
 
-import { Transform, Health, Sprite, BossTag, BossAI, HitBox } from '../components'
 import { ASSETS } from '../configs';
+import { BossId } from '../types';
 import { Blueprint } from './types';
-import { BossType } from '@/types';
 
 
 /**
@@ -247,4 +246,18 @@ export const BLUEPRINT_BOSS_APOCALYPSE: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 180 * 0.7 },
+};
+
+// 导出Boss蓝图表
+export const BOSSES_TABLE: Record<BossId, Blueprint> = {
+    [BossId.GUARDIAN]: BLUEPRINT_BOSS_GUARDIAN,
+    [BossId.INTERCEPTOR]: BLUEPRINT_BOSS_INTERCEPTOR,
+    [BossId.DESTROYER]: BLUEPRINT_BOSS_DESTROYER,
+    [BossId.ANNIHILATOR]: BLUEPRINT_BOSS_ANNIHILATOR,
+    [BossId.DOMINATOR]: BLUEPRINT_BOSS_DOMINATOR,
+    [BossId.OVERLORD]: BLUEPRINT_BOSS_OVERLORD,
+    [BossId.TITAN]: BLUEPRINT_BOSS_TITAN,
+    [BossId.COLOSSUS]: BLUEPRINT_BOSS_COLOSSUS,
+    [BossId.LEVIATHAN]: BLUEPRINT_BOSS_LEVIATHAN,
+    [BossId.APOCALYPSE]: BLUEPRINT_BOSS_APOCALYPSE,
 };

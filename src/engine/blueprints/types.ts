@@ -46,3 +46,4 @@ export interface EffectSpec {
     radius: number; // 效果半径
     duration: number; // 效果持续时间
 }
+

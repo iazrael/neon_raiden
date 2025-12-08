@@ -4,6 +4,7 @@
 //
 
 import { ASSETS } from '../configs';
+import { EnemyId } from '../types';
 import { Blueprint } from './types';
 
 /**
@@ -268,4 +269,22 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
+};
+
+/**
+ * 敌人蓝图表
+ * 包含游戏中所有敌人类型的蓝图定义
+ */
+export const ENEMIES_TABLE: Record<EnemyId, Blueprint> = {
+    [EnemyId.NORMAL]: BLUEPRINT_ENEMY_NORMAL,
+    [EnemyId.FAST]: BLUEPRINT_ENEMY_FAST,
+    [EnemyId.TANK]: BLUEPRINT_ENEMY_TANK,
+    [EnemyId.KAMIKAZE]: BLUEPRINT_ENEMY_KAMIKAZE,
+    [EnemyId.ELITE_GUNBOAT]: BLUEPRINT_ENEMY_ELITE_GUNBOAT,
+    [EnemyId.LASER_INTERCEPTOR]: BLUEPRINT_ENEMY_LASER_INTERCEPTOR,
+    [EnemyId.MINE_LAYER]: BLUEPRINT_ENEMY_MINE_LAYER,
+    [EnemyId.PULSAR]: BLUEPRINT_ENEMY_PULSAR,
+    [EnemyId.FORTRESS]: BLUEPRINT_ENEMY_FORTRESS,
+    [EnemyId.STALKER]: BLUEPRINT_ENEMY_STALKER,
+    [EnemyId.BARRAGE]: BLUEPRINT_ENEMY_BARRAGE,
 };
