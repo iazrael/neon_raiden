@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { GameEngine } from './game/GameEngine';
+import { GameEngine } from './_old/game/GameEngine';
 import { GameUI } from './components/GameUI';
-import { GameState, WeaponType, ClickType } from './types';
-import type { ComboState } from './game/systems/ComboSystem';
-import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
+import { GameState, WeaponType, ClickType } from './_old/types';
+import type { ComboState } from './_old/game/systems/ComboSystem';
+import type { SynergyConfig } from './_old/game/systems/WeaponSynergySystem';
 
-import { SpriteGenerator } from './game/SpriteGenerator';
-import { GameConfig } from './game/config/game';
+import { SpriteGenerator } from './_old/game/SpriteGenerator';
+import { GameConfig } from './_old/game/config/game';
 import ReloadPrompt from './components/ReloadPrompt';
 
 function App() {

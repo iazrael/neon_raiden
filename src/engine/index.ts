@@ -70,30 +70,44 @@ export class Engine {
     private framePipeline(world: World, dt: number) {
         // ① 逻辑循环（所有 System）
         // 按顺序执行所有系统
-        InputSystem(world, dt);
-        WeaponSystem(world, dt);
-        WeaponSynergySystem(world, dt);
-        AISteerSystem(world, dt);
-        MovementSystem(world, dt);
-        CameraSystem(world, dt);
-        CollisionSystem(world, dt);
-        DamageResolutionSystem(world, dt);
-        ComboSystem(world, dt);
-        DifficultySystem(world, dt);
-        SpawnSystem(world, dt);
-        // EnvironmentSystem(world, dt);
-        // BossPhaseSystem(world, dt);
-        BossSystem(world, dt);
-        LifetimeSystem(world, dt);
-        LootSystem(world, dt);
-        PickupSystem(world, dt);
-        BuffSystem(world, dt);
-        EffectPlayer(world, dt);
-        AudioSystem(world, dt);
+        
+        // P1. 决策层 (输入与AI)
+        InputSystem(world, dt);                         // 1. 输入系统 - 读取键盘/手柄输入
+        DifficultySystem(world, dt);                    // 2. 难度系统 - 根据时间/击杀调整难度
+        SpawnSystem(world, dt);                         // 3. 生成系统 - 刷新敌人
+        // BossPhaseSystem(world, dt);                  // 4. Boss阶段系统 - 控制Boss阶段转换
+        BossSystem(world, dt);                          // 5. Boss系统 - 控制Boss行为
+        // EnemySystem(world, dt);                      // 6. 敌人系统 - 控制敌人决策 (在旧系统中实现)
+        AISteerSystem(world, dt);                       // 7. AI转向系统 - 生成敌人移动意图
+
+        // P2. 状态层 (数值更新)
+        BuffSystem(world, dt);                          // 8. 增益系统 - 更新Buff效果
+        WeaponSynergySystem(world, dt);                 // 9. 武器协同系统 - 计算武器组合效果
+        WeaponSystem(world, dt);                        // 10. 武器系统 - 处理武器射击
+
+        // P3. 物理层 (位移)
+        MovementSystem(world, dt);                      // 11. 移动系统 - 更新实体位置
+
+        // P4. 交互层 (核心碰撞)
+        CollisionSystem(world, dt);                     // 12. 碰撞系统 - 检测碰撞并生成事件
+
+        // P5. 结算层 (事件处理)
+        PickupSystem(world, dt);                        // 13. 拾取系统 - 处理道具拾取
+        DamageResolutionSystem(world, dt);              // 14. 伤害结算系统 - 处理伤害和死亡
+        LootSystem(world, dt);                          // 15. 掉落系统 - 处理敌人掉落
+        ComboSystem(world, dt);                         // 16. 连击系统 - 处理连击逻辑
+
+        // P6. 表现层 (视听反馈)
+        CameraSystem(world, dt);                        // 17. 相机系统 - 更新相机位置
+        EffectPlayer(world, dt);                        // 18. 效果播放系统 - 播放视觉效果
+        AudioSystem(world, dt);                         // 19. 音频系统 - 播放音效
+
         // ② 拍快照（**必须在清理前**）
         this.snapshot$.next(buildSnapshot(this.world, dt));
-        // ③ 清理（**必须在最后**）
-        CleanupSystem(world, dt);
-        RenderSystem(this.ctx, world);
+
+        // P7. 清理层 (生命周期)
+        LifetimeSystem(world, dt);                      // 21. 生命周期系统 - 处理实体生命周期
+        CleanupSystem(world, dt);                       // 22. 清理系统 - 删除标记销毁的实体
+        RenderSystem(this.ctx, world);                  // 20. 渲染系统 - 绘制游戏画面
     }
 }
