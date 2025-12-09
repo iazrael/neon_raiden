@@ -1,5 +1,6 @@
-import { World, DestroyTag } from '../types';
+import { World } from '../types';
 import { view, addComponent } from '../world';
+import { Lifetime, DestroyTag } from '../components';
 
 /**
  * 生命周期系统
@@ -7,12 +8,12 @@ import { view, addComponent } from '../world';
  * 超时后为实体添加DestroyTag组件
  */
 export function LifetimeSystem(w: World, dt: number) {
-  for (const [id, [lifetime]] of view(w, ['Lifetime'])) {
-    (lifetime as any).timer -= dt;
+  for (const [id, [lifetime]] of view(w, [Lifetime])) {
+    lifetime.timer -= dt;
     
     // 如果计时器到期，添加销毁标记
-    if ((lifetime as any).timer <= 0) {
-      addComponent(w, id, new DestroyTag('timeout'));
+    if (lifetime.timer <= 0) {
+      addComponent(w, id, new DestroyTag({ reason: 'timeout' }));
     }
   }
 }

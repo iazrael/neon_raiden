@@ -94,6 +94,17 @@ export function addComponent<T extends Component>(w: World, id: EntityId, comp: 
     w.entities.get(id)!.push(comp);
 }
 
+// ========== 移除组件 ==========
+export function removeComponent(w: World, id: EntityId, comp: Component) {
+    const comps = w.entities.get(id);
+    if (comps) {
+        const index = comps.indexOf(comp);
+        if (index !== -1) {
+            comps.splice(index, 1);
+        }
+    }
+}
+
 // ========== 删除实体 ==========
 export function removeEntity(w: World, id: EntityId) {
     w.entities.delete(id);
