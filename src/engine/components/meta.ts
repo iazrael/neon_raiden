@@ -1,4 +1,4 @@
-import { Component } from '../types';
+import { BossId, Component } from '../types';
 
 // 「标签 & 死亡 & 特效」
 
@@ -31,9 +31,16 @@ export class PlayerTag extends Component { }
 /** 敌人标签组件 */
 export class EnemyTag extends Component { }
 
-/** Boss标签组件 */
-export class BossTag extends Component { }
+/** Boss身份组件 - 标识此实体为Boss，并记录具体是哪个Boss */
+export class BossTag extends Component {
+    constructor(cfg: { id: BossId }) {
+        super();
+        this.id = cfg.id;
+    }
+    public id: BossId;
 
+    static check(c: any): c is BossTag { return c instanceof BossTag; }
+}
 
 
 /** 相机震动组件 - 控制相机震动效果 */

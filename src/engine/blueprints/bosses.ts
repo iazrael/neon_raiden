@@ -24,10 +24,10 @@ export const BLUEPRINT_BOSS_GUARDIAN: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.guardian, srcX: 0, srcY: 0, srcW: 180, srcH: 180, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.GUARDIAN },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 90 * 0.7 },
@@ -50,10 +50,10 @@ export const BLUEPRINT_BOSS_INTERCEPTOR: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.interceptor, srcX: 0, srcY: 0, srcW: 200, srcH: 200, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.INTERCEPTOR },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 100 * 0.7 },
@@ -76,10 +76,10 @@ export const BLUEPRINT_BOSS_DESTROYER: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.destroyer, srcX: 0, srcY: 0, srcW: 220, srcH: 220, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.DESTROYER },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 110 * 0.7 },
@@ -102,10 +102,10 @@ export const BLUEPRINT_BOSS_ANNIHILATOR: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.annihilator, srcX: 0, srcY: 0, srcW: 240, srcH: 240, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.ANNIHILATOR },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 120 * 0.7 },
@@ -128,10 +128,10 @@ export const BLUEPRINT_BOSS_DOMINATOR: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.dominator, srcX: 0, srcY: 0, srcW: 260, srcH: 260, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.DOMINATOR },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 130 * 0.7 },
@@ -154,10 +154,10 @@ export const BLUEPRINT_BOSS_OVERLORD: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.overlord, srcX: 0, srcY: 0, srcW: 280, srcH: 280, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.OVERLORD },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 140 * 0.7 },
@@ -180,10 +180,10 @@ export const BLUEPRINT_BOSS_TITAN: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.titan, srcX: 0, srcY: 0, srcW: 300, srcH: 300, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.TITAN },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 150 * 0.7 },
@@ -206,10 +206,10 @@ export const BLUEPRINT_BOSS_COLOSSUS: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.colossus, srcX: 0, srcY: 0, srcW: 320, srcH: 320, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.COLOSSUS },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 160 * 0.7 },
@@ -232,10 +232,10 @@ export const BLUEPRINT_BOSS_LEVIATHAN: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.leviathan, srcX: 0, srcY: 0, srcW: 340, srcH: 340, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.LEVIATHAN },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 170 * 0.7 },
@@ -258,10 +258,10 @@ export const BLUEPRINT_BOSS_APOCALYPSE: Blueprint = {
     Sprite: { texture: ASSETS.BOSSES.apocalypse, srcX: 0, srcY: 0, srcW: 360, srcH: 360, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** Boss标签组件 - 标识此实体为Boss */
-    BossTag: {},
+    BossTag: { id: BossId.APOCALYPSE },
 
     /** Boss AI组件 - 控制Boss的行为模式 */
-    BossAI: { phase: 1, nextPatternTime: 0 },
+    BossAI: { phase: 0, nextPatternTime: 0 },
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 180 * 0.7 },
