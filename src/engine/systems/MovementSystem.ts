@@ -20,7 +20,7 @@ export function MovementSystem(w: World, dt: number) {
     // 1. 处理 "速度模式" (键盘/手柄)
     // 依赖: Velocity (存速度), MoveIntent (存意图), SpeedStat (存数值)
     // ==========================================
-    for (const [id, [vel, intent, stat]] of view(w, [Velocity, MoveIntent, SpeedStat])) {
+    for (const [id, [vel, intent, speed]] of view(w, [Velocity, MoveIntent, SpeedStat])) {
 
         // 只处理速度类型的意图
         if (intent.type === 'velocity') {
@@ -37,8 +37,8 @@ export function MovementSystem(w: World, dt: number) {
 
             // 【关键点】应用 SpeedStat.maxLinear
             // 目标速度 = 方向 * 最大速度
-            vel.vx = dx * stat.maxLinear;
-            vel.vy = dy * stat.maxLinear;
+            vel.vx = dx * speed.maxLinear;
+            vel.vy = dy * speed.maxLinear;
 
             // 处理角速度 (如果有旋转逻辑)
             // vel.vrot = ...
@@ -80,7 +80,7 @@ export function MovementSystem(w: World, dt: number) {
         const isPlayer = w.entities.get(id)?.some(PlayerTag.check);
 
         if (isPlayer) {
-            // TODO 假设飞船半径大概 24，留一点边距
+            // FIXME 假设飞船半径大概 24，留一点边距
             const margin = 24;
 
             // 左右边界

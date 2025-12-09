@@ -15,7 +15,7 @@ import { KillEvent } from '../events';
 // }
 
 
-export function LootSystem(world: World) {
+export function LootSystem(world: World, dt: number) {
     // 遍历本帧所有事件
     for (const event of world.events) {
         // 只处理死亡事件

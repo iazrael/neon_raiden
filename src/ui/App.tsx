@@ -1,6 +1,7 @@
 
-import { Engine } from "../engine";
-import { Blueprint } from "../engine/blueprints";
+import { Engine } from "@/engine";
+import { Blueprint } from "@/engine/blueprints";
+import { InputManager } from "@/engine/input/InputManager";
 import { useEffect, useRef, useState } from "react";
 
 export default function App() {
@@ -15,6 +16,9 @@ export default function App() {
 
   if (!snap) return null;
 
+  // 绑定事件
+  InputManager.getInstance().init(canvasRef.current!);
+  
   // 选游戏 → 启动
   const startGame = (bp: Blueprint) => {
     engine.start(canvasRef.current!, bp);
