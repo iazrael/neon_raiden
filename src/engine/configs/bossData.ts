@@ -558,3 +558,52 @@ export function getBossConfigByLevel(level: number): Omit<BossEntity, 'hp' | 'sp
     const bossEntry = Object.values(BossConfigData).find((config) => config.level === level);
     return bossEntry || null;
 }
+
+// src/engine/configs/bossData.ts
+
+export enum BossMovePattern {
+    SINE = 'sine',       // 正弦游弋 (旧配置中的 pattern)
+    FOLLOW = 'follow',   // 追踪玩家
+    IDLE = 'idle',       // 定点站桩
+    DASH = 'dash',       // 冲刺
+}
+
+/** 定义 Boss 每个阶段的行为 */
+export interface BossPhaseSpec {
+    /** 触发该阶段的血量阈值 (0-1), 例如 0.5 表示 50% 血量进入此阶段 */
+    threshold: number;      
+    /** 该阶段的移动模式 */
+    movePattern: BossMovePattern; 
+    /** 该阶段使用的武器 ID (引用 weapons.ts) */
+    weaponId: string;       
+    /** 移动参数 (例如正弦波的振幅/频率) */
+    moveParams?: { xSpeed?: number; ySpeed?: number; frequency?: number };
+}
+
+export interface BossSpec {
+    id: string;
+    phases: BossPhaseSpec[];
+}
+
+// 静态配置表：Boss 的行为逻辑
+export const BOSS_DATA: Record<string, BossSpec> = {
+    'boss_guardian': {
+        id: 'boss_guardian',
+        phases: [
+            // 第一阶段：满血，正弦游动，用普通放射炮
+            {
+                threshold: 1.0,
+                movePattern: BossMovePattern.SINE,
+                weaponId: 'boss_guardian_radial', // 对应 weapons.ts
+                moveParams: { xSpeed: 1.5, frequency: 2 } // 对应旧配置 speed: 1.5
+            },
+            // 第二阶段：50%血，狂暴，追踪玩家，射速变快
+            {
+                threshold: 0.5,
+                movePattern: BossMovePattern.FOLLOW,
+                weaponId: 'boss_guardian_radial_enraged',
+                moveParams: { xSpeed: 3.0 }
+            }
+        ]
+    }
+};

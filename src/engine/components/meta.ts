@@ -78,3 +78,13 @@ export class BossAI extends Component {
     public nextPatternTime = 0;
     static check(c: any): c is BossAI { return c instanceof BossAI; }
 }
+
+/** 分数值组件 - 击杀该实体可获得的分数 */
+export class ScoreValue extends Component {
+    constructor(cfg: { value: number }) {
+        super();
+        this.value = cfg.value;
+    }
+    public value: number;
+    static check(c: any): c is ScoreValue { return c instanceof ScoreValue; }
+}
