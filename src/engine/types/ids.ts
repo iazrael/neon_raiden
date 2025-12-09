@@ -32,36 +32,34 @@ export enum EnemyWeaponId {
     ENEMY_LAYER = 'enemy_layer',
     ENEMY_PULSAR = 'enemy_pulsar',
     ENEMY_BARRAGE = 'enemy_barrage',
-}
 
 // === Boss 专用武器 (按 ID 映射) ===
-export enum BossWeaponId {
     // Guardian
-    BOSS_GUARDIAN_RADIAL = 'boss_guardian_radial',
-    BOSS_GUARDIAN_RADIAL_ENRAGED = 'boss_guardian_radial_enraged',
+    GUARDIAN_RADIAL = 'boss_guardian_radial',
+    GUARDIAN_RADIAL_ENRAGED = 'boss_guardian_radial_enraged',
 
     // Destroyer
-    BOSS_DESTROYER_MAIN = 'boss_destroyer_main',
-    BOSS_DESTROYER_DASH = 'boss_destroyer_dash',
-    BOSS_DESTROYER_BERSERK = 'boss_destroyer_berserk',
+    DESTROYER_MAIN = 'boss_destroyer_main',
+    DESTROYER_DASH = 'boss_destroyer_dash',
+    DESTROYER_BERSERK = 'boss_destroyer_berserk',
 
     // Titan
-    BOSS_TITAN_LASER_BASE = 'boss_titan_laser_base',
-    BOSS_TITAN_LASER_RAPID = 'boss_titan_laser_rapid',
-    BOSS_TITAN_OMNI = 'boss_titan_omni',
+    TITAN_LASER_BASE = 'boss_titan_laser_base',
+    TITAN_LASER_RAPID = 'boss_titan_laser_rapid',
+    TITAN_OMNI = 'boss_titan_omni',
 
     // Apocalypse
-    BOSS_APOCALYPSE_MIXED = 'boss_apocalypse_mixed',
-    BOSS_APOCALYPSE_DEFENSE = 'boss_apocalypse_defense',
-    BOSS_APOCALYPSE_BERSERK = 'boss_apocalypse_berserk',
-    BOSS_APOCALYPSE_FINAL = 'boss_apocalypse_final',
+    APOCALYPSE_MIXED = 'boss_apocalypse_mixed',
+    APOCALYPSE_DEFENSE = 'boss_apocalypse_defense',
+    APOCALYPSE_BERSERK = 'boss_apocalypse_berserk',
+    APOCALYPSE_FINAL = 'boss_apocalypse_final',
 
     // Generic Boss Weapons (其他 Boss 复用)
-    BOSS_GENERIC_TARGETED = 'boss_generic_targeted',
-    BOSS_GENERIC_RADIAL = 'boss_generic_radial',
-    BOSS_GENERIC_LASER = 'boss_generic_laser',
-    BOSS_GENERIC_SPREAD = 'boss_generic_spread',
-    BOSS_GENERIC_HOMING = 'boss_generic_homing'
+    GENERIC_TARGETED = 'boss_generic_targeted',
+    GENERIC_RADIAL = 'boss_generic_radial',
+    GENERIC_LASER = 'boss_generic_laser',
+    GENERIC_SPREAD = 'boss_generic_spread',
+    GENERIC_HOMING = 'boss_generic_homing'
 }
 
 // | 武器枚举       | 弹种 ID              | 语义说明  |
@@ -88,15 +86,17 @@ export enum AmmoType {
     TESLA_CHAIN = 'teslaChain',       // 电磁连锁
     MAGMA_POOL = 'magmaPool',         // 熔岩池
     SHURIKEN_BOUNCE = 'shurikenBounce', // 手里剑反弹
-}
 
-// === 敌人弹药 ===
-export enum EnemyAmmoType {
+    // === 敌人弹药 ===
     ENEMY_ORB_RED = 'enemy_orb_red',       // 普通红球
     ENEMY_ORB_BLUE = 'enemy_orb_blue',     // 普通蓝球
     ENEMY_ORB_GREEN = 'enemy_orb_green',   // 普通绿球
     ENEMY_BEAM_THIN = 'enemy_beam_thin',   // 细激光
     ENEMY_BEAM_THICK = 'enemy_beam_thick', // 粗激光 (Titan)
+    ENEMY_RAPID = 'enemy_rapid',           // 速射弹
+    ENEMY_HEAVY = 'enemy_heavy',           // 重炮弹
+    ENEMY_HOMING = 'enemy_homing',         // 追踪弹
+    ENEMY_SPIRAL = 'enemy_spiral',         // 螺旋弹
     ENEMY_MISSILE = 'enemy_missile',       // 敌方导弹
     ENEMY_PULSE = 'enemy_pulse',           // 脉冲弹
     ENEMY_VOID_ORB = 'enemy_void_orb',     // 虚空弹 (Apocalypse)

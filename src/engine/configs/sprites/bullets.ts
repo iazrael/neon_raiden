@@ -1,9 +1,24 @@
-import { AmmoType } from '../../types';
+import { AmmoType } from '@/engine/types';
 import { SpriteSpec } from '../types';
 import { ASSETS } from '../assets';
 
+// 弹药类型列表
+export const PLAYER_AMMO_TYPES = [
+    AmmoType.VULCAN_SPREAD,
+    AmmoType.LASER_BEAM,
+    AmmoType.MISSILE_HOMING,
+    AmmoType.WAVE_PULSE,
+    AmmoType.PLASMA_ORB,
+    AmmoType.TESLA_CHAIN,
+    AmmoType.MAGMA_POOL,
+    AmmoType.SHURIKEN_BOUNCE,
+] as const;
+
+// 定义玩家子弹类型
+type PlayerAmmoType = typeof PLAYER_AMMO_TYPES[number];
+
 // 玩家武器子弹精灵配置
-export const PLAYER_BULLET_SPRITES: Record<AmmoType, SpriteSpec> = {
+export const PLAYER_BULLET_SPRITES: Record<PlayerAmmoType, SpriteSpec> = {
     [AmmoType.VULCAN_SPREAD]: {
         texture: ASSETS.BULLETS.vulcan,
         color: '#ebdd17ff',
@@ -46,38 +61,89 @@ export const PLAYER_BULLET_SPRITES: Record<AmmoType, SpriteSpec> = {
     }
 };
 
+// 定义敌人子弹类型
+export const ENEMY_AMMO_TYPES = [
+    AmmoType.ENEMY_ORB_RED,
+    AmmoType.ENEMY_ORB_BLUE,
+    AmmoType.ENEMY_ORB_GREEN,
+    AmmoType.ENEMY_BEAM_THIN,
+    AmmoType.ENEMY_BEAM_THICK,
+    AmmoType.ENEMY_HEAVY,
+    AmmoType.ENEMY_RAPID,
+    AmmoType.ENEMY_HOMING,
+    AmmoType.ENEMY_SPIRAL,
+    AmmoType.ENEMY_MISSILE,
+    AmmoType.ENEMY_PULSE,
+    AmmoType.ENEMY_VOID_ORB,
+] as const;
+
+// 定义敌人子弹类型
+type EnemyAmmoType = typeof ENEMY_AMMO_TYPES[number];
+
+
 // 敌人子弹精灵配置
-export const ENEMY_BULLET_SPRITES: Record<string, SpriteSpec> = {
-    'enemy_orb': {
+export const ENEMY_BULLET_SPRITES: Record<EnemyAmmoType, SpriteSpec> = {
+    [AmmoType.ENEMY_ORB_RED]: {
         texture: ASSETS.ENEMIE_BULLETS.orb,
         color: '#ff9999',
         size: { width: 14, height: 14 },
     },
-    'enemy_beam': {
+    [AmmoType.ENEMY_ORB_BLUE]: {
+        texture: ASSETS.ENEMIE_BULLETS.orb,
+        color: '#ff9999',
+        size: { width: 14, height: 14 },
+    },
+    [AmmoType.ENEMY_ORB_GREEN]: {
+        texture: ASSETS.ENEMIE_BULLETS.orb,
+        color: '#ff9999',
+        size: { width: 14, height: 14 },
+    },
+    [AmmoType.ENEMY_BEAM_THIN]: {
         texture: ASSETS.ENEMIE_BULLETS.beam,
         color: '#f97316ff',
         size: { width: 12, height: 32 },
     },
-    'enemy_rapid': {
+    [AmmoType.ENEMY_BEAM_THICK]: {
+        texture: ASSETS.ENEMIE_BULLETS.beam,
+        color: '#f97316ff',
+        size: { width: 16, height: 48 },
+    },
+    [AmmoType.ENEMY_RAPID]: {
         texture: ASSETS.ENEMIE_BULLETS.rapid,
         color: '#ecc94b',
         size: { width: 10, height: 20 },
     },
-    'enemy_heavy': {
+    [AmmoType.ENEMY_HEAVY]: {
         texture: ASSETS.ENEMIE_BULLETS.heavy,
         color: '#9f7aea',
         size: { width: 28, height: 28 },
     },
-    'enemy_homing': {
+    [AmmoType.ENEMY_HOMING]: {
         texture: ASSETS.ENEMIE_BULLETS.homing,
         color: '#48bb78',
         size: { width: 16, height: 16 },
     },
-    'enemy_spiral': {
+    [AmmoType.ENEMY_SPIRAL]: {
         texture: ASSETS.ENEMIE_BULLETS.spiral,
         color: '#4299e1',
         size: { width: 14, height: 14 },
-    }
+    },
+    [AmmoType.ENEMY_MISSILE]: {
+        texture: ASSETS.ENEMIE_BULLETS.missile,
+        color: '#ff9999',
+        size: { width: 16, height: 16 },
+    },
+    [AmmoType.ENEMY_PULSE]: {
+        texture: ASSETS.ENEMIE_BULLETS.pulse,
+        color: '#ff9999',
+        size: { width: 16, height: 16 },
+    },
+    [AmmoType.ENEMY_VOID_ORB]: {
+        texture: ASSETS.ENEMIE_BULLETS.voidOrb,
+        color: '#ff9999',
+        size: { width: 16, height: 16 },
+    },
+    
 };
 
 // 合并所有子弹精灵配置

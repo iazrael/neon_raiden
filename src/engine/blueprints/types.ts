@@ -1,5 +1,5 @@
 import * as Components from '../components';
-import { AmmoType, WeaponId } from '../types';
+import { AmmoType, EnemyWeaponId, WeaponId } from '../types';
 
 // ========== Blueprint 类型 ==========
 export type Blueprint = Partial<{
@@ -25,6 +25,17 @@ export type WeaponSpec = {
     curCD?: number;
     /** 最大等级 */
     maxLevel: number,
+}
+
+export type EnemyWeaponSpec = {
+    id: EnemyWeaponId;
+    /** 弹药类型 */
+    ammoType: AmmoType;
+    /** 冷却时间 */
+    cooldown: number;
+    bulletCount: number; // 子弹数量
+    spread?: number; // 扩散角度
+    pattern: 'radial' | 'spread' | 'aimed' | 'random' | 'spiral' | 'fixed_rear'; // 弹幕模式
 }
 
 // =========== 子弹 =================

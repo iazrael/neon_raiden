@@ -3,14 +3,13 @@
 // 定义各个Boss的基础配置信息
 //
 
-import { BossId, WeaponId } from "../types";
+import { BossId, EnemyWeaponId, WeaponId } from "@/engine/types";
 
 
 export interface BossSpec {
     id: BossId;
     phases: BossPhaseSpec[];
 }
-
 
 /**
  * Boss 的移动模式
@@ -41,7 +40,7 @@ export interface BossPhaseSpec {
     /** 该阶段的移动模式 */
     movePattern: BossMovementPattern;
     /** 该阶段使用的武器 ID (引用 weapons.ts) */
-    weaponId: WeaponId;
+    weaponId: EnemyWeaponId;
     /** 阶段属性修正 (相对于基础值的倍率) */
     modifiers: {
         moveSpeed?: number;
@@ -75,13 +74,13 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
             { // P1: 100% - 50%
                 threshold: 1.0,
                 movePattern: BossMovementPattern.SINE,
-                weaponId: 'boss_guardian_radial',
+                weaponId: EnemyWeaponId.GUARDIAN_RADIAL,
                 modifiers: { moveSpeed: 1.0, fireRate: 1.0 }
             },
             { // P2: 50% - 0% (狂暴)
                 threshold: 0.5,
                 movePattern: BossMovementPattern.FOLLOW, // 开始追踪
-                weaponId: 'boss_guardian_radial_enraged', // 弹幕更密
+                weaponId: EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED, // 弹幕更密
                 modifiers: { moveSpeed: 1.5, fireRate: 1.5 },
                 phaseColor: '#ffaa00'
             }
@@ -98,21 +97,21 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
             { // P1: 100% - 70%
                 threshold: 1.0,
                 movePattern: BossMovementPattern.FIGURE_8,
-                weaponId: 'boss_destroyer_main',
+                weaponId: EnemyWeaponId.DESTROYER_MAIN,
                 modifiers: { moveSpeed: 1.0 },
                 specialEvents: ['wingman_support']
             },
             { // P2: 70% - 40% (冲刺)
                 threshold: 0.7,
                 movePattern: BossMovementPattern.DASH,
-                weaponId: 'boss_destroyer_dash',
+                weaponId: EnemyWeaponId.DESTROYER_DASH,
                 modifiers: { moveSpeed: 1.5, fireRate: 1.2 },
                 phaseColor: '#ffd700'
             },
             { // P3: 40% - 0% (螺旋狂暴)
                 threshold: 0.4,
                 movePattern: BossMovementPattern.FOLLOW,
-                weaponId: 'boss_destroyer_berserk', // 螺旋弹幕 + 激光
+                weaponId: EnemyWeaponId.DESTROYER_BERSERK, // 螺旋弹幕 + 激光
                 modifiers: { moveSpeed: 2.0, fireRate: 1.5 },
                 phaseColor: '#ff4500'
             }
@@ -129,20 +128,20 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
             { // P1: 100% - 65%
                 threshold: 1.0,
                 movePattern: BossMovementPattern.IDLE, // 缓慢降临/站桩
-                weaponId: 'boss_titan_laser_base',
+                weaponId: EnemyWeaponId.TITAN_LASER_BASE,
                 modifiers: { moveSpeed: 0.5 }
             },
             { // P2: 65% - 30%
                 threshold: 0.65,
                 movePattern: BossMovementPattern.SINE, // 开始缓慢移动
-                weaponId: 'boss_titan_laser_rapid',
+                weaponId: EnemyWeaponId.TITAN_LASER_RAPID,
                 modifiers: { moveSpeed: 0.8, fireRate: 1.5 },
                 phaseColor: '#ffd700'
             },
             { // P3: 30% - 0% (全弹幕)
                 threshold: 0.3,
                 movePattern: BossMovementPattern.FOLLOW,
-                weaponId: 'boss_titan_omni',
+                weaponId: EnemyWeaponId.TITAN_OMNI,
                 modifiers: { moveSpeed: 1.0, fireRate: 2.0 },
                 phaseColor: '#ff4500'
             }
@@ -158,27 +157,27 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
             { // P1: 100% - 75% (全武器展示)
                 threshold: 1.0,
                 movePattern: BossMovementPattern.ADAPTIVE,
-                weaponId: 'boss_apocalypse_mixed',
+                weaponId: EnemyWeaponId.APOCALYPSE_MIXED,
                 modifiers: { moveSpeed: 1.0 }
             },
             { // P2: 75% - 50% (装甲模式)
                 threshold: 0.75,
                 movePattern: BossMovementPattern.IDLE,
-                weaponId: 'boss_apocalypse_defense',
+                weaponId: EnemyWeaponId.APOCALYPSE_DEFENSE,
                 modifiers: { moveSpeed: 0.8, damage: 0.5 }, // 减伤逻辑需在DamageResolutionSystem实现
                 phaseColor: '#ffff00'
             },
             { // P3: 50% - 25% (狂暴模式)
                 threshold: 0.5,
-                movePattern: BossMovementPattern.TELEPORT,
-                weaponId: 'boss_apocalypse_berserk',
+                movePattern: BossMovementPattern.RANDOM_TELEPORT,
+                weaponId: EnemyWeaponId.APOCALYPSE_BERSERK,
                 modifiers: { moveSpeed: 1.5, fireRate: 1.6 },
                 phaseColor: '#ff4500'
             },
             { // P4: 25% - 0% (绝境反击)
                 threshold: 0.25,
                 movePattern: BossMovementPattern.DASH,
-                weaponId: 'boss_apocalypse_final',
+                weaponId: EnemyWeaponId.APOCALYPSE_FINAL,
                 modifiers: { moveSpeed: 2.0, fireRate: 2.0 },
                 phaseColor: '#8b0000',
                 specialEvents: ['screen_clear', 'last_stand']
@@ -189,26 +188,26 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
     // ... 其他 Boss 可以配置为简单的单阶段或两阶段
     [BossId.INTERCEPTOR]: {
         id: BossId.INTERCEPTOR,
-        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.ZIGZAG, weaponId: 'boss_weapon_targeted', modifiers: {} }]
+        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.ZIGZAG, weaponId: EnemyWeaponId.GENERIC_TARGETED, modifiers: {} }]
     },
     [BossId.ANNIHILATOR]: {
         id: BossId.ANNIHILATOR,
-        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.RANDOM_TELEPORT, weaponId: 'boss_weapon_targeted', modifiers: {} }]
+        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.RANDOM_TELEPORT, weaponId: EnemyWeaponId.GENERIC_TARGETED, modifiers: {} }]
     },
     [BossId.DOMINATOR]: {
         id: BossId.DOMINATOR,
-        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.CIRCLE, weaponId: 'boss_weapon_radial', modifiers: {} }]
+        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.CIRCLE, weaponId: EnemyWeaponId.GENERIC_RADIAL, modifiers: {} }]
     },
     [BossId.OVERLORD]: {
         id: BossId.OVERLORD,
-        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.FOLLOW, weaponId: 'boss_weapon_laser', modifiers: {} }]
+        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.FOLLOW, weaponId: EnemyWeaponId.GENERIC_LASER, modifiers: {} }]
     },
     [BossId.COLOSSUS]: {
         id: BossId.COLOSSUS,
-        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.DASH, weaponId: 'boss_weapon_spread', modifiers: {} }]
+        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.DASH, weaponId: EnemyWeaponId.GENERIC_SPREAD, modifiers: {} }]
     },
     [BossId.LEVIATHAN]: {
         id: BossId.LEVIATHAN,
-        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.FIGURE_8, weaponId: 'boss_weapon_homing', modifiers: {} }]
+        phases: [{ threshold: 1.0, movePattern: BossMovementPattern.FIGURE_8, weaponId: EnemyWeaponId.GENERIC_HOMING, modifiers: {} }]
     },
 };

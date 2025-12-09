@@ -3,19 +3,9 @@
 //
 
 import { AmmoSpec } from './types';
-import { AmmoType, EnemyAmmoType } from '../types';
+import { AmmoType } from '../types';
+import { ASSETS } from '../configs';
 
-// 弹药类型列表
-export const AMMO_TYPES = [
-    AmmoType.VULCAN_SPREAD,
-    AmmoType.LASER_BEAM,
-    AmmoType.MISSILE_HOMING,
-    AmmoType.WAVE_PULSE,
-    AmmoType.PLASMA_ORB,
-    AmmoType.TESLA_CHAIN,
-    AmmoType.MAGMA_POOL,
-    AmmoType.SHURIKEN_BOUNCE,
-] as const;
 
 // =============================================================================
 // 弹药规格总览表
@@ -162,47 +152,96 @@ export const AMMO_TABLE: Record<AmmoType, AmmoSpec> = {
         /** 命中时触发的效果 ID 列表（字符串引用） */
         onHit: [],
     },
-}
-export const ENEMY_AMMO_TABLE: Record<EnemyAmmoType, AmmoSpec> = {
     // ==================== 敌人弹药 ====================
-    [EnemyAmmoType.ENEMY_ORB_RED]: {
-        id: EnemyAmmoType.ENEMY_ORB_RED,
+    [AmmoType.ENEMY_ORB_RED]: {
+        id: AmmoType.ENEMY_ORB_RED,
         damage: 10, radius: 6, speed: 300, pierce: 0, bounces: 0, onHit: [],
-        visuals: { texture: 'bullet_orb_red', color: '#ff4444' }
     },
-    [EnemyAmmoType.ENEMY_ORB_BLUE]: {
-        id: EnemyAmmoType.ENEMY_ORB_BLUE,
+    [AmmoType.ENEMY_ORB_BLUE]: {
+        id: AmmoType.ENEMY_ORB_BLUE,
         damage: 15, radius: 8, speed: 250, pierce: 0, bounces: 0, onHit: [],
-        visuals: { texture: 'bullet_orb_blue', color: '#4488ff' }
     },
-    [EnemyAmmoType.ENEMY_ORB_GREEN]: {
-        id: EnemyAmmoType.ENEMY_ORB_GREEN,
+    [AmmoType.ENEMY_ORB_GREEN]: {
+        id: AmmoType.ENEMY_ORB_GREEN,
         damage: 12, radius: 7, speed: 280, pierce: 0, bounces: 0, onHit: [],
-        visuals: { texture: 'bullet_orb_green', color: '#44ff44' }
     },
-    [EnemyAmmoType.ENEMY_BEAM_THIN]: {
-        id: EnemyAmmoType.ENEMY_BEAM_THIN,
+    [AmmoType.ENEMY_BEAM_THIN]: {
+        id: AmmoType.ENEMY_BEAM_THIN,
         damage: 20, radius: 4, speed: 800, pierce: 99, bounces: 0, onHit: [],
-        visuals: { texture: 'bullet_beam_thin', color: '#ffaa00' }
     },
-    [EnemyAmmoType.ENEMY_BEAM_THICK]: {
-        id: EnemyAmmoType.ENEMY_BEAM_THICK,
+    [AmmoType.ENEMY_BEAM_THICK]: {
+        id: AmmoType.ENEMY_BEAM_THICK,
         damage: 40, radius: 12, speed: 600, pierce: 99, bounces: 0, onHit: [],
-        visuals: { texture: 'bullet_beam_thick', color: '#ff0000' }
     },
-    [EnemyAmmoType.ENEMY_MISSILE]: {
-        id: EnemyAmmoType.ENEMY_MISSILE,
+    // 速射弹：伤害低，但在屏幕上飞得很快，通常用于加特林或突击单位
+    [AmmoType.ENEMY_RAPID]: {
+        id: AmmoType.ENEMY_RAPID,
+        damage: 5,               // 伤害较低
+        radius: 4,               // 碰撞箱小
+        speed: 700,              // 速度快 (700px/s)
+        pierce: 0,
+        bounces: 0,
+        onHit: [],
+        // visuals: {
+        //     texture: 'bullet_rapid_needle', // 建议用细长的针状贴图
+        //     color: '#ffff00' // 黄色预警
+        // }
+    },
+
+    // 重炮弹：像陨石一样砸过来，速度慢但判定大、伤害高，甚至可能带小范围爆炸
+    [AmmoType.ENEMY_HEAVY]: {
+        id: AmmoType.ENEMY_HEAVY,
+        damage: 40,              // 伤害极高
+        radius: 18,              // 判定范围很大
+        speed: 200,              // 速度慢
+        pierce: 0,
+        bounces: 0,
+        onHit: ['explosion_small'], // 击中后可能产生一个小爆炸特效
+        // visuals: {
+        //     texture: 'bullet_heavy_shell', // 建议用大圆球或炮弹贴图
+        //     color: '#ff6600' // 橙红色
+        // }
+    },
+
+    // 追踪弹：速度适中，配合 Weapon 的 homing 逻辑使用
+    [AmmoType.ENEMY_HOMING]: {
+        id: AmmoType.ENEMY_HOMING,
+        damage: 15,
+        radius: 8,
+        speed: 350,              // 速度适中，给玩家躲避空间
+        pierce: 0,
+        bounces: 0,
+        onHit: [],
+        // visuals: {
+        //     texture: 'bullet_homing_arrow', // 建议用箭头或三角形，方便看朝向
+        //     color: '#aa00ff' // 紫色
+        // }
+    },
+
+    // 螺旋弹：通常用于弹幕机，颜色鲜艳，速度规律，适合铺满屏幕
+    [AmmoType.ENEMY_SPIRAL]: {
+        id: AmmoType.ENEMY_SPIRAL,
+        damage: 10,
+        radius: 7,
+        speed: 300,
+        pierce: 0,
+        bounces: 0,
+        onHit: [],
+        // visuals: {
+        //     texture: 'bullet_spiral_star', // 建议用星星或菱形
+        //     color: '#00ffff' // 青色/霓虹色
+        // }
+    },
+    [AmmoType.ENEMY_MISSILE]: {
+        id: AmmoType.ENEMY_MISSILE,
         damage: 25, radius: 10, speed: 350, pierce: 0, bounces: 0, onHit: ['explosion_small'],
-        visuals: { texture: 'bullet_missile', color: '#cccccc' }
     },
-    [EnemyAmmoType.ENEMY_PULSE]: {
-        id: EnemyAmmoType.ENEMY_PULSE,
+    [AmmoType.ENEMY_PULSE]: {
+        id: AmmoType.ENEMY_PULSE,
         damage: 8, radius: 5, speed: 500, pierce: 0, bounces: 0, onHit: [],
-        visuals: { texture: 'bullet_pulse', color: '#ff00ff' }
     },
-    [EnemyAmmoType.ENEMY_VOID_ORB]: {
-        id: EnemyAmmoType.ENEMY_VOID_ORB,
+    [AmmoType.ENEMY_VOID_ORB]: {
+        id: AmmoType.ENEMY_VOID_ORB,
         damage: 50, radius: 20, speed: 200, pierce: 99, bounces: 0, onHit: ['void_zone'],
-        visuals: { texture: 'bullet_void', color: '#330033' }
     },
 };

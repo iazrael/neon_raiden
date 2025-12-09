@@ -39,12 +39,16 @@ export const ASSETS = {
         layer: BASE_ASSET_PATH + 'enemies/enemy_layer.svg',
     },
     ENEMIE_BULLETS: {
-        orb: BASE_ASSET_PATH + 'bullets/bullet_enemy_orb.png',
-        beam: BASE_ASSET_PATH + 'bullets/bullet_enemy_beam.png',
-        rapid: BASE_ASSET_PATH + 'bullets/bullet_enemy_rapid.png',
-        heavy: BASE_ASSET_PATH + 'bullets/bullet_enemy_heavy.png',
-        homing: BASE_ASSET_PATH + 'bullets/bullet_enemy_homing.png',
-        spiral: BASE_ASSET_PATH + 'bullets/bullet_enemy_spiral.png',
+        orb: BASE_ASSET_PATH + 'bullets/bullet_enemy_orb.svg',
+        beam: BASE_ASSET_PATH + 'bullets/bullet_enemy_beam.svg',
+        rapid: BASE_ASSET_PATH + 'bullets/bullet_enemy_rapid.svg',
+        heavy: BASE_ASSET_PATH + 'bullets/bullet_enemy_heavy.svg',
+        homing: BASE_ASSET_PATH + 'bullets/bullet_enemy_homing.svg',
+        spiral: BASE_ASSET_PATH + 'bullets/bullet_enemy_spiral.svg',
+        // 下面三个还没有
+        missile: BASE_ASSET_PATH + 'bullets/bullet_enemy_missile.png',
+        voidOrb: BASE_ASSET_PATH + 'bullets/bullet_enemy_void_orb.png',
+        pulse: BASE_ASSET_PATH + 'bullets/bullet_enemy_pulse.png',
     },
     BOSSES: {
         annihilator: BASE_ASSET_PATH + 'bosses/boss_annihilator.svg',
