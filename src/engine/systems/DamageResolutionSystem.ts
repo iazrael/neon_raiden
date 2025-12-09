@@ -1,15 +1,18 @@
 import { World } from '../types';
 import { view, addComponent } from '../world';
-import { Health, Shield, DestroyTag } from '../components';
+import { Health, Shield, DestroyTag, TeleportState } from '../components';
 
 /**
  * 伤害结算系统
  * 处理护盾吸收伤害、DOT效果、无敌帧逻辑
  * 为需要销毁的实体添加DestroyTag组件
  */
-export function DamageResolutionSystem(w: World, dt: number) {
+export function DamageResolutionSystem(world: World, dt: number) {
   // 处理护盾吸收伤害
-  for (const [, [health, shield]] of view(w, [Health, Shield])) {
+  for (const [id, [health, shield]] of view(world, [Health, Shield])) {
+    const comps = world.entities.get(id)!;
+    // 在扣血前检查
+    if (comps.some(TeleportState.check)) return; // 瞬移中无敌
     // 简单的类型检查
     if ('hp' in health && 'max' in health && 'value' in shield && 'regen' in shield) {
       // 护盾每帧恢复
@@ -20,16 +23,16 @@ export function DamageResolutionSystem(w: World, dt: number) {
         }
       }
     }
-    
+
     // TODO: 处理DOT效果
     // TODO: 处理无敌帧逻辑
   }
-  
+
   // 检查需要销毁的实体
-  for (const [id, [health]] of view(w, [Health])) {
+  for (const [id, [health]] of view(world, [Health])) {
     if ('hp' in health && health.hp <= 0) {
       // 为需要销毁的实体添加DestroyTag组件
-      addComponent(w, id, new DestroyTag({ reason: 'killed' }));
+      addComponent(world, id, new DestroyTag({ reason: 'killed' }));
     }
   }
 }

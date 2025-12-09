@@ -571,3 +571,128 @@ useEffect(() => {
 2.  **Touch/Mouse 统一**：通过 `pointerDelta` 解决，支持拖拽移动。
 3.  **KeyB 炸弹**：通过 `BombIntent` 解决。
 4.  **架构纯洁性**：DOM 事件依然留在 Manager 里，ECS System 只处理纯数据 (`Intent`)。
+
+
+在使用 `SpeedStat` 时，我们需要将它加入到 `view` 的查询列表中，用它来替换掉硬编码的 `speed = 300`。
+
+同时，结合之前我们设计的 **InputSystem**（区分了 `'velocity'` 键盘模式和 `'offset'` 触摸模式），`MovementSystem` 需要分别处理这两种移动逻辑。
+
+以下是修改后的 `MovementSystem.ts`：
+
+### 代码修改
+
+```typescript
+// src/engine/systems/MovementSystem.ts
+
+import { Transform, Velocity, MoveIntent, SpeedStat, PlayerTag } from '../components';
+import { World } from '../types';
+import { view } from '../world';
+import { STAGE_WIDTH, STAGE_HEIGHT, STAGE_PADDING } from '../configs/global'; // 假设你有全局配置
+
+/**
+ * 移动系统
+ * 1. 消费 MoveIntent：根据 SpeedStat 计算目标速度 或 直接应用位移
+ * 2. 应用物理：根据 Velocity 更新 Transform
+ * 3. 边界限制：防止玩家跑出屏幕
+ */
+export function MovementSystem(w: World, dt: number) {
+  // dt 通常是毫秒，转换为秒用于物理计算
+  const dtSeconds = dt / 1000;
+
+  // ==========================================
+  // 1. 处理 "速度模式" (键盘/手柄)
+  // 依赖: Velocity (存速度), MoveIntent (存意图), SpeedStat (存数值)
+  // ==========================================
+  for (const [id, [vel, intent, stat]] of view(w, [Velocity, MoveIntent, SpeedStat])) {
+    
+    // 只处理速度类型的意图
+    if (intent.type === 'velocity') {
+      let dx = intent.dx;
+      let dy = intent.dy;
+      
+      // 归一化向量 (解决对角线移动比直线快的问题)
+      // 如果长度 > 1 (例如两个键同时按)，则除以长度
+      const len = Math.sqrt(dx * dx + dy * dy);
+      if (len > 1) {
+        dx /= len;
+        dy /= len;
+      }
+
+      // 【关键点】应用 SpeedStat.maxLinear
+      // 目标速度 = 方向 * 最大速度
+      vel.vx = dx * stat.maxLinear;
+      vel.vy = dy * stat.maxLinear;
+      
+      // 处理角速度 (如果有旋转逻辑)
+      // vel.vrot = ...
+    }
+  }
+
+  // ==========================================
+  // 2. 处理 "位移模式" (触摸/鼠标拖拽)
+  // 依赖: Transform (改坐标), MoveIntent (存位移)
+  // 这里的意图是 "绝对像素偏移"，不依赖 SpeedStat 和 dt
+  // ==========================================
+  for (const [id, [tr, intent]] of view(w, [Transform, MoveIntent])) {
+    
+    if (intent.type === 'offset') {
+      // 直接应用 InputSystem 计算好的像素增量
+      tr.x += intent.dx;
+      tr.y += intent.dy;
+
+      // 如果有速度组件，在触摸移动时应将速度归零，防止切回键盘时有惯性残留
+      const vel = w.entities.get(id)?.find(c => c instanceof Velocity) as Velocity;
+      if (vel) {
+        vel.vx = 0;
+        vel.vy = 0;
+      }
+    }
+  }
+
+  // ==========================================
+  // 3. 物理积分 (位置 += 速度 * 时间)
+  // 依赖: Transform, Velocity
+  // ==========================================
+  for (const [id, [tr, vel]] of view(w, [Transform, Velocity])) {
+    tr.x += vel.vx * dtSeconds;
+    tr.y += vel.vy * dtSeconds;
+
+    // ==========================================
+    // 4. 边界限制 (仅针对玩家)
+    // ==========================================
+    // 检查是否有 PlayerTag
+    const isPlayer = w.entities.get(id)?.some(c => c instanceof PlayerTag);
+    
+    if (isPlayer) {
+      // 假设飞船半径大概 24，留一点边距
+      const margin = 24; 
+      
+      // 左右边界
+      if (tr.x < margin) tr.x = margin;
+      if (tr.x > 800 - margin) tr.x = 800 - margin; // 假设屏幕宽 800
+
+      // 上下边界
+      if (tr.y < margin) tr.y = margin;
+      if (tr.y > 600 - margin) tr.y = 600 - margin; // 假设屏幕高 600
+    }
+  }
+}
+```
+
+### 核心改动点解释
+
+1.  **引入 `SpeedStat`**：
+    *   在第一个循环的 `view` 中加入了 `SpeedStat`。
+    *   使用 `stat.maxLinear` 替换了原来的硬编码 `const speed = 300`。
+    *   这样，如果你在 `fighters.ts` 里把 `maxLinear` 改成 `10 * 60`，飞船就会变快，且无需修改系统代码。
+
+2.  **区分意图类型 (`intent.type`)**：
+    *   **`velocity` (键盘)**：根据 `SpeedStat` 计算 `vx/vy`，然后在第 3 步物理积分时更新位置。
+    *   **`offset` (触摸)**：直接修改 `Transform` 的 `x/y`。因为触摸通常是 1:1 跟随手指，不需要物理积分（乘以 `dt`），否则会有延迟感或瞬移。
+
+3.  **向量归一化 (Normalization)**：
+    *   旧代码：`vx *= 0.7071` 是硬编码。
+    *   新代码：`Math.sqrt(dx*dx + dy*dy)` 计算模长。这兼容了键盘（模长可能为 $\sqrt{2}$）和摇杆（模长可能为 0.5）。只有当模长 > 1 时才归一化，支持模拟摇杆的“轻推慢走”操作。
+
+4.  **时间步长 (`dt`)**：
+    *   统一将 `dt` (毫秒) 转换为 `dtSeconds` (秒)。因为 `SpeedStat` 中的速度单位通常是 **像素/秒**。

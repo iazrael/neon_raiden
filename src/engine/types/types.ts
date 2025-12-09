@@ -132,16 +132,21 @@ export enum PowerupType {
  * Boss 的移动模式
  */
 export enum BossMovementPattern {
-    SINE = 'sine',
-    FIGURE_8 = 'figure8',
-    TRACKING = 'tracking',
-    AGGRESSIVE = 'aggressive',
-    // P3新增移动模式
-    ZIGZAG = 'zigzag',              // 之字形移动
-    RANDOM_TELEPORT = 'random_teleport', // 随机瞬移
-    CIRCLE = 'circle',              // 圆形轨迹
-    SLOW_DESCENT = 'slow_descent',  // 缓慢下沉
-    ADAPTIVE = 'adaptive'           // 自适应追踪
+    // 基础模式
+    IDLE = 'idle',                  // 站桩/空闲
+    SINE = 'sine',                  // 正弦游动 (Guardian P1)
+    FIGURE_8 = 'figure_8',          // 8字形 (Destroyer P1)
+    CIRCLE = 'circle',              // 绕圈 (Dominator)
+    ZIGZAG = 'zigzag',              // 之字形/折线 (Interceptor)
+    SLOW_DESCENT = 'slow_descent',  // 缓慢下沉 (Titan P1)
+
+    // 高级模式
+    FOLLOW = 'follow',              // 缓慢追踪玩家 (Guardian P2)
+    TRACKING = 'tracking',          // 紧密追踪 (Overlord)
+    DASH = 'dash',                  // 冲刺 (Destroyer P2, Colossus)
+    RANDOM_TELEPORT = 'random_teleport', // 随机瞬移 (Annihilator)
+    ADAPTIVE = 'adaptive',          // 自适应/混合 (Apocalypse)
+    AGGRESSIVE = 'aggressive'       // 激进压制 (Leviathan, Colossus)
 }
 
 /**

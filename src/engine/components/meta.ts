@@ -8,13 +8,13 @@ export class DestroyTag extends Component {
      * 构造函数
      * @param cfg 销毁标记配置
      */
-    constructor(cfg: { 
+    constructor(cfg: {
         /** 销毁原因 */
         reason?: 'timeout' | 'killed' | 'consumed' | 'offscreen';
         /** 重用池类型 */
         reusePool?: 'bullet' | 'enemy' | 'pickup';
-    }) { 
-        super(); 
+    }) {
+        super();
         this.reason = cfg.reason ?? 'killed';
         this.reusePool = cfg.reusePool;
     }
@@ -42,13 +42,13 @@ export class CameraShake extends Component {
      * 构造函数
      * @param cfg 震动配置
      */
-    constructor(cfg: { 
+    constructor(cfg: {
         /** 震动强度 */
-        intensity: number; 
+        intensity: number;
         /** 震动持续时间 */
-        timer: number; 
-    }) { 
-        super(); 
+        timer: number;
+    }) {
+        super();
         this.intensity = cfg.intensity;
         this.timer = cfg.timer;
     }
@@ -64,13 +64,13 @@ export class BossAI extends Component {
      * 构造函数
      * @param cfg Boss AI配置
      */
-    constructor(cfg: { 
+    constructor(cfg: {
         /** 当前阶段 */
-        phase?: number; 
+        phase?: number;
         /** 下次行为模式切换时间 */
-        nextPatternTime?: number; 
-    }) { 
-        super(); 
+        nextPatternTime?: number;
+    }) {
+        super();
         this.phase = cfg.phase ?? 1;
         this.nextPatternTime = cfg.nextPatternTime ?? 0;
     }
@@ -87,4 +87,25 @@ export class ScoreValue extends Component {
     }
     public value: number;
     static check(c: any): c is ScoreValue { return c instanceof ScoreValue; }
+}
+
+// src/engine/components/meta.ts
+
+/** 瞬移状态组件 - 挂载此组件表示实体正在瞬移（隐形/无敌/不可控） */
+export class TeleportState extends Component {
+    constructor(cfg: {
+        timer: number;       // 瞬移持续时间（隐形时间）
+        targetX: number;     // 目标 X
+        targetY: number;     // 目标 Y
+    }) {
+        super();
+        this.timer = cfg.timer;
+        this.targetX = cfg.targetX;
+        this.targetY = cfg.targetY;
+    }
+    public timer: number;
+    public targetX: number;
+    public targetY: number;
+
+    static check(c: any): c is TeleportState { return c instanceof TeleportState; }
 }

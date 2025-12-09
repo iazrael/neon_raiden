@@ -21,16 +21,7 @@
         "jsx": "react-jsx",
         "paths": {
             "@/*": [
-                "./*"
-            ],
-            "@/src/*": [
                 "./src/*"
-            ],
-            "@/game/*": [
-                "./game/*"
-            ],
-            "@/types/*": [
-                "./types/*"
             ]
         },
         "sourceMap": true,

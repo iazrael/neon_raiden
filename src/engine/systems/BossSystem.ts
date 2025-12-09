@@ -1,39 +1,61 @@
-import { World } from '../types';
-import { view } from '../world';
-import { BossTag, Transform, Health } from '../components';
+// src/engine/systems/BossSystem.ts
 
-/**
- * Boss系统
- * 控制Boss的行为模式
- * 管理Boss的不同阶段
- */
-export function BossSystem(w: World, dt: number) {
-  // 遍历所有Boss实体
-  for (const [id, [bossTag, transform, health]] of view(w, [BossTag, Transform, Health])) {
-    // Boss的基本行为：向下移动直到到达指定位置
-    if (transform.y < 150) {
-      transform.y += 100 * (dt / 1000); // 每秒移动100像素
+import { World } from '@/engine/types';
+import { BossAI, Transform, MoveIntent, PlayerTag, BossTag } from '@/engine/components';
+import { view } from '@/engine/world';
+import { BossMovementPattern } from '@/engine/types';
+import { BOSS_DATA } from '@/engine/configs/bossData';
+import { MOVEMENT_STRATEGIES, MovementContext } from './logic/bossMovement'; // 导入策略
+
+const STAGE_WIDTH = 800;
+const BOSS_MARGIN_X = 100;
+
+export function BossSystem(world: World, dt: number) {
+  // 1. 获取玩家位置
+  let playerPos = { x: STAGE_WIDTH / 2, y: 500 };
+  for (const [_, [tr]] of view(world, [PlayerTag, Transform])) {
+    playerPos = { x: tr.x, y: tr.y };
+    break;
+  }
+
+  // 2. 遍历 Boss
+  for (const [id, [bossAi, tr, moveIntent, bossTag]] of view(world, [BossAI, Transform, MoveIntent, BossTag])) {
+    // 获取配置 (实际项目中建议缓存 BossType 到组件)
+    const bossComps = world.entities.get(id)!;
+
+    // 假设 BossTag 里存了 subType (如 'boss_guardian')
+    // 如果你的 BossTag 是空的，你需要从 factory 生成时把它记在 Entity 上或扩展 BossTag
+    // 这里假设我们能获取到 type，例如通过 id 查表或者扩展组件
+    const bossType = bossTag.subType || 'boss_guardian';
+
+    const bossSpec = BOSS_DATA[bossType];
+    const phaseSpec = bossSpec?.phases[bossAi.phase - 1];
+
+    const pattern = phaseSpec?.movePattern || BossMovementPattern.IDLE;
+    const speedMod = phaseSpec?.modifiers?.moveSpeed || 1.0;
+
+    // 3. 【核心修改】调用策略函数
+    const strategy = MOVEMENT_STRATEGIES[pattern];
+
+    if (strategy) {
+      const ctx: MovementContext = {
+        dt,
+        time: world.time,
+        self: tr,
+        player: playerPos,
+        bossAi: bossAi,
+        components: bossComps // <--- 【关键】传入组件列表引用
+      };
+
+      const result = strategy(ctx);
+
+      // 应用结果
+      moveIntent.dx = result.dx;
+      moveIntent.dy = result.dy;
     }
-    
-    // 简单的Boss AI：左右移动
-    transform.x += Math.sin(w.time / 1000) * 50 * (dt / 1000); // 每秒最多移动50像素
-    
-    // 限制Boss在屏幕范围内
-    transform.x = Math.max(100, Math.min(700, transform.x));
-    
-    // 简单的Boss攻击逻辑：根据血量比例改变攻击模式
-    const healthRatio = health.hp / health.max;
-    
-    // 如果血量低于70%，进入第二阶段
-    if (healthRatio < 0.7) {
-      // 第二阶段行为：更快的移动和攻击
-      transform.x += Math.sin(w.time / 500) * 75 * (dt / 1000);
-    }
-    
-    // 如果血量低于30%，进入第三阶段
-    if (healthRatio < 0.3) {
-      // 第三阶段行为：更加激进的攻击模式
-      transform.x += Math.sin(w.time / 250) * 100 * (dt / 1000);
-    }
+
+    // 4. 边界限制 (通用逻辑)
+    if (tr.x < BOSS_MARGIN_X && moveIntent.dx < 0) moveIntent.dx = 0;
+    if (tr.x > STAGE_WIDTH - BOSS_MARGIN_X && moveIntent.dx > 0) moveIntent.dx = 0;
   }
 }
