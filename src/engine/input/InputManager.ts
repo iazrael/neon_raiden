@@ -9,19 +9,19 @@ export class InputManager {
 
   // 状态存储
   private keys: Set<string> = new Set();
-  
+
   // 指针状态 (鼠标 + 触摸)
   private pointerDelta = { x: 0, y: 0 }; // 本帧位移增量
   private lastPointer = { x: 0, y: 0 };  // 上一次坐标
   private isPointerDown = false;
-  
+
   // 动作状态
   private _isFiring = false;
   private _isBombing = false;
 
   private canvas: HTMLCanvasElement | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   /** 
    * 初始化：必须传入 Canvas 以计算正确的坐标 
@@ -79,7 +79,7 @@ export class InputManager {
   private movePointer(x: number, y: number) {
     const dx = x - this.lastPointer.x;
     const dy = y - this.lastPointer.y;
-    
+
     // 累加位移 (因为一帧内可能触发多次 move 事件)
     this.pointerDelta.x += dx;
     this.pointerDelta.y += dy;

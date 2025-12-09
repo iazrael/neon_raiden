@@ -1,52 +1,68 @@
 import { World } from '../types';
-import { view } from '../world';
-import { MoveIntent, FireIntent } from '../components';
+import { inputManager } from '../input/InputManager';
+import { MoveIntent, FireIntent, BombIntent, PlayerTag, SpeedStat } from '../components';
+import { removeComponent, view } from '../world';
 
-// 全局按键状态管理
-export const keys: Record<string, boolean> = {};
-
-/**
- * 输入系统
- * 处理玩家输入，为玩家实体生成MoveIntent和FireIntent组件
- */
 export function InputSystem(w: World, dt: number) {
-  // 查找玩家实体
-  for (const [id] of view(w, [])) {
-    if (id === w.playerId) {
-      // 移除旧的意图组件
-      const comps = w.entities.get(id) || [];
-      const moveIntentIndex = comps.findIndex(c => c instanceof MoveIntent);
-      const fireIntentIndex = comps.findIndex(c => c instanceof FireIntent);
-      
-      if (moveIntentIndex !== -1) {
-        comps.splice(moveIntentIndex, 1);
-      }
-      
-      if (fireIntentIndex !== -1) {
-        comps.splice(fireIntentIndex, 1);
-      }
-      
-      // 创建新的意图组件
-      let dx = 0;
-      let dy = 0;
-      
-      // 处理移动输入
-      if (keys['ArrowLeft'] || keys['KeyA']) dx = -1;
-      if (keys['ArrowRight'] || keys['KeyD']) dx = 1;
-      if (keys['ArrowUp'] || keys['KeyW']) dy = -1;
-      if (keys['ArrowDown'] || keys['KeyS']) dy = 1;
-      
-      // 添加移动意图组件
-      if (dx !== 0 || dy !== 0) {
-        comps.push(new MoveIntent({ dx, dy }));
-      }
-      
-      // 处理射击输入
-      if (keys['Space']) {
-        comps.push(new FireIntent());
-      }
-      
-      break;
+    // 1. 获取输入源数据
+    const kbVec = inputManager.getKeyboardVector();
+    const pointerDelta = inputManager.consumePointerDelta(); // 注意：这会清空 Manager 里的积攒值
+    const isFiring = inputManager.isFiring();
+    const isBombing = inputManager.isBombing();
+
+    // 2. 查找玩家
+    const playerComps = w.entities.get(w.playerId);
+    if (!playerComps) return;
+
+    // === 处理移动 (优先处理触摸/鼠标拖拽，其次键盘) ===
+    const existingMove = playerComps.find(MoveIntent.check);
+
+    // 逻辑：如果有指针位移，直接使用像素偏移 (Offset)
+    if (Math.abs(pointerDelta.x) > 0.1 || Math.abs(pointerDelta.y) > 0.1) {
+        // 触摸是 1:1 跟随，直接作为 Offset
+        if (existingMove) {
+            existingMove.dx = pointerDelta.x;
+            existingMove.dy = pointerDelta.y;
+            existingMove.type = 'offset';
+        } else {
+            playerComps.push(new MoveIntent({ dx: pointerDelta.x, dy: pointerDelta.y, type: 'offset' }));
+        }
     }
-  }
+    // 逻辑：否则，使用键盘向量 (Velocity)
+    else if (kbVec.x !== 0 || kbVec.y !== 0) {
+        // 键盘需要后续乘速度
+        if (existingMove) {
+            existingMove.dx = kbVec.x;
+            existingMove.dy = kbVec.y;
+            existingMove.type = 'velocity';
+        } else {
+            playerComps.push(new MoveIntent({ dx: kbVec.x, dy: kbVec.y, type: 'velocity' }));
+        }
+    }
+    // 无输入：清理意图
+    else {
+        if (existingMove) {
+            const idx = playerComps.indexOf(existingMove);
+            playerComps.splice(idx, 1);
+        }
+    }
+
+    // === 处理开火 ===
+    const existingFire = playerComps.find(FireIntent.check);
+    if (isFiring) {
+        if (!existingFire) playerComps.push(new FireIntent());
+    } else {
+        if (existingFire) removeComponent(w, w.playerId, existingFire);
+    }
+
+    // === 处理炸弹 (B键) ===
+    const existingBomb = playerComps.find(BombIntent.check);
+    if (isBombing) {
+        // 炸弹通常是一次性触发，这里持续按住会持续产生意图
+        // 后续 SkillSystem 需要处理冷却或消耗
+        if (!existingBomb) playerComps.push(new BombIntent());
+    } else {
+        if (existingBomb) removeComponent(w, w.playerId, existingBomb);
+    }
+
 }
