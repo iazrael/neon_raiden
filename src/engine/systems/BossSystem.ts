@@ -1,10 +1,9 @@
 // src/engine/systems/BossSystem.ts
 
 import { World } from '@/engine/types';
-import { BossAI, Transform, MoveIntent, PlayerTag, BossTag } from '@/engine/components';
+import { BossAI, Transform, MoveIntent, PlayerTag, BossTag, SpeedStat } from '@/engine/components';
 import { view } from '@/engine/world';
-import { BossMovementPattern } from '@/engine/types';
-import { BOSS_DATA } from '@/engine/configs/bossData';
+import { BOSS_DATA, BossMovementPattern } from '@/engine/configs/bossData';
 import { MOVEMENT_STRATEGIES, MovementContext } from './logic/bossMovement'; // 导入策略
 
 const STAGE_WIDTH = 800;
@@ -12,50 +11,57 @@ const BOSS_MARGIN_X = 100;
 
 export function BossSystem(world: World, dt: number) {
   // 1. 获取玩家位置
-  let playerPos = { x: STAGE_WIDTH / 2, y: 500 };
-  for (const [_, [tr]] of view(world, [PlayerTag, Transform])) {
-    playerPos = { x: tr.x, y: tr.y };
-    break;
-  }
+  const playerComps = world.entities.get(world.playerId);
+  // 安全检查：玩家可能死亡
+  if (!playerComps) return;
+  const playerTr = playerComps.find(Transform.check);
+  if (!playerTr) return;
 
   // 2. 遍历 Boss
-  for (const [id, [bossAi, tr, moveIntent, bossTag]] of view(world, [BossAI, Transform, MoveIntent, BossTag])) {
-    // 获取配置 (实际项目中建议缓存 BossType 到组件)
+  for (const [id, [bossAi, trans, moveIntent, bossTag, speedStat]] of view(world, [BossAI, Transform, MoveIntent, BossTag, SpeedStat])) {
     const bossComps = world.entities.get(id)!;
 
-    // 假设 BossTag 里存了 subType (如 'boss_guardian')
-    // 如果你的 BossTag 是空的，你需要从 factory 生成时把它记在 Entity 上或扩展 BossTag
-    // 这里假设我们能获取到 type，例如通过 id 查表或者扩展组件
-    const bossType = bossTag.subType || 'boss_guardian';
+    // 安全检查配置
+    const bossSpec = BOSS_DATA[bossTag.id]; // 这里的 id 应该是字符串 'boss_guardian' 等
+    if (!bossSpec) continue;
 
-    const bossSpec = BOSS_DATA[bossType];
-    const phaseSpec = bossSpec?.phases[bossAi.phase - 1];
+    const phaseIndex = Math.max(0, bossAi.phase - 1);
+    const phaseSpec = bossSpec.phases[phaseIndex] || bossSpec.phases[0];
 
-    const pattern = phaseSpec?.movePattern || BossMovementPattern.IDLE;
-    const speedMod = phaseSpec?.modifiers?.moveSpeed || 1.0;
+    const logicSpeedMult = phaseSpec.modifiers?.moveSpeed || 1.0;
+    const pattern = phaseSpec.movePattern || BossMovementPattern.IDLE;
 
-    // 3. 【核心修改】调用策略函数
+    // 3. 调用策略
     const strategy = MOVEMENT_STRATEGIES[pattern];
 
     if (strategy) {
       const ctx: MovementContext = {
-        dt,
-        time: world.time,
-        self: tr,
-        player: playerPos,
-        bossAi: bossAi,
-        components: bossComps // <--- 【关键】传入组件列表引用
+        dtInSeconds: dt / 1000, // 转换为秒传给策略
+        timeInSeconds: world.time / 1000, // 转换为秒
+        trans,
+        player: playerTr,
+        bossAi,
+        components: bossComps,
+        moveSpeed: logicSpeedMult,
+        speedStat
       };
 
       const result = strategy(ctx);
 
-      // 应用结果
+      // 【核心修改】正确设置意图类型
       moveIntent.dx = result.dx;
       moveIntent.dy = result.dy;
+      moveIntent.type = result.type; // 'velocity' or 'offset'
+    } else {
+      // 默认不动
+      moveIntent.dx = 0;
+      moveIntent.dy = 0;
     }
 
-    // 4. 边界限制 (通用逻辑)
-    if (tr.x < BOSS_MARGIN_X && moveIntent.dx < 0) moveIntent.dx = 0;
-    if (tr.x > STAGE_WIDTH - BOSS_MARGIN_X && moveIntent.dx > 0) moveIntent.dx = 0;
+    // 4. 边界限制 (仅针对 Velocity 模式，Offset 模式通常是精确控制)
+    if (moveIntent.type === 'velocity') {
+      if (trans.x < BOSS_MARGIN_X && moveIntent.dx < 0) moveIntent.dx = 0;
+      if (trans.x > STAGE_WIDTH - BOSS_MARGIN_X && moveIntent.dx > 0) moveIntent.dx = 0;
+    }
   }
 }

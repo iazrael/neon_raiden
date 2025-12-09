@@ -26,10 +26,14 @@ export class DestroyTag extends Component {
 
 // ========== 标签组件（空对象即可） ==========
 /** 玩家标签组件 */
-export class PlayerTag extends Component { }
+export class PlayerTag extends Component {
+    static check(c: any): c is PlayerTag { return c instanceof PlayerTag; }
+}
 
 /** 敌人标签组件 */
-export class EnemyTag extends Component { }
+export class EnemyTag extends Component {
+    static check(c: any): c is EnemyTag { return c instanceof EnemyTag; }
+}
 
 /** Boss身份组件 - 标识此实体为Boss，并记录具体是哪个Boss */
 export class BossTag extends Component {

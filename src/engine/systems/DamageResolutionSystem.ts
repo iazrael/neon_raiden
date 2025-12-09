@@ -1,6 +1,6 @@
 import { World } from '../types';
 import { view, addComponent } from '../world';
-import { Health, Shield, DestroyTag, TeleportState } from '../components';
+import { Health, Shield, DestroyTag, TeleportState, ScoreValue } from '../components';
 
 /**
  * 伤害结算系统
@@ -29,7 +29,7 @@ export function DamageResolutionSystem(world: World, dt: number) {
   }
 
   // 检查需要销毁的实体
-  for (const [id, [health]] of view(world, [Health])) {
+  for (const [id, [health]] of view(world, [Health, ScoreValue])) {
     if ('hp' in health && health.hp <= 0) {
       // 为需要销毁的实体添加DestroyTag组件
       addComponent(world, id, new DestroyTag({ reason: 'killed' }));

@@ -36,7 +36,8 @@ export class MoveIntent extends Component {
         dx?: number;
         /** Y轴移动方向 */
         dy?: number;
-        type: 'velocity' | 'offset'; // 区分是 速度方向 还是 绝对位移
+        /** 意图类型 */
+        type?: 'velocity' | 'offset'; // 区分是 速度方向 还是 绝对位移
     }) {
         super();
         this.dx = cfg.dx ?? 0;
@@ -45,7 +46,7 @@ export class MoveIntent extends Component {
     }
     public dx = 0;
     public dy = 0;
-    public type: 'velocity' | 'offset';
+    public type: 'velocity' | 'offset' = 'velocity';
     static check(c: any): c is MoveIntent { return c instanceof MoveIntent; }
 }
 

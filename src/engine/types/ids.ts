@@ -11,6 +11,7 @@ export enum FighterId {
  * 武器 ID
  */
 export enum WeaponId {
+    // === 玩家武器 ===
     VULCAN = 'vulcan',      // 散弹枪
     LASER = 'laser',        // 激光枪 （穿透）
     MISSILE = 'missile',    // 跟踪导弹
@@ -18,7 +19,49 @@ export enum WeaponId {
     PLASMA = 'plasma',      // 等离子炮 (范围爆炸)
     TESLA = 'tesla',        // 电磁枪 (连锁)
     MAGMA = 'magma',        // 熔岩炉 (持续伤害)
-    SHURIKEN = 'shuriken'   // 手里剑 (弹射)
+    SHURIKEN = 'shuriken',   // 手里剑 (弹射)
+}
+
+// === 敌人通用武器 ===
+export enum EnemyWeaponId {
+    ENEMY_NORMAL = 'enemy_normal',
+    ENEMY_FAST = 'enemy_fast',
+    ENEMY_TANK = 'enemy_tank',
+    ENEMY_ELITE = 'enemy_elite',
+    ENEMY_SNIPER = 'enemy_sniper',
+    ENEMY_LAYER = 'enemy_layer',
+    ENEMY_PULSAR = 'enemy_pulsar',
+    ENEMY_BARRAGE = 'enemy_barrage',
+}
+
+// === Boss 专用武器 (按 ID 映射) ===
+export enum BossWeaponId {
+    // Guardian
+    BOSS_GUARDIAN_RADIAL = 'boss_guardian_radial',
+    BOSS_GUARDIAN_RADIAL_ENRAGED = 'boss_guardian_radial_enraged',
+
+    // Destroyer
+    BOSS_DESTROYER_MAIN = 'boss_destroyer_main',
+    BOSS_DESTROYER_DASH = 'boss_destroyer_dash',
+    BOSS_DESTROYER_BERSERK = 'boss_destroyer_berserk',
+
+    // Titan
+    BOSS_TITAN_LASER_BASE = 'boss_titan_laser_base',
+    BOSS_TITAN_LASER_RAPID = 'boss_titan_laser_rapid',
+    BOSS_TITAN_OMNI = 'boss_titan_omni',
+
+    // Apocalypse
+    BOSS_APOCALYPSE_MIXED = 'boss_apocalypse_mixed',
+    BOSS_APOCALYPSE_DEFENSE = 'boss_apocalypse_defense',
+    BOSS_APOCALYPSE_BERSERK = 'boss_apocalypse_berserk',
+    BOSS_APOCALYPSE_FINAL = 'boss_apocalypse_final',
+
+    // Generic Boss Weapons (其他 Boss 复用)
+    BOSS_GENERIC_TARGETED = 'boss_generic_targeted',
+    BOSS_GENERIC_RADIAL = 'boss_generic_radial',
+    BOSS_GENERIC_LASER = 'boss_generic_laser',
+    BOSS_GENERIC_SPREAD = 'boss_generic_spread',
+    BOSS_GENERIC_HOMING = 'boss_generic_homing'
 }
 
 // | 武器枚举       | 弹种 ID              | 语义说明  |
@@ -36,6 +79,7 @@ export enum WeaponId {
  * 子弹类型的 ID 
  */
 export enum AmmoType {
+    // === 玩家弹药 ===
     VULCAN_SPREAD = 'vulcanSpread',   // 散弹扇形
     LASER_BEAM = 'laserBeam',         // 激光束
     MISSILE_HOMING = 'missileHoming', // 追踪导弹
@@ -43,7 +87,19 @@ export enum AmmoType {
     PLASMA_ORB = 'plasmaOrb',         // 等离子球
     TESLA_CHAIN = 'teslaChain',       // 电磁连锁
     MAGMA_POOL = 'magmaPool',         // 熔岩池
-    SHURIKEN_BOUNCE = 'shurikenBounce' // 手里剑反弹
+    SHURIKEN_BOUNCE = 'shurikenBounce', // 手里剑反弹
+}
+
+// === 敌人弹药 ===
+export enum EnemyAmmoType {
+    ENEMY_ORB_RED = 'enemy_orb_red',       // 普通红球
+    ENEMY_ORB_BLUE = 'enemy_orb_blue',     // 普通蓝球
+    ENEMY_ORB_GREEN = 'enemy_orb_green',   // 普通绿球
+    ENEMY_BEAM_THIN = 'enemy_beam_thin',   // 细激光
+    ENEMY_BEAM_THICK = 'enemy_beam_thick', // 粗激光 (Titan)
+    ENEMY_MISSILE = 'enemy_missile',       // 敌方导弹
+    ENEMY_PULSE = 'enemy_pulse',           // 脉冲弹
+    ENEMY_VOID_ORB = 'enemy_void_orb',     // 虚空弹 (Apocalypse)
 }
 
 /**
@@ -118,7 +174,7 @@ export const PickupId = {
     OPTION: 'pickup_buff_option',
     INVINCIBILITY: 'pickup_buff_invincibility',
     TIME_SLOW: 'pickup_buff_time_slow',
-    
+
     // 特殊
     NONE: 'none', // 什么都不掉
 };

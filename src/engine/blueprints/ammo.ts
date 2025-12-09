@@ -3,7 +3,7 @@
 //
 
 import { AmmoSpec } from './types';
-import { AmmoType } from '../types';
+import { AmmoType, EnemyAmmoType } from '../types';
 
 // 弹药类型列表
 export const AMMO_TYPES = [
@@ -161,5 +161,48 @@ export const AMMO_TABLE: Record<AmmoType, AmmoSpec> = {
         bounces: 3,
         /** 命中时触发的效果 ID 列表（字符串引用） */
         onHit: [],
+    },
+}
+export const ENEMY_AMMO_TABLE: Record<EnemyAmmoType, AmmoSpec> = {
+    // ==================== 敌人弹药 ====================
+    [EnemyAmmoType.ENEMY_ORB_RED]: {
+        id: EnemyAmmoType.ENEMY_ORB_RED,
+        damage: 10, radius: 6, speed: 300, pierce: 0, bounces: 0, onHit: [],
+        visuals: { texture: 'bullet_orb_red', color: '#ff4444' }
+    },
+    [EnemyAmmoType.ENEMY_ORB_BLUE]: {
+        id: EnemyAmmoType.ENEMY_ORB_BLUE,
+        damage: 15, radius: 8, speed: 250, pierce: 0, bounces: 0, onHit: [],
+        visuals: { texture: 'bullet_orb_blue', color: '#4488ff' }
+    },
+    [EnemyAmmoType.ENEMY_ORB_GREEN]: {
+        id: EnemyAmmoType.ENEMY_ORB_GREEN,
+        damage: 12, radius: 7, speed: 280, pierce: 0, bounces: 0, onHit: [],
+        visuals: { texture: 'bullet_orb_green', color: '#44ff44' }
+    },
+    [EnemyAmmoType.ENEMY_BEAM_THIN]: {
+        id: EnemyAmmoType.ENEMY_BEAM_THIN,
+        damage: 20, radius: 4, speed: 800, pierce: 99, bounces: 0, onHit: [],
+        visuals: { texture: 'bullet_beam_thin', color: '#ffaa00' }
+    },
+    [EnemyAmmoType.ENEMY_BEAM_THICK]: {
+        id: EnemyAmmoType.ENEMY_BEAM_THICK,
+        damage: 40, radius: 12, speed: 600, pierce: 99, bounces: 0, onHit: [],
+        visuals: { texture: 'bullet_beam_thick', color: '#ff0000' }
+    },
+    [EnemyAmmoType.ENEMY_MISSILE]: {
+        id: EnemyAmmoType.ENEMY_MISSILE,
+        damage: 25, radius: 10, speed: 350, pierce: 0, bounces: 0, onHit: ['explosion_small'],
+        visuals: { texture: 'bullet_missile', color: '#cccccc' }
+    },
+    [EnemyAmmoType.ENEMY_PULSE]: {
+        id: EnemyAmmoType.ENEMY_PULSE,
+        damage: 8, radius: 5, speed: 500, pierce: 0, bounces: 0, onHit: [],
+        visuals: { texture: 'bullet_pulse', color: '#ff00ff' }
+    },
+    [EnemyAmmoType.ENEMY_VOID_ORB]: {
+        id: EnemyAmmoType.ENEMY_VOID_ORB,
+        damage: 50, radius: 20, speed: 200, pierce: 99, bounces: 0, onHit: ['void_zone'],
+        visuals: { texture: 'bullet_void', color: '#330033' }
     },
 };

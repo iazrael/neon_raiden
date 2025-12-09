@@ -4,6 +4,7 @@
 //
 
 import { ASSETS } from '../configs';
+import { BOSS_DATA } from '../configs/bossData';
 import { DROPTABLE_BOSS } from '../configs/droptables/common';
 import { BossId } from '../types';
 import { Blueprint } from './types';
@@ -31,6 +32,8 @@ export const BLUEPRINT_BOSS_GUARDIAN: Blueprint = {
 
     /** 碰撞盒组件 - 设置Boss的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 90 * 0.7 },
+    // 击杀得分 (原配置 score: 5000)
+    ScoreValue: { value: 5000 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_BOSS }
 };
@@ -282,3 +285,58 @@ export const BOSSES_TABLE: Record<BossId, Blueprint> = {
     [BossId.LEVIATHAN]: BLUEPRINT_BOSS_LEVIATHAN,
     [BossId.APOCALYPSE]: BLUEPRINT_BOSS_APOCALYPSE,
 };
+
+// 辅助函数：快速生成 Boss 蓝图
+function createBossBlueprint(
+    bossId: BossId,
+    sprite: string,
+    hp: number,
+    radius: number,
+    score: number
+): Blueprint {
+    // 自动查找该 Boss 的初始武器 (P1 阶段)
+    const bossSpec = BOSS_DATA[bossId];
+    const initialWeaponId = bossSpec?.phases[0]?.weaponId || 'boss_weapon_radial';
+
+    return {
+        Transform: { x: 400, y: -200, rot: 180 },
+        Health: { hp, max: hp },
+        Sprite: { texture: sprite, srcX: 0, srcY: 0, srcW: radius * 2, srcH: radius * 2, scale: 1 },
+        BossTag: { id: bossId }, // 标记为 Boss
+        BossAI: { phase: 0, nextPatternTime: 0 }, // 初始阶段 0
+        Weapon: { id: initialWeaponId, ammoType: 'orb_red', cooldown: 1000, slot: 'main' },
+        HitBox: { shape: 'circle', radius: radius * 0.7 },
+        // 速度限制
+        // maxLinear: 120 (每秒120像素，用于追踪/移动时的基准速度) 
+        // maxAngular: 2 (旋转速度，用于转头瞄准)
+        // 建议值：maxLinear: 100 ~ 200 (像素/秒)。
+        SpeedStat: { maxLinear: 120, maxAngular: 2 },
+        ScoreValue: { value: score },
+        DropTable: { table: DROPTABLE_BOSS }
+    };
+}
+
+
+// export const BLUEPRINT_BOSS_GUARDIAN = createBossBlueprint('boss_guardian', ASSETS.BOSSES.guardian, 2000, 90, 5000);
+// export const BLUEPRINT_BOSS_INTERCEPTOR = createBossBlueprint('boss_interceptor', ASSETS.BOSSES.interceptor, 3200, 100, 10000);
+// export const BLUEPRINT_BOSS_DESTROYER = createBossBlueprint('boss_destroyer', ASSETS.BOSSES.destroyer, 5800, 110, 15000);
+// export const BLUEPRINT_BOSS_ANNIHILATOR = createBossBlueprint('boss_annihilator', ASSETS.BOSSES.annihilator, 7000, 120, 20000);
+// export const BLUEPRINT_BOSS_DOMINATOR = createBossBlueprint('boss_dominator', ASSETS.BOSSES.dominator, 8200, 130, 25000);
+// export const BLUEPRINT_BOSS_OVERLORD = createBossBlueprint('boss_overlord', ASSETS.BOSSES.overlord, 10600, 140, 30000);
+// export const BLUEPRINT_BOSS_TITAN = createBossBlueprint('boss_titan', ASSETS.BOSSES.titan, 16000, 150, 35000);
+// export const BLUEPRINT_BOSS_COLOSSUS = createBossBlueprint('boss_colossus', ASSETS.BOSSES.colossus, 17200, 160, 40000);
+// export const BLUEPRINT_BOSS_LEVIATHAN = createBossBlueprint('boss_leviathan', ASSETS.BOSSES.leviathan, 18400, 170, 45000);
+// export const BLUEPRINT_BOSS_APOCALYPSE = createBossBlueprint('boss_apocalypse', ASSETS.BOSSES.apocalypse, 20000, 180, 50000);
+
+// export const BOSSES_TABLE: Record<BossId, Blueprint> = {
+//     [BossId.GUARDIAN]: BLUEPRINT_BOSS_GUARDIAN,
+//     [BossId.INTERCEPTOR]: BLUEPRINT_BOSS_INTERCEPTOR,
+//     [BossId.DESTROYER]: BLUEPRINT_BOSS_DESTROYER,
+//     [BossId.ANNIHILATOR]: BLUEPRINT_BOSS_ANNIHILATOR,
+//     [BossId.DOMINATOR]: BLUEPRINT_BOSS_DOMINATOR,
+//     [BossId.OVERLORD]: BLUEPRINT_BOSS_OVERLORD,
+//     [BossId.TITAN]: BLUEPRINT_BOSS_TITAN,
+//     [BossId.COLOSSUS]: BLUEPRINT_BOSS_COLOSSUS,
+//     [BossId.LEVIATHAN]: BLUEPRINT_BOSS_LEVIATHAN,
+//     [BossId.APOCALYPSE]: BLUEPRINT_BOSS_APOCALYPSE,
+// };

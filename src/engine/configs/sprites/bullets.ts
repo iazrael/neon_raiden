@@ -1,6 +1,6 @@
 import { AmmoType } from '../../types';
 import { SpriteSpec } from '../types';
-import { ASSETS } from '../global';
+import { ASSETS } from '../assets';
 
 // 玩家武器子弹精灵配置
 export const PLAYER_BULLET_SPRITES: Record<AmmoType, SpriteSpec> = {
