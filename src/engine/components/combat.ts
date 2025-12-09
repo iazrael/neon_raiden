@@ -1,4 +1,4 @@
-import { AmmoType, BuffType, Component, EntityId, WeaponId } from '../types';
+import { AmmoType, BuffType, Component, EntityId, WeaponId } from '@/engine/types';
 
 // 「攻击 & 防御 & 增益」
 

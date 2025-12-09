@@ -3,10 +3,11 @@
 // 包含游戏中所有敌人类型的蓝图定义
 //
 
-import { ASSETS } from '../configs';
-import { DROPTABLE_COMMON } from '../configs/droptables/common';
-import { EnemyId } from '../types';
+import { ASSETS } from '@/engine/configs';
+import { DROPTABLE_COMMON } from '@/engine/configs/droptables';
+import { EnemyId, EnemyWeaponId, AmmoType } from '@/engine/types';
 import { Blueprint } from './types';
+import { WEAPON_TABLE } from './weapons';
 
 /**
  * 普通敌人蓝图
@@ -32,7 +33,10 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
     HitBox: { shape: 'circle', radius: 20 },
 
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用普通敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
 };
 
 /**
@@ -58,7 +62,10 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 15 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用快速敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_FAST]
 };
 
 /**
@@ -84,7 +91,10 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 30 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用坦克敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_TANK]
 };
 
 /**
@@ -110,7 +120,10 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 15 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 自杀式敌人不使用远程武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
 };
 
 /**
@@ -136,7 +149,10 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用精英敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_ELITE]
 };
 
 /**
@@ -162,7 +178,10 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用狙击敌人武器（激光）
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_SNIPER]
 };
 
 /**
@@ -188,7 +207,10 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 30 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用布雷敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_LAYER]
 };
 
 /**
@@ -214,7 +236,10 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 16 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用脉冲敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_PULSAR]
 };
 
 /**
@@ -240,7 +265,10 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用堡垒敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
 };
 
 /**
@@ -266,7 +294,10 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 18 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用追踪敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.GENERIC_HOMING]
 };
 
 /**
@@ -292,7 +323,10 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
     // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON } 
+    DropTable: { table: DROPTABLE_COMMON },
+    
+    // 挂载敌人武器组件 - 使用弹幕敌人武器
+    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
 };
 
 /**

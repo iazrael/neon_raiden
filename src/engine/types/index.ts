@@ -1,4 +1,4 @@
-import { Event } from '../events';
+import { Event } from '@/engine/events';
 export * from './ids'
 export * from './types'
 

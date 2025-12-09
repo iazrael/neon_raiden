@@ -1,4 +1,4 @@
-import { Component } from '../types';
+import { Component } from '@/engine/types';
 
 // 「精灵、帧动画、震屏、闪光、光斑、弹痕」
 

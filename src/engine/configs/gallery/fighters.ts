@@ -1,5 +1,5 @@
-import { FighterId } from "../../types";
-import { GalleryEntry } from "../types";
+import { FighterId } from "@/engine/types";
+import { GalleryEntry } from '@/engine/configs';
 
 
 export const GALLERY_FIGHTERS: Record<FighterId, GalleryEntry> = {

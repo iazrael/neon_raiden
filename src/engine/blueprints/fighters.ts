@@ -1,5 +1,5 @@
-import { ASSETS } from '../configs/global';
-import { WeaponId } from '../types';
+import { ASSETS } from '@/engine/configs';
+import { WeaponId } from '@/engine/types';
 import { Blueprint } from './types';
 import { WEAPON_TABLE } from './weapons';
 

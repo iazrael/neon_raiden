@@ -1,26 +1,26 @@
-输入 → 武器(含协同) → 移动(玩家+敌人+精英) → 碰撞 → 伤害 → 连击/难度/环境
-     → Boss(阶段→行为) → 计时 → 掉落 → 拾取 → 音频 → 清理 → 渲染
+# System 执行顺序
 
-| 阶段        | 系统                     | 调整理由                                                     |
-| --------- | ---------------------- | -------------------------------------------------------- |
-| ① 输入      | InputSystem            | 硬件 → 意图                                                  |
-| ② 武器      | WeaponSystem           | 读 Intent → 生成子弹实体                                        |
-| ③ 武器协同    | WeaponSynergySystem    | **修正/增强武器数值**（必须在 Weapon 之后，但自己不再生实体）                    |
-| ④ 行为      | AISteerSystem          | 生成**敌人移动意图**（给下一步 Movement 读）                            |
-| ⑤ 移动      | MovementSystem         | 读所有 Velocity（玩家+敌人+Knockback）→ 写 Transform               |
-| ⑥ 相机      | CameraSystem           | **立刻跟拍玩家**（避免渲染层看到上一帧位置）                                 |
-| ⑦ 碰撞      | CollisionSystem        | 只认 Transform+HitBox → 扣血、反弹、穿透                           |
-| ⑧ 伤害结算    | DamageResolutionSystem | 护盾、DOT、无敌帧；**写 DestroyTag**                              |
-| ⑨ 连击      | ComboSystem            | **同一帧内**立即统计命中次数，给音频/难度实时用                               |
-| ⑩ 难度      | DifficultySystem       | 根据本帧连击/时间 → 调下波刷新率、倍率                                    |
-| ⑪ 环境      | EnvironmentSystem      | 移动平台、风向、毒圈（在 Spawn 前，避免新生成敌人立刻被挤）                        |
-| ⑫ Boss 阶段 | BossPhaseSystem        | 读 Boss 血量 → 切 phase                                      |
-| ⑬ Boss 行为 | BossSystem             | 根据当前 phase 放技能（**可能生成弹幕实体**，所以在 WeaponSystem 之后）         |
-| ⑭ 计时      | LifetimeSystem         | 子弹/道具/Buff 超时 → **写 DestroyTag**                         |
-| ⑮ 掉落      | LootSystem             | 读 DeadTag+DropTable → 生成 PickupItem 实体                   |
-| ⑯ 拾取      | PickupSystem           | 玩家碰道具 → 吃/换武器（**可能写 Inventory**，音频立即需要）                  |
-| ⑰  Buff   | BuffSystem             | 所有 Buff 计时-1，超时 → **写 DestroyTag**                       |
-| ⑱ 效果      | EffectPlayer           | 收集本帧所有 **HitEvent/KillEvent/PickupEvent** → 生成粒子、力场、相机震屏 |
-| ⑲ 音频      | AudioSystem            | **一次性播放**上一步所有事件对应的音效，避免 60 次/秒 new Audio()              |
-| ⑳ 清理      | CleanupSystem          | **唯一** `Map.delete(id)` & 对象池回灌                          |
-| ㉑ 渲染      | RenderSystem           | 只读 world → Canvas/WebGL 画精灵（可放 Worker）                   |
+| 阶段 | 序号 | 系统名称 | 职责 (Inputs $\to$ Outputs) |
+| :--- | :--- | :--- | :--- |
+| **P1. 决策层**<br>(输入与AI) | 1 | **InputSystem** | 读键盘/手柄 $\to$ 写 `MoveIntent`, `FireIntent` (玩家) |
+| | 2 | **DifficultySystem** | 读全局时间/击杀 $\to$ 改 `World.difficulty` (影响刷怪/掉率) |
+| | 3 | **SpawnSystem** | 读 `World.time` $\to$ `new EnemyEntity` (刷怪) |
+| | 4 | **BossPhaseSystem** | 读 `Health` $\to$ 改 `BossState.phase` (转阶段逻辑) |
+| | 5 | **BossSystem** | 读 `BossState` $\to$ 写 `MoveIntent`, `FireIntent` (Boss行为) |
+| | 6 | **EnemySystem**<br>*(含 EliteAI)* | 读 `EnemyTag` $\to$ 写 `MoveIntent`, `FireIntent` (敌人决策) |
+| | 7 | **AISteerSystem** | 读 `MoveIntent` (寻路/避障算法) $\to$ 修正 `MoveIntent` |
+| **P2. 状态层**<br>(数值更新) | 8 | **BuffSystem** | 读 `Buff` (计时/过期) $\to$ 改 `Speed`, `Weapon.cooldown` |
+| | 9 | **WeaponSynergySystem** | 读 `Inventory` (武器组合) $\to$ 产生协同特效/Buff |
+| | 10 | **WeaponSystem** | 读 `FireIntent` + `Weapon` $\to$ `new BulletEntity` (发射) |
+| **P3. 物理层**<br>(位移) | 11 | **MovementSystem** | 读 `MoveIntent` + `Velocity` $\to$ 改 `Transform` (x,y) |
+| **P4. 交互层**<br>(核心碰撞) | 12 | **CollisionSystem** | 读 `HitBox` + `Transform` $\to$ 推送 `HitEvent`, `PickupEvent` (不直接扣血) |
+| **P5. 结算层**<br>(事件处理) | 13 | **PickupSystem** | 消费 `PickupEvent` $\to$ 加武器/Buff，销毁道具 |
+| | 14 | **DamageResolutionSystem** | 消费 `HitEvent` $\to$ 扣 `Health`，闪避/无敌判断，推 `DeathEvent` |
+| | 15 | **LootSystem** | 消费 `DeathEvent` (敌人死亡) $\to$ `new PickupEntity` (掉落) |
+| | 16 | **ComboSystem** | 消费 `DeathEvent` $\to$ 加 `World.score`, 更新连击倍率 |
+| **P6. 表现层**<br>(视听反馈) | 17 | **CameraSystem** | 读 Player `Transform` / 震屏事件 $\to$ 改 Camera View |
+| | 18 | **EffectPlayer** | 消费所有事件 (Hit/Die/Shoot) $\to$ `new ParticleEntity` (视觉特效) |
+| | 19 | **AudioSystem** | 消费所有事件 $\to$ 播放音效 (AudioContext) |
+| | 20 | **RenderSystem** | 读 `Sprite`, `Transform`, `Particle` $\to$ Canvas/WebGL 绘制 |
+| **P7. 清理层**<br>(生命周期) | 21 | **LifetimeSystem** | `Timer` -= dt $\to$ 给超时的实体打 `DestroyTag` |
+| | 22 | **CleanupSystem** | 遍历 `DestroyTag` $\to$ 真正的 `delete entity`，清空本帧 `Events` |

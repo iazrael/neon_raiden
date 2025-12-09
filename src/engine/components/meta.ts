@@ -1,4 +1,4 @@
-import { BossId, Component } from '../types';
+import { BossId, Component } from '@/engine/types';
 
 // 「标签 & 死亡 & 特效」
 

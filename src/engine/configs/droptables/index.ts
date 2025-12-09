@@ -1,7 +1,10 @@
-import { Blueprint } from '../../blueprints';
-import { PickupId } from '../../types';
-import * as WP from '../../blueprints/pickups/weaponPickups'; // 武器蓝图文件
-import * as BP from '../../blueprints/pickups/buffPickups';   // Buff蓝图文件
+import { Blueprint } from '@/engine/blueprints';
+import { PickupId } from '@/engine/types';
+import * as WP from '@/engine/blueprints/pickups/weaponPickups'; // 武器蓝图文件
+import * as BP from '@/engine/blueprints/pickups/buffPickups';   // Buff蓝图文件
+
+export * from './common'; // 从 './common' 导出所有内容
+
 
 // 注册表：ID -> 蓝图对象
 export const PICKUP_REGISTRY: Record<string, Blueprint> = {

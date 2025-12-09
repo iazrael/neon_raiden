@@ -1,4 +1,4 @@
-import { PickupId } from "../../types";
+import { PickupId } from "@/engine/types";
 
 // 掉落项结构定义（为了类型安全）
 export interface DropItemSpec {

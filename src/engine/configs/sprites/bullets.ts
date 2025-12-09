@@ -1,6 +1,6 @@
 import { AmmoType } from '@/engine/types';
-import { SpriteSpec } from '../types';
-import { ASSETS } from '../assets';
+import { SpriteSpec } from '@/engine/configs';
+import { ASSETS } from '@/engine/configs/assets';
 
 // 弹药类型列表
 export const PLAYER_AMMO_TYPES = [
