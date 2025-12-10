@@ -1,4 +1,4 @@
-import { AmmoType, BuffType, Component, EntityId, WeaponId } from '@/engine/types';
+import { AmmoType, BuffType, Component, EntityId, WeaponId, WeaponPattern } from '@/engine/types';
 
 // 「攻击 & 防御 & 增益」
 
@@ -39,6 +39,9 @@ export class Weapon extends Component {
     curCD?: number;
     /** 武器等级 */
     level?: number;
+    bulletCount?: number; // 子弹数量
+    spread?: number; // 扩散角度
+    pattern?: WeaponPattern; // 弹幕模式
   }) {
     super();
     this.ammoType = cfg.ammoType;
@@ -51,6 +54,9 @@ export class Weapon extends Component {
   public cooldown: number;
   public curCD = 0;
   public level = 1;
+  public bulletCount = 0;
+  public spread?: number;
+  public pattern?: WeaponPattern;
   static check(c: any): c is Weapon { return c instanceof Weapon; }
 }
 

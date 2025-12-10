@@ -1,5 +1,5 @@
 import * as Components from '@/engine/components';
-import { AmmoType, EnemyWeaponId, WeaponId } from '@/engine/types';
+import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '@/engine/types';
 
 // ========== Blueprint 类型 ==========
 export type Blueprint = Partial<{
@@ -24,7 +24,10 @@ export type WeaponSpec = {
     /** 当前冷却时间 */
     curCD?: number;
     /** 最大等级 */
-    maxLevel: number,
+    maxLevel?: number,
+    bulletCount?: number; // 子弹数量
+    spread?: number; // 扩散角度
+    pattern: WeaponPattern; // 弹幕模式
 }
 
 export type EnemyWeaponSpec = {

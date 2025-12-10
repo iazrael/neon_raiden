@@ -33,7 +33,7 @@ export enum EnemyWeaponId {
     ENEMY_PULSAR = 'enemy_pulsar',
     ENEMY_BARRAGE = 'enemy_barrage',
 
-// === Boss 专用武器 (按 ID 映射) ===
+    // === Boss 专用武器 (按 ID 映射) ===
     // Guardian
     GUARDIAN_RADIAL = 'boss_guardian_radial',
     GUARDIAN_RADIAL_ENRAGED = 'boss_guardian_radial_enraged',
@@ -60,6 +60,16 @@ export enum EnemyWeaponId {
     GENERIC_LASER = 'boss_generic_laser',
     GENERIC_SPREAD = 'boss_generic_spread',
     GENERIC_HOMING = 'boss_generic_homing'
+}
+
+// 武器的发射模式
+export enum WeaponPattern {
+    RADIAL = 'radial', // 径向发射
+    SPREAD = 'spread', // 扩散发射
+    AIMED = 'aimed', // 准星发射
+    RANDOM = 'random', // 随机发射
+    SPIRAL = 'spiral', // 螺旋发射
+    FIXED_REAR = 'fixed_rear' // 子弹从后方发射
 }
 
 // | 武器枚举       | 弹种 ID              | 语义说明  |
