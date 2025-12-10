@@ -9,6 +9,7 @@ import { buildSnapshot, GameSnapshot } from './snapshot';
 import { AISteerSystem } from './systems/AISteerSystem';
 import { AudioSystem } from './systems/AudioSystem';
 import { BossSystem } from './systems/BossSystem';
+import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { BuffSystem } from './systems/BuffSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { CleanupSystem } from './systems/CleanupSystem';
@@ -70,12 +71,12 @@ export class Engine {
     private framePipeline(world: World, dt: number) {
         // ① 逻辑循环（所有 System）
         // 按顺序执行所有系统
-        
+
         // P1. 决策层 (输入与AI)
         InputSystem(world, dt);                         // 1. 输入系统 - 读取键盘/手柄输入
         DifficultySystem(world, dt);                    // 2. 难度系统 - 根据时间/击杀调整难度
         SpawnSystem(world, dt);                         // 3. 生成系统 - 刷新敌人
-        // BossPhaseSystem(world, dt);                  // 4. Boss阶段系统 - 控制Boss阶段转换
+        BossPhaseSystem(world, dt);                  // 4. Boss阶段系统 - 控制Boss阶段转换
         BossSystem(world, dt);                          // 5. Boss系统 - 控制Boss行为
         // EnemySystem(world, dt);                      // 6. 敌人系统 - 控制敌人决策 (在旧系统中实现)
         AISteerSystem(world, dt);                       // 7. AI转向系统 - 生成敌人移动意图

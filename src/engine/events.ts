@@ -10,7 +10,9 @@ export type Event =
     | CamShakeEvent
     | BloodFogEvent
     | LevelUpEvent
-    | ComboBreakEvent;
+    | ComboBreakEvent
+    | ScreenClearEvent
+    | PlaySoundEvent;
 
 // ① 命中（碰撞瞬间）
 export interface HitEvent {
@@ -82,4 +84,15 @@ export interface ComboBreakEvent {
     type: 'ComboBreak';
     combo: number;                 // 中断前的连击数
     reason: 'timeout' | 'miss' | 'hit'; // 中断原因
+}
+
+// ⑩ 清屏事件
+export interface ScreenClearEvent {
+    type: 'ScreenClear';
+}
+
+// ⑪ 播放音效事件
+export interface PlaySoundEvent {
+    type: 'PlaySound';
+    name: string;
 }

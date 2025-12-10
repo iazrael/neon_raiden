@@ -148,19 +148,19 @@ export class Buff extends Component {
 
 /** 掉落表组件 - 定义实体被销毁时的掉落物品 */
 export class DropTable extends Component {
-    /**
-     * 构造函数
-     * @param cfg 掉落表配置
-     */
-    constructor(cfg: { 
-        /** 掉落项数组 */
-        table: Array<{ item: string; weight: number; min?: number; max?: number }>; 
-    }) {
-        super();
-        this.table = cfg.table;
-    }
-    public table: Array<{ item: string; weight: number; min?: number; max?: number }>;
-    static check(c: any): c is DropTable { return c instanceof DropTable; }
+  /**
+   * 构造函数
+   * @param cfg 掉落表配置
+   */
+  constructor(cfg: {
+    /** 掉落项数组 */
+    table: Array<{ item: string; weight: number; min?: number; max?: number }>;
+  }) {
+    super();
+    this.table = cfg.table;
+  }
+  public table: Array<{ item: string; weight: number; min?: number; max?: number }>;
+  static check(c: any): c is DropTable { return c instanceof DropTable; }
 }
 
 /**
@@ -213,34 +213,32 @@ export class DamageOverTime extends Component {
 }
 
 /**
- * 无敌帧计时器
+ * 无敌状态 (包含视觉效果)
  * 用法：受伤瞬间挂上，DamageResolutionSystem 每帧减时；存在期间**跳过一切伤害逻辑**
  */
-export class InvincibleTimer extends Component {
-  /**
-   * 构造函数
-   * @param cfg 无敌帧配置
-   */
+export class InvulnerableState extends Component {
   constructor(cfg: {
-    /** 剩余无敌时间（秒） */
-    remaining: number;
-  }) {  // 剩余无敌时间（秒）
+    /** 无敌状态持续时间（毫秒） */
+    duration: number;
+    /** 无敌状态视觉效果颜色 */
+    flashColor?: string
+  }) {
     super();
-    this.remaining = cfg.remaining;
+    this.duration = cfg.duration;
+    this.flashColor = cfg.flashColor;
   }
-  public remaining: number;   // 剩余无敌时间（秒）
+  public duration: number; // 剩余无敌时间（毫秒）
+  public flashColor?: string;
 
   /** 每帧由 DamageResolutionSystem 调用 */
-  tick(dt: number): void {
-    this.remaining -= dt;
+  tick(dt: number) {
+    this.duration -= dt;
   }
 
-  /** 是否还在无敌期内？ */
-  isActive(): boolean {
-    return this.remaining > 0;
+  /** 倒计时结束？ */
+  isFinished(): boolean {
+    return this.duration <= 0;
   }
 
-  static check(c: any): c is InvincibleTimer {
-    return c instanceof InvincibleTimer;
-  }
+  static check(c: any): c is InvulnerableState { return c instanceof InvulnerableState; }
 }
