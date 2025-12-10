@@ -52,6 +52,19 @@ export class MoveIntent extends Component {
 
 /** 开火意图组件 - 表示实体想要开火 */
 export class FireIntent extends Component {
+    constructor(cfg?: {
+        firing?: boolean;
+        angle?: number;
+        targetId?: number;
+    }) {
+        super();
+        this.firing = cfg?.firing ?? true;
+        this.angle = cfg?.angle;
+        this.targetId = cfg?.targetId;
+    }
+    public firing: boolean;
+    public angle?: number;
+    public targetId?: number;
     static check(c: any): c is FireIntent { return c instanceof FireIntent; }
 }
 

@@ -1,9 +1,8 @@
 import { World } from '../types';
 import { view, addComponent, generateId } from '../world';
-import { keys } from './InputSystem';
-import { Weapon, Transform, FireIntent, Bullet } from '../components';
-import { WEAPON_SPECS } from '../configs/weapons';
-import { AMMO_SPECS } from '../configs/ammo';
+import { Weapon, Transform, FireIntent, Bullet, Velocity, Lifetime } from '../components';
+import { WEAPON_TABLE, ENEMY_WEAPON_TABLE } from '../blueprints/weapons';
+import { AMMO_TABLE } from '../blueprints/ammo';
 
 /**
  * 武器系统
@@ -17,47 +16,88 @@ export function WeaponSystem(w: World, dt: number) {
     if (weapon.curCD > 0) {
       weapon.curCD -= dt;
     }
-    
+
     // 检查是否有开火意图
-    const hasFireIntent = [...(w.entities.get(id) || [])].some(c => c instanceof FireIntent);
-    
+    // 注意：FireIntent 可能由 InputSystem (玩家) 或 EnemySystem (敌人) 添加
+    const entity = w.entities.get(id) || [];
+    const intent = entity.find(c => c instanceof FireIntent) as FireIntent;
+
     // 如果有开火意图且武器已冷却，则发射子弹
-    if (hasFireIntent && weapon.curCD <= 0) {
+    if (intent && intent.firing && weapon.curCD <= 0) {
+      // 1. 查找武器配置 (先找玩家武器表，找不到再找敌人武器表)
+
+      // 2. 查找弹药配置
+      const ammoSpec = AMMO_TABLE[weapon.ammoType];
+      if (!ammoSpec) continue;
+
       // 重置冷却时间
       weapon.curCD = weapon.cooldown;
-      
-      // 获取武器配置
-      const weaponSpec = WEAPON_SPECS[weapon.id];
-      if (!weaponSpec) continue;
-      
-      // 获取弹药配置
-      const ammoSpec = AMMO_SPECS[weaponSpec.ammoType];
-      if (!ammoSpec) continue;
-      
-      // 生成子弹实体
-      const bulletId = generateId();
-      
-      // 计算子弹位置（在玩家前方）
-      const bulletX = transform.x;
-      const bulletY = transform.y - 20;
-      
-      // 计算子弹伤害（考虑武器等级）
-      const damage = ammoSpec.damage * (1 + 0.1 * weapon.level);
-      
-      // 创建子弹组件
-      addComponent(w, bulletId, new Transform({ x: bulletX, y: bulletY }));
-      addComponent(w, bulletId, new Bullet({ 
-        owner: id, 
-        ammoType: weaponSpec.ammoType,
-        pierceLeft: ammoSpec.pierce,
-        bouncesLeft: ammoSpec.bounces
-      }));
-      
-      // 添加速度组件使子弹向上移动
-      addComponent(w, bulletId, { vx: 0, vy: -ammoSpec.speed } as any);
-      
-      // 添加生命周期组件（子弹存在10秒）
-      addComponent(w, bulletId, { timer: 10000 } as any);
+
+      // 3. 计算发射参数
+      const bulletSpeed = ammoSpec.speed;
+      const damage = ammoSpec.damage * (1 + 0.1 * (weapon.level - 1));
+
+      const isEnemyWeapon = id !== w.playerId;
+      // 基础发射位置
+      const originX = transform.x;
+      const originY = transform.y + (isEnemyWeapon ? 0 : -20); // 敌人从中心发，玩家从头上发
+
+      // 基础角度 (玩家默认向上 -90度，敌人默认向下 +90度)
+      let baseAngle = isEnemyWeapon ? Math.PI / 2 : -Math.PI / 2;
+
+      // 如果 Intent 指定了角度（例如瞄准玩家），优先使用
+      if (intent.angle !== undefined) {
+        baseAngle = intent.angle;
+      }
+
+      // 4. 根据 Pattern 发射子弹
+      // 处理多发子弹 (spread / shotgun)
+      const count = ammoSpec.bulletCount || 1;
+      const spread = ammoSpec.spread || 0; // 总扩散角 (度)
+
+      for (let i = 0; i < count; i++) {
+        // 计算当前子弹的偏移角度
+        let angleOffset = 0;
+        if (count > 1) {
+          // Special handling for 360 spread to avoid overlapping start/end
+          if (spread >= 360) {
+            const step = (Math.PI * 2) / count;
+            angleOffset = i * step; // Start from 0, distribute evenly
+          } else {
+            // evenly distribute across spread
+            // e.g. spread=30, count=3 => -15, 0, +15
+            const start = -spread / 2;
+            const step = spread / (count - 1);
+            angleOffset = (start + i * step) * (Math.PI / 180);
+          }
+        }
+
+        const finalAngle = baseAngle + angleOffset;
+        const vx = Math.cos(finalAngle) * bulletSpeed;
+        const vy = Math.sin(finalAngle) * bulletSpeed;
+
+        spawnBullet(w, originX, originY, vx, vy, damage, ammoSpec, id);
+      }
     }
   }
+}
+
+function spawnBullet(w: World, x: number, y: number, vx: number, vy: number, damage: number, ammoSpec: any, ownerId: number) {
+  const bulletId = generateId();
+
+  // Transform
+  addComponent(w, bulletId, new Transform({ x, y, rot: Math.atan2(vy, vx) }));
+
+  // Bullet
+  addComponent(w, bulletId, new Bullet({
+    owner: ownerId,
+    ammoType: ammoSpec.id,
+    pierceLeft: ammoSpec.pierce,
+    bouncesLeft: ammoSpec.bounces
+  }));
+
+  addComponent(w, bulletId, new Velocity({ vx, vy }));
+
+  // Lifetime (10s)
+  addComponent(w, bulletId, new Lifetime({ timer: 10000 }));
 }

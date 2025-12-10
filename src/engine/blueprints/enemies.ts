@@ -27,14 +27,17 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.normal, srcX: 0, srcY: 0, srcW: 40, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为普通敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.NORMAL },
+
+    /** 速度状态限制 */
+    SpeedStat: { maxLinear: 150 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 20 },
 
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用普通敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
 };
@@ -57,13 +60,14 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.fast, srcX: 0, srcY: 0, srcW: 30, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为快速敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.FAST },
+    SpeedStat: { maxLinear: 300 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 15 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用快速敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_FAST]
 };
@@ -86,13 +90,14 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.tank, srcX: 0, srcY: 0, srcW: 60, srcH: 60, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为坦克敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.TANK },
+    SpeedStat: { maxLinear: 100 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 30 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用坦克敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_TANK]
 };
@@ -115,13 +120,14 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.kamikaze, srcX: 0, srcY: 0, srcW: 30, srcH: 30, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为自杀式敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.KAMIKAZE },
+    SpeedStat: { maxLinear: 400 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 15 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 自杀式敌人不使用远程武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
 };
@@ -144,13 +150,14 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.gunboat, srcX: 0, srcY: 0, srcW: 70, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为精英炮艇敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.ELITE_GUNBOAT },
+    SpeedStat: { maxLinear: 80 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用精英敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_ELITE]
 };
@@ -173,13 +180,14 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.interceptor, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为激光拦截机敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.LASER_INTERCEPTOR },
+    SpeedStat: { maxLinear: 150 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用狙击敌人武器（激光）
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_SNIPER]
 };
@@ -202,13 +210,14 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.layer, srcX: 0, srcY: 0, srcW: 60, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为布雷船敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.MINE_LAYER },
+    SpeedStat: { maxLinear: 100 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 30 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用布雷敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_LAYER]
 };
@@ -231,13 +240,14 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.pulsar, srcX: 0, srcY: 0, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为脉冲敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.PULSAR },
+    SpeedStat: { maxLinear: 200 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 16 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用脉冲敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_PULSAR]
 };
@@ -260,13 +270,14 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.fortress, srcX: 0, srcY: 0, srcW: 70, srcH: 70, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为堡垒敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.FORTRESS },
+    SpeedStat: { maxLinear: 50 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用堡垒敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
 };
@@ -289,13 +300,14 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.stalker, srcX: 0, srcY: 0, srcW: 36, srcH: 36, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为追踪者敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.STALKER },
+    SpeedStat: { maxLinear: 250 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 18 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用追踪敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.GENERIC_HOMING]
 };
@@ -318,13 +330,14 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
     Sprite: { texture: ASSETS.ENEMIES.barrage, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
 
     /** 敌人标签组件 - 标识此实体为弹幕敌人 */
-    EnemyTag: {},
+    EnemyTag: { id: EnemyId.BARRAGE },
+    SpeedStat: { maxLinear: 100 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 25 },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
-    
+
     // 挂载敌人武器组件 - 使用弹幕敌人武器
     Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
 };

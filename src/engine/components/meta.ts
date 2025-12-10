@@ -1,4 +1,4 @@
-import { BossId, Component } from '@/engine/types';
+import { BossId, Component, EnemyId } from '@/engine/types';
 
 // 「标签 & 死亡 & 特效」
 
@@ -32,6 +32,20 @@ export class PlayerTag extends Component {
 
 /** 敌人标签组件 */
 export class EnemyTag extends Component {
+    constructor(cfg: {
+        id: EnemyId;
+        state?: number;
+        timer?: number;
+    }) {
+        super();
+        this.id = cfg.id;
+        this.state = cfg.state ?? 0;
+        this.timer = cfg.timer ?? 0;
+    }
+    public id: EnemyId;
+    public state: number;
+    public timer: number;
+
     static check(c: any): c is EnemyTag { return c instanceof EnemyTag; }
 }
 

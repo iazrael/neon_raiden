@@ -1,6 +1,6 @@
 import React from "react";
 import { GameState, WeaponType, ClickType } from "@/types";
-import { WeaponConfig, ASSETS_BASE_PATH, PowerupEffects, GameConfig } from "@/game/config";
+import { WeaponConfig, ASSETS_BASE_PATH, PowerupEffects, GameConfig } from "@/engine/configs/ui_compat";
 import { capitalize } from "@/utils/string";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";

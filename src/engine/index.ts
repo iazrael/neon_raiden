@@ -8,6 +8,7 @@ import { buildSnapshot, GameSnapshot } from './snapshot';
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
 import { AudioSystem } from './systems/AudioSystem';
+import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { BuffSystem } from './systems/BuffSystem';
@@ -78,7 +79,7 @@ export class Engine {
         SpawnSystem(world, dt);                         // 3. 生成系统 - 刷新敌人
         BossPhaseSystem(world, dt);                  // 4. Boss阶段系统 - 控制Boss阶段转换
         BossSystem(world, dt);                          // 5. Boss系统 - 控制Boss行为
-        // EnemySystem(world, dt);                      // 6. 敌人系统 - 控制敌人决策 (在旧系统中实现)
+        EnemySystem(world, dt);                          // 6. 敌人系统 - 控制敌人决策 (ECS版)
         AISteerSystem(world, dt);                       // 7. AI转向系统 - 生成敌人移动意图
 
         // P2. 状态层 (数值更新)
