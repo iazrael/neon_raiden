@@ -26,6 +26,8 @@ export interface World {
     spawnCredits: number; // 当前余额
     spawnTimer: number;   // 用来控制刷怪检测频率
     enemyCount: number;   // 当前敌人数量
+    width: number;        // 画布宽
+    height: number;       // 画布高
 }
 
 

@@ -15,7 +15,9 @@ export function createWorld(): World {
         difficulty: 1,    // 动态倍率
         spawnCredits: 0,  // 当前余额
         spawnTimer: 0,    // 用来控制刷怪检测频率
-        enemyCount: 0     // 当前敌人数量
+        enemyCount: 0,     // 当前敌人数量
+        width: 0,
+        height: 0
     };
 }
 

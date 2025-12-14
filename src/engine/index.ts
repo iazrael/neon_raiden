@@ -34,12 +34,31 @@ export class Engine {
     private raf = 0;
     private world: World;
     private ctx: CanvasRenderingContext2D;
+    private resizeObserver: ResizeObserver;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
 
     start(canvas: HTMLCanvasElement, bp: Blueprint) {
         this.ctx = canvas.getContext('2d')!;
         this.world = createWorld();
-        // 保存Canvas的宽高，并且Canvas的尺寸要跟随浏览器变化调整
+
+        // 监听尺寸变化
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+                canvas.width = width;
+                canvas.height = height;
+                this.world.width = width;
+                this.world.height = height;
+            }
+        });
+        this.resizeObserver.observe(canvas);
+
+        // 初始同步一次
+        this.world.width = canvas.clientWidth;
+        this.world.height = canvas.clientHeight;
+        canvas.width = this.world.width;
+        canvas.height = this.world.height;
+
         spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80);
         this.loop();
     }
@@ -55,6 +74,7 @@ export class Engine {
 
     stop() {
         cancelAnimationFrame(this.raf);
+        this.resizeObserver.disconnect();
         this.world.events.length = 0;
         this.world.entities.clear();
         this.snapshot$.next(null);
