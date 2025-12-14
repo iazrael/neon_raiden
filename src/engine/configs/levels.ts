@@ -19,9 +19,10 @@ export const LEVEL_CONFIGS: Record<number, LevelSpec> = {
         baseIncome: 10,
         creditCap: 100,
         enemyPool: [
-            { id: EnemyId.NORMAL, cost: 10, weight: 60 },
-            { id: EnemyId.FAST, cost: 30, weight: 30 },
-            { id: EnemyId.TANK, cost: 80, weight: 10 },
+            { id: EnemyId.NORMAL, cost: 10, weight: 6 },
+            { id: EnemyId.FAST, cost: 30, weight: 3 },
+            { id: EnemyId.TANK, cost: 80, weight: 1 },
+            { id: EnemyId.STALKER, cost: 70, weight: 1 },
         ],
         boss: BossId.GUARDIAN
     },

@@ -39,6 +39,7 @@ export class Engine {
     start(canvas: HTMLCanvasElement, bp: Blueprint) {
         this.ctx = canvas.getContext('2d')!;
         this.world = createWorld();
+        // 保存Canvas的宽高，并且Canvas的尺寸要跟随浏览器变化调整
         spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80);
         this.loop();
     }
