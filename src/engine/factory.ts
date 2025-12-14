@@ -5,7 +5,7 @@ import * as Components from './components';
 
 /** 根据蓝图生成实体，支持对象池 */
 export function spawnFromBlueprint(world: World, bp: Blueprint,
-    x = 0, y = 0,
+    x = 0, y = 0, rot = 0,
     pool?: 'bullet' | 'enemy' | 'pickup'
 ): EntityId {
     const id = generateId();
@@ -23,7 +23,9 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
         const comp = new ComponentCtor(args);
         if (Components.Transform.check(comp)){
             // 动态注入出生点
-            comp.x = x; comp.y = y;
+            comp.x = x;
+             comp.y = y;
+            comp.rot = rot;
         }
         comps.push(comp);
     }
@@ -33,29 +35,29 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
 }
 
 
-export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number): EntityId {
-    const id = spawnFromBlueprint(world, bp, x, y);
+export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, rot);
     world.playerId = id;
     return id;
 }
 
-export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number): EntityId {
-    const id = spawnFromBlueprint(world, bp, x, y, 'enemy');
+export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, rot, 'enemy');
     world.enemyCount++;
     return id;
 }
 
-export function spawnBoss(world: World, bp: Blueprint, x: number, y: number): EntityId {
-    const id = spawnFromBlueprint(world, bp, x, y);
+export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, rot);
     return id;
 }
 
-export function spawnBullet(world: World, bp: Blueprint, x: number, y: number): EntityId {
-    const id = spawnFromBlueprint(world, bp, x, y, 'bullet');
+export function spawnBullet(world: World, bp: Blueprint, x: number=0, y: number=0, rot: number=0): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, rot, 'bullet');
     return id;
 }
 
-export function spawnPickup(world: World, bp: Blueprint, x: number, y: number): EntityId {
-    const id = spawnFromBlueprint(world, bp, x, y, 'pickup');
+export function spawnPickup(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, rot, 'pickup');
     return id;
 }

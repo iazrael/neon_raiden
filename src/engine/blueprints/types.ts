@@ -43,7 +43,7 @@ export type EnemyWeaponSpec = {
 
 // =========== 子弹 =================
 export interface AmmoSpec {
-    id: string;               // 弹种唯一键（与 WeaponSpec.ammoType 对应）
+    id: AmmoType;               // 弹种唯一键（与 WeaponSpec.ammoType 对应）
     damage: number;           // 每发子弹的基础伤害值
     radius: number;           // 碰撞盒半径（像素）
     speed: number;            // 子弹飞行速度（像素/秒）

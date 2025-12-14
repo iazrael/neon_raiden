@@ -63,7 +63,7 @@ export function SpawnSystem(world: World, dt: number) {
       world.spawnCredits -= enemyProto.cost;
       // 使用 getRandomSpawnPos 获取坐标
       const pos = getRandomSpawnPos();
-      spawnEnemy(world, ENEMIES_TABLE[enemyProto.id], pos.x, pos.y);
+      spawnEnemy(world, ENEMIES_TABLE[enemyProto.id], pos.x, pos.y, 0);
     } else {
       // 买不起当前随机到的这个，就跳出循环存钱
       // (或者可以尝试随机一个更便宜的)

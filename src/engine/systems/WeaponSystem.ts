@@ -1,8 +1,9 @@
 import { World } from '../types';
-import { view, addComponent, generateId } from '../world';
-import { Weapon, Transform, FireIntent, Bullet, Velocity, Lifetime } from '../components';
-import { WEAPON_TABLE, ENEMY_WEAPON_TABLE } from '../blueprints/weapons';
+import { view } from '../world';
+import { Weapon, Transform, FireIntent } from '../components';
 import { AMMO_TABLE } from '../blueprints/ammo';
+import { spawnBullet } from '../factory';
+import { Blueprint } from '../blueprints';
 
 /**
  * 武器系统
@@ -52,8 +53,8 @@ export function WeaponSystem(w: World, dt: number) {
 
       // 4. 根据 Pattern 发射子弹
       // 处理多发子弹 (spread / shotgun)
-      const count = ammoSpec.bulletCount || 1;
-      const spread = ammoSpec.spread || 0; // 总扩散角 (度)
+      const count = weapon.bulletCount || 1;
+      const spread = weapon.spread || 0; // 总扩散角 (度)
 
       for (let i = 0; i < count; i++) {
         // 计算当前子弹的偏移角度
@@ -76,28 +77,16 @@ export function WeaponSystem(w: World, dt: number) {
         const vx = Math.cos(finalAngle) * bulletSpeed;
         const vy = Math.sin(finalAngle) * bulletSpeed;
 
-        spawnBullet(w, originX, originY, vx, vy, damage, ammoSpec, id);
+        // spawnBullet(w, originX, originY, vx, vy, damage, ammoSpec, id);
+        const bp: Blueprint = {
+          Transform: { x: originX, y: originY, rot: Math.atan2(vy, vx) },
+          Bullet: { owner: id, ammoType: ammoSpec.id, pierceLeft: ammoSpec.pierce, bouncesLeft: ammoSpec.bounces },
+          Velocity: { vx, vy },
+          Lifetime: { timer: 10000 }
+        };
+
+        const bulletId = spawnBullet(w, bp);
       }
     }
   }
-}
-
-function spawnBullet(w: World, x: number, y: number, vx: number, vy: number, damage: number, ammoSpec: any, ownerId: number) {
-  const bulletId = generateId();
-
-  // Transform
-  addComponent(w, bulletId, new Transform({ x, y, rot: Math.atan2(vy, vx) }));
-
-  // Bullet
-  addComponent(w, bulletId, new Bullet({
-    owner: ownerId,
-    ammoType: ammoSpec.id,
-    pierceLeft: ammoSpec.pierce,
-    bouncesLeft: ammoSpec.bounces
-  }));
-
-  addComponent(w, bulletId, new Velocity({ vx, vy }));
-
-  // Lifetime (10s)
-  addComponent(w, bulletId, new Lifetime({ timer: 10000 }));
 }

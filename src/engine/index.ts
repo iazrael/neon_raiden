@@ -59,7 +59,7 @@ export class Engine {
         canvas.width = this.world.width;
         canvas.height = this.world.height;
 
-        spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80);
+        spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80, 0);
         this.loop();
     }
 
