@@ -27,7 +27,7 @@ export type WeaponSpec = {
     maxLevel?: number,
     bulletCount?: number; // 子弹数量
     spread?: number; // 扩散角度
-    pattern: WeaponPattern; // 弹幕模式
+    pattern?: WeaponPattern; // 弹幕模式
 }
 
 export type EnemyWeaponSpec = {

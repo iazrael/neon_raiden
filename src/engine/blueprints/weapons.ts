@@ -3,7 +3,7 @@
 // 包含游戏中所有武器类型的蓝图定义
 //
 
-import { AmmoType, EnemyWeaponId, WeaponId } from '@/engine/types';
+import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '@/engine/types';
 import { EnemyWeaponSpec, WeaponSpec } from './types';
 
 /**
@@ -119,35 +119,35 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
 export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
     [EnemyWeaponId.ENEMY_NORMAL]: { // 侦察机: 低频单发
         id: EnemyWeaponId.ENEMY_NORMAL, ammoType: AmmoType.ENEMY_ORB_RED,
-        cooldown: 2000, bulletCount: 1, pattern: 'aimed'
+        cooldown: 2000, bulletCount: 1, pattern: WeaponPattern.AIMED    
     },
     [EnemyWeaponId.ENEMY_FAST]: { // 飞翼: 稍微快一点
         id: EnemyWeaponId.ENEMY_FAST, ammoType: AmmoType.ENEMY_PULSE,
-        cooldown: 1200, bulletCount: 1, pattern: 'aimed'
+        cooldown: 1200, bulletCount: 1, pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_TANK]: { // 坦克: 慢速重弹
         id: EnemyWeaponId.ENEMY_TANK, ammoType: AmmoType.ENEMY_ORB_BLUE,
-        cooldown: 3000, bulletCount: 1, pattern: 'aimed'
+        cooldown: 3000, bulletCount: 1, pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_ELITE]: { // 精英炮艇: 快速连射
         id: EnemyWeaponId.ENEMY_ELITE, ammoType: AmmoType.ENEMY_ORB_RED,
-        cooldown: 800, bulletCount: 3, spread: 15, pattern: 'aimed'
+        cooldown: 800, bulletCount: 3, spread: 15, pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_SNIPER]: { // 拦截机: 激光
         id: EnemyWeaponId.ENEMY_SNIPER, ammoType: AmmoType.ENEMY_BEAM_THIN,
-        cooldown: 4000, bulletCount: 1, pattern: 'aimed' // 需配合蓄力逻辑
+        cooldown: 4000, bulletCount: 1, pattern: WeaponPattern.AIMED // 需配合蓄力逻辑
     },
     [EnemyWeaponId.ENEMY_LAYER]: { // 布雷机: 放置地雷(这里用重弹模拟)
         id: EnemyWeaponId.ENEMY_LAYER, ammoType: AmmoType.ENEMY_ORB_GREEN,
-        cooldown: 1500, bulletCount: 1, pattern: 'fixed_rear' // 向后发射
+        cooldown: 1500, bulletCount: 1, pattern: WeaponPattern.FIXED_REAR // 向后发射
     },
     [EnemyWeaponId.ENEMY_PULSAR]: { // 脉冲机: 快速散射
         id: EnemyWeaponId.ENEMY_PULSAR, ammoType: AmmoType.ENEMY_PULSE,
-        cooldown: 1000, bulletCount: 3, spread: 30, pattern: 'spread'
+        cooldown: 1000, bulletCount: 3, spread: 30, pattern: WeaponPattern.SPREAD
     },
     [EnemyWeaponId.ENEMY_BARRAGE]: { // 弹幕机: 螺旋弹
         id: EnemyWeaponId.ENEMY_BARRAGE, ammoType: AmmoType.ENEMY_ORB_BLUE,
-        cooldown: 1500, bulletCount: 8, spread: 360, pattern: 'spiral'
+        cooldown: 1500, bulletCount: 8, spread: 360, pattern: WeaponPattern.SPIRAL
     },
 
     // ==================== Boss 武器 ====================
@@ -159,7 +159,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         cooldown: 1000,
         bulletCount: 6,
         spread: 360,
-        pattern: 'radial'
+        pattern: WeaponPattern.RADIAL
     },
     [EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED]: {
         id: EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED,
@@ -167,7 +167,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_ORB_RED,
         bulletCount: 12,
         spread: 360,
-        pattern: 'radial'
+        pattern: WeaponPattern.RADIAL
     },
 
     // === Destroyer ===
@@ -177,7 +177,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_MISSILE,
         bulletCount: 4,
         spread: 60,
-        pattern: 'spread'
+        pattern: WeaponPattern.SPREAD
     },
     [EnemyWeaponId.DESTROYER_DASH]: {
         cooldown: 400, // 冲刺时射速快
@@ -185,7 +185,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_ORB_BLUE,
         bulletCount: 3,
         spread: 120,
-        pattern: 'spread'
+        pattern: WeaponPattern.SPREAD
     },
     [EnemyWeaponId.DESTROYER_BERSERK]: {
         cooldown: 200, // 极快
@@ -193,7 +193,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_ORB_RED,
         bulletCount: 2, // 螺旋
         spread: 360,
-        pattern: 'spiral' // 螺旋发射
+        pattern: WeaponPattern.SPIRAL // 螺旋发射
     },
 
     // === Titan ===
@@ -203,7 +203,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_BEAM_THICK,
         spread: 0,
         bulletCount: 1,
-        pattern: 'aimed'
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.TITAN_LASER_RAPID]: {
         id: EnemyWeaponId.TITAN_LASER_RAPID,
@@ -211,7 +211,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_BEAM_THIN,
         bulletCount: 3,
         spread: 30,
-        pattern: 'aimed'
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.TITAN_OMNI]: {
         id: EnemyWeaponId.TITAN_OMNI,
@@ -219,7 +219,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_ORB_GREEN,
         bulletCount: 36,
         spread: 360,
-        pattern: 'radial'
+        pattern: WeaponPattern.RADIAL
     },
 
     // === Apocalypse (终极缝合怪) ===
@@ -229,7 +229,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_ORB_RED,
         bulletCount: 8,
         spread: 360,
-        pattern: 'radial' // 混合弹幕
+        pattern: WeaponPattern.RADIAL // 混合弹幕
     },
     [EnemyWeaponId.APOCALYPSE_DEFENSE]: {
         id: EnemyWeaponId.APOCALYPSE_DEFENSE,
@@ -237,7 +237,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_MISSILE,
         bulletCount: 4,
         spread: 0,
-        pattern: 'aimed'
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.APOCALYPSE_BERSERK]: {
         id: EnemyWeaponId.APOCALYPSE_BERSERK,
@@ -245,7 +245,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_BEAM_THIN,
         spread: 0,
         bulletCount: 1,
-        pattern: 'random' // 随机点名
+        pattern: WeaponPattern.RANDOM // 随机点名
     },
     [EnemyWeaponId.APOCALYPSE_FINAL]: {
         id: EnemyWeaponId.APOCALYPSE_FINAL,
@@ -253,7 +253,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
         ammoType: AmmoType.ENEMY_VOID_ORB,
         bulletCount: 16,
         spread: 360,
-        pattern: 'spiral'
+        pattern: WeaponPattern.SPIRAL
     },
 
     // --- Generic Boss Weapons ---
