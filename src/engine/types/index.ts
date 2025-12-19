@@ -1,4 +1,6 @@
 import { Event } from '@/engine/events';
+import { GameState } from '@/types';
+import { ComboState } from '../systems/ComboSystem';
 export * from './ids'
 export * from './types'
 
@@ -28,6 +30,11 @@ export interface World {
     enemyCount: number;   // 当前敌人数量
     width: number;        // 画布宽
     height: number;       // 画布高
+
+    // 新增字段用于UI状态
+    state?: GameState;
+    maxLevelReached?: number;
+    comboState?: ComboState;
 }
 
 
