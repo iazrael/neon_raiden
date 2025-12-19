@@ -20,7 +20,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.VULCAN_SPREAD,
         cooldown: 150,
         curCD: 0,
-        maxLevel: 6
+        maxLevel: 6,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.SPREAD,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 0
     },
 
     /**
@@ -33,7 +40,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.LASER_BEAM,
         cooldown: 180,
         curCD: 0,
-        maxLevel: 3
+        maxLevel: 3,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.AIMED,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 5,  // 高穿透
+        bounces: 0
     },
 
     /**
@@ -46,7 +60,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.MISSILE_HOMING,
         cooldown: 400,
         curCD: 0,
-        maxLevel: 3
+        maxLevel: 3,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.AIMED,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 0
     },
 
     /**
@@ -59,7 +80,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.WAVE_PULSE,
         cooldown: 400,
         curCD: 0,
-        maxLevel: 3
+        maxLevel: 3,
+        bulletCount: 3,
+        spread: 30,
+        pattern: WeaponPattern.SPREAD,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 0
     },
 
     /**
@@ -72,7 +100,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.PLASMA_ORB,
         cooldown: 600,
         curCD: 0,
-        maxLevel: 6
+        maxLevel: 6,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.AIMED,
+        damageMultiplier: 2.0,  // 高伤害
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 0
     },
 
     /**
@@ -85,7 +120,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.TESLA_CHAIN,
         cooldown: 200,
         curCD: 0,
-        maxLevel: 6
+        maxLevel: 6,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.AIMED,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 0
     },
 
     /**
@@ -98,7 +140,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.MAGMA_POOL,
         cooldown: 220,
         curCD: 0,
-        maxLevel: 6
+        maxLevel: 6,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.AIMED,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 0
     },
 
     /**
@@ -111,7 +160,14 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         ammoType: AmmoType.SHURIKEN_BOUNCE,
         cooldown: 300,
         curCD: 0,
-        maxLevel: 6
+        maxLevel: 6,
+        bulletCount: 1,
+        spread: 0,
+        pattern: WeaponPattern.AIMED,
+        damageMultiplier: 1.0,
+        fireRateMultiplier: 1.0,
+        pierce: 0,
+        bounces: 3  // 高反弹
     }
 };
 
@@ -119,7 +175,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
 export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
     [EnemyWeaponId.ENEMY_NORMAL]: { // 侦察机: 低频单发
         id: EnemyWeaponId.ENEMY_NORMAL, ammoType: AmmoType.ENEMY_ORB_RED,
-        cooldown: 2000, bulletCount: 1, pattern: WeaponPattern.AIMED    
+        cooldown: 2000, bulletCount: 1, pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_FAST]: { // 飞翼: 稍微快一点
         id: EnemyWeaponId.ENEMY_FAST, ammoType: AmmoType.ENEMY_PULSE,
@@ -257,9 +313,9 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
     },
 
     // --- Generic Boss Weapons ---
-    [EnemyWeaponId.GENERIC_TARGETED]: { id: EnemyWeaponId.GENERIC_TARGETED, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_RED, bulletCount: 1, pattern: 'aimed' },
-    [EnemyWeaponId.GENERIC_RADIAL]: { id: EnemyWeaponId.GENERIC_RADIAL, cooldown: 1200, ammoType: AmmoType.ENEMY_ORB_BLUE, bulletCount: 8, spread: 360, pattern: 'radial' },
-    [EnemyWeaponId.GENERIC_LASER]: { id: EnemyWeaponId.GENERIC_LASER, cooldown: 2500, ammoType: AmmoType.ENEMY_BEAM_THIN, bulletCount: 1, pattern: 'aimed' },
-    [EnemyWeaponId.GENERIC_SPREAD]: { id: EnemyWeaponId.GENERIC_SPREAD, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_GREEN, bulletCount: 5, spread: 90, pattern: 'spread' },
-    [EnemyWeaponId.GENERIC_HOMING]: { id: EnemyWeaponId.GENERIC_HOMING, cooldown: 1500, ammoType: AmmoType.ENEMY_MISSILE, bulletCount: 2, pattern: 'aimed' },
+    [EnemyWeaponId.GENERIC_TARGETED]: { id: EnemyWeaponId.GENERIC_TARGETED, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_RED, bulletCount: 1, pattern: WeaponPattern.AIMED },
+    [EnemyWeaponId.GENERIC_RADIAL]: { id: EnemyWeaponId.GENERIC_RADIAL, cooldown: 1200, ammoType: AmmoType.ENEMY_ORB_BLUE, bulletCount: 8, spread: 360, pattern: WeaponPattern.RADIAL },
+    [EnemyWeaponId.GENERIC_LASER]: { id: EnemyWeaponId.GENERIC_LASER, cooldown: 2500, ammoType: AmmoType.ENEMY_BEAM_THIN, bulletCount: 1, pattern: WeaponPattern.AIMED },
+    [EnemyWeaponId.GENERIC_SPREAD]: { id: EnemyWeaponId.GENERIC_SPREAD, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_GREEN, bulletCount: 5, spread: 90, pattern: WeaponPattern.SPREAD },
+    [EnemyWeaponId.GENERIC_HOMING]: { id: EnemyWeaponId.GENERIC_HOMING, cooldown: 1500, ammoType: AmmoType.ENEMY_MISSILE, bulletCount: 2, pattern: WeaponPattern.AIMED },
 };

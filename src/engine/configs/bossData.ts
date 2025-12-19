@@ -29,7 +29,14 @@ export enum BossMovementPattern {
     DASH = 'dash',                  // 冲刺 (Destroyer P2, Colossus)
     RANDOM_TELEPORT = 'random_teleport', // 随机瞬移 (Annihilator)
     ADAPTIVE = 'adaptive',          // 自适应/混合 (Apocalypse)
-    AGGRESSIVE = 'aggressive'       // 激进压制 (Leviathan, Colossus)
+    AGGRESSIVE = 'aggressive',      // 激进压制 (Leviathan, Colossus)
+
+    // 新增模式
+    SPIRAL_DESCENT = 'spiral_descent', // 螺旋下降
+    HORIZONTAL_SCAN = 'horizontal_scan', // 横向扫描
+    VERTICAL_SWAY = 'vertical_sway', // 垂直摆动
+    AMBUSH = 'ambush',              // 突袭模式
+    HOP = 'hop'                     // 跳跃移动
 }
 
 

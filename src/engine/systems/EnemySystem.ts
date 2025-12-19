@@ -140,6 +140,52 @@ export function EnemySystem(w: World, dt: number) {
                 break;
             }
 
+            case EnemyId.FAST: {
+                // 快速敌人：高速向下移动，偶尔左右摆动
+                moveDy = 2; // 高速向下
+                moveDx = Math.sin(tag.timer / 200) * 0.5; // 轻微左右摆动
+
+                // 定期开火
+                if (Math.floor(tag.timer / 1000) % 3 === 0) {
+                    shouldFire = true;
+                }
+                break;
+            }
+
+            case EnemyId.TANK: {
+                // 坦克敌人：缓慢移动，血厚，定期开火
+                moveDy = 0.1; // 缓慢移动
+
+                // 每2秒开火一次
+                if (Math.floor(tag.timer / 2000) % 2 === 0) {
+                    shouldFire = true;
+                }
+                break;
+            }
+
+            case EnemyId.PULSAR: {
+                // 脉冲敌人：中等速度移动，扇形扫射
+                moveDy = 0.8;
+
+                // 每1.5秒进行一次扇形扫射
+                if (Math.floor(tag.timer / 1500) % 2 === 0) {
+                    shouldFire = true;
+                    // 扇形扫射角度
+                    fireAngle = Math.atan2(playerY - trans.y, playerX - trans.x) + Math.sin(tag.timer / 300) * 0.5;
+                }
+                break;
+            }
+
+            case EnemyId.FORTRESS: {
+                // 堡垒敌人：几乎不动，强力火力
+                moveDy = 0; // 几乎不动
+
+                // 持续开火
+                shouldFire = true;
+                fireAngle = Math.atan2(playerY - trans.y, playerX - trans.x);
+                break;
+            }
+
             default: {
                 // 其他所有杂兵：默认向下，默认尝试开火 (WeaponSystem 会控制 CD)
                 // 部分敌人可能不需要每帧都尝试开火以节省性能，但 ECS 模式下逻辑统一更重要

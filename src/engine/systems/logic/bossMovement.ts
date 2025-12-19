@@ -163,6 +163,75 @@ const aggressive: MovementHandler = ({ trans, player }) => {
     };
 };
 
+// 新增移动策略
+
+// 螺旋下降
+const spiralDescent: MovementHandler = ({ timeInSeconds: time, moveSpeed }) => ({
+    dx: Math.cos(time * 2) * moveSpeed,
+    dy: Math.sin(time * 2) * moveSpeed + 0.5,
+    type: 'velocity'
+});
+
+// 横向扫描
+const horizontalScan: MovementHandler = ({ timeInSeconds: time, trans }) => {
+    const scanWidth = 300;
+    const centerX = 400;
+    const targetX = centerX + Math.sin(time * 0.5) * scanWidth / 2;
+    const dx = targetX - trans.x;
+
+    return {
+        dx: dx * 0.1,
+        dy: 0,
+        type: 'offset'
+    };
+};
+
+// 垂直摆动
+const verticalSway: MovementHandler = ({ timeInSeconds: time, moveSpeed }) => ({
+    dx: Math.sin(time * 3) * moveSpeed,
+    dy: Math.cos(time * 1.5) * 0.5 * moveSpeed,
+    type: 'velocity'
+});
+
+// 突袭模式
+const ambush: MovementHandler = ({ trans, player, timeInSeconds: time }) => {
+    // 初始隐藏在屏幕上方
+    if (time < 5) {
+        return { dx: 0, dy: 0, type: 'velocity' };
+    }
+
+    // 突然俯冲
+    const dx = player.x - trans.x;
+    const dy = player.y - trans.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > 50) {
+        return {
+            dx: (dx / dist) * 2,
+            dy: (dy / dist) * 2,
+            type: 'velocity'
+        };
+    }
+
+    return { dx: 0, dy: 0, type: 'velocity' };
+};
+
+// 跳跃移动
+const hop: MovementHandler = ({ timeInSeconds: time, trans }) => {
+    const hopCycle = time % 3.0;
+
+    if (hopCycle < 1.0) {
+        // 跳跃上升
+        return { dx: 0, dy: -1.0, type: 'velocity' };
+    } else if (hopCycle < 2.0) {
+        // 滞空
+        return { dx: 0, dy: 0, type: 'velocity' };
+    } else {
+        // 下降
+        return { dx: 0, dy: 1.0, type: 'velocity' };
+    }
+};
+
 export const MOVEMENT_STRATEGIES: Record<BossMovementPattern, MovementHandler> = {
     [BossMovementPattern.IDLE]: idle,
     [BossMovementPattern.SINE]: sine,
@@ -176,4 +245,9 @@ export const MOVEMENT_STRATEGIES: Record<BossMovementPattern, MovementHandler> =
     [BossMovementPattern.RANDOM_TELEPORT]: randomTeleport,
     [BossMovementPattern.ADAPTIVE]: adaptive,
     [BossMovementPattern.AGGRESSIVE]: aggressive,
+    [BossMovementPattern.SPIRAL_DESCENT]: spiralDescent,
+    [BossMovementPattern.HORIZONTAL_SCAN]: horizontalScan,
+    [BossMovementPattern.VERTICAL_SWAY]: verticalSway,
+    [BossMovementPattern.AMBUSH]: ambush,
+    [BossMovementPattern.HOP]: hop,
 };

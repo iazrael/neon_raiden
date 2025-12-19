@@ -13,9 +13,9 @@ import { Blueprint } from '../blueprints';
 export function WeaponSystem(w: World, dt: number) {
   // 遍历所有拥有武器和变换组件的实体
   for (const [id, [weapon, transform]] of view(w, [Weapon, Transform])) {
-    // 更新武器冷却时间
+    // 更新武器冷却时间（考虑射速倍率）
     if (weapon.curCD > 0) {
-      weapon.curCD -= dt;
+      weapon.curCD -= dt * weapon.fireRateMultiplier;
     }
 
     // 检查是否有开火意图
@@ -31,12 +31,13 @@ export function WeaponSystem(w: World, dt: number) {
       const ammoSpec = AMMO_TABLE[weapon.ammoType];
       if (!ammoSpec) continue;
 
-      // 重置冷却时间
-      weapon.curCD = weapon.cooldown;
+      // 重置冷却时间（考虑射速倍率）
+      weapon.curCD = weapon.cooldown / weapon.fireRateMultiplier;
 
       // 3. 计算发射参数
       const bulletSpeed = ammoSpec.speed;
-      const damage = ammoSpec.damage * (1 + 0.1 * (weapon.level - 1));
+      // 计算伤害（考虑武器等级和伤害倍率）
+      const damage = ammoSpec.damage * (1 + 0.1 * (weapon.level - 1)) * weapon.damageMultiplier;
 
       const isEnemyWeapon = id !== w.playerId;
       // 基础发射位置
@@ -80,7 +81,12 @@ export function WeaponSystem(w: World, dt: number) {
         // spawnBullet(w, originX, originY, vx, vy, damage, ammoSpec, id);
         const bp: Blueprint = {
           Transform: { x: originX, y: originY, rot: Math.atan2(vy, vx) },
-          Bullet: { owner: id, ammoType: ammoSpec.id, pierceLeft: ammoSpec.pierce, bouncesLeft: ammoSpec.bounces },
+          Bullet: {
+            owner: id,
+            ammoType: ammoSpec.id,
+            pierceLeft: ammoSpec.pierce + weapon.pierce,  // 考虑武器穿透加成
+            bouncesLeft: ammoSpec.bounces + weapon.bounces  // 考虑武器反弹加成
+          },
           Velocity: { vx, vy },
           Lifetime: { timer: 10000 }
         };

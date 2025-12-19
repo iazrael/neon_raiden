@@ -49,6 +49,56 @@ export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number, ro
 
 export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot);
+
+    // 初始化Boss相关组件
+    const bossComps = world.entities.get(id);
+    if (bossComps) {
+        // 确保Boss有必要的组件
+        const bossTag = bossComps.find(c => c instanceof Components.BossTag) as Components.BossTag;
+        if (bossTag) {
+            // 初始化Boss AI组件
+            let bossAI = bossComps.find(c => c instanceof Components.BossAI) as Components.BossAI;
+            if (!bossAI) {
+                bossAI = new Components.BossAI({ phase: 1, nextPatternTime: 0 });
+                bossComps.push(bossAI);
+            }
+
+            // 初始化Boss移动意图组件
+            let moveIntent = bossComps.find(c => c instanceof Components.MoveIntent) as Components.MoveIntent;
+            if (!moveIntent) {
+                moveIntent = new Components.MoveIntent({ dx: 0, dy: 0, type: 'velocity' });
+                bossComps.push(moveIntent);
+            }
+
+            // 初始化Boss开火意图组件
+            let fireIntent = bossComps.find(c => c instanceof Components.FireIntent) as Components.FireIntent;
+            if (!fireIntent) {
+                fireIntent = new Components.FireIntent({ firing: false });
+                bossComps.push(fireIntent);
+            }
+
+            // 确保Boss有武器组件
+            let weapon = bossComps.find(c => c instanceof Components.Weapon) as Components.Weapon;
+            if (!weapon) {
+                // 如果蓝图中没有武器组件，添加默认武器
+                weapon = new Components.Weapon({
+                    id: 'boss_default' as any,
+                    ammoType: 'enemy_orb_red',
+                    cooldown: 1000,
+                    level: 1
+                });
+                bossComps.push(weapon);
+            }
+
+            // 确保Boss有速度状态组件
+            let speedStat = bossComps.find(c => c instanceof Components.SpeedStat) as Components.SpeedStat;
+            if (!speedStat) {
+                speedStat = new Components.SpeedStat({ maxLinear: 120, maxAngular: 2 });
+                bossComps.push(speedStat);
+            }
+        }
+    }
+
     return id;
 }
 

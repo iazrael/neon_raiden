@@ -1,25 +1,42 @@
-import { ENEMIES_TABLE } from '../blueprints';
+import { ENEMIES_TABLE, BOSSES_TABLE } from '../blueprints';
 import { LEVEL_CONFIGS } from '../configs/levels';
-import { spawnEnemy } from '../factory';
+import { spawnEnemy, spawnBoss } from '../factory';
 import { World } from '../types';
 import { getRandomSpawnPos, pickEnemyByWeight } from '../utils/random';
+import { BossTag } from '../components';
 
 /**
  * 生成系统
  * 根据游戏进度生成敌人和Boss实体
  * 控制刷怪节奏和Boss战时机
  */
-// export function SpawnSystem(w: World, dt: number) {
-//   // TODO: 实现生成系统逻辑
-//   // 根据游戏进度生成敌人和Boss实体
-//   // 控制刷怪节奏和Boss战时机
-// }
-
 export function SpawnSystem(world: World, dt: number) {
   const config = LEVEL_CONFIGS[world.level];
 
   // ==============================
-  // 1. 发工资 (Income Phase)
+  // 1. 检查是否需要生成Boss
+  // ==============================
+  let hasBoss = false;
+  // 检查场上是否已有Boss
+  for (const [id, comps] of world.entities) {
+    if (comps.some(c => c instanceof BossTag)) {
+      hasBoss = true;
+      break;
+    }
+  }
+
+  // 如果场上没有Boss，且游戏时间足够长，生成Boss
+  if (!hasBoss && world.time > 30000) { // 30秒后生成Boss
+    const bossBlueprint = BOSSES_TABLE[config.boss];
+    if (bossBlueprint) {
+      // Boss在屏幕上方中央生成
+      spawnBoss(world, bossBlueprint, world.width / 2, -200, 0);
+      return; // 生成Boss后不再生成普通敌人
+    }
+  }
+
+  // ==============================
+  // 2. 发工资 (Income Phase)
   // ==============================
 
   // 进阶技巧：使用正弦波模拟“张弛有度”
@@ -36,7 +53,7 @@ export function SpawnSystem(world: World, dt: number) {
   );
 
   // ==============================
-  // 2. 消费 (Spending Phase)
+  // 3. 消费 (Spending Phase)
   // ==============================
 
   // 每 0.2 秒检查一次，避免每帧都计算

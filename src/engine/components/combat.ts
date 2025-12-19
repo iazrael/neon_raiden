@@ -33,30 +33,53 @@ export class Weapon extends Component {
     id: WeaponId
     /** 弹药类型 */
     ammoType: AmmoType;
-    /** 冷却时间 */
+    /** 基础冷却时间 */
     cooldown: number;
     /** 当前冷却时间 */
     curCD?: number;
     /** 武器等级 */
     level?: number;
-    bulletCount?: number; // 子弹数量
-    spread?: number; // 扩散角度
-    pattern?: WeaponPattern; // 弹幕模式
+    /** 子弹数量 */
+    bulletCount?: number;
+    /** 扩散角度 */
+    spread?: number;
+    /** 弹幕模式 */
+    pattern?: WeaponPattern;
+    /** 伤害倍率 */
+    damageMultiplier?: number;
+    /** 射速倍率 */
+    fireRateMultiplier?: number;
+    /** 穿透次数 */
+    pierce?: number;
+    /** 弹跳次数 */
+    bounces?: number;
   }) {
     super();
+    this.id = cfg.id;
     this.ammoType = cfg.ammoType;
     this.cooldown = cfg.cooldown;
     this.curCD = cfg.curCD ?? 0;
     this.level = cfg.level ?? 1;
+    this.bulletCount = cfg.bulletCount ?? 1;
+    this.spread = cfg.spread;
+    this.pattern = cfg.pattern;
+    this.damageMultiplier = cfg.damageMultiplier ?? 1.0;
+    this.fireRateMultiplier = cfg.fireRateMultiplier ?? 1.0;
+    this.pierce = cfg.pierce ?? 0;
+    this.bounces = cfg.bounces ?? 0;
   }
   public id: WeaponId;
   public ammoType: AmmoType;
   public cooldown: number;
   public curCD = 0;
   public level = 1;
-  public bulletCount = 0;
+  public bulletCount = 1;
   public spread?: number;
   public pattern?: WeaponPattern;
+  public damageMultiplier = 1.0;
+  public fireRateMultiplier = 1.0;
+  public pierce = 0;
+  public bounces = 0;
   static check(c: any): c is Weapon { return c instanceof Weapon; }
 }
 

@@ -14,7 +14,7 @@ type ComponentShape<T> = T extends new (arg: infer P) => any
     : never;
 
 
-// ============== 武器 =================  
+// ============== 武器 =================
 export type WeaponSpec = {
     id: WeaponId;
     /** 弹药类型 */
@@ -25,9 +25,20 @@ export type WeaponSpec = {
     curCD?: number;
     /** 最大等级 */
     maxLevel?: number,
-    bulletCount?: number; // 子弹数量
-    spread?: number; // 扩散角度
-    pattern?: WeaponPattern; // 弹幕模式
+    /** 子弹数量 */
+    bulletCount?: number;
+    /** 扩散角度 */
+    spread?: number;
+    /** 弹幕模式 */
+    pattern?: WeaponPattern;
+    /** 伤害倍率 */
+    damageMultiplier?: number;
+    /** 射速倍率 */
+    fireRateMultiplier?: number;
+    /** 穿透次数 */
+    pierce?: number;
+    /** 弹跳次数 */
+    bounces?: number;
 }
 
 export type EnemyWeaponSpec = {

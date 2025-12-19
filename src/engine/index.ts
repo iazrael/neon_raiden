@@ -20,11 +20,13 @@ import { DamageResolutionSystem } from './systems/DamageResolutionSystem';
 import { DifficultySystem } from './systems/DifficultySystem';
 import { EffectPlayer } from './systems/EffectPlayer';
 import { InputSystem } from './systems/InputSystem';
+import { LevelingSystem } from './systems/LevelingSystem';
 import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
 import { MovementSystem } from './systems/MovementSystem';
 import { PickupSystem } from './systems/PickupSystem';
 import { RenderSystem } from './systems/RenderSystem';
+import { ShieldRegenSystem } from './systems/ShieldRegenSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
@@ -105,6 +107,8 @@ export class Engine {
 
         // P2. 状态层 (数值更新)
         BuffSystem(world, dt);                          // 8. 增益系统 - 更新Buff效果
+        LevelingSystem(world, dt);                      // 8.1 等级系统 - 处理玩家升级和属性增强
+        ShieldRegenSystem(world, dt);                   // 8.2 护盾恢复系统 - 处理护盾自动恢复
         WeaponSynergySystem(world, dt);                 // 9. 武器协同系统 - 计算武器组合效果
         WeaponSystem(world, dt);                        // 10. 武器系统 - 处理武器射击
 
