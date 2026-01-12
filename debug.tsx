@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
-import { AudioSystem } from '@/game/systems/AudioSystem';
+import { AudioSystem } from '@/game/systems-deprecated/AudioSystem';
 import { WeaponType, ClickType, ExplosionSize } from '@/types';
 
 const DebugPage = () => {

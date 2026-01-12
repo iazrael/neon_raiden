@@ -6,7 +6,7 @@
  */
 
 import { WeaponType, Entity, EntityType } from '../types/index.ts';
-import { WeaponSynergySystem, SynergyType } from '../game/systems/WeaponSynergySystem.ts';
+import { WeaponSynergySystem, SynergyType } from '../game/systems-deprecated/WeaponSynergySystem.ts';
 
 // 创建武器组合技系统实例
 const synergySystem = new WeaponSynergySystem();

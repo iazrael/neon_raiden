@@ -1,7 +1,7 @@
 import React from 'react';
 import { WeaponItem } from './types';
 import { calculateDPS, getDPSByLevel } from '@/game/utils/dpsCalculator';
-import { SYNERGY_CONFIGS, SynergyType } from '@/game/systems/WeaponSynergySystem';
+import { SYNERGY_CONFIGS, SynergyType } from '@/game/systems-deprecated/WeaponSynergySystem';
 import { WeaponConfig } from '@/game/config';
 
 interface WeaponDetailProps {

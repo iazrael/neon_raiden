@@ -1,6 +1,6 @@
 import { Entity, WeaponType, EnemyType, BulletType, EntityType } from '@/types';
 import { BulletConfigs, EnemyCommonConfig, EnemyConfig, EnemySpawnWeights } from '@/game/config';
-import { AudioSystem } from '@/game/systems/AudioSystem';
+import { AudioSystem } from '@/game/systems-deprecated/AudioSystem';
 
 export class EnemySystem {
     audio: AudioSystem;

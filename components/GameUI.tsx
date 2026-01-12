@@ -4,8 +4,8 @@ import { WeaponConfig, ASSETS_BASE_PATH, PowerupEffects, GameConfig } from "@/ga
 import { capitalize } from "@/utils/string";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
-import type { ComboState } from "@/game/systems/ComboSystem";
-import type { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
+import type { ComboState } from "@/game/systems-deprecated/ComboSystem";
+import type { SynergyConfig } from "@/game/systems-deprecated/WeaponSynergySystem";
 import { intToRoman } from "@/game/utils/numbers";
 
 
