@@ -27,7 +27,6 @@
                 "./src/engine/*"
             ]
         },
-        "baseUrl": ".",
         "sourceMap": true,
         "allowImportingTsExtensions": true,
         "noEmit": true
