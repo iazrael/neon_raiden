@@ -1,4 +1,4 @@
-import { GameSnapshot } from '../engine/types';
+import { GameSnapshot } from '@/engine/types';
 
 interface BarProps {
   label: string;

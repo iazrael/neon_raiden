@@ -22,13 +22,24 @@
         "paths": {
             "@/*": [
                 "./src/*"
+            ],
+            "@/engine/*": [
+                "./src/engine/*"
             ]
         },
         "sourceMap": true,
         "allowImportingTsExtensions": true,
         "noEmit": true
     },
+    "files": [
+        "./App.tsx"
+    ],
     "exclude": [
-        "_old/*",
+        "_old/**",
+        "components/**",
+        "node_modules",
+        "dist",
+        ".git",
+        "tests"
     ]
 }

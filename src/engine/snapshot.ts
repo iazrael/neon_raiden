@@ -2,8 +2,8 @@ import { World } from './types';
 import { Health, Transform, Weapon, Shield, Bullet, InvulnerableState, PlayerTag, EnemyTag, BossTag } from './components';
 import { view } from './world';
 import { GameState } from '@/types';
-import { ComboState } from './systems/ComboSystem';
-import { SynergyConfig } from './systems/WeaponSynergySystem';
+import { getScoreMultiplier, getDamageMultiplier } from './systems/ComboSystem';
+import { getActiveSynergies } from './systems/WeaponSynergySystem';
 
 
 
@@ -17,7 +17,7 @@ export interface GameSnapshot {
     levelTransitionTimer: number;
     maxLevelReached: number;
     showBossWarning: boolean;
-    comboState: ComboState;
+    comboState: ComboState | null;
 
     player: {
         hp: number;

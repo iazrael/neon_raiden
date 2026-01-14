@@ -33,11 +33,11 @@ export class MoveIntent extends Component {
      */
     constructor(cfg: {
         /** X轴移动方向 */
-        dx?: number;
+        dx: number;
         /** Y轴移动方向 */
-        dy?: number;
+        dy: number;
         /** 意图类型 */
-        type?: 'velocity' | 'offset'; // 区分是 速度方向 还是 绝对位移
+        type: 'velocity' | 'offset'; // 区分是 速度方向 还是 绝对位移
     }) {
         super();
         this.dx = cfg.dx ?? 0;

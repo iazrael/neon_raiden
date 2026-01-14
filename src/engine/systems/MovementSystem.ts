@@ -1,10 +1,6 @@
 import { Transform, Velocity, MoveIntent, SpeedStat, PlayerTag } from '../components';
-import { World } from '../types';
-import { view } from '../world';
+import { view, World } from '../world';
 
-// TODO 假设宽度限制 800
-const STAGE_WIDTH = 800;
-const STAGE_HEIGHT = 1200;
 
 /**
  * 移动系统
@@ -85,11 +81,10 @@ export function MovementSystem(w: World, dt: number) {
 
             // 左右边界
             if (tr.x < margin) tr.x = margin;
-            if (tr.x > STAGE_WIDTH - margin) tr.x = STAGE_WIDTH - margin;
-
+            if (tr.x > w.width - margin) tr.x = w.width - margin;
             // 上下边界
             if (tr.y < margin) tr.y = margin;
-            if (tr.y > STAGE_HEIGHT - margin) tr.y = STAGE_HEIGHT - margin;
+            if (tr.y > w.height - margin) tr.y = w.height - margin;
         }
     }
 }

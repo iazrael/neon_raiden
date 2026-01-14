@@ -1,6 +1,8 @@
 import { World, EntityId, Component } from './types';
 import { Event } from './events';
 
+export * from './types';
+
 // ========== 世界与工具 ==========
 
 export function createWorld(): World {

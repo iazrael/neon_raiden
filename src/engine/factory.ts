@@ -1,5 +1,6 @@
 import { Blueprint } from './blueprints';
 import { World, EntityId, Component } from './types';
+import { AmmoType } from './types/ids';
 import { addComponent, generateId, getFromPool } from './world';
 import * as Components from './components';
 
@@ -21,10 +22,10 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
     for (const [key, args] of Object.entries(bp)) {
         const ComponentCtor = Components[key];
         const comp = new ComponentCtor(args);
-        if (Components.Transform.check(comp)){
+        if (Components.Transform.check(comp)) {
             // 动态注入出生点
             comp.x = x;
-             comp.y = y;
+            comp.y = y;
             comp.rot = rot;
         }
         comps.push(comp);
@@ -83,7 +84,7 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
                 // 如果蓝图中没有武器组件，添加默认武器
                 weapon = new Components.Weapon({
                     id: 'boss_default' as any,
-                    ammoType: 'enemy_orb_red',
+                    ammoType: AmmoType.ENEMY_ORB_GREEN,
                     cooldown: 1000,
                     level: 1
                 });
@@ -102,7 +103,7 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
     return id;
 }
 
-export function spawnBullet(world: World, bp: Blueprint, x: number=0, y: number=0, rot: number=0): EntityId {
+export function spawnBullet(world: World, bp: Blueprint, x: number = 0, y: number = 0, rot: number = 0): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot, 'bullet');
     return id;
 }

@@ -1,6 +1,4 @@
-import { ComboState } from "@/game/systems/ComboSystem";
-import { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
-import { GameState, WeaponType } from "@/types";
+import { ComboState, SynergyConfig, GameState, WeaponType } from '@/types';
 
 // ========== 游戏快照接口 ==========
 export interface GameSnapshot {

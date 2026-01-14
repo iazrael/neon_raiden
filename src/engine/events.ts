@@ -12,7 +12,9 @@ export type Event =
     | LevelUpEvent
     | ComboBreakEvent
     | ScreenClearEvent
-    | PlaySoundEvent;
+    | PlaySoundEvent
+    | BerserkModeEvent
+    | ComboUpgradeEvent;
 
 // ① 命中（碰撞瞬间）
 export interface HitEvent {
@@ -95,4 +97,19 @@ export interface ScreenClearEvent {
 export interface PlaySoundEvent {
     type: 'PlaySound';
     name: string;
+}
+
+// ⑫ 狂暴模式触发事件
+export interface BerserkModeEvent {
+    type: 'BerserkMode';
+    pos: { x: number; y: number }; // 触发位置
+}
+
+// ⑬ 连击升级事件
+export interface ComboUpgradeEvent {
+    type: 'ComboUpgrade';
+    pos: { x: number; y: number }; // 触发位置
+    level: number;                 // 新连击等级
+    name: string;                  // 连击等级名称
+    color: string;                 // 视觉颜色
 }
