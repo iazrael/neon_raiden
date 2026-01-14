@@ -19,6 +19,6 @@ export function AISteerSystem(w: World, dt: number) {
     }
     
     // 简单的AI行为：一直向下移动
-    comps.push(new MoveIntent({ dx: 0, dy: 1 }));
+    comps.push(new MoveIntent({ dx: 0, dy: 1, type: 'velocity' }));
   }
 }
