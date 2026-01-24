@@ -16,6 +16,11 @@ export { InputSystem } from './InputSystem';
 export { EnemySystem } from './EnemySystem';
 export { AISteerSystem } from './AISteerSystem';
 
+// P2: 状态层
+export { BuffSystem } from './BuffSystem';
+export { WeaponSynergySystem } from './WeaponSynergySystem';
+export { WeaponSystem } from './WeaponSystem';
+
 // P3: 物理层
 export { MovementSystem } from './MovementSystem';
 
