@@ -37,12 +37,14 @@ const COMBO_CONFIG = {
  * @param dt 时间增量（秒）
  */
 export function ComboSystem(world: World, dt: number): void {
-    // 初始化连击状态
+    // 初始化连击状态（使用旧接口结构）
     if (!world.comboState) {
         world.comboState = {
             count: 0,
             timer: 0,
-            multiplier: 1
+            level: 0,
+            maxCombo: 0,
+            hasBerserk: false
         };
     }
 
@@ -57,12 +59,19 @@ export function ComboSystem(world: World, dt: number): void {
         combo.count += killCount;
         combo.timer = COMBO_CONFIG.timeout; // 重置计时器
 
+        // 更新历史最高连击
+        if (combo.count > combo.maxCombo) {
+            combo.maxCombo = combo.count;
+        }
+
         // 检查是否升级连击等级
         checkComboUpgrade(world, combo);
 
-        // 根据连击倍率加分
+        // 根据连击倍率加分（通过等级获取倍率）
+        const levelConfig = getLevelConfig(combo.level);
+        const multiplier = levelConfig?.scoreMult ?? 1;
         for (const event of killEvents) {
-            world.score += Math.floor(event.score * combo.multiplier);
+            world.score += Math.floor(event.score * multiplier);
         }
     } else {
         // 2. 没有击杀，减少计时器
@@ -84,6 +93,14 @@ export function ComboSystem(world: World, dt: number): void {
 }
 
 /**
+ * 获取连击等级配置
+ */
+function getLevelConfig(level: number) {
+    if (level === 0) return { scoreMult: 1, multiplier: 1 };
+    return COMBO_CONFIG.levels[level - 1];
+}
+
+/**
  * 检查连击升级
  */
 function checkComboUpgrade(world: World, combo: ComboState): void {
@@ -93,8 +110,8 @@ function checkComboUpgrade(world: World, combo: ComboState): void {
     if (newLevel > oldLevel) {
         const levelConfig = COMBO_CONFIG.levels[newLevel - 1];
 
-        // 更新倍率
-        combo.multiplier = levelConfig.multiplier;
+        // 更新连击等级
+        combo.level = newLevel;
 
         // 生成连击升级事件
         pushEvent(world, {
@@ -106,19 +123,12 @@ function checkComboUpgrade(world: World, combo: ComboState): void {
         } as ComboUpgradeEvent);
 
         // 检查是否触发狂暴模式
-        if (newLevel === 4) {
+        if (newLevel === 4 && !combo.hasBerserk) {
+            combo.hasBerserk = true;
             pushEvent(world, {
                 type: 'BerserkMode',
                 pos: { x: world.width / 2, y: world.height / 2 }
             } as BerserkModeEvent);
-        }
-    } else {
-        // 没有升级，更新当前倍率
-        const currentLevel = getComboLevel(combo.count);
-        if (currentLevel > 0) {
-            combo.multiplier = COMBO_CONFIG.levels[currentLevel - 1].multiplier;
-        } else {
-            combo.multiplier = 1;
         }
     }
 }
@@ -141,25 +151,26 @@ function getComboLevel(count: number): number {
 function resetCombo(combo: ComboState): void {
     combo.count = 0;
     combo.timer = 0;
-    combo.multiplier = 1;
+    combo.level = 0;
+    // 注意：不清空 maxCombo 和 hasBerserk，这是历史记录
 }
 
 /**
  * 获取当前连击得分倍率
  */
 export function getComboScoreMultiplier(world: World): number {
-    return world.comboState?.multiplier ?? 1;
+    const level = world.comboState?.level ?? 0;
+    const levelConfig = getLevelConfig(level);
+    return levelConfig?.scoreMult ?? 1;
 }
 
 /**
  * 获取当前连击伤害倍率
  */
 export function getComboDamageMultiplier(world: World): number {
-    const level = getComboLevel(world.comboState?.count ?? 0);
-    if (level === 0) return 1;
-
-    const bonusPerLevel = [0, 0.2, 0.5, 1.0, 2.0];
-    return 1 + bonusPerLevel[level];
+    const level = world.comboState?.level ?? 0;
+    const levelConfig = getLevelConfig(level);
+    return levelConfig?.multiplier ?? 1;
 }
 
 /**

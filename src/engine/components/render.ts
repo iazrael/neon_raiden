@@ -47,9 +47,11 @@ export class Sprite extends Component {
         pivotX?: number;        // 轴心 0-1
         pivotY?: number;
         rotate90?: number;      // 0/1/2/3 = 0°/90°/180°/270°
+        spriteKey?: string;     // 精灵键值，用于查找资源
+        hitFlashUntil?: number; // 受伤闪烁截止时间
     }) {
         super();
-        this.texture = cfg.texture;
+        this.texture = cfg.texture ?? '';
         this.color = cfg.color ?? '';
         this.srcX = cfg.srcX ?? 0;
         this.srcY = cfg.srcY ?? 0;
@@ -59,6 +61,8 @@ export class Sprite extends Component {
         this.pivotX = cfg.pivotX ?? 0.5;
         this.pivotY = cfg.pivotY ?? 0.5;
         this.rotate90 = cfg.rotate90 ?? 0;
+        this.spriteKey = cfg.spriteKey ?? '';
+        this.hitFlashUntil = cfg.hitFlashUntil;
     }
     public texture: string;        // 图集名
     public color = '';
@@ -70,6 +74,8 @@ export class Sprite extends Component {
     public pivotX = 0.5;           // 轴心 0-1
     public pivotY = 0.5;
     public rotate90 = 0;           // 0/1/2/3 = 0°/90°/180°/270°
+    public spriteKey = '';         // 精灵键值
+    public hitFlashUntil?: number;  // 受伤闪烁截止时间
     static check(c: any): c is Sprite { return c instanceof Sprite; }
 }
 

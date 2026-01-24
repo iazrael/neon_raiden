@@ -22,22 +22,12 @@ export enum BossMovementPattern {
     HOP = 'hop'
 }
 
-// 游戏状态枚举 - 避免循环依赖
-export enum GameState {
-    MENU = 'MENU',
-    PLAYING = 'PLAYING',
-    PAUSED = 'PAUSED',
-    GAME_OVER = 'GAME_OVER',
-    VICTORY = 'VICTORY',
-    GALLERY = 'GALLERY'
-}
+// 从外部导入 GameState 和 ComboState，保持与旧代码兼容
+import { GameState } from '@/types';
+export type { ComboState } from '@/game/systems/ComboSystem';
 
-// 连击状态接口 - 避免循环依赖
-export interface ComboState {
-    count: number;
-    timer: number;
-    multiplier: number;
-}
+// 重新导出 GameState
+export { GameState };
 
 // 武器类型 - 避免循环依赖
 export type WeaponType = 'vulcan' | 'laser' | 'missile' | 'wave' | 'plasma' | 'tesla' | 'magma' | 'shuriken';

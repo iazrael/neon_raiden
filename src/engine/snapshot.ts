@@ -70,7 +70,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         levelTransitionTimer: 0,
         maxLevelReached: world.maxLevelReached || 1,
         showBossWarning: false, // TODO: 从BossSystem获取
-        comboState: world.comboState || { count: 0, timer: 0, multiplier: 1.0 },
+        comboState: world.comboState || { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false },
 
         player: {
             hp: hl.hp,

@@ -13,6 +13,7 @@
 
 import { World } from '../types';
 import { Transform, Sprite, Particle, PlayerTag, EnemyTag } from '../components';
+import { SpriteRenderer } from '../SpriteRenderer';
 
 /**
  * 渲染层级
@@ -188,23 +189,76 @@ function drawSprite(
     const rotation = transform.rot + sprite.rotate90 * 90;
     ctx.rotate((rotation * Math.PI) / 180);
 
-    // 应用颜色
-    if (sprite.color) {
-        ctx.fillStyle = sprite.color;
-    }
-
-    // 绘制（这里是简化版，实际应该从图集加载纹理）
+    // 绘制
     if (sprite.texture) {
-        // TODO: 从纹理图集加载并绘制
-        // 这里用简化版矩形代替
-        ctx.fillRect(-pivotX, -pivotY, width, height);
+        // 使用纹理（SVG 图像）
+        const textureImage = getTextureImage(sprite.texture);
+        if (textureImage && textureImage.complete) {
+            ctx.drawImage(
+                textureImage,
+                -pivotX,
+                -pivotY,
+                width,
+                height
+            );
+        } else {
+            // 图像未加载，使用颜色占位
+            ctx.fillStyle = sprite.color || '#fff';
+            ctx.fillRect(-pivotX, -pivotY, width, height);
+        }
+    } else if (sprite.spriteKey) {
+        // 使用 spriteKey 加载图像
+        const spriteImage = loadSpriteByKey(sprite.spriteKey, sprite.srcW, sprite.srcH);
+        if (spriteImage && spriteImage.complete) {
+            ctx.drawImage(
+                spriteImage,
+                -pivotX,
+                -pivotY,
+                width,
+                height
+            );
+        } else {
+            // 图像未加载，使用颜色占位
+            ctx.fillStyle = sprite.color || '#fff';
+            ctx.fillRect(-pivotX, -pivotY, width, height);
+        }
     } else {
         // 使用颜色绘制矩形
+        ctx.fillStyle = sprite.color || '#fff';
+        ctx.fillRect(-pivotX, -pivotY, width, height);
+    }
+
+    // 受伤闪烁效果
+    if (sprite.hitFlashUntil && Date.now() < sprite.hitFlashUntil) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.fillRect(-pivotX, -pivotY, width, height);
     }
 
     // 恢复上下文状态
     ctx.restore();
+}
+
+/**
+ * 根据 spriteKey 加载图像
+ */
+function loadSpriteByKey(spriteKey: string, width: number, height: number): HTMLImageElement | null {
+    if (spriteKey.startsWith('player')) {
+        return SpriteRenderer.getImage('player') || null;
+    } else if (spriteKey.startsWith('bullet_')) {
+        return SpriteRenderer.getImage(spriteKey) || null;
+    } else if (spriteKey.startsWith('enemy_')) {
+        return SpriteRenderer.getImage(spriteKey) || null;
+    } else if (spriteKey.startsWith('boss_')) {
+        return SpriteRenderer.getImage(spriteKey) || null;
+    }
+    return null;
+}
+
+/**
+ * 获取纹理图像
+ */
+function getTextureImage(texture: string): HTMLImageElement | null {
+    return SpriteRenderer.getImage(texture) || null;
 }
 
 /**

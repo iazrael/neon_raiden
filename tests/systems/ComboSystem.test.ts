@@ -137,8 +137,8 @@ describe('ComboSystem', () => {
         });
     });
 
-    describe('连击倍率', () => {
-        it('10连击应该达到1级倍率', () => {
+    describe('连击等级', () => {
+        it('10连击应该达到1级', () => {
             for (let i = 0; i < 10; i++) {
                 pushEvent(world, {
                     type: 'Kill',
@@ -151,10 +151,10 @@ describe('ComboSystem', () => {
 
             ComboSystem(world, 0.016);
 
-            expect(world.comboState?.multiplier).toBeGreaterThan(1);
+            expect(world.comboState?.level).toBe(1);
         });
 
-        it('25连击应该达到2级倍率', () => {
+        it('25连击应该达到2级', () => {
             for (let i = 0; i < 25; i++) {
                 pushEvent(world, {
                     type: 'Kill',
@@ -167,10 +167,10 @@ describe('ComboSystem', () => {
 
             ComboSystem(world, 0.016);
 
-            expect(world.comboState?.multiplier).toBe(1.5);
+            expect(world.comboState?.level).toBe(2);
         });
 
-        it('50连击应该达到3级倍率', () => {
+        it('50连击应该达到3级', () => {
             for (let i = 0; i < 50; i++) {
                 pushEvent(world, {
                     type: 'Kill',
@@ -183,10 +183,10 @@ describe('ComboSystem', () => {
 
             ComboSystem(world, 0.016);
 
-            expect(world.comboState?.multiplier).toBe(2.0);
+            expect(world.comboState?.level).toBe(3);
         });
 
-        it('100连击应该达到狂暴倍率', () => {
+        it('100连击应该达到狂暴(4级)', () => {
             for (let i = 0; i < 100; i++) {
                 pushEvent(world, {
                     type: 'Kill',
@@ -199,7 +199,8 @@ describe('ComboSystem', () => {
 
             ComboSystem(world, 0.016);
 
-            expect(world.comboState?.multiplier).toBe(3.0);
+            expect(world.comboState?.level).toBe(4);
+            expect(world.comboState?.hasBerserk).toBe(true);
         });
     });
 
@@ -293,9 +294,8 @@ describe('ComboSystem', () => {
 
             ComboSystem(world, 0.016);
 
-            // 25连击 = 1.5倍伤害倍率（comboState.multiplier）
-            // 得分倍率是分开计算的，25连击的得分倍率是2.0
-            expect(getComboScoreMultiplier(world)).toBe(1.5);
+            // 25连击 = 2级，得分倍率是2.0
+            expect(getComboScoreMultiplier(world)).toBe(2.0);
         });
 
         it('getComboDamageMultiplier 应该返回伤害倍率', () => {
@@ -331,7 +331,7 @@ describe('ComboSystem', () => {
             resetWorldCombo(world);
 
             expect(world.comboState?.count).toBe(0);
-            expect(world.comboState?.multiplier).toBe(1);
+            expect(world.comboState?.level).toBe(0);
         });
     });
 
@@ -344,7 +344,9 @@ describe('ComboSystem', () => {
             expect(world.comboState).toBeDefined();
             expect(world.comboState?.count).toBe(0);
             expect(world.comboState?.timer).toBe(0);
-            expect(world.comboState?.multiplier).toBe(1);
+            expect(world.comboState?.level).toBe(0);
+            expect(world.comboState?.maxCombo).toBe(0);
+            expect(world.comboState?.hasBerserk).toBe(false);
         });
     });
 });
