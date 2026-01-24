@@ -14,5 +14,11 @@
 // P3: 物理层
 export { MovementSystem } from './MovementSystem';
 
+// P4: 交互层
+export { CollisionSystem } from './CollisionSystem';
+
+// P5: 结算层
+export { DamageResolutionSystem } from './DamageResolutionSystem';
+
 // P7: 清理层
 export { LifetimeSystem } from './LifetimeSystem';
