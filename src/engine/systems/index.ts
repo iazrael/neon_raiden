@@ -29,6 +29,9 @@ export { CollisionSystem } from './CollisionSystem';
 
 // P5: 结算层
 export { DamageResolutionSystem } from './DamageResolutionSystem';
+export { PickupSystem } from './PickupSystem';
+export { LootSystem } from './LootSystem';
+export { ComboSystem, getComboScoreMultiplier, getComboDamageMultiplier, resetWorldCombo } from './ComboSystem';
 
 // P7: 清理层
 export { LifetimeSystem } from './LifetimeSystem';
