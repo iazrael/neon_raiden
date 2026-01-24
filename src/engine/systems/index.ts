@@ -11,6 +11,11 @@
  * - P7 清理层 (生命周期)
  */
 
+// P1: 决策层
+export { InputSystem } from './InputSystem';
+export { EnemySystem } from './EnemySystem';
+export { AISteerSystem } from './AISteerSystem';
+
 // P3: 物理层
 export { MovementSystem } from './MovementSystem';
 
