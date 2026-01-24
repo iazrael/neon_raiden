@@ -57,3 +57,4 @@ export {
 
 // P8: 清理层
 export { LifetimeSystem } from './LifetimeSystem';
+export { CleanupSystem, destroyEntity, destroyEntities, getCleanupStats, resetCleanupStats } from './CleanupSystem';

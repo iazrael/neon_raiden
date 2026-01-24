@@ -11,7 +11,7 @@
  */
 
 import { World } from '../types';
-import { Lifetime, Transform, DestroyTag } from '../components';
+import { Lifetime, Transform, DestroyTag, PlayerTag } from '../components';
 
 /**
  * 生命周期系统主函数
@@ -52,7 +52,7 @@ export function LifetimeSystem(world: World, dt: number): void {
                 transform.y > world.height + margin
             ) {
                 // 玩家不检查边界
-                const isPlayer = comps.some(c => c.constructor.name === 'PlayerTag');
+                const isPlayer = comps.some(c => c instanceof PlayerTag);
                 if (!isPlayer) {
                     const hasDestroyTag = comps.some(c => c instanceof DestroyTag);
                     if (!hasDestroyTag) {
