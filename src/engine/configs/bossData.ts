@@ -3,7 +3,7 @@
 // 定义各个Boss的基础配置信息
 //
 
-import { BossId, EnemyWeaponId, WeaponId } from "@/engine/types";
+import { BossId, EnemyWeaponId, WeaponId } from "../types";
 
 
 export interface BossSpec {

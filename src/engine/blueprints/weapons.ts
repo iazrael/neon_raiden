@@ -3,7 +3,7 @@
 // 包含游戏中所有武器类型的蓝图定义
 //
 
-import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '@/engine/types';
+import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '../types';
 import { EnemyWeaponSpec, WeaponSpec } from './base';
 
 /**

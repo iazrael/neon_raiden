@@ -1,5 +1,5 @@
-import { WeaponId } from '@/engine/types';
-import { GalleryEntry } from '@/engine/configs';
+import { WeaponId } from '../../types';
+import { GalleryEntry } from '../index';
 
 export const GALLERY_WEAPONS: Record<WeaponId, GalleryEntry> = {
   [WeaponId.VULCAN]: {

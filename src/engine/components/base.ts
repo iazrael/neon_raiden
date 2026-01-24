@@ -1,4 +1,4 @@
-import { Component } from '@/engine/types';
+import { Component } from '../types';
 
 // 「空间 & 生命 & 基础运动」相关组件
 

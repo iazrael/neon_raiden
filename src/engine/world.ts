@@ -1,5 +1,5 @@
 import { World, EntityId, Component } from './types';
-import { Event } from './events';
+import { Event as GameEvent } from './events';
 
 export * from './types';
 
@@ -115,7 +115,7 @@ export function removeEntity(w: World, id: EntityId) {
 }
 
 // ========== 事件推送 ==========
-export function pushEvent(w: World, event: Event) {
+export function pushEvent(w: World, event: GameEvent) {
     w.events.push(event);
 }
 

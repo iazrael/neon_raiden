@@ -1,5 +1,5 @@
-import { BossId } from '@/engine/types';
-import { GalleryEntry } from '@/engine/configs';
+import { BossId } from '../../types';
+import { GalleryEntry } from '../index';
 
 export const GALLERY_BOSSES: Record<BossId, GalleryEntry> = {
   [BossId.GUARDIAN]: {

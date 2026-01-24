@@ -3,7 +3,7 @@
 // 定义武器随着等级提升而获得的属性增长
 //
 
-import { WeaponId } from '@/engine/types';
+import { WeaponId } from '../types';
 import { WeaponGrowthSpec } from './base';
 
 /**

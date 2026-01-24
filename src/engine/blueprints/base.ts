@@ -1,5 +1,5 @@
-import * as Components from '@/engine/components';
-import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '@/engine/types';
+import * as Components from '../components';
+import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '../types';
 
 // ========== Blueprint 类型 ==========
 export type Blueprint = Partial<{

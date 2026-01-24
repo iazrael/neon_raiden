@@ -3,9 +3,9 @@
 // 包含游戏中所有敌人类型的蓝图定义
 //
 
-import { ASSETS } from '@/engine/configs';
-import { DROPTABLE_COMMON } from '@/engine/configs/droptables';
-import { EnemyId, EnemyWeaponId, AmmoType } from '@/engine/types';
+import { ASSETS } from '../configs';
+import { DROPTABLE_COMMON } from '../configs/droptables';
+import { EnemyId, EnemyWeaponId, AmmoType } from '../types';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
 

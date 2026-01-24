@@ -1,4 +1,4 @@
-import { Component } from '@/engine/types';
+import { Component } from '../types';
 
 // 「意图 & 击飞」
 

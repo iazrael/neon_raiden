@@ -1,5 +1,5 @@
 import { GameState, ComboState } from './index';
-import { Event } from '../events';
+import { Event as GameEvent } from '../events';
 
 // 实体ID类型
 export type EntityId = number;
@@ -14,7 +14,7 @@ export interface World {
     // 玩家ID
     playerId: EntityId;
     // 事件队列
-    events: Event[];
+    events: GameEvent[];
     // 游戏时间
     time: number;
     // 全局进度

@@ -29,7 +29,10 @@ export default defineConfig(({ mode }) => {
             react(),
             tailwindcss(),
             checker({
-                typescript: true
+                typescript: {
+                    root: './',
+                    tsconfigPath: './tsconfig.json'
+                }
             }),
             VitePWA({
                 registerType: 'prompt',

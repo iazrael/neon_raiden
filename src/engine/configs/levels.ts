@@ -1,6 +1,6 @@
 // configs/levels.ts
 
-import { BossId, EnemyId } from "@/engine/types";
+import { BossId, EnemyId } from "../types";
 
 
 export interface LevelSpec {

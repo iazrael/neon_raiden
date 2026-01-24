@@ -3,10 +3,10 @@
 // 包含游戏中所有Boss类型的蓝图定义
 //
 
-import { ASSETS } from '@/engine/configs';
-import { BOSS_DATA } from '@/engine/configs/bossData';
-import { DROPTABLE_BOSS } from '@/engine/configs/droptables/common';
-import { BossId } from '@/engine/types';
+import { ASSETS } from '../configs';
+import { BOSS_DATA } from '../configs/bossData';
+import { DROPTABLE_BOSS } from '../configs/droptables/common';
+import { BossId } from '../types';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
 
