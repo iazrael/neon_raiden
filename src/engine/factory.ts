@@ -21,6 +21,10 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
     // 2. 按蓝图 push 组件
     for (const [key, args] of Object.entries(bp)) {
         const ComponentCtor = Components[key];
+        if (!ComponentCtor) {
+            console.error('[factory] Missing component constructor for key:', key);
+            continue;
+        }
         const comp = new ComponentCtor(args);
         if (Components.Transform.check(comp)) {
             // 动态注入出生点
@@ -29,6 +33,14 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
             comp.rot = rot;
         }
         comps.push(comp);
+    }
+
+    // 调试：如果是子弹，检查是否有 Sprite 组件
+    if (pool === 'bullet') {
+        const hasSprite = comps.some(c => c instanceof Components.Sprite);
+        if (!hasSprite) {
+            console.error('[factory] Bullet spawned without Sprite!', bp);
+        }
     }
 
     world.entities.set(id, comps);

@@ -6,6 +6,7 @@ import type { ComboState } from './game/systems/ComboSystem';
 import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
 import { SpriteGenerator } from './game/SpriteGenerator';
+import { SpriteRenderer } from './src/engine/SpriteRenderer';
 import { GameConfig } from './game/config/game';
 import ReloadPrompt from './components/ReloadPrompt';
 
@@ -32,8 +33,13 @@ function App() {
   const [weaponLevel, setWeaponLevel] = useState<number>(1);
 
   useEffect(() => {
-    // Preload assets
-    SpriteGenerator.preloadAssets();
+    // Preload assets - both old and new systems
+    Promise.all([
+      SpriteGenerator.preloadAssets(),
+      SpriteRenderer.preloadAssets(),
+    ]).then(() => {
+      console.log('[App] All assets preloaded');
+    });
 
     // 隐藏加载指示器
     const loadingIndicator = document.getElementById('loading-indicator');

@@ -37,7 +37,37 @@ export interface GameSnapshot {
 
 
 export function buildSnapshot(world: World, t: number): GameSnapshot {
-    const player = world.entities.get(world.playerId)!;
+    // 安全检查：如果玩家不存在或 ID 无效，返回默认快照
+    const player = (world.playerId ?? 0) > 0 ? world.entities.get(world.playerId!) : undefined;
+    if (!player) {
+        return {
+            t,
+            state: GameState.MENU,
+            score: 0,
+            level: 1,
+            showLevelTransition: false,
+            levelTransitionTimer: 0,
+            maxLevelReached: 1,
+            showBossWarning: false,
+            comboState: null,
+            player: {
+                hp: 100,
+                maxHp: 100,
+                x: 0,
+                y: 0,
+                bombs: 0,
+                shieldPercent: 0,
+                weaponType: 'VULCAN',
+                secondaryWeapon: null,
+                weaponLevel: 1,
+                activeSynergies: [],
+                invulnerable: false
+            },
+            bullets: [],
+            enemies: []
+        };
+    }
+
     const tr = player.find(Transform.check)!;
     const hl = player.find(Health.check)!;
     const wp = player.find(Weapon.check)!;

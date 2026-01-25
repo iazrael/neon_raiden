@@ -17,18 +17,7 @@ import { GameState, WeaponType, ClickType } from '@/types';
 import type { ComboState } from '@/game/systems/ComboSystem';
 import type { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
 import type { GameSnapshot } from './snapshot';
-
-/**
- * 简单的 AudioSystem 包装类，兼容旧接口
- */
-class AudioSystemWrapper {
-    playClick(type: ClickType = ClickType.DEFAULT): void {
-        // TODO: 实现点击音效
-        console.log('playClick:', type);
-    }
-
-    // 其他音频方法...
-}
+import { AudioSystem as GameAudioSystem } from '@/game/systems/AudioSystem';
 
 /**
  * 模拟的 WeaponSynergySystem，暂时返回空数组
@@ -47,7 +36,7 @@ export class ReactEngine {
     private canvas: HTMLCanvasElement | null = null;
 
     // ========== 公共系统 (与旧 GameEngine 兼容) ==========
-    public audio: AudioSystemWrapper;
+    public audio: GameAudioSystem;
     public synergySys: MockWeaponSynergySystem;
 
     // ========== 游戏状态 (与旧 GameEngine 兼容) ==========
@@ -101,7 +90,7 @@ export class ReactEngine {
     ) {
         this.engine = new Engine();
         this.canvas = canvas ?? null;
-        this.audio = new AudioSystemWrapper();
+        this.audio = new GameAudioSystem();
         this.synergySys = new MockWeaponSynergySystem();
 
         // 设置回调

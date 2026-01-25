@@ -8,7 +8,7 @@ import { inputManager } from './input/InputManager';
 
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
-import { AudioSystem } from './systems/AudioSystem';
+// import { AudioSystem } from './systems/AudioSystem'; // 暂时禁用 - 使用旧 GameAudioSystem
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
@@ -146,7 +146,7 @@ export class Engine {
         // P7. 表现层 (视听反馈)
         CameraSystem(world, dt);                        // 17. 相机系统
         EffectPlayer(world, dt);                        // 18. 效果播放系统
-        AudioSystem(world, dt);                         // 19. 音频系统
+        // AudioSystem(world, dt);                     // 19. 音频系统 (暂时禁用 - 使用旧 GameAudioSystem)
 
         // 拍快照（**必须在清理前**）
         this.snapshot$.next(buildSnapshot(world, dt));

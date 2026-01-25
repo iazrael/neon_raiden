@@ -5,7 +5,8 @@
  * 这个类包装了 AssetsLoader，提供更简洁的接口。
  */
 
-import { ASSETS_BASE_PATH } from '@/game/config';
+import { ASSETS } from './configs/assets';
+import { BASE_ASSET_PATH } from './configs/global';
 
 /**
  * 精灵类型枚举
@@ -49,45 +50,75 @@ export class SpriteRenderer {
      * 预加载所有游戏资源
      */
     static async preloadAssets(): Promise<void> {
-        const spritesToLoad: Array<{ key: string, src: string, w: number, h: number }> = [
-            { key: 'player', src: `${ASSETS_BASE_PATH}fighters/player.svg`, w: 64, h: 64 },
-            { key: 'option', src: `${ASSETS_BASE_PATH}fighters/option.svg`, w: 32, h: 32 },
-            { key: 'obstacle', src: `${ASSETS_BASE_PATH}environment/obstacle.svg`, w: 60, h: 80 },
-            { key: 'energy_storm', src: `${ASSETS_BASE_PATH}environment/energy_storm.svg`, w: 600, h: 120 },
-            { key: 'gravity_field', src: `${ASSETS_BASE_PATH}environment/gravity_field.svg`, w: 220, h: 600 },
+        const spritesToLoad: Array<{ key: string, src: string, w: number, h: number }> = [];
+
+        // ============ 战斗机 ============
+        spritesToLoad.push(
+            { key: 'player', src: ASSETS.FIGHTERS.player, w: 64, h: 64 },
+            { key: 'option', src: ASSETS.FIGHTERS.option, w: 32, h: 32 },
+        );
+
+        // ============ 子弹 (玩家) ============
+        const bulletTypes: Array<{ key: string; src: string }> = [
+            { key: 'bullet_laser', src: ASSETS.BULLETS.laser },
+            { key: 'bullet_magma', src: ASSETS.BULLETS.magma },
+            { key: 'bullet_missile', src: ASSETS.BULLETS.missile },
+            { key: 'bullet_plasma', src: ASSETS.BULLETS.plasma },
+            { key: 'bullet_shuriken', src: ASSETS.BULLETS.shuriken },
+            { key: 'bullet_tesla', src: ASSETS.BULLETS.tesla },
+            { key: 'bullet_vulcan', src: ASSETS.BULLETS.vulcan },
+            { key: 'bullet_wave', src: ASSETS.BULLETS.wave },
         ];
-
-        // 加载敌人
-        const enemyTypes = ['drone', 'fighter', 'bomber', 'interceptor', 'cruiser'];
-        for (const type of enemyTypes) {
-            spritesToLoad.push({
-                key: `enemy_${type}`,
-                src: `${ASSETS_BASE_PATH}enemies/${type}.svg`,
-                w: 48,
-                h: 48
-            });
+        for (const { key, src } of bulletTypes) {
+            spritesToLoad.push({ key, src, w: 32, h: 32 });
         }
 
-        // 加载 Boss
-        const bossTypes = ['guardian', 'destroyer', 'titan', 'phoenix'];
-        for (const type of bossTypes) {
-            spritesToLoad.push({
-                key: `boss_${type}`,
-                src: `${ASSETS_BASE_PATH}bosses/${type}.svg`,
-                w: 128,
-                h: 128
-            });
+        // ============ 敌人 ============
+        const enemyTypes: Array<{ key: string; src: string }> = [
+            { key: 'enemy_normal', src: ASSETS.ENEMIES.normal },
+            { key: 'enemy_fast', src: ASSETS.ENEMIES.fast },
+            { key: 'enemy_fortress', src: ASSETS.ENEMIES.fortress },
+            { key: 'enemy_gunboat', src: ASSETS.ENEMIES.gunboat },
+            { key: 'enemy_interceptor', src: ASSETS.ENEMIES.interceptor },
+            { key: 'enemy_kamikaze', src: ASSETS.ENEMIES.kamikaze },
+            { key: 'enemy_pulsar', src: ASSETS.ENEMIES.pulsar },
+            { key: 'enemy_stalker', src: ASSETS.ENEMIES.stalker },
+            { key: 'enemy_tank', src: ASSETS.ENEMIES.tank },
+            { key: 'enemy_barrage', src: ASSETS.ENEMIES.barrage },
+            { key: 'enemy_layer', src: ASSETS.ENEMIES.layer },
+        ];
+        for (const { key, src } of enemyTypes) {
+            spritesToLoad.push({ key, src, w: 48, h: 48 });
         }
 
-        // 加载子弹
-        const bulletTypes = ['vulcan', 'laser', 'missile', 'wave', 'plasma', 'tesla', 'magma', 'shuriken'];
-        for (const type of bulletTypes) {
-            spritesToLoad.push({
-                key: `bullet_${type}`,
-                src: `${ASSETS_BASE_PATH}bullets/bullet_${type}.svg`,
-                w: 32,
-                h: 32
-            });
+        // ============ Boss ============
+        const bossTypes: Array<{ key: string; src: string }> = [
+            { key: 'boss_guardian', src: ASSETS.BOSSES.guardian },
+            { key: 'boss_interceptor', src: ASSETS.BOSSES.interceptor },
+            { key: 'boss_destroyer', src: ASSETS.BOSSES.destroyer },
+            { key: 'boss_dominator', src: ASSETS.BOSSES.dominator },
+            { key: 'boss_overlord', src: ASSETS.BOSSES.overlord },
+            { key: 'boss_titan', src: ASSETS.BOSSES.titan },
+            { key: 'boss_colossus', src: ASSETS.BOSSES.colossus },
+            { key: 'boss_leviathan', src: ASSETS.BOSSES.leviathan },
+            { key: 'boss_annihilator', src: ASSETS.BOSSES.annihilator },
+            { key: 'boss_apocalypse', src: ASSETS.BOSSES.apocalypse },
+        ];
+        for (const { key, src } of bossTypes) {
+            spritesToLoad.push({ key, src, w: 128, h: 128 });
+        }
+
+        // ============ 敌人子弹 ============
+        const enemyBulletTypes: Array<{ key: string; src: string }> = [
+            { key: 'bullet_enemy_orb', src: ASSETS.ENEMIE_BULLETS.orb },
+            { key: 'bullet_enemy_beam', src: ASSETS.ENEMIE_BULLETS.beam },
+            { key: 'bullet_enemy_rapid', src: ASSETS.ENEMIE_BULLETS.rapid },
+            { key: 'bullet_enemy_heavy', src: ASSETS.ENEMIE_BULLETS.heavy },
+            { key: 'bullet_enemy_homing', src: ASSETS.ENEMIE_BULLETS.homing },
+            { key: 'bullet_enemy_spiral', src: ASSETS.ENEMIE_BULLETS.spiral },
+        ];
+        for (const { key, src } of enemyBulletTypes) {
+            spritesToLoad.push({ key, src, w: 32, h: 32 });
         }
 
         // 并行加载所有资源
@@ -96,7 +127,7 @@ export class SpriteRenderer {
         );
 
         await Promise.all(promises);
-        console.log('[SpriteRenderer] All assets preloaded');
+        console.log('[SpriteRenderer] All assets preloaded:', spritesToLoad.length);
     }
 
     /**
@@ -172,7 +203,7 @@ export class SpriteRenderer {
             const img = new Image();
             img.width = width;
             img.height = height;
-            img.src = `${ASSETS_BASE_PATH}enemies/${spriteName}.svg`;
+            img.src = `${BASE_ASSET_PATH}enemies/${spriteName}.svg`;
             cached = { image: img, width, height, loaded: false };
             this.cache.set(key, cached);
         }
@@ -191,7 +222,7 @@ export class SpriteRenderer {
             const img = new Image();
             img.width = width;
             img.height = height;
-            img.src = `${ASSETS_BASE_PATH}bosses/${spriteName}.svg`;
+            img.src = `${BASE_ASSET_PATH}bosses/${spriteName}.svg`;
             cached = { image: img, width, height, loaded: false };
             this.cache.set(key, cached);
         }
@@ -210,7 +241,7 @@ export class SpriteRenderer {
             const img = new Image();
             img.width = width;
             img.height = height;
-            img.src = `${ASSETS_BASE_PATH}bullets/${spriteName}.svg`;
+            img.src = `${BASE_ASSET_PATH}bullets/${spriteName}.svg`;
             cached = { image: img, width, height, loaded: false };
             this.cache.set(key, cached);
         }

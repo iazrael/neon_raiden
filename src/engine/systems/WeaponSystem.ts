@@ -12,12 +12,41 @@
  */
 
 import { World } from '../types';
-import { Transform, Weapon, FireIntent, Bullet, PlayerTag, EnemyTag, Velocity } from '../components';
+import { Transform, Weapon, FireIntent, Bullet, PlayerTag, EnemyTag, Velocity, Sprite } from '../components';
 import { spawnBullet } from '../factory';
 import { AMMO_TABLE } from '../blueprints/ammo';
 import { Blueprint } from '../blueprints';
 import { pushEvent } from '../world';
 import { WeaponFiredEvent } from '../events';
+import { AmmoType } from '../types';
+import { ASSETS } from '../configs';
+
+/**
+ * 弹药类型到纹理的映射
+ */
+const AMMO_SPRITE_MAP: Partial<Record<AmmoType, string>> = {
+    [AmmoType.VULCAN_SPREAD]: ASSETS.BULLETS.vulcan,
+    [AmmoType.LASER_BEAM]: ASSETS.BULLETS.laser,
+    [AmmoType.MISSILE_HOMING]: ASSETS.BULLETS.missile,
+    [AmmoType.WAVE_PULSE]: ASSETS.BULLETS.wave,
+    [AmmoType.PLASMA_ORB]: ASSETS.BULLETS.plasma,
+    [AmmoType.TESLA_CHAIN]: ASSETS.BULLETS.tesla,
+    [AmmoType.MAGMA_POOL]: ASSETS.BULLETS.magma,
+    [AmmoType.SHURIKEN_BOUNCE]: ASSETS.BULLETS.shuriken,
+    // 敌人弹药
+    [AmmoType.ENEMY_ORB_RED]: ASSETS.ENEMIE_BULLETS.orb,
+    [AmmoType.ENEMY_ORB_BLUE]: ASSETS.ENEMIE_BULLETS.orb,
+    [AmmoType.ENEMY_ORB_GREEN]: ASSETS.ENEMIE_BULLETS.orb,
+    [AmmoType.ENEMY_BEAM_THIN]: ASSETS.ENEMIE_BULLETS.beam,
+    [AmmoType.ENEMY_BEAM_THICK]: ASSETS.ENEMIE_BULLETS.beam,
+    [AmmoType.ENEMY_RAPID]: ASSETS.ENEMIE_BULLETS.rapid,
+    [AmmoType.ENEMY_HEAVY]: ASSETS.ENEMIE_BULLETS.heavy,
+    [AmmoType.ENEMY_HOMING]: ASSETS.ENEMIE_BULLETS.homing,
+    [AmmoType.ENEMY_SPIRAL]: ASSETS.ENEMIE_BULLETS.spiral,
+    [AmmoType.ENEMY_MISSILE]: ASSETS.ENEMIE_BULLETS.homing,
+    [AmmoType.ENEMY_PULSE]: ASSETS.ENEMIE_BULLETS.orb,
+    [AmmoType.ENEMY_VOID_ORB]: ASSETS.ENEMIE_BULLETS.orb,
+};
 
 /**
  * 武器系统主函数
@@ -107,16 +136,16 @@ function fireWeapon(
 
     if (weapon.pattern === 'radial') {
         // 径向发射 - 360度均匀分布
-        fireRadial(world, transform, weapon, bulletCount, ammoSpec.speed);
+        fireRadial(world, transform, weapon, id, bulletCount, ammoSpec.speed);
     } else if (weapon.pattern === 'spiral') {
         // 螺旋发射
-        fireSpiral(world, transform, weapon, bulletCount, spread, baseAngle, ammoSpec.speed);
+        fireSpiral(world, transform, weapon, id, bulletCount, spread, baseAngle, ammoSpec.speed);
     } else if (weapon.pattern === 'random') {
         // 随机发射
-        fireRandom(world, transform, weapon, bulletCount, spread, baseAngle, ammoSpec.speed);
+        fireRandom(world, transform, weapon, id, bulletCount, spread, baseAngle, ammoSpec.speed);
     } else {
         // 默认扇形发射（SPREAD/AIMED）
-        fireSpread(world, transform, weapon, bulletCount, spread, baseAngle, ammoSpec.speed);
+        fireSpread(world, transform, weapon, id, bulletCount, spread, baseAngle, ammoSpec.speed);
     }
 
     // 重置冷却
@@ -139,6 +168,7 @@ function fireSpread(
     world: World,
     transform: Transform,
     weapon: Weapon,
+    ownerId: number,
     count: number,
     spread: number,
     baseAngle: number,
@@ -151,7 +181,7 @@ function fireSpread(
             : 0;
         const angle = baseAngle + angleOffset;
 
-        createBullet(world, transform, weapon, angle, speed);
+        createBullet(world, transform, weapon, ownerId, angle, speed);
     }
 }
 
@@ -162,12 +192,13 @@ function fireRadial(
     world: World,
     transform: Transform,
     weapon: Weapon,
+    ownerId: number,
     count: number,
     speed: number
 ): void {
     for (let i = 0; i < count; i++) {
         const angle = (2 * Math.PI * i) / count;
-        createBullet(world, transform, weapon, angle, speed);
+        createBullet(world, transform, weapon, ownerId, angle, speed);
     }
 }
 
@@ -178,6 +209,7 @@ function fireSpiral(
     world: World,
     transform: Transform,
     weapon: Weapon,
+    ownerId: number,
     count: number,
     spread: number,
     baseAngle: number,
@@ -185,7 +217,7 @@ function fireSpiral(
 ): void {
     for (let i = 0; i < count; i++) {
         const angle = baseAngle + (spread * i * Math.PI / 180);
-        createBullet(world, transform, weapon, angle, speed);
+        createBullet(world, transform, weapon, ownerId, angle, speed);
     }
 }
 
@@ -196,6 +228,7 @@ function fireRandom(
     world: World,
     transform: Transform,
     weapon: Weapon,
+    ownerId: number,
     count: number,
     spread: number,
     baseAngle: number,
@@ -204,7 +237,7 @@ function fireRandom(
     for (let i = 0; i < count; i++) {
         const randomOffset = (Math.random() - 0.5) * 2 * spread * Math.PI / 180;
         const angle = baseAngle + randomOffset;
-        createBullet(world, transform, weapon, angle, speed);
+        createBullet(world, transform, weapon, ownerId, angle, speed);
     }
 }
 
@@ -215,19 +248,26 @@ function createBullet(
     world: World,
     transform: Transform,
     weapon: Weapon,
+    ownerId: number,
     angle: number,
     speed: number
 ): void {
-    // 计算速度向量
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed;
+
+
+    // 计算速度向量 - speed 是像素/秒，需要转换为像素/毫秒
+    const vx = Math.cos(angle) * speed / 1000;
+    const vy = Math.sin(angle) * speed / 1000;
+
+    // 获取子弹纹理
+    const bulletTexture = AMMO_SPRITE_MAP[weapon.ammoType] || ASSETS.BULLETS.vulcan;
 
     // 创建子弹蓝图
     const bulletBlueprint: Blueprint = {
         Transform: { x: transform.x, y: transform.y, rot: angle },
         Velocity: { vx, vy },
+        Sprite: { texture: bulletTexture, srcX: 0, srcY: 0, srcW: 16, srcH: 16, scale: 1, pivotX: 0.5, pivotY: 0.5 },
         Bullet: {
-            owner: world.playerId, // 默认玩家发射
+            owner: ownerId, // 使用实际的拥有者 ID
             ammoType: weapon.ammoType,
             pierceLeft: weapon.pierce || 0,
             bouncesLeft: weapon.bounces || 0
@@ -242,4 +282,7 @@ function createBullet(
     };
 
     spawnBullet(world, bulletBlueprint, transform.x, transform.y, angle);
+
+    // 调试日志
+    console.log('[WeaponSystem] Bullet spawned:', { x: transform.x, y: transform.y, texture: bulletTexture });
 }

@@ -12,6 +12,9 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
     /** 变换组件 - 设置战机的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 设置战机的初始速度（玩家由 InputSystem 控制） */
+    Velocity: { vx: 0, vy: 0, vrot: 0 },
+
     /** 生命值组件 - 设置战机的当前生命值和最大生命值 */
     Health: { hp: 150, max: 200 },
 

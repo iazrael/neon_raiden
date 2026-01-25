@@ -21,7 +21,7 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
     Health: { hp: 30, max: 30 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 2, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.12, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.normal, srcX: 0, srcY: 0, srcW: 40, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -54,7 +54,7 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
     Health: { hp: 10, max: 10 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 10, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.4, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.fast, srcX: 0, srcY: 0, srcW: 30, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -84,7 +84,7 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
     Health: { hp: 60, max: 60 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 1, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.06, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.tank, srcX: 0, srcY: 0, srcW: 60, srcH: 60, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -114,7 +114,7 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
     Health: { hp: 5, max: 5 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 10, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.4, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.kamikaze, srcX: 0, srcY: 0, srcW: 30, srcH: 30, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -144,7 +144,7 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
     Health: { hp: 100, max: 100 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 0.5, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.03, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.gunboat, srcX: 0, srcY: 0, srcW: 70, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -174,7 +174,7 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
     Health: { hp: 80, max: 80 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 5, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.25, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.interceptor, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -204,7 +204,7 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
     Health: { hp: 60, max: 60 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 1.5, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.09, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.layer, srcX: 0, srcY: 0, srcW: 60, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -234,7 +234,7 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
     Health: { hp: 15, max: 15 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 6, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.3, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.pulsar, srcX: 0, srcY: 0, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -264,7 +264,7 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
     Health: { hp: 200, max: 200 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 0.8, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.05, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.fortress, srcX: 0, srcY: 0, srcW: 70, srcH: 70, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -294,7 +294,7 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
     Health: { hp: 30, max: 30 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 5, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.25, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.stalker, srcX: 0, srcY: 0, srcW: 36, srcH: 36, scale: 1, pivotX: 0.5, pivotY: 0.5 },
@@ -324,7 +324,7 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
     Health: { hp: 100, max: 100 },
 
     /** 速度组件 - 设置敌人的移动速度 */
-    Velocity: { vx: 0, vy: 1.2, vrot: 0 },
+    Velocity: { vx: 0, vy: 0.07, vrot: 0 },
 
     /** 精灵组件 - 设置敌人的纹理信息 */
     Sprite: { texture: ASSETS.ENEMIES.barrage, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },

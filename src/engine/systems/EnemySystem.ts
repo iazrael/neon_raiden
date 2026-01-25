@@ -11,7 +11,7 @@
  */
 
 import { World, EntityId, EnemyId } from '../types';
-import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon } from '../components';
+import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon, PlayerTag } from '../components';
 
 /**
  * 敌人行为状态
@@ -86,7 +86,7 @@ export function EnemySystem(world: World, dt: number): void {
     // 获取玩家位置
     let playerPos: { x: number; y: number } | null = null;
     for (const [id, comps] of world.entities) {
-        const playerTag = comps.find(c => c.constructor.name === 'PlayerTag');
+        const playerTag = comps.find(c => c instanceof PlayerTag);
         if (playerTag) {
             const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
             if (transform) {
@@ -136,13 +136,13 @@ function generateMoveIntent(
     switch (config.behavior) {
         case EnemyBehavior.MOVE_DOWN:
             // 直线向下
-            dy = config.moveSpeed;
+            dy = config.moveSpeed / 1000; // 转换为像素/毫秒
             break;
 
         case EnemyBehavior.SINE_WAVE:
             // 正弦波移动：向下 + 横向正弦
-            dy = config.moveSpeed;
-            dx = Math.sin(transform.y * 0.02) * config.moveSpeed * 0.5;
+            dy = config.moveSpeed / 1000;
+            dx = Math.sin(transform.y * 0.02) * config.moveSpeed * 0.5 / 1000;
             break;
 
         case EnemyBehavior.CHASE:
@@ -151,8 +151,8 @@ function generateMoveIntent(
                 playerPos.y - transform.y,
                 playerPos.x - transform.x
             );
-            dx = Math.cos(angleToPlayer) * config.moveSpeed;
-            dy = Math.sin(angleToPlayer) * config.moveSpeed;
+            dx = Math.cos(angleToPlayer) * config.moveSpeed / 1000;
+            dy = Math.sin(angleToPlayer) * config.moveSpeed / 1000;
             break;
 
         case EnemyBehavior.RAM:
@@ -161,15 +161,15 @@ function generateMoveIntent(
                 playerPos.y - transform.y,
                 playerPos.x - transform.x
             );
-            dx = Math.cos(ramAngle) * config.moveSpeed * 1.5;
-            dy = Math.sin(ramAngle) * config.moveSpeed * 1.5;
+            dx = Math.cos(ramAngle) * config.moveSpeed * 1.5 / 1000;
+            dy = Math.sin(ramAngle) * config.moveSpeed * 1.5 / 1000;
             break;
 
         case EnemyBehavior.STRAFE:
             // 侧移：向下 + 周期性横向
-            dy = config.moveSpeed * 0.5;
+            dy = config.moveSpeed * 0.5 / 1000;
             const strafeDir = Math.sin(enemyTag.timer * 0.002) > 0 ? 1 : -1;
-            dx = strafeDir * config.moveSpeed;
+            dx = strafeDir * config.moveSpeed / 1000;
             break;
 
         case EnemyBehavior.CIRCLE:
@@ -181,12 +181,12 @@ function generateMoveIntent(
             const circleRadius = 150;
             const targetX = playerPos.x + Math.cos(circleAngle) * circleRadius;
             const targetY = playerPos.y + Math.sin(circleAngle) * circleRadius;
-            dx = (targetX - transform.x) * 2;
-            dy = (targetY - transform.y) * 2;
+            dx = (targetX - transform.x) * 2 / 1000;
+            dy = (targetY - transform.y) * 2 / 1000;
             break;
 
         default:
-            dy = config.moveSpeed;
+            dy = config.moveSpeed / 1000;
     }
 
     // 添加移动意图

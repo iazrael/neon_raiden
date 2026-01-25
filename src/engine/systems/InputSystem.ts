@@ -42,8 +42,8 @@ export function InputSystem(world: World, dt: number): void {
 
             // 键盘输入（使用速度方向）
             if (keyboardVector.x !== 0 || keyboardVector.y !== 0) {
-                dx = keyboardVector.x * 400; // 基础移动速度
-                dy = keyboardVector.y * 400;
+                dx = keyboardVector.x * 400 / 1000; // 转换为像素/毫秒
+                dy = keyboardVector.y * 400 / 1000;
             }
 
             // 触摸/鼠标输入（直接位移）

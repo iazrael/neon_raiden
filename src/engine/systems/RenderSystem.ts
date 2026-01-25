@@ -12,7 +12,7 @@
  */
 
 import { World } from '../types';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag } from '../components';
+import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Bullet } from '../components';
 import { SpriteRenderer } from '../SpriteRenderer';
 
 /**
@@ -126,6 +126,19 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
             layer,
             particle
         });
+    }
+
+    // 调试日志 - 检查是否有子弹实体存在但没有 Sprite 组件
+    let bulletsWithoutSprite = 0;
+    for (const [, comps] of world.entities) {
+        const bullet = comps.find(c => c instanceof Bullet);
+        const sprite = comps.find(c => c instanceof Sprite);
+        if (bullet && !sprite) {
+            bulletsWithoutSprite++;
+        }
+    }
+    if (bulletsWithoutSprite > 0) {
+        console.error('[RenderSystem] Found bullets without Sprite:', bulletsWithoutSprite);
     }
 
     // 按层级排序

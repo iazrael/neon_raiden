@@ -1,23 +1,24 @@
 {
-    "permissions": {
-        "allow": [
-            "mcp__plugin_playwright_playwright__browser_snapshot",
-            "Bash(ls:*)",
-            "Bash(pnpm init:*)",
-            "Bash(pnpm add:*)",
-            "Bash(pnpm install:*)",
-            "Bash(pnpm type-check:*)",
-            "Bash(timeout:*)",
-            "mcp__plugin_playwright_playwright__browser_navigate",
-            "Bash(pnpm dev)",
-            "mcp__plugin_playwright_playwright__browser_take_screenshot",
-            "mcp__plugin_playwright_playwright__browser_close",
-            "Bash(git add:*)",
-            "Bash(git commit:*)",
-            "Bash(pnpm run type-check:*)",
-            "Bash(pnpm remove:*)",
-            "mcp__plugin_playwright_playwright__browser_evaluate",
-            "mcp__plugin_playwright_playwright__browser_run_code"
-        ]
-    }
+  "permissions": {
+    "allow": [
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "Bash(ls:*)",
+      "Bash(pnpm init:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(timeout:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "Bash(pnpm dev)",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(pnpm run type-check:*)",
+      "Bash(pnpm remove:*)",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "mcp__plugin_playwright_playwright__browser_click"
+    ]
+  }
 }

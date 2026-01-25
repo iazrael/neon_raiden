@@ -26,3 +26,4 @@ dist-ssr
 .qoder/quests/*
 .trae/documents/*
 dev-dist/*
+.playwright-mcp
