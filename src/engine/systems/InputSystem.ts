@@ -1,85 +1,73 @@
-/**
- * 输入系统 (InputSystem)
- *
- * 职责：
- * - 读取 InputManager 的输入状态
- * - 为玩家实体生成 MoveIntent（移动意图）
- * - 为玩家实体生成 FireIntent（开火意图）
- * - 为玩家实体生成 BombIntent（炸弹意图）
- *
- * 系统类型：决策层
- * 执行顺序：P1 - 第一个执行的系统
- */
-
 import { World } from '../types';
-import { PlayerTag, MoveIntent, FireIntent, BombIntent } from '../components';
 import { inputManager } from '../input/InputManager';
+import { MoveIntent, FireIntent, BombIntent, Velocity } from '../components';
+import { removeComponent } from '../world';
 
-/**
- * 输入系统主函数
- * @param world 世界对象
- * @param dt 时间增量（秒）
- */
-export function InputSystem(world: World, dt: number): void {
-    // 获取键盘输入向量
-    const keyboardVector = inputManager.getKeyboardVector();
-    const pointerDelta = inputManager.consumePointerDelta();
+export function InputSystem(w: World, dt: number) {
+    // 1. 获取输入源数据
+    const kbVec = inputManager.getKeyboardVector();
+    const pointerDelta = inputManager.consumePointerDelta(); // 注意：这会清空 Manager 里的积攒值
     const isFiring = inputManager.isFiring();
     const isBombing = inputManager.isBombing();
 
-    // 找到玩家实体
-    for (const [playerId, comps] of world.entities) {
-        const playerTag = comps.find(PlayerTag.check);
-        if (!playerTag) continue;
+    // 2. 查找玩家
+    const playerComps = w.entities.get(w.playerId);
+    if (!playerComps) return;
 
-        // 处理移动输入
-        const hasMoveInput = keyboardVector.x !== 0 || keyboardVector.y !== 0 || pointerDelta.x !== 0 || pointerDelta.y !== 0;
+    // === 处理移动 (优先处理触摸/鼠标拖拽，其次键盘) ===
+    const playerVel = playerComps.find(Velocity.check);
 
-        if (hasMoveInput) {
-            // 计算移动方向
-            let dx = 0;
-            let dy = 0;
+    // 键盘速度配置（像素/毫秒）
+    const KEYBOARD_SPEED = 1;
 
-            // 键盘输入（使用速度方向）
-            if (keyboardVector.x !== 0 || keyboardVector.y !== 0) {
-                dx = keyboardVector.x * 400 / 1000; // 转换为像素/毫秒
-                dy = keyboardVector.y * 400 / 1000;
-            }
+    // 先移除旧的 MoveIntent，确保只有一个
+    const oldMoveIndex = playerComps.findIndex(MoveIntent.check);
+    if (oldMoveIndex >= 0) {
+        playerComps.splice(oldMoveIndex, 1);
+    }
 
-            // 触摸/鼠标输入（直接位移）
-            if (pointerDelta.x !== 0 || pointerDelta.y !== 0) {
-                // 触摸输入使用 offset 模式，直接设置位移
-                comps.push(new MoveIntent({
-                    dx: pointerDelta.x,
-                    dy: pointerDelta.y,
-                    type: 'offset'
-                }));
-            } else if (dx !== 0 || dy !== 0) {
-                // 键盘输入使用 velocity 模式
-                comps.push(new MoveIntent({
-                    dx,
-                    dy,
-                    type: 'velocity'
-                }));
-            }
+    // 逻辑：如果有指针位移，直接使用像素偏移 (Offset)
+    if (Math.abs(pointerDelta.x) > 0.1 || Math.abs(pointerDelta.y) > 0.1) {
+        // 清除键盘速度，防止残留
+        if (playerVel) {
+            playerVel.vx = 0;
+            playerVel.vy = 0;
         }
-
-        // 处理开火输入
-        if (isFiring) {
-            // 检查是否已有开火意图（每帧只添加一次）
-            const hasFireIntent = comps.some(FireIntent.check);
-            if (!hasFireIntent) {
-                comps.push(new FireIntent({ firing: true }));
-            }
-        }
-
-        // 处理炸弹输入
-        if (isBombing) {
-            // 检查是否已有炸弹意图（每帧只添加一次）
-            const hasBombIntent = comps.some(BombIntent.check);
-            if (!hasBombIntent) {
-                comps.push(new BombIntent());
-            }
+        // 触摸是 1:1 跟随，直接作为 Offset
+        playerComps.push(new MoveIntent({ dx: pointerDelta.x, dy: pointerDelta.y, type: 'offset' }));
+    }
+    // 逻辑：否则，使用键盘向量 (Velocity)
+    else if (kbVec.x !== 0 || kbVec.y !== 0) {
+        playerComps.push(new MoveIntent({
+            dx: kbVec.x * KEYBOARD_SPEED,
+            dy: kbVec.y * KEYBOARD_SPEED,
+            type: 'velocity'
+        }));
+    }
+    // 无输入：直接清零速度，让玩家立即停止
+    else {
+        if (playerVel) {
+            playerVel.vx = 0;
+            playerVel.vy = 0;
         }
     }
+
+    // === 处理开火 ===
+    const existingFire = playerComps.find(FireIntent.check);
+    if (isFiring) {
+        if (!existingFire) playerComps.push(new FireIntent());
+    } else {
+        if (existingFire) removeComponent(w, w.playerId, existingFire);
+    }
+
+    // === 处理炸弹 (B键) ===
+    const existingBomb = playerComps.find(BombIntent.check);
+    if (isBombing) {
+        // 炸弹通常是一次性触发，这里持续按住会持续产生意图
+        // 后续 SkillSystem 需要处理冷却或消耗
+        if (!existingBomb) playerComps.push(new BombIntent());
+    } else {
+        if (existingBomb) removeComponent(w, w.playerId, existingBomb);
+    }
+
 }

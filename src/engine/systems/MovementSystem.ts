@@ -12,29 +12,30 @@
  */
 
 import { World } from '../types';
-import { Transform, Velocity, SpeedStat, MoveIntent, Knockback } from '../components';
+import { Transform, Velocity, SpeedStat, MoveIntent, Knockback, PlayerTag, BossTag, DestroyTag } from '../components';
+import { removeComponent, view } from '../world';
+import { destroyEntity } from './CleanupSystem';
 
 /**
  * 移动系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function MovementSystem(world: World, dt: number): void {
     // 遍历所有有 Transform 和 Velocity 的实体
-    for (const [id, comps] of world.entities) {
-        const transform = comps.find(Transform.check) as Transform | undefined;
-        const velocity = comps.find(Velocity.check) as Velocity | undefined;
+    for (const [id, [transform, velocity]] of view(world, [Transform, Velocity])) {
 
-        if (!transform || !velocity) continue;
+        const comps = world.entities.get(id);
+        if (!comps) continue;
 
         // 获取速度限制组件（可选）
-        const speedStat = comps.find(SpeedStat.check) as SpeedStat | undefined;
+        const speedStat = comps.find(SpeedStat.check);
 
         // 获取移动意图组件（可选，每帧清除）
-        const moveIntent = comps.find(MoveIntent.check) as MoveIntent | undefined;
+        const moveIntent = comps.find(MoveIntent.check);
 
         // 获取击退组件（可选）
-        const knockback = comps.find(Knockback.check) as Knockback | undefined;
+        const knockback = comps.find(Knockback.check);
 
         // 计算实际速度
         let vx = velocity.vx;
@@ -53,8 +54,7 @@ export function MovementSystem(world: World, dt: number): void {
             }
 
             // 意图组件是"一次性的"，用完即删
-            const idx = comps.indexOf(moveIntent);
-            if (idx !== -1) comps.splice(idx, 1);
+            removeComponent(world, id, MoveIntent);
         }
 
         // 如果有击退效果，叠加击退速度
@@ -68,8 +68,7 @@ export function MovementSystem(world: World, dt: number): void {
 
             // 击退效果很小时移除组件
             if (Math.abs(knockback.vx) < 1 && Math.abs(knockback.vy) < 1) {
-                const idx = comps.indexOf(knockback);
-                if (idx !== -1) comps.splice(idx, 1);
+                removeComponent(world, id, Knockback);
             }
         }
 
@@ -105,28 +104,42 @@ export function MovementSystem(world: World, dt: number): void {
  * 应用边界限制
  */
 function applyBounds(world: World, transform: Transform, entityId: number): void {
-    const halfSize = 20; // 假设实体半径为20像素
-
-    // 检查是否有玩家标签（玩家可以有更大的边界）
     const comps = world.entities.get(entityId);
-    const isPlayer = comps?.some(c => c.constructor.name === 'PlayerTag');
+    if (!comps) return;
 
-    const margin = isPlayer ? 0 : halfSize;
+    // 检查是否是玩家或 Boss（需要限制在屏幕内）
+    const isPlayer = comps.find(PlayerTag.check);
+    const isBoss = comps.find(BossTag.check);
 
-    // 左边界
-    if (transform.x < margin) {
-        transform.x = margin;
+    if (isPlayer || isBoss) {
+        // 玩家和 Boss 限制在屏幕范围内
+        const margin = 0;
+        // 左边界
+        if (transform.x < margin) {
+            transform.x = margin;
+        }
+        // 右边界
+        if (transform.x > world.width - margin) {
+            transform.x = world.width - margin;
+        }
+        // 上边界
+        if (transform.y < margin) {
+            transform.y = margin;
+        }
+        // 下边界
+        if (transform.y > world.height - margin) {
+            transform.y = world.height - margin;
+        }
+        return;
     }
-    // 右边界
-    if (transform.x > world.width - margin) {
-        transform.x = world.width - margin;
-    }
-    // 上边界
-    if (transform.y < margin) {
-        transform.y = margin;
-    }
-    // 下边界
-    if (transform.y > world.height - margin) {
-        transform.y = world.height - margin;
+
+    // 其他实体：超出屏幕后销毁（给予一定的缓冲距离）
+    const buffer = 50;
+    if (transform.x < -buffer ||
+        transform.x > world.width + buffer ||
+        transform.y < -buffer ||
+        transform.y > world.height + buffer) {
+        // 添加销毁标记
+        destroyEntity(world, entityId, 'offscreen');
     }
 }

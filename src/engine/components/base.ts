@@ -35,11 +35,11 @@ export class Velocity extends Component {
      * @param cfg 速度配置
      */
     constructor(cfg: { 
-        /** X轴速度 */
+        /** X轴速度, 单位像素/毫秒 */
         vx?: number; 
-        /** Y轴速度 */
+        /** Y轴速度, 单位像素/毫秒 */
         vy?: number; 
-        /** 旋转速度 */
+        /** 旋转速度, 单位像素/毫秒 */
         vrot?: number; 
     }) { 
         super(); 

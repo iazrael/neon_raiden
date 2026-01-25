@@ -19,7 +19,7 @@ import { spawnBullet } from '../factory';
 import { AMMO_TABLE } from '../blueprints/ammo';
 import { WEAPON_TABLE } from '../blueprints/weapons';
 import { Blueprint, WeaponSpec, AmmoSpec } from '../blueprints';
-import { pushEvent, view } from '../world';
+import { pushEvent, removeComponent, view } from '../world';
 import { WeaponFiredEvent } from '../events';
 import { BULLET_SPRITE_CONFIG, getWeaponUpgrade, SpriteSpec } from '../configs';
 
@@ -43,6 +43,10 @@ export function WeaponSystem(world: World, dt: number): void {
         if (!intent || !intent.firing) {
             continue; // 没有开火意图，跳过
         }
+        // 消费掉开火意图
+        removeComponent(world, id, FireIntent);
+        
+        // 第三步：发射武器
         const isPlayer = !!entity.find(PlayerTag.check);
         // console.log(`Entity ${id} firing weapon ${weapon.id}`);
         fireWeapon(world, {

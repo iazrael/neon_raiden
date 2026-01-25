@@ -109,6 +109,15 @@ export function removeComponent<T extends Component>(w: World, id: EntityId, com
     }
 }
 
+// ======= 判断是否存在指定组件 =======
+export function hasComponent<T extends Component>(w: World, id: EntityId, compCtor: Ctor<T>): boolean {
+    const comps = w.entities.get(id);
+    if (comps) {
+        return comps.some(c => c instanceof compCtor);
+    }
+    return false;
+}
+
 // ========== 删除实体 ==========
 export function removeEntity(w: World, id: EntityId) {
     w.entities.delete(id);
