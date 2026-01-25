@@ -43,7 +43,7 @@ export function CleanupSystem(world: World, dt: number): void {
 
     for (const [id, comps] of world.entities) {
         // 检查是否有销毁标记
-        const hasDestroyTag = comps.some(c => c instanceof DestroyTag);
+        const hasDestroyTag = comps.some(DestroyTag.check);
         if (hasDestroyTag) {
             toRemove.push(id);
         }
@@ -54,7 +54,7 @@ export function CleanupSystem(world: World, dt: number): void {
         const comps = world.entities.get(id);
         if (comps) {
             // 处理对象池回收（如果有 reusePool 属性）
-            const destroyTag = comps.find(c => c instanceof DestroyTag) as DestroyTag | undefined;
+            const destroyTag = comps.find(DestroyTag.check) as DestroyTag | undefined;
             if (destroyTag?.reusePool) {
                 // TODO: 回收到对象池
                 // 目前简单处理：直接删除
@@ -109,7 +109,7 @@ export function destroyEntity(world: World, entityId: number, reason: DestroyTag
     if (!comps) return;
 
     // 检查是否已有销毁标记
-    const hasDestroyTag = comps.some(c => c instanceof DestroyTag);
+    const hasDestroyTag = comps.some(DestroyTag.check);
     if (!hasDestroyTag) {
         comps.push(new DestroyTag({ reason }));
     }

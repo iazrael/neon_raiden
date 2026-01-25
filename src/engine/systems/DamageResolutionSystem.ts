@@ -103,7 +103,7 @@ function applyDamage(world: World, event: HitEvent): void {
  */
 function processDamageOverTime(world: World, dt: number): void {
     for (const [id, comps] of world.entities) {
-        const dots = comps.filter(c => c instanceof DamageOverTime) as DamageOverTime[];
+        const dots = comps.filter(DamageOverTime.check) as DamageOverTime[];
 
         for (const dot of dots) {
             // 检查 DOT 是否结束
@@ -149,7 +149,7 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
     if (!victimComps) return;
 
     // 获取分数值
-    const scoreValue = victimComps.find(c => c instanceof ScoreValue) as ScoreValue | undefined;
+    const scoreValue = victimComps.find(ScoreValue.check) as ScoreValue | undefined;
     const score = scoreValue?.value ?? 100;
 
     // 生成 KillEvent
@@ -170,7 +170,7 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
     world.events.push(soundEvent);
 
     // 添加销毁标记
-    const hasDestroyTag = victimComps.some(c => c instanceof DestroyTag);
+    const hasDestroyTag = victimComps.some(DestroyTag.check);
     if (!hasDestroyTag) {
         victimComps.push(new DestroyTag({ reason: 'killed' }));
     }

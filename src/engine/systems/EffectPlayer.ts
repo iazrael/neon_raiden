@@ -336,7 +336,7 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
  */
 export function updateParticles(world: World, dt: number): void {
     for (const [id, comps] of world.entities) {
-        const particle = comps.find(c => c instanceof Particle) as Particle | undefined;
+        const particle = comps.find(Particle.check) as Particle | undefined;
         if (!particle) continue;
 
         // 累加帧时间
@@ -345,7 +345,7 @@ export function updateParticles(world: World, dt: number): void {
         // 检查是否播放完毕
         if (particle.frame >= particle.maxFrame) {
             // 标记为销毁
-            const lifetime = comps.find(c => c instanceof Lifetime) as Lifetime | undefined;
+            const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
             if (lifetime) {
                 lifetime.timer = 0; // 强制过期
             }

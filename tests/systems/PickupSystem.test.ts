@@ -39,7 +39,7 @@ describe('PickupSystem', () => {
             PickupSystem(world, 0.016);
 
             const comps = world.entities.get(playerId);
-            const weapon = comps?.find(c => c instanceof Weapon);
+            const weapon = comps?.find(Weapon.check);
             expect(weapon).toBeDefined();
             expect((weapon as Weapon).id).toBe(WeaponId.LASER);
         });
@@ -101,7 +101,7 @@ describe('PickupSystem', () => {
             PickupSystem(world, 0.016);
 
             const comps = world.entities.get(playerId);
-            const weapon = comps?.find(c => c instanceof Weapon);
+            const weapon = comps?.find(Weapon.check);
             expect((weapon as Weapon).id).toBe(WeaponId.LASER);
         });
     });
@@ -193,7 +193,7 @@ describe('PickupSystem', () => {
             PickupSystem(world, 0.016);
 
             const comps = world.entities.get(playerId);
-            const buff = comps?.find(c => c instanceof Buff);
+            const buff = comps?.find(Buff.check);
             expect(buff).toBeDefined();
             expect((buff as Buff).type).toBe(BuffType.INVINCIBILITY);
         });
@@ -215,7 +215,7 @@ describe('PickupSystem', () => {
             PickupSystem(world, 0.016);
 
             const comps = world.entities.get(playerId);
-            const buff = comps?.find(c => c instanceof Buff);
+            const buff = comps?.find(Buff.check);
             expect(buff).toBeDefined();
             expect((buff as Buff).type).toBe(BuffType.TIME_SLOW);
         });

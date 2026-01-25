@@ -69,8 +69,8 @@ function checkCollisionType(world: World, id1: EntityId, id2: EntityId): Collisi
     if (!comps1 || !comps2) return null;
 
     // 检查是否有碰撞盒
-    const hitBox1 = comps1.find(c => c instanceof HitBox) as HitBox | undefined;
-    const hitBox2 = comps2.find(c => c instanceof HitBox) as HitBox | undefined;
+    const hitBox1 = comps1.find(HitBox.check) as HitBox | undefined;
+    const hitBox2 = comps2.find(HitBox.check) as HitBox | undefined;
 
     if (!hitBox1 || !hitBox2) return null;
 
@@ -86,14 +86,14 @@ function checkCollisionType(world: World, id1: EntityId, id2: EntityId): Collisi
     }
 
     // 确定碰撞类型
-    const bullet1 = comps1.find(c => c instanceof Bullet) as Bullet | undefined;
-    const bullet2 = comps2.find(c => c instanceof Bullet) as Bullet | undefined;
-    const player1 = comps1.find(c => c instanceof PlayerTag);
-    const player2 = comps2.find(c => c instanceof PlayerTag);
-    const enemy1 = comps1.find(c => c instanceof EnemyTag);
-    const enemy2 = comps2.find(c => c instanceof EnemyTag);
-    const pickup1 = comps1.find(c => c instanceof PickupItem) as PickupItem | undefined;
-    const pickup2 = comps2.find(c => c instanceof PickupItem) as PickupItem | undefined;
+    const bullet1 = comps1.find(Bullet.check) as Bullet | undefined;
+    const bullet2 = comps2.find(Bullet.check) as Bullet | undefined;
+    const player1 = comps1.find(PlayerTag.check);
+    const player2 = comps2.find(PlayerTag.check);
+    const enemy1 = comps1.find(EnemyTag.check);
+    const enemy2 = comps2.find(EnemyTag.check);
+    const pickup1 = comps1.find(PickupItem.check) as PickupItem | undefined;
+    const pickup2 = comps2.find(PickupItem.check) as PickupItem | undefined;
 
     // 子弹击中敌人
     if (bullet1 && enemy2) return 'bullet_hit_enemy';
@@ -151,8 +151,8 @@ function handleCollision(world: World, collision: CollisionPair): void {
     let victimTransform: Transform;
 
     if (type === 'bullet_hit_enemy' || type === 'bullet_hit_player') {
-        const bullet1 = comps1.find(c => c instanceof Bullet) as Bullet | undefined;
-        const bullet2 = comps2.find(c => c instanceof Bullet) as Bullet | undefined;
+        const bullet1 = comps1.find(Bullet.check) as Bullet | undefined;
+        const bullet2 = comps2.find(Bullet.check) as Bullet | undefined;
 
         if (bullet1) {
             attackerId = bullet1.owner;
@@ -211,9 +211,9 @@ function handleCollision(world: World, collision: CollisionPair): void {
         }
     } else if (type === 'player_pickup') {
         // 确定玩家和道具
-        const player1 = comps1.find(c => c instanceof PlayerTag);
-        const pickup1 = comps1.find(c => c instanceof PickupItem) as PickupItem | undefined;
-        const pickup2 = comps2.find(c => c instanceof PickupItem) as PickupItem | undefined;
+        const player1 = comps1.find(PlayerTag.check);
+        const pickup1 = comps1.find(PickupItem.check) as PickupItem | undefined;
+        const pickup2 = comps2.find(PickupItem.check) as PickupItem | undefined;
 
         let playerId: EntityId;
         let pickup: PickupItem;

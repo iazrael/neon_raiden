@@ -128,7 +128,7 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
     if (playerComps) {
         console.log('[RenderSystem] Player components:', playerComps.map(c => c.constructor.name));
         const transform = playerComps.find(Transform.check);
-        const sprite = playerComps.find(c => c instanceof Sprite);
+        const sprite = playerComps.find(Sprite.check);
         console.log('[RenderSystem] Player Transform:', transform);
         console.log('[RenderSystem] Player Sprite:', sprite);
     }

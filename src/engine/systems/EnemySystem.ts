@@ -86,7 +86,7 @@ export function EnemySystem(world: World, dt: number): void {
     // 获取玩家位置
     let playerPos: { x: number; y: number } | null = null;
     for (const [id, comps] of world.entities) {
-        const playerTag = comps.find(c => c instanceof PlayerTag);
+        const playerTag = comps.find(PlayerTag.check);
         if (playerTag) {
             const transform = comps.find(Transform.check) as Transform | undefined;
             if (transform) {
@@ -100,7 +100,7 @@ export function EnemySystem(world: World, dt: number): void {
 
     // 处理每个敌人
     for (const [enemyId, comps] of world.entities) {
-        const enemyTag = comps.find(c => c instanceof EnemyTag) as EnemyTag | undefined;
+        const enemyTag = comps.find(EnemyTag.check) as EnemyTag | undefined;
         if (!enemyTag) continue;
 
         const transform = comps.find(Transform.check) as Transform | undefined;
@@ -208,7 +208,7 @@ function generateFireIntent(
     enemyTag: EnemyTag
 ): void {
     // 检查是否有武器组件
-    const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;
+    const weapon = comps.find(Weapon.check) as Weapon | undefined;
     if (!weapon) return;
 
     // 检查是否在冷却中

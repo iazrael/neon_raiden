@@ -187,7 +187,7 @@ export function LootSystem(world: World) {
 
         // 1. 查找该实体是否有 DropTable 组件
         // 注意：这里假设你有一个 helper 或者直接遍历查找
-        const dropTableComp = entityComp.find(c => c instanceof DropTable) as DropTable;
+        const dropTableComp = entityComp.find(DropTable.check) as DropTable;
         const transformComp = entityComp.find(Transform.check) as Transform;
 
         if (dropTableComp && transformComp) {

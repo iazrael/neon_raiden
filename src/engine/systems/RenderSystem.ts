@@ -174,13 +174,13 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
 
     for (const [, comps] of world.entities) {
         const transform = comps.find(Transform.check) as Transform | undefined;
-        const sprite = comps.find(c => c instanceof Sprite) as Sprite | undefined;
+        const sprite = comps.find(Sprite.check) as Sprite | undefined;
 
         if (!transform || !sprite) continue;
 
         // 确定渲染层级
         const layer = determineLayer(comps);
-        const particle = comps.find(c => c instanceof Particle) as Particle | undefined;
+        const particle = comps.find(Particle.check) as Particle | undefined;
 
         renderItems.push({
             transform,
@@ -232,13 +232,13 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
  * 确定实体的渲染层级
  */
 function determineLayer(comps: any[]): RenderLayer {
-    if (comps.some(c => c instanceof Particle)) {
+    if (comps.some(Particle.check)) {
         return RenderLayer.PARTICLE;
     }
-    if (comps.some(c => c instanceof PlayerTag)) {
+    if (comps.some(PlayerTag.check)) {
         return RenderLayer.PLAYER;
     }
-    if (comps.some(c => c instanceof EnemyTag)) {
+    if (comps.some(EnemyTag.check)) {
         return RenderLayer.ENEMY;
     }
     return RenderLayer.PICKUP;

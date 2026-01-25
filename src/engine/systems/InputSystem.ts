@@ -29,7 +29,7 @@ export function InputSystem(world: World, dt: number): void {
 
     // 找到玩家实体
     for (const [playerId, comps] of world.entities) {
-        const playerTag = comps.find(c => c instanceof PlayerTag);
+        const playerTag = comps.find(PlayerTag.check);
         if (!playerTag) continue;
 
         // 处理移动输入
@@ -67,7 +67,7 @@ export function InputSystem(world: World, dt: number): void {
         // 处理开火输入
         if (isFiring) {
             // 检查是否已有开火意图（每帧只添加一次）
-            const hasFireIntent = comps.some(c => c instanceof FireIntent);
+            const hasFireIntent = comps.some(FireIntent.check);
             if (!hasFireIntent) {
                 comps.push(new FireIntent({ firing: true }));
             }
@@ -76,7 +76,7 @@ export function InputSystem(world: World, dt: number): void {
         // 处理炸弹输入
         if (isBombing) {
             // 检查是否已有炸弹意图（每帧只添加一次）
-            const hasBombIntent = comps.some(c => c instanceof BombIntent);
+            const hasBombIntent = comps.some(BombIntent.check);
             if (!hasBombIntent) {
                 comps.push(new BombIntent());
             }

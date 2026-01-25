@@ -115,7 +115,7 @@ describe('DifficultySystem', () => {
 
         it('应该根据武器等级评分', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const weapon = playerComps?.find(c => c instanceof Weapon) as Weapon;
+            const weapon = playerComps?.find(Weapon.check) as Weapon;
 
             // 高等级武器
             weapon!.level = 5;

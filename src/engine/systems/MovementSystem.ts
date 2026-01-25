@@ -23,18 +23,18 @@ export function MovementSystem(world: World, dt: number): void {
     // 遍历所有有 Transform 和 Velocity 的实体
     for (const [id, comps] of world.entities) {
         const transform = comps.find(Transform.check) as Transform | undefined;
-        const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
+        const velocity = comps.find(Velocity.check) as Velocity | undefined;
 
         if (!transform || !velocity) continue;
 
         // 获取速度限制组件（可选）
-        const speedStat = comps.find(c => c instanceof SpeedStat) as SpeedStat | undefined;
+        const speedStat = comps.find(SpeedStat.check) as SpeedStat | undefined;
 
         // 获取移动意图组件（可选，每帧清除）
-        const moveIntent = comps.find(c => c instanceof MoveIntent) as MoveIntent | undefined;
+        const moveIntent = comps.find(MoveIntent.check) as MoveIntent | undefined;
 
         // 获取击退组件（可选）
-        const knockback = comps.find(c => c instanceof Knockback) as Knockback | undefined;
+        const knockback = comps.find(Knockback.check) as Knockback | undefined;
 
         // 计算实际速度
         let vx = velocity.vx;

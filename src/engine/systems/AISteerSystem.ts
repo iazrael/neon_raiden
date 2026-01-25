@@ -43,11 +43,11 @@ export function AISteerSystem(world: World, dt: number): void {
     const enemies: Array<{ id: EntityId; pos: { x: number; y: number }; vel: { x: number; y: number } }> = [];
 
     for (const [id, comps] of world.entities) {
-        const enemyTag = comps.find(c => c instanceof EnemyTag) as EnemyTag | undefined;
+        const enemyTag = comps.find(EnemyTag.check) as EnemyTag | undefined;
         if (!enemyTag) continue;
 
         const transform = comps.find(Transform.check) as Transform | undefined;
-        const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
+        const velocity = comps.find(Velocity.check) as Velocity | undefined;
 
         if (transform && velocity) {
             enemies.push({

@@ -39,7 +39,7 @@ describe('BossPhaseSystem', () => {
         it('应该检查 Boss 血量阶段', () => {
             const bossComps = mockWorld.entities.get(bossId);
             const health = bossComps?.find(Health.check) as Health;
-            const bossAI = bossComps?.find(c => c instanceof BossAI) as BossAI;
+            const bossAI = bossComps?.find(BossAI.check) as BossAI;
 
             // 满血状态
             health!.hp = 2000;
@@ -71,7 +71,7 @@ describe('BossPhaseSystem', () => {
         it('应该应用阶段的速度修正', () => {
             const bossComps = mockWorld.entities.get(bossId);
             const health = bossComps?.find(Health.check) as Health;
-            const speedStat = bossComps?.find(c => c instanceof SpeedStat) as SpeedStat;
+            const speedStat = bossComps?.find(SpeedStat.check) as SpeedStat;
 
             const initialSpeed = speedStat!.maxLinear;
 
@@ -90,7 +90,7 @@ describe('BossPhaseSystem', () => {
     describe('事件生成', () => {
         it('应该处理阶段相关逻辑', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const bossAI = bossComps?.find(c => c instanceof BossAI) as BossAI;
+            const bossAI = bossComps?.find(BossAI.check) as BossAI;
 
             // 设置为阶段 1
             bossAI!.phase = 1;
@@ -186,12 +186,12 @@ describe('BossPhaseSystem', () => {
 
             // 两个 Boss 都应该保持初始阶段
             const boss1Comps = mockWorld.entities.get(bossId);
-            const boss1AI = boss1Comps?.find(c => c instanceof BossAI) as BossAI;
+            const boss1AI = boss1Comps?.find(BossAI.check) as BossAI;
             expect(boss1AI!.phase).toBe(0);
 
             // 第二个 Boss 应该保持初始阶段
             const boss2Comps = mockWorld.entities.get(bossId2);
-            const boss2AI = boss2Comps?.find(c => c instanceof BossAI) as BossAI;
+            const boss2AI = boss2Comps?.find(BossAI.check) as BossAI;
             expect(boss2AI!.phase).toBe(0);
         });
     });

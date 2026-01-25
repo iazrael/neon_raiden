@@ -126,7 +126,7 @@ function clampCameraBounds(minX = -100, minY = -100, maxX = 100, maxY = 100): vo
  */
 function processCameraShakeComponents(world: World): void {
     for (const [id, comps] of world.entities) {
-        const shake = comps.find(c => c instanceof CameraShake) as CameraShake | undefined;
+        const shake = comps.find(CameraShake.check) as CameraShake | undefined;
         if (!shake) continue;
 
         // 应用震屏
@@ -211,7 +211,7 @@ export function addCameraShake(world: World, entityId: number, intensity: number
     if (!comps) return;
 
     // 检查是否已有 CameraShake 组件
-    const existing = comps.find(c => c instanceof CameraShake);
+    const existing = comps.find(CameraShake.check);
     if (existing) {
         // 更新现有组件
         (existing as CameraShake).intensity = intensity;

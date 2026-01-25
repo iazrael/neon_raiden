@@ -170,7 +170,7 @@ describe('DamageResolutionSystem', () => {
 
             DamageResolutionSystem(world, 0.016);
 
-            const destroyTag = world.entities.get(victimId)?.find(c => c instanceof DestroyTag);
+            const destroyTag = world.entities.get(victimId)?.find(DestroyTag.check);
             expect(destroyTag).toBeDefined();
             expect(destroyTag?.reason).toBe('killed');
         });

@@ -151,7 +151,7 @@ function shouldSpawnBoss(world: World): boolean {
 
     // 检查场上是否已有 Boss
     for (const [id, comps] of world.entities) {
-        const bossTag = comps.find(c => c instanceof BossTag);
+        const bossTag = comps.find(BossTag.check);
         if (bossTag) return false;
     }
 

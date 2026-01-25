@@ -143,7 +143,7 @@ export function InputSystem(w: World) {
 
   // 2. 处理移动意图 (MoveIntent)
   // 查找现有的 MoveIntent
-  const moveIntent = playerComps.find(c => c instanceof MoveIntent) as MoveIntent;
+  const moveIntent = playerComps.find(MoveIntent.check) as MoveIntent;
 
   if (moveVec.x !== 0 || moveVec.y !== 0) {
     if (moveIntent) {
@@ -164,7 +164,7 @@ export function InputSystem(w: World) {
   }
 
   // 3. 处理开火意图 (FireIntent)
-  const fireIntent = playerComps.find(c => c instanceof FireIntent);
+  const fireIntent = playerComps.find(FireIntent.check);
   
   if (isFiring) {
     if (!fireIntent) {
@@ -458,7 +458,7 @@ export function InputSystem(w: World, dt: number) {
     const playerComps = w.entities.get(id)!;
 
     // === 处理移动 (优先处理触摸/鼠标拖拽，其次键盘) ===
-    const existingMove = playerComps.find(c => c instanceof MoveIntent) as MoveIntent;
+    const existingMove = playerComps.find(MoveIntent.check) as MoveIntent;
     
     // 逻辑：如果有指针位移，直接使用像素偏移 (Offset)
     if (Math.abs(pointerDelta.x) > 0.1 || Math.abs(pointerDelta.y) > 0.1) {
@@ -491,7 +491,7 @@ export function InputSystem(w: World, dt: number) {
     }
 
     // === 处理开火 ===
-    const existingFire = playerComps.find(c => c instanceof FireIntent);
+    const existingFire = playerComps.find(FireIntent.check);
     if (isFiring) {
       if (!existingFire) playerComps.push(new FireIntent());
     } else {
@@ -499,7 +499,7 @@ export function InputSystem(w: World, dt: number) {
     }
 
     // === 处理炸弹 (B键) ===
-    const existingBomb = playerComps.find(c => c instanceof BombIntent);
+    const existingBomb = playerComps.find(BombIntent.check);
     if (isBombing) {
       // 炸弹通常是一次性触发，这里持续按住会持续产生意图
       // 后续 SkillSystem 需要处理冷却或消耗
@@ -641,7 +641,7 @@ export function MovementSystem(w: World, dt: number) {
       tr.y += intent.dy;
 
       // 如果有速度组件，在触摸移动时应将速度归零，防止切回键盘时有惯性残留
-      const vel = w.entities.get(id)?.find(c => c instanceof Velocity) as Velocity;
+      const vel = w.entities.get(id)?.find(Velocity.check) as Velocity;
       if (vel) {
         vel.vx = 0;
         vel.vy = 0;
@@ -661,7 +661,7 @@ export function MovementSystem(w: World, dt: number) {
     // 4. 边界限制 (仅针对玩家)
     // ==========================================
     // 检查是否有 PlayerTag
-    const isPlayer = w.entities.get(id)?.some(c => c instanceof PlayerTag);
+    const isPlayer = w.entities.get(id)?.some(PlayerTag.check);
     
     if (isPlayer) {
       // 假设飞船半径大概 24，留一点边距

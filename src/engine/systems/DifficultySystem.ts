@@ -135,7 +135,7 @@ function evaluatePerformance(world: World): number {
     // 3. 根据武器等级评分 (20分)
     let maxWeaponLevel = 1;
     for (const [id, comps] of world.entities) {
-        const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;
+        const weapon = comps.find(Weapon.check) as Weapon | undefined;
         if (weapon && weapon.level > maxWeaponLevel) {
             maxWeaponLevel = weapon.level;
         }

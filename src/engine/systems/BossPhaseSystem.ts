@@ -31,11 +31,11 @@ const bossPreviousPhases = new Map<number, number>();
 export function BossPhaseSystem(world: World, dt: number): void {
     // 收集所有 Boss 实体
     for (const [id, comps] of world.entities) {
-        const bossTag = comps.find(c => c instanceof BossTag) as BossTag | undefined;
+        const bossTag = comps.find(BossTag.check) as BossTag | undefined;
         if (!bossTag) continue;
 
         const health = comps.find(Health.check) as Health | undefined;
-        const bossAI = comps.find(c => c instanceof BossAI) as BossAI | undefined;
+        const bossAI = comps.find(BossAI.check) as BossAI | undefined;
 
         if (!health || !bossAI) continue;
 
@@ -116,14 +116,14 @@ function applyPhaseModifiers(comps: any[], phaseSpec: any): void {
     const modifiers = phaseSpec.modifiers || {};
 
     // 应用速度修正
-    const speedStat = comps.find(c => c instanceof SpeedStat) as SpeedStat | undefined;
+    const speedStat = comps.find(SpeedStat.check) as SpeedStat | undefined;
     if (speedStat && modifiers.moveSpeed) {
         speedStat.maxLinear *= modifiers.moveSpeed;
     }
 
     // 应用武器切换
     if (phaseSpec.weaponId) {
-        const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;
+        const weapon = comps.find(Weapon.check) as Weapon | undefined;
         if (weapon) {
             // 这里需要根据 weaponId 切换武器
             // 简化处理：更新武器配置

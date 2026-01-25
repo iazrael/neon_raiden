@@ -84,10 +84,10 @@ export function WeaponSynergySystem(world: World, dt: number): void {
     const playerWeapons: WeaponId[] = [];
 
     for (const [id, comps] of world.entities) {
-        const playerTag = comps.find(c => c instanceof PlayerTag);
+        const playerTag = comps.find(PlayerTag.check);
         if (!playerTag) continue;
 
-        const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
+        const weapons = comps.filter(Weapon.check) as Weapon[];
         for (const weapon of weapons) {
             // 只处理玩家武器类型
             if (isPlayerWeapon(weapon.id)) {
@@ -110,10 +110,10 @@ export function WeaponSynergySystem(world: World, dt: number): void {
 
     // 应用协同效果到玩家的武器组件
     for (const [id, comps] of world.entities) {
-        const playerTag = comps.find(c => c instanceof PlayerTag);
+        const playerTag = comps.find(PlayerTag.check);
         if (!playerTag) continue;
 
-        const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
+        const weapons = comps.filter(Weapon.check) as Weapon[];
 
         for (const weapon of weapons) {
             // 只处理玩家武器

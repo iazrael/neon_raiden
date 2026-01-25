@@ -21,7 +21,7 @@ import { Lifetime, Transform, DestroyTag, PlayerTag } from '../components';
 export function LifetimeSystem(world: World, dt: number): void {
     for (const [id, comps] of world.entities) {
         // 获取生命周期组件
-        const lifetime = comps.find(c => c instanceof Lifetime) as Lifetime | undefined;
+        const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
 
         if (lifetime) {
             // 更新倒计时
@@ -30,7 +30,7 @@ export function LifetimeSystem(world: World, dt: number): void {
             // 倒计时结束，标记为销毁
             if (lifetime.timer <= 0) {
                 // 检查是否已有销毁标记
-                const hasDestroyTag = comps.some(c => c instanceof DestroyTag);
+                const hasDestroyTag = comps.some(DestroyTag.check);
 
                 if (!hasDestroyTag) {
                     // 添加销毁标记
@@ -52,9 +52,9 @@ export function LifetimeSystem(world: World, dt: number): void {
                 transform.y > world.height + margin
             ) {
                 // 玩家不检查边界
-                const isPlayer = comps.some(c => c instanceof PlayerTag);
+                const isPlayer = comps.some(PlayerTag.check);
                 if (!isPlayer) {
-                    const hasDestroyTag = comps.some(c => c instanceof DestroyTag);
+                    const hasDestroyTag = comps.some(DestroyTag.check);
                     if (!hasDestroyTag) {
                         comps.push(new DestroyTag({ reason: 'offscreen' }));
                     }

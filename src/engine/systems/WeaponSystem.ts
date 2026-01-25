@@ -67,9 +67,9 @@ export function WeaponSystem(world: World, dt: number): void {
 
     for (const [id, comps] of world.entities) {
         const transform = comps.find(Transform.check) as Transform | undefined;
-        const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;
-        const intent = comps.find(c => c instanceof FireIntent) as FireIntent | undefined;
-        const playerTag = comps.find(c => c instanceof PlayerTag);
+        const weapon = comps.find(Weapon.check) as Weapon | undefined;
+        const intent = comps.find(FireIntent.check) as FireIntent | undefined;
+        const playerTag = comps.find(PlayerTag.check);
 
         if (!transform || !weapon) continue;
 

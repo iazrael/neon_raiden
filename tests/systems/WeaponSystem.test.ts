@@ -85,7 +85,7 @@ describe('WeaponSystem', () => {
 
             // FireIntent 应该被移除
             const comps = world.entities.get(playerId);
-            const hasFireIntent = comps?.some(c => c instanceof FireIntent);
+            const hasFireIntent = comps?.some(FireIntent.check);
             expect(hasFireIntent).toBe(false);
         });
     });

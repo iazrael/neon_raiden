@@ -256,7 +256,7 @@ export function PickupSystem(world: World) {
   for (const event of world.events) {
     if (event.type === 'COLLISION' && event.targetId === world.playerId) {
       const otherComp = world.entities.get(event.sourceId);
-      const pickup = otherComp?.find(c => c instanceof PickupItem);
+      const pickup = otherComp?.find(PickupItem.check);
       
       if (pickup) {
         handlePickup(world, player, pickup);

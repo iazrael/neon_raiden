@@ -52,7 +52,7 @@ describe('BossSystem', () => {
             BossSystem(mockWorld, 0.1);
 
             const bossComps = mockWorld.entities.get(bossId);
-            const velocity = bossComps?.find(c => c instanceof Velocity) as Velocity;
+            const velocity = bossComps?.find(Velocity.check) as Velocity;
 
             // Boss 应该有垂直速度
             expect(velocity?.vy).toBeGreaterThanOrEqual(0);
@@ -63,13 +63,13 @@ describe('BossSystem', () => {
             BossSystem(mockWorld, 0.1);
 
             const bossComps = mockWorld.entities.get(bossId);
-            const velocity1 = bossComps?.find(c => c instanceof Velocity) as Velocity;
+            const velocity1 = bossComps?.find(Velocity.check) as Velocity;
             const vx1 = velocity1!.vx;
 
             mockWorld.time = 2;
             BossSystem(mockWorld, 0.1);
 
-            const velocity2 = bossComps?.find(c => c instanceof Velocity) as Velocity;
+            const velocity2 = bossComps?.find(Velocity.check) as Velocity;
             const vx2 = velocity2!.vx;
 
             // 不同时间的水平速度应该不同（正弦模式）
@@ -81,7 +81,7 @@ describe('BossSystem', () => {
             BossSystem(mockWorld, 0.1);
 
             const bossComps = mockWorld.entities.get(bossId);
-            const velocity = bossComps?.find(c => c instanceof Velocity) as Velocity;
+            const velocity = bossComps?.find(Velocity.check) as Velocity;
 
             // 速度应该被设置
             expect(velocity).toBeDefined();
@@ -93,7 +93,7 @@ describe('BossSystem', () => {
     describe('Boss 开火', () => {
         it('应该处理武器冷却', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const weapon = bossComps?.find(c => c instanceof Weapon) as Weapon;
+            const weapon = bossComps?.find(Weapon.check) as Weapon;
             weapon!.curCD = 500;
 
             BossSystem(mockWorld, 0.1);
@@ -104,11 +104,11 @@ describe('BossSystem', () => {
 
         it('冷却结束后应该添加开火意图', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const weapon = bossComps?.find(c => c instanceof Weapon) as Weapon;
+            const weapon = bossComps?.find(Weapon.check) as Weapon;
             weapon!.curCD = 0;
 
             // 移除所有开火意图
-            const fireIntents = bossComps!.filter(c => c instanceof FireIntent);
+            const fireIntents = bossComps!.filter(FireIntent.check);
             fireIntents.forEach(f => {
                 const idx = bossComps!.indexOf(f);
                 if (idx > -1) bossComps!.splice(idx, 1);
@@ -117,7 +117,7 @@ describe('BossSystem', () => {
             BossSystem(mockWorld, 0.1);
 
             // 应该添加开火意图
-            const newFireIntent = bossComps!.find(c => c instanceof FireIntent);
+            const newFireIntent = bossComps!.find(FireIntent.check);
             expect(newFireIntent).toBeDefined();
         });
     });
@@ -125,7 +125,7 @@ describe('BossSystem', () => {
     describe('Boss 阶段', () => {
         it('应该根据 BossAI 阶段应用不同行为', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const bossAI = bossComps?.find(c => c instanceof BossAI) as BossAI;
+            const bossAI = bossComps?.find(BossAI.check) as BossAI;
 
             bossAI!.phase = 1;
             BossSystem(mockWorld, 0.1);
@@ -169,7 +169,7 @@ describe('BossSystem', () => {
                 BossSystem(mockWorld, 0.1);
 
                 const bossComps = mockWorld.entities.get(bossId);
-                const velocity = bossComps?.find(c => c instanceof Velocity) as Velocity;
+                const velocity = bossComps?.find(Velocity.check) as Velocity;
                 velocities1.push(velocity!.vx);
             }
 
@@ -178,7 +178,7 @@ describe('BossSystem', () => {
                 BossSystem(mockWorld, 0.1);
 
                 const bossComps = mockWorld.entities.get(bossId);
-                const velocity = bossComps?.find(c => c instanceof Velocity) as Velocity;
+                const velocity = bossComps?.find(Velocity.check) as Velocity;
                 velocities2.push(velocity!.vx);
             }
 

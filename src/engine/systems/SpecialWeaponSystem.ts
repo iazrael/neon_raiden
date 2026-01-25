@@ -55,7 +55,7 @@ function updateHomingMissiles(world: World, dt: number): void {
     const enemies: Map<EntityId, { x: number; y: number }> = new Map();
 
     for (const [id, comps] of world.entities) {
-        const enemyTag = comps.find(c => c instanceof EnemyTag);
+        const enemyTag = comps.find(EnemyTag.check);
         const transform = comps.find(Transform.check) as Transform | undefined;
         const health = comps.find(Health.check);
 
@@ -68,9 +68,9 @@ function updateHomingMissiles(world: World, dt: number): void {
 
     // 更新所有追踪子弹
     for (const [bulletId, comps] of world.entities) {
-        const bullet = comps.find(c => c instanceof Bullet) as Bullet | undefined;
+        const bullet = comps.find(Bullet.check) as Bullet | undefined;
         const transform = comps.find(Transform.check) as Transform | undefined;
-        const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
+        const velocity = comps.find(Velocity.check) as Velocity | undefined;
 
         if (!bullet || !transform || !velocity) continue;
 
@@ -169,7 +169,7 @@ export function handleTeslaChain(
         // 跳过已命中的实体
         if (id === sourceEntity) continue;
 
-        const enemyTag = comps.find(c => c instanceof EnemyTag);
+        const enemyTag = comps.find(EnemyTag.check);
         const transform = comps.find(Transform.check) as Transform | undefined;
         const health = comps.find(Health.check);
 

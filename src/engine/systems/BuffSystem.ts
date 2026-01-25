@@ -41,7 +41,7 @@ const hpHandler: BuffHandler = {
  */
 const powerHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
-        const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
+        const weapons = comps.filter(Weapon.check) as Weapon[];
         for (const weapon of weapons) {
             // 增加伤害倍率
             weapon.damageMultiplier = 1 + buff.value * 0.1;
@@ -54,7 +54,7 @@ const powerHandler: BuffHandler = {
  */
 const speedHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
-        const speedStat = comps.find(c => c instanceof SpeedStat) as SpeedStat | undefined;
+        const speedStat = comps.find(SpeedStat.check) as SpeedStat | undefined;
         if (speedStat) {
             // 增加移动速度
             speedStat.maxLinear *= (1 + buff.value * 0.01);
@@ -104,7 +104,7 @@ const invincibilityHandler: BuffHandler = {
  */
 const rapidFireHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
-        const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
+        const weapons = comps.filter(Weapon.check) as Weapon[];
         for (const weapon of weapons) {
             // 增加射速倍率
             weapon.fireRateMultiplier = 1 + buff.value * 0.05;
@@ -117,7 +117,7 @@ const rapidFireHandler: BuffHandler = {
  */
 const penetrationHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
-        const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
+        const weapons = comps.filter(Weapon.check) as Weapon[];
         for (const weapon of weapons) {
             // 增加穿透次数
             weapon.pierce += Math.floor(buff.value * 0.5);
@@ -157,7 +157,7 @@ const BUFF_HANDLERS: Partial<Record<BuffType, BuffHandler>> = {
 export function BuffSystem(world: World, dt: number): void {
     // 遍历所有实体的 Buff 组件
     for (const [id, comps] of world.entities) {
-        const buffs = comps.filter(c => c instanceof Buff) as Buff[];
+        const buffs = comps.filter(Buff.check) as Buff[];
 
         // 处理每个 Buff
         for (const buff of buffs) {

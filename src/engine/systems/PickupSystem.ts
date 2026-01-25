@@ -65,7 +65,7 @@ function applyWeaponPickup(world: World, playerId: number, weaponId: WeaponId): 
     if (!playerComps) return;
 
     // 查找是否已有该武器
-    const existingWeapon = playerComps.find(c => c instanceof Weapon) as Weapon | undefined;
+    const existingWeapon = playerComps.find(Weapon.check) as Weapon | undefined;
 
     if (existingWeapon && existingWeapon.id === weaponId) {
         // 已有该武器，升级武器等级
@@ -101,7 +101,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
     switch (buffType) {
         case BuffType.POWER:
             // POWER: 武器升级
-            const weapon = playerComps.find(c => c instanceof Weapon) as Weapon | undefined;
+            const weapon = playerComps.find(Weapon.check) as Weapon | undefined;
             if (weapon) {
                 weapon.level = Math.min(weapon.level + 1, 5);
             }

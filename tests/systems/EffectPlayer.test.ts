@@ -131,7 +131,7 @@ describe('EffectPlayer', () => {
 
             // 帧应该增加
             const comps = mockWorld.entities.get(id);
-            const particle = comps?.find(c => c instanceof Particle) as Particle;
+            const particle = comps?.find(Particle.check) as Particle;
             expect(particle!.frame).toBeGreaterThan(0);
         });
 
@@ -149,7 +149,7 @@ describe('EffectPlayer', () => {
 
             // Lifetime 应该被设置为 0
             const comps = mockWorld.entities.get(id);
-            const lifetime = comps?.find(c => c instanceof Lifetime) as Lifetime;
+            const lifetime = comps?.find(Lifetime.check) as Lifetime;
             expect(lifetime!.timer).toBe(0);
         });
     });

@@ -1,4 +1,5 @@
 import { Blueprint } from './blueprints';
+import { BossAI, BossTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon } from './components';
 import { World, EntityId, Component } from './types';
 import { AmmoType } from './types/ids';
 import { addComponent, generateId, getFromPool } from './world';
@@ -26,7 +27,7 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
             continue;
         }
         const comp = new ComponentCtor(args);
-        if (Components.Transform.check(comp)) {
+        if (Transform.check(comp)) {
             // 动态注入出生点
             comp.x = x;
             comp.y = y;
@@ -37,7 +38,7 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
 
     // 调试：如果是子弹，检查是否有 Sprite 组件
     if (pool === 'bullet') {
-        const hasSprite = comps.some(c => c instanceof Components.Sprite);
+        const hasSprite = comps.some(Sprite.check);
         if (!hasSprite) {
             console.error('[factory] Bullet spawned without Sprite!', bp);
         }
@@ -67,34 +68,34 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
     const bossComps = world.entities.get(id);
     if (bossComps) {
         // 确保Boss有必要的组件
-        const bossTag = bossComps.find(c => c instanceof Components.BossTag) as Components.BossTag;
+        const bossTag = bossComps.find(BossTag.check);
         if (bossTag) {
             // 初始化Boss AI组件
-            let bossAI = bossComps.find(c => c instanceof Components.BossAI) as Components.BossAI;
+            let bossAI = bossComps.find(BossAI.check);
             if (!bossAI) {
-                bossAI = new Components.BossAI({ phase: 1, nextPatternTime: 0 });
+                bossAI = new BossAI({ phase: 1, nextPatternTime: 0 });
                 bossComps.push(bossAI);
             }
 
             // 初始化Boss移动意图组件
-            let moveIntent = bossComps.find(c => c instanceof Components.MoveIntent) as Components.MoveIntent;
+            let moveIntent = bossComps.find(MoveIntent.check);
             if (!moveIntent) {
-                moveIntent = new Components.MoveIntent({ dx: 0, dy: 0, type: 'velocity' });
+                moveIntent = new MoveIntent({ dx: 0, dy: 0, type: 'velocity' });
                 bossComps.push(moveIntent);
             }
 
             // 初始化Boss开火意图组件
-            let fireIntent = bossComps.find(c => c instanceof Components.FireIntent) as Components.FireIntent;
+            let fireIntent = bossComps.find(FireIntent.check);
             if (!fireIntent) {
-                fireIntent = new Components.FireIntent({ firing: false });
+                fireIntent = new FireIntent({ firing: false });
                 bossComps.push(fireIntent);
             }
 
             // 确保Boss有武器组件
-            let weapon = bossComps.find(c => c instanceof Components.Weapon) as Components.Weapon;
+            let weapon = bossComps.find(Weapon.check);
             if (!weapon) {
                 // 如果蓝图中没有武器组件，添加默认武器
-                weapon = new Components.Weapon({
+                weapon = new Weapon({
                     id: 'boss_default' as any,
                     ammoType: AmmoType.ENEMY_ORB_GREEN,
                     cooldown: 1000,
@@ -104,9 +105,9 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
             }
 
             // 确保Boss有速度状态组件
-            let speedStat = bossComps.find(c => c instanceof Components.SpeedStat) as Components.SpeedStat;
+            let speedStat = bossComps.find(SpeedStat.check);
             if (!speedStat) {
-                speedStat = new Components.SpeedStat({ maxLinear: 120, maxAngular: 2 });
+                speedStat = new SpeedStat({ maxLinear: 120, maxAngular: 2 });
                 bossComps.push(speedStat);
             }
         }

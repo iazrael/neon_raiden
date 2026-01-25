@@ -176,7 +176,7 @@ describe('BuffSystem', () => {
 
             const comps = world.entities.get(playerId);
             const invState = comps?.find(InvulnerableState.check);
-            const buff = comps?.find(c => c instanceof Buff);
+            const buff = comps?.find(Buff.check);
 
             // Buff 和 InvulnerableState 都应该被移除
             expect(buff).toBeUndefined();
@@ -307,7 +307,7 @@ describe('BuffSystem', () => {
             BuffSystem(world, 0.1); // 超过持续时间
 
             const comps = world.entities.get(playerId);
-            const buff = comps?.find(c => c instanceof Buff);
+            const buff = comps?.find(Buff.check);
             expect(buff).toBeUndefined();
         });
     });

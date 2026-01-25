@@ -39,13 +39,13 @@ export function BossSystem(world: World, dt: number): void {
     }> = [];
 
     for (const [id, comps] of world.entities) {
-        const bossTag = comps.find(c => c instanceof BossTag) as BossTag | undefined;
+        const bossTag = comps.find(BossTag.check) as BossTag | undefined;
         if (!bossTag) continue;
 
         const transform = comps.find(Transform.check) as Transform | undefined;
-        const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
-        const bossAI = comps.find(c => c instanceof BossAI) as BossAI | undefined;
-        const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;
+        const velocity = comps.find(Velocity.check) as Velocity | undefined;
+        const bossAI = comps.find(BossAI.check) as BossAI | undefined;
+        const weapon = comps.find(Weapon.check) as Weapon | undefined;
 
         if (!transform || !bossAI) continue;
 
@@ -232,7 +232,7 @@ function handleBossFiring(
     const comps = world.entities.get(boss.id);
     if (comps) {
         // 检查是否已有开火意图
-        const hasFireIntent = comps.some(c => c instanceof FireIntent);
+        const hasFireIntent = comps.some(FireIntent.check);
         if (!hasFireIntent) {
             comps.push(new FireIntent({ firing: true }));
         }

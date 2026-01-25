@@ -66,7 +66,7 @@ function handleEntityDeath(world: World, event: KillEvent): void {
     if (!entityComps) return;
 
     // 查找 DropTable 组件
-    const dropTable = entityComps.find(c => c instanceof DropTable) as DropTable | undefined;
+    const dropTable = entityComps.find(DropTable.check) as DropTable | undefined;
     const transform = entityComps.find(Transform.check) as Transform | undefined;
 
     if (!dropTable || !transform) return;
