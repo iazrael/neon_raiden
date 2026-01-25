@@ -44,7 +44,7 @@ export class EnemyTag extends Component {
     }
     public id: EnemyId;
     public state: number;
-    public timer: number;
+    public timer: number; // 计时器，用于行为模式切换等, 单位毫秒
 
     static check(c: any): c is EnemyTag { return c instanceof EnemyTag; }
 }

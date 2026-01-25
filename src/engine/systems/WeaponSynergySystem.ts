@@ -77,7 +77,7 @@ const SYNERGY_TABLE: SynergyEffect[] = [
 /**
  * 武器协同系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function WeaponSynergySystem(world: World, dt: number): void {
     // 收集玩家所有武器（只处理玩家武器类型）

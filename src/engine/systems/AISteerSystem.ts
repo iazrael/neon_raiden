@@ -36,7 +36,7 @@ const DEFAULT_STEERING: SteeringConfig = {
 /**
  * AI转向系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function AISteerSystem(world: World, dt: number): void {
     // 收集所有敌人的位置和速度

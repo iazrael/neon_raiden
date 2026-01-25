@@ -17,7 +17,7 @@ import { addComponent, view } from '../world';
 /**
  * 生命周期系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function LifetimeSystem(world: World, dt: number): void {
     for (const [id, [lifetime]] of view(world, [Lifetime])) {

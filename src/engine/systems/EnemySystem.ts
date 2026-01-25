@@ -30,8 +30,8 @@ enum EnemyBehavior {
  * 敌人行为配置
  */
 interface EnemyBehaviorConfig {
-    moveSpeed: number;
-    fireInterval: number;
+    moveSpeed: number; // 像素/秒
+    fireInterval: number; // 发射间隔（毫秒）
     behavior: EnemyBehavior;
     aggressiveness: number; // 0-1，影响攻击频率
 }
@@ -80,7 +80,7 @@ const ENEMY_BEHAVIORS: Partial<Record<EnemyId, EnemyBehaviorConfig>> = {
 /**
  * 敌人系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function EnemySystem(world: World, dt: number): void {
     // 获取玩家位置
@@ -110,7 +110,7 @@ export function EnemySystem(world: World, dt: number): void {
         const config = ENEMY_BEHAVIORS[enemyTag.id] || ENEMY_BEHAVIORS[EnemyId.NORMAL];
 
         // 更新状态计时器
-        enemyTag.timer += dt * 1000;
+        enemyTag.timer += dt;
 
         // 根据行为模式生成移动意图
         generateMoveIntent(comps, transform, playerPos, config, enemyTag);

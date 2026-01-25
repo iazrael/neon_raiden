@@ -57,7 +57,7 @@ function getRandomSpawnPos(world: World): { x: number; y: number } {
 /**
  * 刷怪系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function SpawnSystem(world: World, dt: number): void {
     const config = LEVEL_CONFIGS[world.level];
@@ -70,7 +70,8 @@ export function SpawnSystem(world: World, dt: number): void {
     const timeFactor = (Math.sin(world.time * 0.3) + 1) / 2; // 0.0 ~ 1.0 之间波动
     const waveMultiplier = 0.5 + (1.5 * timeFactor); // 在 0.5倍 ~ 2.0倍之间波动
 
-    const income = config.baseIncome * waveMultiplier * dt;
+    // dt 单位是毫秒，需要转换为秒
+    const income = config.baseIncome * waveMultiplier * (dt / 1000);
 
     // 存入钱包，但不超过上限
     world.spawnCredits = Math.min(
@@ -83,7 +84,7 @@ export function SpawnSystem(world: World, dt: number): void {
     // ==============================
     // 每 0.2 秒检查一次，避免每帧都计算
     world.spawnTimer += dt;
-    if (world.spawnTimer < 0.2) return;
+    if (world.spawnTimer < 200) return; // dt 单位是毫秒，0.2秒 = 200毫秒
     world.spawnTimer = 0;
 
     // 检查是否需要刷 Boss

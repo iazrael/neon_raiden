@@ -39,11 +39,11 @@ const guaranteedDropState: GuaranteedDropConfig = {
 /**
  * 掉落系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function LootSystem(world: World, dt: number): void {
     // 更新保底掉落计时
-    updateGuaranteedDropTimer(world, dt * 1000);
+    updateGuaranteedDropTimer(world, dt);
 
     // 收集本帧的所有死亡事件
     const killEvents = world.events.filter(e => e.type === 'Kill') as KillEvent[];

@@ -152,7 +152,7 @@ const BUFF_HANDLERS: Partial<Record<BuffType, BuffHandler>> = {
 /**
  * Buff系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function BuffSystem(world: World, dt: number): void {
     // 遍历所有实体的 Buff 组件

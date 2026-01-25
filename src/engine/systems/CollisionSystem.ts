@@ -19,7 +19,7 @@ import { HitEvent, PickupEvent } from '../events';
 /**
  * 碰撞检测系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function CollisionSystem(world: World, dt: number): void {
     // 清空上一帧的事件队列

@@ -129,7 +129,7 @@ export class Engine {
         // P1. 决策层 (输入与AI)
         InputSystem(world, dt);                         // 1. 输入系统
         // DifficultySystem(world, dt);                    // 2. 难度系统
-        // SpawnSystem(world, dt);                         // 3. 生成系统
+        SpawnSystem(world, dt);                         // 3. 生成系统
         // BossPhaseSystem(world, dt);                     // 4. Boss阶段系统
         // BossSystem(world, dt);                          // 5. Boss系统
         // EnemySystem(world, dt);                         // 6. 敌人系统
@@ -145,7 +145,7 @@ export class Engine {
         MovementSystem(world, dt);                      // 11. 移动系统
 
         // P4. 交互层 (核心碰撞)
-        // CollisionSystem(world, dt);                     // 12. 碰撞系统
+        CollisionSystem(world, dt);                     // 12. 碰撞系统
 
         // P5. 结算层 (事件处理)
         // PickupSystem(world, dt);                        // 13. 拾取系统

@@ -104,7 +104,7 @@ const audioState: AudioState = {
 /**
  * 音频系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function AudioSystem(world: World, dt: number): void {
     // 收集本帧的所有事件

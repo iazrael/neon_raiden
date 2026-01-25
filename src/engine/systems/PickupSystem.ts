@@ -19,7 +19,7 @@ import { PickupEvent, PlaySoundEvent } from '../events';
 /**
  * 拾取系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function PickupSystem(world: World, dt: number): void {
     // 收集本帧的所有拾取事件
@@ -133,7 +133,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
             playerComps.push(new Buff({
                 type: BuffType.INVINCIBILITY,
                 value: 1,
-                remaining: 3 // 3秒无敌
+                remaining: 3000 // 3秒无敌
             }));
             break;
 
@@ -142,7 +142,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
             playerComps.push(new Buff({
                 type: BuffType.TIME_SLOW,
                 value: 1,
-                remaining: 5 // 5秒减速
+                remaining: 5000 // 5秒减速
             }));
             break;
 

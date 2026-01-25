@@ -81,8 +81,10 @@ export class EnemySystem {
 
     update(dt: number, timeScale: number, enemies: Entity[], player: Entity, enemyBullets: Entity[]) {
         enemies.forEach(e => {
-            e.x += e.vx * timeScale;
-            e.y += e.vy * timeScale;
+            // dt 单位是毫秒，需要转换为秒
+            const dtInSeconds = dt / 1000;
+            e.x += e.vx * timeScale * dtInSeconds;
+            e.y += e.vy * timeScale * dtInSeconds;
 
             // Kamikaze AI
             if (e.subType === EnemyType.KAMIKAZE) {

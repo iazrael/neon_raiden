@@ -19,7 +19,7 @@ import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent } fro
 /**
  * 伤害结算系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function DamageResolutionSystem(world: World, dt: number): void {
     // 处理所有 HitEvent
@@ -122,7 +122,7 @@ function processDamageOverTime(world: World, dt: number): void {
                 const health = comps.find(Health.check) as Health | undefined;
 
                 if (health && transform) {
-                    health.hp -= dot.damagePerSecond * dot.interval;
+                    health.hp -= dot.damagePerSecond * dot.interval / 1000;
 
                     // 检查死亡
                     if (health.hp <= 0) {

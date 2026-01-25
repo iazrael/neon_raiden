@@ -37,7 +37,7 @@ const TESLA_CONFIG = {
 /**
  * 特殊武器效果系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function SpecialWeaponSystem(world: World, dt: number): void {
     // 处理追踪导弹
@@ -122,7 +122,7 @@ function updateHomingMissiles(world: World, dt: number): void {
         while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
 
         // 限制转向速度
-        const maxTurn = HOMING_CONFIG.turnRate * dt;
+        const maxTurn = HOMING_CONFIG.turnRate * dt / 1000; // 毫秒转秒
         let newAngle = currentAngle;
 
         if (Math.abs(angleDiff) <= maxTurn) {

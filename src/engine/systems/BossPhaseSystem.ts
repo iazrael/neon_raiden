@@ -26,7 +26,7 @@ const bossPreviousPhases = new Map<number, number>();
 /**
  * Boss 阶段系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function BossPhaseSystem(world: World, dt: number): void {
     // 收集所有 Boss 实体

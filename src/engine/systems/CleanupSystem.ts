@@ -33,7 +33,7 @@ const stats: CleanupStats = {
 /**
  * 清理系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function CleanupSystem(world: World, dt: number): void {
     let removedCount = 0;

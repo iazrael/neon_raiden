@@ -34,7 +34,7 @@ const COMBO_CONFIG = {
 /**
  * 连击系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function ComboSystem(world: World, dt: number): void {
     // 初始化连击状态（使用旧接口结构）

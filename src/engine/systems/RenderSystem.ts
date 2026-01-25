@@ -122,7 +122,7 @@ export function getRenderContext(): RenderContext | null {
 /**
  * 渲染系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  * @param renderCtx 可选的渲染上下文
  */
 export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext): void {

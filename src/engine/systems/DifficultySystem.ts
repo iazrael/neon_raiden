@@ -69,12 +69,12 @@ const DIFFICULTY_CONFIGS: Record<DifficultyState, DifficultyConfig> = {
 };
 
 /**
- * 难度评估间隔（秒）
+ * 难度评估间隔（毫秒）
  */
-const EVALUATION_INTERVAL = 15;
+const EVALUATION_INTERVAL = 15000; // 每15秒评估一次
 
 /**
- * 上次评估时间
+ * 上次评估时间, 毫秒
  */
 let lastEvaluationTime = 0;
 
@@ -86,7 +86,7 @@ const performanceHistory: number[] = [];
 /**
  * 动态难度系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function DifficultySystem(world: World, dt: number): void {
     // 每隔一定时间评估一次

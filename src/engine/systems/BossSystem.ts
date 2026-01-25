@@ -25,7 +25,7 @@ function isTransform(c: any): c is Transform {
 /**
  * Boss 系统主函数
  * @param world 世界对象
- * @param dt 时间增量（秒）
+ * @param dt 时间增量（毫秒）
  */
 export function BossSystem(world: World, dt: number): void {
     // 收集所有 Boss 实体
@@ -224,7 +224,7 @@ function handleBossFiring(
 
     // 检查武器冷却
     if (boss.weapon.curCD > 0) {
-        boss.weapon.curCD -= dt * 1000 * (phaseSpec.modifiers.fireRate || 1);
+        boss.weapon.curCD -= dt * (phaseSpec.modifiers.fireRate || 1);
         return;
     }
 
