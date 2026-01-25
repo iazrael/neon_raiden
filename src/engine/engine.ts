@@ -27,6 +27,7 @@ import { MovementSystem } from './systems/MovementSystem';
 import { PickupSystem } from './systems/PickupSystem';
 import { RenderSystem, setRenderContext, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
+import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 // ==============
@@ -125,6 +126,7 @@ export class Engine {
         BuffSystem(world, dt);                          // 8. 增益系统
         WeaponSynergySystem(world, dt);                 // 9. 武器协同系统
         WeaponSystem(world, dt);                        // 10. 武器系统
+        SpecialWeaponSystem(world, dt);                 // 11. 特殊武器效果 (追踪、链式等)
 
         // P3. 物理层 (位移)
         MovementSystem(world, dt);                      // 11. 移动系统

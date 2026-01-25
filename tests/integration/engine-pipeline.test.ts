@@ -24,6 +24,8 @@ class MockCanvas {
     width = 800;
     height = 600;
     getContext = jest.fn().mockReturnValue(new MockCanvasRenderingContext2D());
+    addEventListener = jest.fn();
+    removeEventListener = jest.fn();
 }
 
 // Mock ResizeObserver
@@ -47,6 +49,9 @@ describe('Engine Pipeline 集成测试', () => {
     beforeAll(() => {
         // Mock ResizeObserver
         (window as any).ResizeObserver = MockResizeObserver;
+        // Mock window event listeners
+        window.addEventListener = jest.fn();
+        window.removeEventListener = jest.fn();
     });
 
     beforeEach(() => {
