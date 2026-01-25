@@ -74,7 +74,7 @@ describe('DifficultySystem', () => {
     describe('性能评分', () => {
         it('应该根据玩家血量评分', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const health = playerComps?.find(c => c instanceof Health) as Health;
+            const health = playerComps?.find(Health.check) as Health;
 
             // 满血
             health!.hp = 100;
@@ -89,7 +89,7 @@ describe('DifficultySystem', () => {
 
         it('低血量应该降低评分', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const health = playerComps?.find(c => c instanceof Health) as Health;
+            const health = playerComps?.find(Health.check) as Health;
 
             // 低血量
             health!.hp = 10;
@@ -144,7 +144,7 @@ describe('DifficultySystem', () => {
         it('应该根据玩家表现更新难度', () => {
             // 设置低血量触发困难难度评估
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const health = playerComps?.find(c => c instanceof Health) as Health;
+            const health = playerComps?.find(Health.check) as Health;
             health!.hp = 10;
             mockWorld.comboState = { count: 0, timer: 0, multiplier: 1 };
             mockWorld.time = 15;
@@ -262,7 +262,7 @@ describe('DifficultySystem', () => {
         it('评分应该限制在 0-100 范围内', () => {
             // 极端情况：最低评分
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const health = playerComps?.find(c => c instanceof Health) as Health;
+            const health = playerComps?.find(Health.check) as Health;
             health!.hp = 1;
             mockWorld.comboState = { count: 0, timer: 0, multiplier: 1 };
             mockWorld.score = 0;

@@ -109,7 +109,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
 
         case BuffType.HP:
             // HP: 恢复生命值
-            const health = playerComps.find(c => c instanceof Health) as Health | undefined;
+            const health = playerComps.find(Health.check) as Health | undefined;
             if (health) {
                 health.hp = Math.min(health.hp + 30, health.max);
             }

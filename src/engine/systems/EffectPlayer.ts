@@ -262,7 +262,7 @@ function handleBloodFogEvent(world: World, event: BloodFogEvent): void {
 function handleLevelUpEvent(world: World, event: LevelUpEvent): void {
     // 获取玩家位置
     const playerComps = world.entities.get(world.playerId);
-    const transform = playerComps?.find(c => c instanceof Transform) as Transform | undefined;
+    const transform = playerComps?.find(Transform.check) as Transform | undefined;
 
     if (transform) {
         spawnParticle(world, 'levelup', transform.x, transform.y);

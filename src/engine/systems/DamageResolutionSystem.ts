@@ -41,10 +41,10 @@ function applyDamage(world: World, event: HitEvent): void {
     if (!victimComps) return;
 
     // 获取护盾组件
-    const shield = victimComps.find(c => c instanceof Shield) as Shield | undefined;
+    const shield = victimComps.find(Shield.check) as Shield | undefined;
 
     // 获取生命值组件
-    const health = victimComps.find(c => c instanceof Health) as Health | undefined;
+    const health = victimComps.find(Health.check) as Health | undefined;
 
     if (!health) return;
 
@@ -119,7 +119,7 @@ function processDamageOverTime(world: World, dt: number): void {
             if (shouldDamage) {
                 // 应用 DOT 伤害
                 const transform = comps.find(c => c.constructor.name === 'Transform') as { x: number; y: number } | undefined;
-                const health = comps.find(c => c instanceof Health) as Health | undefined;
+                const health = comps.find(Health.check) as Health | undefined;
 
                 if (health && transform) {
                     health.hp -= dot.damagePerSecond * dot.interval;

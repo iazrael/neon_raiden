@@ -92,7 +92,7 @@ function updateFollowTarget(world: World): void {
     const playerComps = world.entities.get(world.playerId);
     if (!playerComps) return;
 
-    const transform = playerComps.find(c => c instanceof Transform) as Transform | undefined;
+    const transform = playerComps.find(Transform.check) as Transform | undefined;
     if (!transform) return;
 
     // 设置目标为玩家位置（居中）

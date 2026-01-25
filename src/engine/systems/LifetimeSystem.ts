@@ -40,7 +40,7 @@ export function LifetimeSystem(world: World, dt: number): void {
         }
 
         // 检查是否飞出屏幕太远（自动销毁）
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         if (transform) {
             const margin = 200; // 屏幕外200像素
 

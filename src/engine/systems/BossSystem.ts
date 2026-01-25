@@ -42,7 +42,7 @@ export function BossSystem(world: World, dt: number): void {
         const bossTag = comps.find(c => c instanceof BossTag) as BossTag | undefined;
         if (!bossTag) continue;
 
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
         const bossAI = comps.find(c => c instanceof BossAI) as BossAI | undefined;
         const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;

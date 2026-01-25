@@ -75,8 +75,8 @@ function checkCollisionType(world: World, id1: EntityId, id2: EntityId): Collisi
     if (!hitBox1 || !hitBox2) return null;
 
     // 检查是否有位置
-    const transform1 = comps1.find(c => c instanceof Transform) as Transform | undefined;
-    const transform2 = comps2.find(c => c instanceof Transform) as Transform | undefined;
+    const transform1 = comps1.find(Transform.check) as Transform | undefined;
+    const transform2 = comps2.find(Transform.check) as Transform | undefined;
 
     if (!transform1 || !transform2) return null;
 
@@ -141,8 +141,8 @@ function handleCollision(world: World, collision: CollisionPair): void {
 
     if (!comps1 || !comps2) return;
 
-    const transform1 = comps1.find(c => c instanceof Transform) as Transform;
-    const transform2 = comps2.find(c => c instanceof Transform) as Transform;
+    const transform1 = comps1.find(Transform.check) as Transform;
+    const transform2 = comps2.find(Transform.check) as Transform;
 
     // 确定攻击者和受害者
     let attackerId: EntityId;
@@ -169,7 +169,7 @@ function handleCollision(world: World, collision: CollisionPair): void {
         // 检查受害者是否处于无敌状态
         const victimComps = world.entities.get(victimId);
         if (victimComps) {
-            const invulnerable = victimComps.find(c => c instanceof InvulnerableState);
+            const invulnerable = victimComps.find(InvulnerableState.check);
             if (invulnerable) return; // 无敌状态，跳过伤害
         }
 

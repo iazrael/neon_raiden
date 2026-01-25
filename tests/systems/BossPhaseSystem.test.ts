@@ -38,7 +38,7 @@ describe('BossPhaseSystem', () => {
     describe('阶段切换', () => {
         it('应该检查 Boss 血量阶段', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const health = bossComps?.find(c => c instanceof Health) as Health;
+            const health = bossComps?.find(Health.check) as Health;
             const bossAI = bossComps?.find(c => c instanceof BossAI) as BossAI;
 
             // 满血状态
@@ -54,7 +54,7 @@ describe('BossPhaseSystem', () => {
 
         it('应该根据血量计算正确的阶段', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const health = bossComps?.find(c => c instanceof Health) as Health;
+            const health = bossComps?.find(Health.check) as Health;
 
             // 设置一个低于阈值的血量
             health!.hp = 500;
@@ -70,7 +70,7 @@ describe('BossPhaseSystem', () => {
     describe('阶段属性修正', () => {
         it('应该应用阶段的速度修正', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const health = bossComps?.find(c => c instanceof Health) as Health;
+            const health = bossComps?.find(Health.check) as Health;
             const speedStat = bossComps?.find(c => c instanceof SpeedStat) as SpeedStat;
 
             const initialSpeed = speedStat!.maxLinear;
@@ -121,7 +121,7 @@ describe('BossPhaseSystem', () => {
 
         it('血量百分比计算应该正确', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const health = bossComps?.find(c => c instanceof Health) as Health;
+            const health = bossComps?.find(Health.check) as Health;
 
             // 50% 血量
             health!.hp = 1000;
@@ -138,7 +138,7 @@ describe('BossPhaseSystem', () => {
         it('resetBossPhases 应该清空阶段记录', () => {
             // 触发一次阶段切换
             const bossComps = mockWorld.entities.get(bossId);
-            const health = bossComps?.find(c => c instanceof Health) as Health;
+            const health = bossComps?.find(Health.check) as Health;
             health!.hp = 100;
             mockWorld.events = [];
 
@@ -156,7 +156,7 @@ describe('BossPhaseSystem', () => {
 
         it('removeBossPhase 应该移除指定 Boss 的阶段记录', () => {
             const bossComps = mockWorld.entities.get(bossId);
-            const health = bossComps?.find(c => c instanceof Health) as Health;
+            const health = bossComps?.find(Health.check) as Health;
             health!.hp = 100;
             mockWorld.events = [];
 

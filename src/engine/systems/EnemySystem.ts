@@ -88,7 +88,7 @@ export function EnemySystem(world: World, dt: number): void {
     for (const [id, comps] of world.entities) {
         const playerTag = comps.find(c => c instanceof PlayerTag);
         if (playerTag) {
-            const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+            const transform = comps.find(Transform.check) as Transform | undefined;
             if (transform) {
                 playerPos = { x: transform.x, y: transform.y };
             }
@@ -103,7 +103,7 @@ export function EnemySystem(world: World, dt: number): void {
         const enemyTag = comps.find(c => c instanceof EnemyTag) as EnemyTag | undefined;
         if (!enemyTag) continue;
 
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         if (!transform) continue;
 
         // 获取敌人行为配置

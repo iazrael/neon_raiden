@@ -2,9 +2,11 @@
  * 武器系统 (WeaponSystem)
  *
  * 职责：
- * - 处理 FireIntent 组件
+ * - 处理 FireIntent 组件，发射子弹
+ * - 玩家的 FireIntent 由 InputSystem 根据武器冷却自动生成
+ * - 敌人的 FireIntent 由 AI 系统生成
  * - 根据武器配置生成子弹实体
- * - 处理武器冷却
+ * - 处理武器冷却重置
  * - 支持不同的弹幕模式（SPREAD、AIMED、RADIAL、SPIRAL等）
  *
  * 系统类型：状态层
@@ -12,7 +14,7 @@
  */
 
 import { World } from '../types';
-import { Transform, Weapon, FireIntent, Bullet, PlayerTag, EnemyTag, Velocity, Sprite } from '../components';
+import { Transform, Weapon, FireIntent, PlayerTag } from '../components';
 import { spawnBullet } from '../factory';
 import { AMMO_TABLE } from '../blueprints/ammo';
 import { Blueprint } from '../blueprints';
@@ -64,24 +66,16 @@ export function WeaponSystem(world: World, dt: number): void {
     }> = [];
 
     for (const [id, comps] of world.entities) {
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         const weapon = comps.find(c => c instanceof Weapon) as Weapon | undefined;
         const intent = comps.find(c => c instanceof FireIntent) as FireIntent | undefined;
+        const playerTag = comps.find(c => c instanceof PlayerTag);
 
         if (!transform || !weapon) continue;
 
         // 检查是否有开火意图
-        const hasFireIntent = intent?.firing === true;
-        if (!hasFireIntent) continue;
+        if (!intent || !intent.firing) continue;
 
-        // 检查是否在冷却中
-        if (weapon.curCD > 0) {
-            weapon.curCD -= dt * 1000;
-            continue;
-        }
-
-        const playerTag = comps.find(c => c instanceof PlayerTag);
-        const enemyTag = comps.find(c => c instanceof EnemyTag);
         const isPlayer = !!playerTag;
 
         firingEntities.push({
@@ -112,7 +106,7 @@ function fireWeapon(
         id: number;
         transform: Transform;
         weapon: Weapon;
-        intent: FireIntent;
+        intent?: FireIntent;
         isPlayer: boolean;
     }
 ): void {

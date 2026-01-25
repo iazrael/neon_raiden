@@ -56,8 +56,8 @@ function updateHomingMissiles(world: World, dt: number): void {
 
     for (const [id, comps] of world.entities) {
         const enemyTag = comps.find(c => c instanceof EnemyTag);
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
-        const health = comps.find(c => c instanceof Health);
+        const transform = comps.find(Transform.check) as Transform | undefined;
+        const health = comps.find(Health.check);
 
         if (enemyTag && transform && health && health.hp > 0) {
             enemies.set(id, { x: transform.x, y: transform.y });
@@ -69,7 +69,7 @@ function updateHomingMissiles(world: World, dt: number): void {
     // 更新所有追踪子弹
     for (const [bulletId, comps] of world.entities) {
         const bullet = comps.find(c => c instanceof Bullet) as Bullet | undefined;
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
 
         if (!bullet || !transform || !velocity) continue;
@@ -170,8 +170,8 @@ export function handleTeslaChain(
         if (id === sourceEntity) continue;
 
         const enemyTag = comps.find(c => c instanceof EnemyTag);
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
-        const health = comps.find(c => c instanceof Health);
+        const transform = comps.find(Transform.check) as Transform | undefined;
+        const health = comps.find(Health.check);
 
         if (!enemyTag || !transform || !health) continue;
         if (health.hp <= 0) continue;

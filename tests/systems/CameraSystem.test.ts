@@ -49,7 +49,7 @@ describe('CameraSystem', () => {
 
         it('应该平滑移动相机', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const transform = playerComps?.find(c => c instanceof Transform) as Transform;
+            const transform = playerComps?.find(Transform.check) as Transform;
             transform!.x = 500;
             transform!.y = 400;
 
@@ -63,7 +63,7 @@ describe('CameraSystem', () => {
 
         it('应该正确计算目标位置', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const transform = playerComps?.find(c => c instanceof Transform) as Transform;
+            const transform = playerComps?.find(Transform.check) as Transform;
             transform!.x = 600;
             transform!.y = 500;
 
@@ -152,7 +152,7 @@ describe('CameraSystem', () => {
 
         it('玩家缺少 Transform 组件时不应该崩溃', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const transform = playerComps?.find(c => c instanceof Transform);
+            const transform = playerComps?.find(Transform.check);
             if (transform) {
                 const idx = playerComps!.indexOf(transform);
                 playerComps!.splice(idx, 1);

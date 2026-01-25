@@ -121,7 +121,7 @@ function evaluatePerformance(world: World): number {
     // 1. 根据血量评分 (40分)
     const playerComps = world.entities.get(world.playerId);
     if (playerComps) {
-        const health = playerComps.find(c => c instanceof Health) as Health | undefined;
+        const health = playerComps.find(Health.check) as Health | undefined;
         if (health) {
             const hpPercent = health.hp / health.max;
             score += (hpPercent - 0.5) * 40; // 血量越高分越高

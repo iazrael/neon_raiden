@@ -34,7 +34,7 @@ export function BossPhaseSystem(world: World, dt: number): void {
         const bossTag = comps.find(c => c instanceof BossTag) as BossTag | undefined;
         if (!bossTag) continue;
 
-        const health = comps.find(c => c instanceof Health) as Health | undefined;
+        const health = comps.find(Health.check) as Health | undefined;
         const bossAI = comps.find(c => c instanceof BossAI) as BossAI | undefined;
 
         if (!health || !bossAI) continue;

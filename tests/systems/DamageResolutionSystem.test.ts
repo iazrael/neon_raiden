@@ -36,7 +36,7 @@ describe('DamageResolutionSystem', () => {
 
             DamageResolutionSystem(world, 0.016);
 
-            const health = world.entities.get(victimId)?.find(c => c instanceof Health) as Health;
+            const health = world.entities.get(victimId)?.find(Health.check) as Health;
             expect(health.hp).toBe(70);
         });
 
@@ -59,7 +59,7 @@ describe('DamageResolutionSystem', () => {
 
             DamageResolutionSystem(world, 0.016);
 
-            const health = world.entities.get(victimId)?.find(c => c instanceof Health) as Health;
+            const health = world.entities.get(victimId)?.find(Health.check) as Health;
             expect(health.hp).toBe(100);
         });
     });
@@ -85,8 +85,8 @@ describe('DamageResolutionSystem', () => {
 
             DamageResolutionSystem(world, 0.016);
 
-            const health = world.entities.get(victimId)?.find(c => c instanceof Health) as Health;
-            const shield = world.entities.get(victimId)?.find(c => c instanceof Shield) as Shield;
+            const health = world.entities.get(victimId)?.find(Health.check) as Health;
+            const shield = world.entities.get(victimId)?.find(Shield.check) as Shield;
 
             expect(health.hp).toBe(100); // 生命值不变
             expect(shield.value).toBe(20); // 护盾减少30
@@ -112,8 +112,8 @@ describe('DamageResolutionSystem', () => {
 
             DamageResolutionSystem(world, 0.016);
 
-            const health = world.entities.get(victimId)?.find(c => c instanceof Health) as Health;
-            const shield = world.entities.get(victimId)?.find(c => c instanceof Shield) as Shield;
+            const health = world.entities.get(victimId)?.find(Health.check) as Health;
+            const shield = world.entities.get(victimId)?.find(Shield.check) as Shield;
 
             expect(shield.value).toBe(0); // 护盾归零
             expect(health.hp).toBe(70); // 生命值减少30
@@ -296,12 +296,12 @@ describe('DamageResolutionSystem', () => {
 
             // 第一帧 - 不应该扣血（间隔未到）
             DamageResolutionSystem(world, 0.1);
-            let health = world.entities.get(victimId)?.find(c => c instanceof Health) as Health;
+            let health = world.entities.get(victimId)?.find(Health.check) as Health;
             expect(health.hp).toBe(100);
 
             // 第二帧 - 应该扣血
             DamageResolutionSystem(world, 0.15);
-            health = world.entities.get(victimId)?.find(c => c instanceof Health) as Health;
+            health = world.entities.get(victimId)?.find(Health.check) as Health;
             expect(health.hp).toBeLessThan(100);
         });
     });

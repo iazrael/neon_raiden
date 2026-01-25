@@ -27,7 +27,7 @@ interface BuffHandler {
  */
 const hpHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
-        const health = comps.find(c => c instanceof Health) as Health | undefined;
+        const health = comps.find(Health.check) as Health | undefined;
         if (health) {
             // 持续恢复生命值
             const healAmount = buff.value * dt;
@@ -67,7 +67,7 @@ const speedHandler: BuffHandler = {
  */
 const shieldHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
-        const shield = comps.find(c => c instanceof Shield) as Shield | undefined;
+        const shield = comps.find(Shield.check) as Shield | undefined;
         if (shield) {
             // 持续恢复护盾
             shield.regen = buff.value;
@@ -86,7 +86,7 @@ const shieldHandler: BuffHandler = {
 const invincibilityHandler: BuffHandler = {
     apply(buff: Buff, comps: unknown[], dt: number): void {
         // 检查是否已有无敌状态组件
-        let invState = comps.find(c => c instanceof InvulnerableState) as InvulnerableState | undefined;
+        let invState = comps.find(InvulnerableState.check) as InvulnerableState | undefined;
 
         if (!invState && buff.remaining > 0) {
             // 添加无敌状态组件
@@ -181,7 +181,7 @@ export function BuffSystem(world: World, dt: number): void {
 
             // 如果是无敌状态结束，移除 InvulnerableState 组件
             if ((buff as Buff).type === BuffType.INVINCIBILITY) {
-                const invState = comps.find(c => c instanceof InvulnerableState);
+                const invState = comps.find(InvulnerableState.check);
                 if (invState) {
                     const invIdx = comps.indexOf(invState);
                     if (invIdx !== -1) comps.splice(invIdx, 1);

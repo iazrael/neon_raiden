@@ -22,7 +22,7 @@ import { Transform, Velocity, SpeedStat, MoveIntent, Knockback } from '../compon
 export function MovementSystem(world: World, dt: number): void {
     // 遍历所有有 Transform 和 Velocity 的实体
     for (const [id, comps] of world.entities) {
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
 
         if (!transform || !velocity) continue;

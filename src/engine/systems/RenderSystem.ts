@@ -17,6 +17,7 @@
 import { World } from '../types';
 import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Bullet, Shield, InvulnerableState, Health, BossTag } from '../components';
 import { SpriteRenderer } from '../SpriteRenderer';
+import { view } from '../world';
 
 /**
  * 渲染层级
@@ -79,6 +80,32 @@ export interface RenderContext {
 let currentContext: RenderContext | null = null;
 
 /**
+ * 调试模式开关
+ */
+export const RenderDebug = {
+    enabled: false,
+    logEntities: false,
+    logTextures: false,
+    logPlayer: false
+};
+
+/**
+ * 设置渲染调试模式
+ */
+export function setRenderDebug(options: {
+    enabled?: boolean;
+    logEntities?: boolean;
+    logTextures?: boolean;
+    logPlayer?: boolean;
+}): void {
+    if (options.enabled !== undefined) RenderDebug.enabled = options.enabled;
+    if (options.logEntities !== undefined) RenderDebug.logEntities = options.logEntities;
+    if (options.logTextures !== undefined) RenderDebug.logTextures = options.logTextures;
+    if (options.logPlayer !== undefined) RenderDebug.logPlayer = options.logPlayer;
+    console.log('[RenderSystem] Debug mode:', RenderDebug);
+}
+
+/**
  * 设置渲染上下文
  */
 export function setRenderContext(ctx: RenderContext): void {
@@ -107,6 +134,15 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
 
     const { canvas, context, width, height } = ctx;
 
+    // ========== 调试日志 ==========
+    if (RenderDebug.enabled) {
+        console.log('[RenderSystem] === Frame Start ===');
+        console.log('[RenderSystem] Canvas size:', width, 'x', height);
+        console.log('[RenderSystem] World entities:', world.entities.size);
+        console.log('[RenderSystem] Player ID:', world.playerId);
+    }
+    // ===========================
+
     // 绘制背景
     drawBackground(context, width, height);
 
@@ -120,11 +156,24 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
     // 收集 Boss 信息（用于血条渲染）
     const bossInfo = collectBossInfo(world);
 
+    // ========== 调试：玩家信息 ==========
+    if (RenderDebug.enabled && RenderDebug.logPlayer) {
+        console.log('[RenderSystem] Player info:', playerInfo ? {
+            hasTransform: !!playerInfo.transform,
+            position: { x: playerInfo.transform.x, y: playerInfo.transform.y },
+            hasShield: !!playerInfo.shield,
+            shieldValue: playerInfo.shield?.value,
+            hasInvulnerable: !!playerInfo.invulnerable,
+            invulnerableDuration: playerInfo.invulnerable?.duration
+        } : 'NO PLAYER');
+    }
+    // ==================================
+
     // 收集所有需要渲染的实体
     const renderItems: RenderItem[] = [];
 
-    for (const [id, comps] of world.entities) {
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+    for (const [, comps] of world.entities) {
+        const transform = comps.find(Transform.check) as Transform | undefined;
         const sprite = comps.find(c => c instanceof Sprite) as Sprite | undefined;
 
         if (!transform || !sprite) continue;
@@ -141,11 +190,30 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
         });
     }
 
+    // ========== 调试：渲染项统计 ==========
+    if (RenderDebug.enabled && RenderDebug.logEntities) {
+        console.log('[RenderSystem] Render items:', renderItems.length);
+        const byLayer: Record<number, number> = {};
+        for (const item of renderItems) {
+            byLayer[item.layer] = (byLayer[item.layer] || 0) + 1;
+        }
+        console.log('[RenderSystem] By layer:', byLayer);
+    }
+    // ====================================
+
     // 按层级排序
     renderItems.sort((a, b) => a.layer - b.layer);
 
     // 绘制所有实体
     for (const item of renderItems) {
+        if (RenderDebug.enabled && RenderDebug.logTextures) {
+            console.log('[RenderSystem] Drawing:', {
+                position: { x: item.transform.x, y: item.transform.y },
+                texture: item.sprite.texture,
+                spriteKey: item.sprite.spriteKey,
+                color: item.sprite.color
+            });
+        }
         drawSprite(context, item, camX, camY, camera.zoom);
     }
 
@@ -349,10 +417,10 @@ function collectPlayerInfo(world: World): PlayerInfo | null {
     const playerComps = world.entities.get(world.playerId);
     if (!playerComps) return null;
 
-    const transform = playerComps.find(c => c instanceof Transform) as Transform | undefined;
-    const shield = playerComps.find(c => c instanceof Shield) as Shield | undefined;
-    const invulnerable = playerComps.find(c => c instanceof InvulnerableState) as InvulnerableState | undefined;
-    const health = playerComps.find(c => c instanceof Health) as Health | undefined;
+    const transform = playerComps.find(Transform.check);
+    const shield = playerComps.find(Shield.check);
+    const invulnerable = playerComps.find(InvulnerableState.check);
+    const health = playerComps.find(Health.check);
 
     if (!transform) return null;
 
@@ -369,16 +437,8 @@ interface BossInfo {
 }
 
 function collectBossInfo(world: World): BossInfo | null {
-    for (const [, comps] of world.entities) {
-        const bossTag = comps.find(c => c instanceof BossTag) as BossTag | undefined;
-        if (!bossTag) continue;
-
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
-        const health = comps.find(c => c instanceof Health) as Health | undefined;
-
-        if (transform && health) {
-            return { transform, health, bossTag };
-        }
+    for (const [id, [bossTag, transform, health]] of view(world, [BossTag, Transform, Health])) {
+        return { transform, health, bossTag };
     }
     return null;
 }

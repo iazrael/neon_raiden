@@ -46,7 +46,7 @@ export function AISteerSystem(world: World, dt: number): void {
         const enemyTag = comps.find(c => c instanceof EnemyTag) as EnemyTag | undefined;
         if (!enemyTag) continue;
 
-        const transform = comps.find(c => c instanceof Transform) as Transform | undefined;
+        const transform = comps.find(Transform.check) as Transform | undefined;
         const velocity = comps.find(c => c instanceof Velocity) as Velocity | undefined;
 
         if (transform && velocity) {
