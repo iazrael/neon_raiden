@@ -94,6 +94,8 @@ export class Bullet extends Component {
     owner: EntityId;
     /** 弹药类型 */
     ammoType: AmmoType;
+    /** 子弹伤害（已包含升级倍率） */
+    damage?: number;
     /** 穿透次数剩余 */
     pierceLeft?: number;
     /** 弹跳次数剩余 */
@@ -104,12 +106,14 @@ export class Bullet extends Component {
     super();
     this.owner = cfg.owner;
     this.ammoType = cfg.ammoType;
+    this.damage = cfg.damage;
     this.pierceLeft = cfg.pierceLeft ?? 0;
     this.bouncesLeft = cfg.bouncesLeft ?? 0;
     this.target = cfg.target;
   }
   public owner: EntityId;
   public ammoType: string;
+  public damage?: number;
   public pierceLeft = 0;
   public bouncesLeft = 0;
   public target?: EntityId;

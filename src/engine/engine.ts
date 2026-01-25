@@ -138,7 +138,7 @@ export class Engine {
         // P2. 状态层 (数值更新)
         // BuffSystem(world, dt);                          // 8. 增益系统
         // WeaponSynergySystem(world, dt);                 // 9. 武器协同系统
-        // WeaponSystem(world, dt);                        // 10. 武器系统
+        WeaponSystem(world, dt);                        // 10. 武器系统
         // SpecialWeaponSystem(world, dt);                 // 11. 特殊武器效果 (追踪、链式等)
 
         // P3. 物理层 (位移)

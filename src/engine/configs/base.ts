@@ -1,8 +1,19 @@
-
+/**
+ * 子弹外观配置（纯视觉，无数值）
+ */
 export type SpriteSpec = {
-    texture: string; // 纹理地址
-    color: string; // 主色调
-    size: { width: number; height: number }; // 视觉尺寸
+    /** 纹理路径 */
+    texture: string;
+    /** 着色颜色（hex + alpha，如 '#ffffffff'） */
+    color: string;
+    /** 源矩形宽度（单帧纹理，srcX/srcY 固定为 0） */
+    srcW: number;
+    /** 源矩形高度 */
+    srcH: number;
+    /** 旋转轴心 X（0-1，默认 0.5） */
+    pivotX: number;
+    /** 旋转轴心 Y（0-1，默认 0.5） */
+    pivotY: number;
 }
 
 export type GalleryEntry = {

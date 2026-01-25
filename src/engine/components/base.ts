@@ -129,7 +129,7 @@ export class Lifetime extends Component {
      * @param cfg 生命周期配置
      */
     constructor(cfg: { 
-        /** 倒计时时间 */
+        /** 倒计时时间, 单位秒 */
         timer: number; 
     }) { 
         super(); 

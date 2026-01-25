@@ -12,7 +12,7 @@
 
 import { World } from '../types';
 import { DestroyTag } from '../components';
-import { freeId } from '../world';
+import { freeId, removeEntity, view } from '../world';
 
 /**
  * 统计信息
@@ -37,43 +37,11 @@ const stats: CleanupStats = {
  */
 export function CleanupSystem(world: World, dt: number): void {
     let removedCount = 0;
-
-    // 收集需要删除的实体 ID
-    const toRemove: number[] = [];
-
-    for (const [id, comps] of world.entities) {
-        // 检查是否有销毁标记
-        const hasDestroyTag = comps.some(DestroyTag.check);
-        if (hasDestroyTag) {
-            toRemove.push(id);
-        }
-    }
-
-    // 删除标记的实体
-    for (const id of toRemove) {
-        const comps = world.entities.get(id);
-        if (comps) {
-            // 处理对象池回收（如果有 reusePool 属性）
-            const destroyTag = comps.find(DestroyTag.check) as DestroyTag | undefined;
-            if (destroyTag?.reusePool) {
-                // TODO: 回收到对象池
-                // 目前简单处理：直接删除
-            }
-
-            // 回收 ID
-            freeId(id);
-        }
-
-        // 从实体集合中删除
-        world.entities.delete(id);
+    // 查找所有带有DestroyTag的实体并删除它们
+    for (const [id, [destroyTag]] of view(world, [DestroyTag])) {
+        removeEntity(world, id);
         removedCount++;
-
-        // 如果删除的是玩家，更新 playerId
-        if (id === world.playerId) {
-            world.playerId = 0;
-        }
     }
-
     // 更新统计
     stats.entitiesRemoved = removedCount;
 
