@@ -256,9 +256,34 @@ function loadSpriteByKey(spriteKey: string, width: number, height: number): HTML
 
 /**
  * 获取纹理图像
+ * 从完整路径中提取资源 key，然后从 SpriteRenderer 获取图像
  */
 function getTextureImage(texture: string): HTMLImageElement | null {
-    return SpriteRenderer.getImage(texture) || null;
+    // 从路径中提取资源 key
+    // 例如: "/assets/fighters/player.svg" -> "player"
+    //        "/assets/bullets/bullet_laser.svg" -> "bullet_laser"
+    //        "/assets/bosses/boss_guardian.svg" -> "boss_guardian"
+    const filename = texture.split('/').pop() || texture;
+    const key = filename.replace('.svg', '').replace('.png', '');
+
+    // 尝试通过 key 获取图像
+    let image = SpriteRenderer.getImage(key);
+
+    // 如果没找到，尝试其他 key 格式
+    if (!image) {
+        // 尝试带 bullet_ 前缀
+        image = SpriteRenderer.getImage(`bullet_${key}`);
+    }
+    if (!image) {
+        // 尝试带 enemy_ 前缀
+        image = SpriteRenderer.getImage(`enemy_${key}`);
+    }
+    if (!image) {
+        // 尝试带 boss_ 前缀
+        image = SpriteRenderer.getImage(`boss_${key}`);
+    }
+
+    return image || null;
 }
 
 /**
