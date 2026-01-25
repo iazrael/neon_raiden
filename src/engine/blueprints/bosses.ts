@@ -4,11 +4,9 @@
 //
 
 import { ASSETS } from '../configs';
-import { BOSS_DATA } from '../configs/bossData';
 import { DROPTABLE_BOSS } from '../configs/droptables/common';
 import { BossId } from '../types';
 import { Blueprint } from './base';
-import { WEAPON_TABLE } from './weapons';
 
 
 // 辅助函数：快速生成 Boss 蓝图
@@ -19,20 +17,17 @@ function createBossBlueprint(
     radius: number,
     score: number
 ): Blueprint {
-    // 自动查找该 Boss 的初始武器 (P1 阶段)
-    const bossSpec = BOSS_DATA[bossId]!;
-    const initialWeaponId = bossSpec.phases[0]!.weaponId;
-
     return {
         Transform: { x: 400, y: -200, rot: 180 },
         Health: { hp, max: hp },
         Sprite: { texture: sprite, srcX: 0, srcY: 0, srcW: radius * 2, srcH: radius * 2, scale: 1 },
         BossTag: { id: bossId }, // 标记为 Boss
         BossAI: { phase: 0, nextPatternTime: 0 }, // 初始阶段 0
-        Weapon: WEAPON_TABLE[initialWeaponId],
+        // 注意：不在蓝图中包含 Weapon，让 factory.ts 的 spawnBoss 添加默认武器
+        // Boss 的武器配置在 BOSS_DATA 中定义，由 BossPhaseSystem 使用
         HitBox: { shape: 'circle', radius: radius * 0.8 },
         // 速度限制
-        // maxLinear: 120 (每秒120像素，用于追踪/移动时的基准速度) 
+        // maxLinear: 120 (每秒120像素，用于追踪/移动时的基准速度)
         // maxAngular: 2 (旋转速度，用于转头瞄准)
         // 建议值：maxLinear: 100 ~ 200 (像素/秒)。
         SpeedStat: { maxLinear: 120, maxAngular: 2 },
