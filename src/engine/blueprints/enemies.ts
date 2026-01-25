@@ -7,7 +7,7 @@ import { ASSETS } from '../configs';
 import { DROPTABLE_COMMON } from '../configs/droptables';
 import { EnemyId, EnemyWeaponId, AmmoType } from '../types';
 import { Blueprint } from './base';
-import { WEAPON_TABLE } from './weapons';
+import { ENEMY_WEAPON_TABLE } from './weapons';
 
 /**
  * 普通敌人蓝图
@@ -39,7 +39,7 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用普通敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
 };
 
 /**
@@ -69,7 +69,7 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用快速敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_FAST]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_FAST]
 };
 
 /**
@@ -99,7 +99,7 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用坦克敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_TANK]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_TANK]
 };
 
 /**
@@ -129,7 +129,7 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 自杀式敌人不使用远程武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_NORMAL]
 };
 
 /**
@@ -159,7 +159,7 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用精英敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_ELITE]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_ELITE]
 };
 
 /**
@@ -189,7 +189,7 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用狙击敌人武器（激光）
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_SNIPER]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_SNIPER]
 };
 
 /**
@@ -219,7 +219,7 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用布雷敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_LAYER]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_LAYER]
 };
 
 /**
@@ -249,7 +249,7 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用脉冲敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_PULSAR]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_PULSAR]
 };
 
 /**
@@ -279,7 +279,7 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用堡垒敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
 };
 
 /**
@@ -309,7 +309,7 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用追踪敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.GENERIC_HOMING]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.GENERIC_HOMING]
 };
 
 /**
@@ -339,7 +339,7 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
     DropTable: { table: DROPTABLE_COMMON },
 
     // 挂载敌人武器组件 - 使用弹幕敌人武器
-    Weapon: WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
+    Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
 };
 
 /**

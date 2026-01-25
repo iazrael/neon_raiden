@@ -12,8 +12,15 @@
 
 import { World } from '../types';
 import { Weapon, PlayerTag } from '../components';
-import { WeaponId } from '../types';
+import { WeaponId, EnemyWeaponId } from '../types';
 import { AMMO_TABLE } from '../blueprints/ammo';
+
+/**
+ * 检查武器 ID 是否为玩家武器
+ */
+function isPlayerWeapon(id: WeaponId | EnemyWeaponId): id is WeaponId {
+    return Object.values(WeaponId).includes(id as WeaponId);
+}
 
 /**
  * 武器协同效果配置
@@ -73,7 +80,7 @@ const SYNERGY_TABLE: SynergyEffect[] = [
  * @param dt 时间增量（秒）
  */
 export function WeaponSynergySystem(world: World, dt: number): void {
-    // 收集玩家所有武器
+    // 收集玩家所有武器（只处理玩家武器类型）
     const playerWeapons: WeaponId[] = [];
 
     for (const [id, comps] of world.entities) {
@@ -82,7 +89,10 @@ export function WeaponSynergySystem(world: World, dt: number): void {
 
         const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
         for (const weapon of weapons) {
-            playerWeapons.push(weapon.id);
+            // 只处理玩家武器类型
+            if (isPlayerWeapon(weapon.id)) {
+                playerWeapons.push(weapon.id);
+            }
         }
     }
 
@@ -106,6 +116,9 @@ export function WeaponSynergySystem(world: World, dt: number): void {
         const weapons = comps.filter(c => c instanceof Weapon) as Weapon[];
 
         for (const weapon of weapons) {
+            // 只处理玩家武器
+            if (!isPlayerWeapon(weapon.id)) continue;
+
             // 重置加成
             weapon.damageMultiplier = 1.0;
             weapon.fireRateMultiplier = 1.0;

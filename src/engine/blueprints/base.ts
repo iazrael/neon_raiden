@@ -49,7 +49,7 @@ export type EnemyWeaponSpec = {
     cooldown: number;
     bulletCount: number; // 子弹数量
     spread?: number; // 扩散角度
-    pattern: 'radial' | 'spread' | 'aimed' | 'random' | 'spiral' | 'fixed_rear'; // 弹幕模式
+    pattern: WeaponPattern; // 弹幕模式
 }
 
 // =========== 子弹 =================

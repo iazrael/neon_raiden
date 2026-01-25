@@ -1,4 +1,4 @@
-import { AmmoType, BuffType, Component, EntityId, WeaponId, WeaponPattern } from '../types';
+import { AmmoType, BuffType, Component, EntityId, EnemyWeaponId, WeaponId, WeaponPattern } from '../types';
 
 // 「攻击 & 防御 & 增益」
 
@@ -30,7 +30,7 @@ export class Weapon extends Component {
    * @param cfg 武器配置
    */
   constructor(cfg: {
-    id: WeaponId
+    id: WeaponId | EnemyWeaponId
     /** 弹药类型 */
     ammoType: AmmoType;
     /** 基础冷却时间 */
@@ -68,7 +68,7 @@ export class Weapon extends Component {
     this.pierce = cfg.pierce ?? 0;
     this.bounces = cfg.bounces ?? 0;
   }
-  public id: WeaponId;
+  public id: WeaponId | EnemyWeaponId;
   public ammoType: AmmoType;
   public cooldown: number;
   public curCD = 0;

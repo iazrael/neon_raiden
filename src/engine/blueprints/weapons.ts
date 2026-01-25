@@ -319,3 +319,12 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
     [EnemyWeaponId.GENERIC_SPREAD]: { id: EnemyWeaponId.GENERIC_SPREAD, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_GREEN, bulletCount: 5, spread: 90, pattern: WeaponPattern.SPREAD },
     [EnemyWeaponId.GENERIC_HOMING]: { id: EnemyWeaponId.GENERIC_HOMING, cooldown: 1500, ammoType: AmmoType.ENEMY_MISSILE, bulletCount: 2, pattern: WeaponPattern.AIMED },
 };
+
+/**
+ * 统一武器表 - 合并玩家和敌人武器
+ * 用于蓝图系统中通过 WeaponId 或 EnemyWeaponId 查找武器配置
+ */
+export const ALL_WEAPONS_TABLE = {
+    ...WEAPON_TABLE,
+    ...ENEMY_WEAPON_TABLE,
+} as const;
