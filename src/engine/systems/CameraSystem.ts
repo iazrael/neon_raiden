@@ -52,21 +52,21 @@ let targetY = 0;
  * 相机系统主函数
  * @param world 世界对象
  * @param dt 时间增量（秒）
+ *
+ * 注意：对于纵向卷轴射击游戏，相机是固定的（0, 0），
+ * 世界坐标就是屏幕坐标，不跟随玩家移动
  */
 export function CameraSystem(world: World, dt: number): void {
     // 1. 处理震屏事件
     handleShakeEvents(world);
 
-    // 2. 更新玩家跟随
-    updateFollowTarget(world);
+    // 相机固定在 (0, 0)，不跟随玩家
+    // 世界坐标 = 屏幕坐标
 
-    // 3. 平滑移动相机
-    smoothMoveCamera();
-
-    // 4. 更新震屏衰减
+    // 2. 更新震屏衰减
     updateCameraShake(dt);
 
-    // 5. 处理 CameraShake 组件（实体上的震屏请求）
+    // 3. 处理 CameraShake 组件（实体上的震屏请求）
     processCameraShakeComponents(world);
 }
 
