@@ -12,11 +12,32 @@
  */
 
 import { Engine } from './engine';
-import { Blueprint } from './blueprints';
-import { GameState, WeaponType } from '@/types';
+import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
+import { GameState, WeaponType, ClickType } from '@/types';
 import type { ComboState } from '@/game/systems/ComboSystem';
 import type { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
 import type { GameSnapshot } from './snapshot';
+
+/**
+ * 简单的 AudioSystem 包装类，兼容旧接口
+ */
+class AudioSystemWrapper {
+    playClick(type: ClickType = ClickType.DEFAULT): void {
+        // TODO: 实现点击音效
+        console.log('playClick:', type);
+    }
+
+    // 其他音频方法...
+}
+
+/**
+ * 模拟的 WeaponSynergySystem，暂时返回空数组
+ */
+class MockWeaponSynergySystem {
+    getActiveSynergies(): SynergyConfig[] {
+        return [];
+    }
+}
 
 /**
  * ReactEngine - 适配新 ECS 引擎供 React 使用
@@ -24,6 +45,10 @@ import type { GameSnapshot } from './snapshot';
 export class ReactEngine {
     private engine: Engine;
     private canvas: HTMLCanvasElement | null = null;
+
+    // ========== 公共系统 (与旧 GameEngine 兼容) ==========
+    public audio: AudioSystemWrapper;
+    public synergySys: MockWeaponSynergySystem;
 
     // ========== 游戏状态 (与旧 GameEngine 兼容) ==========
     public state: GameState = GameState.MENU;
@@ -50,25 +75,48 @@ export class ReactEngine {
     public comboState: ComboState = { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false };
     public activeSynergies: SynergyConfig[] = [];
 
-    // ========== 回调函数 (与旧 GameEngine 兼容) ==========
-    public onScoreChange: (score: number) => void = () => {};
-    public onLevelChange: (level: number) => void = () => {};
-    public onStateChange: (state: GameState) => void = () => {};
-    public onHpChange: (hp: number) => void = () => {};
-    public onBombChange: (bombs: number) => void = () => {};
-    public onMaxLevelChange: (level: number) => void = () => {};
-    public onBossWarning: (show: boolean) => void = () => {};
-    public onComboChange: (state: ComboState) => void = () => {};
-
     // ========== 订阅 cleanup ==========
     private snapshotSubscription: any = null;
 
-    constructor() {
+    // ========== 回调函数 (与旧 GameEngine 兼容) ==========
+    private onScoreChange: (score: number) => void = () => {};
+    private onLevelChange: (level: number) => void = () => {};
+    private onStateChange: (state: GameState) => void = () => {};
+    private onHpChange: (hp: number) => void = () => {};
+    private onBombChange: (bombs: number) => void = () => {};
+    private onMaxLevelChange: (level: number) => void = () => {};
+    private onBossWarning: (show: boolean) => void = () => {};
+    private onComboChange: (state: ComboState) => void = () => {};
+
+    constructor(
+        canvas: HTMLCanvasElement | null = null,
+        onScoreChange?: (s: number) => void,
+        onLevelChange?: (l: number) => void,
+        onStateChange?: (s: GameState) => void,
+        onHpChange?: (hp: number) => void,
+        onBombChange?: (bombs: number) => void,
+        onMaxLevelChange?: (level: number) => void,
+        onBossWarning?: (show: boolean) => void,
+        onComboChange?: (state: ComboState) => void
+    ) {
         this.engine = new Engine();
+        this.canvas = canvas ?? null;
+        this.audio = new AudioSystemWrapper();
+        this.synergySys = new MockWeaponSynergySystem();
+
+        // 设置回调
+        if (onScoreChange) this.onScoreChange = onScoreChange;
+        if (onLevelChange) this.onLevelChange = onLevelChange;
+        if (onStateChange) this.onStateChange = onStateChange;
+        if (onHpChange) this.onHpChange = onHpChange;
+        if (onBombChange) this.onBombChange = onBombChange;
+        if (onMaxLevelChange) this.onMaxLevelChange = onMaxLevelChange;
+        if (onBossWarning) this.onBossWarning = onBossWarning;
+        if (onComboChange) this.onComboChange = onComboChange;
     }
 
     /**
-     * 启动游戏
+     * 启动游戏 (内部方法)
      * @param canvas Canvas 元素
      * @param blueprint 玩家蓝图
      */
@@ -88,6 +136,33 @@ export class ReactEngine {
         // 更新状态
         this.state = GameState.PLAYING;
         this.onStateChange(this.state);
+    }
+
+    /**
+     * 开始游戏 (与旧 GameEngine 兼容)
+     */
+    startGame(): void {
+        if (this.canvas) {
+            // 使用预定义的玩家战机蓝图，包含 Health 等必要组件
+            // 覆盖位置信息以适应当前 canvas 尺寸
+            const blueprint: Blueprint = {
+                ...BLUEPRINT_FIGHTER_NEON,
+                Transform: {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 80,
+                    rot: 0
+                }
+            };
+            this.start(this.canvas, blueprint);
+        }
+    }
+
+    /**
+     * 调整大小 (与旧 GameEngine 兼容)
+     * 实际上由 ResizeObserver 自动处理，这里保留接口兼容性
+     */
+    resize(): void {
+        // 由 Engine 内部的 ResizeObserver 自动处理
     }
 
     /**
