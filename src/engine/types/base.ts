@@ -35,6 +35,8 @@ export interface World {
     width: number;
     // 画布高
     height: number;
+    // 刷怪系统是否已初始化（用于赠送初始点数）
+    spawnInitialized: boolean;
 
     // UI状态字段
     state?: GameState;

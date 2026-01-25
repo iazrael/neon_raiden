@@ -55,6 +55,23 @@ function getRandomSpawnPos(world: World): { x: number; y: number } {
 }
 
 /**
+ * 概率保留函数 - 避免刷"便宜货"，强制系统存钱买贵的
+ */
+function shouldAffordEnemy(cost: number, credits: number, cap: number): boolean {
+    // 如果余额超过上限的 70%，就不再保留
+    if (credits >= cap * 0.7) return true;
+
+    // 如果是便宜货（成本低于上限的 30%），有概率拒绝
+    if (cost < cap * 0.3) {
+        // 基于成本比例决定拒绝概率：越便宜，拒绝概率越高
+        const rejectionProbability = 0.3 + (cap * 0.3 - cost) / cap * 0.4;
+        return Math.random() >= rejectionProbability;
+    }
+
+    return true;
+}
+
+/**
  * 刷怪系统主函数
  * @param world 世界对象
  * @param dt 时间增量（毫秒）
@@ -64,10 +81,20 @@ export function SpawnSystem(world: World, dt: number): void {
     if (!config) return;
 
     // ==============================
+    // 0. 初始化检查（开局赠送）
+    // ==============================
+    // 如果是第一次运行，赠送初始点数
+    if (!world.spawnInitialized) {
+        world.spawnCredits = config.startingCredits;
+        world.spawnInitialized = true;
+        console.log(`SpawnSystem: Initial bonus - ${config.startingCredits} credits`);
+    }
+
+    // ==============================
     // 1. 发工资 (Income Phase)
     // ==============================
     // 使用正弦波模拟"张弛有度"的刷怪节奏
-    const timeFactor = (Math.sin(world.time * 0.3) + 1) / 2; // 0.0 ~ 1.0 之间波动
+    const timeFactor = (Math.sin(world.time) + 1) / 2; // 0.0 ~ 1.0 之间波动
     const waveMultiplier = 0.5 + (1.5 * timeFactor); // 在 0.5倍 ~ 2.0倍之间波动
 
     // dt 单位是毫秒，需要转换为秒
@@ -82,9 +109,9 @@ export function SpawnSystem(world: World, dt: number): void {
     // ==============================
     // 2. 消费 (Spending Phase)
     // ==============================
-    // 每 0.2 秒检查一次，避免每帧都计算
+    // 方案四：波次延迟 - 每 1 秒才能买一次（让钱有时间积累）
     world.spawnTimer += dt;
-    if (world.spawnTimer < 200) return; // dt 单位是毫秒，0.2秒 = 200毫秒
+    if (world.spawnTimer < 1000) return; // dt 单位是毫秒
     world.spawnTimer = 0;
 
     // 检查是否需要刷 Boss
@@ -101,26 +128,32 @@ export function SpawnSystem(world: World, dt: number): void {
     while (attempts < maxAttempts && world.enemyCount < maxEnemies) {
         attempts++;
 
-        // A. 随机挑一个怪
+        // A. 从所有怪物池中按权重随机选择
         const enemyProto = pickEnemyByWeight(config.enemyPool);
         if (!enemyProto) break;
 
-        // B. 买得起吗？
+        // B. 方案一：概率保留 - 如果是便宜货，有概率拒绝
+        if (!shouldAffordEnemy(enemyProto.cost, world.spawnCredits, config.creditCap)) {
+            // 拒绝这个便宜货，选择继续存钱
+            break;
+        }
+
+        // C. 检查买不买得起
         if (world.spawnCredits >= enemyProto.cost) {
-            // C. 找到对应蓝图
+            // D. 找到对应蓝图
             const blueprint = ENEMIES_TABLE[enemyProto.id];
             if (!blueprint) {
                 console.warn(`SpawnSystem: No blueprint found for enemy ID '${enemyProto.id}'`);
                 continue;
             }
 
-            // D. 成交！刷怪
+            // E. 成交！刷怪
             world.spawnCredits -= enemyProto.cost;
             const pos = getRandomSpawnPos(world);
             spawnEnemy(world, blueprint, pos.x, pos.y, 0);
-
+            console.log(`Spawned enemy '${enemyProto.id}' costing ${enemyProto.cost} credits, remaining credits: ${world.spawnCredits.toFixed(2)}`);
         } else {
-            // 买不起最便宜的怪，就跳出循环存钱
+            // 买不起，跳出循环存钱
             break;
         }
     }
@@ -140,9 +173,9 @@ const bossSpawnState: BossSpawnState = {
 };
 
 /**
- * Boss 出现时间（秒）
+ * Boss 出现时间（毫秒）
  */
-const BOSS_SPAWN_TIME = 60; // 60秒后Boss出现
+const BOSS_SPAWN_TIME = 60 * 1000; // 60秒后Boss出现
 
 /**
  * 检查是否需要刷 Boss

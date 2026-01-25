@@ -7,19 +7,20 @@ export * from './types';
 
 export function createWorld(): World {
     return {
-        time: 0,    // 当前时间
+        time: 0,
         entities: new Map(),
         events: [],
-        score: 0,       // 当前分数
-        level: 1,        // 关卡序号
-        playerId: 0,    // 玩家ID
-        playerLevel: 1,  // 战机等级
-        difficulty: 1,    // 动态倍率
-        spawnCredits: 0,  // 当前余额
-        spawnTimer: 0,    // 用来控制刷怪检测频率
-        enemyCount: 0,     // 当前敌人数量
+        score: 0,
+        level: 1,
+        playerId: 0,
+        playerLevel: 1,
+        difficulty: 1,
+        spawnCredits: 0,
+        spawnTimer: 0,
+        enemyCount: 0,
         width: 0,
-        height: 0
+        height: 0,
+        spawnInitialized: false,
     };
 }
 
