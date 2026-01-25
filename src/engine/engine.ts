@@ -4,6 +4,7 @@ import { World } from './types';
 import { Blueprint } from './blueprints';
 import { spawnPlayer } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
+import { inputManager } from './input/InputManager';
 
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
@@ -73,6 +74,9 @@ export class Engine {
         this.world.height = canvas.clientHeight;
         canvas.width = this.world.width;
         canvas.height = this.world.height;
+
+        // 初始化输入管理器
+        inputManager.init(canvas);
 
         spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80, 0);
         this.loop();
