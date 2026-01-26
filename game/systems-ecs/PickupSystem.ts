@@ -1,4 +1,4 @@
-import { World } from '../types/world';
+import { World, CollisionType } from '../types/world';
 import { EntityType } from '@/types';
 
 export function PickupSystem(world: World, dt: number): void {
@@ -103,7 +103,7 @@ function createPowerup(world: World, x: number, y: number): void {
   world.components.colliders.set(id, {
     width: 20,
     height: 20,
-    collisionType: 'powerup' as any
+    collisionType: CollisionType.POWERUP
   });
   world.components.lifetimes.set(id, {
     lifetime: 10000,

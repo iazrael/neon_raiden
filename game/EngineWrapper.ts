@@ -24,6 +24,8 @@ export class EngineWrapper {
 
   private lastSnapshot: GameSnapshot | null = null;
 
+  private audioContext?: AudioContext;
+
   constructor(
     private canvas: HTMLCanvasElement,
     onScoreChange?: (score: number) => void,
@@ -45,6 +47,8 @@ export class EngineWrapper {
     this.onComboChange = onComboChange;
 
     this.engine = new Engine();
+    
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
     this.subscribeToSnapshots();
   }
@@ -67,6 +71,11 @@ export class EngineWrapper {
 
   start(): void {
     this.engine.start(this.canvas);
+    
+    if (this.audioContext?.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
     this.onStateChange?.(GameState.PLAYING);
   }
 
@@ -77,6 +86,11 @@ export class EngineWrapper {
 
   resume(): void {
     this.engine.resume();
+    
+    if (this.audioContext?.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    
     this.onStateChange?.(GameState.PLAYING);
   }
 
@@ -109,6 +123,9 @@ export class EngineWrapper {
   get audio(): any {
     return {
       playClick: (type: string) => {
+        if (this.audioContext?.state === 'suspended') {
+          this.audioContext.resume();
+        }
         console.log('[Audio] Click:', type);
       }
     };

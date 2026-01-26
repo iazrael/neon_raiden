@@ -1,4 +1,4 @@
-import { World } from '../types/world';
+import { World, CollisionType } from '../types/world';
 import { EntityType } from '@/types';
 import { WeaponType } from '@/types/sprite';
 import { createEntity } from '../types/world';
@@ -57,7 +57,7 @@ function fireBullet(
   world.components.colliders.set(bulletId, {
     width: 8,
     height: 16,
-    collisionType: 'bullet' as any
+    collisionType: CollisionType.BULLET
   });
   world.components.combats.set(bulletId, {
     hp: 1,

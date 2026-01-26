@@ -1,14 +1,12 @@
-import { World } from './types/world';
+import { World, CollisionType, MovePattern } from './types/world';
 import { EntityType, EnemyType, BossType } from '@/types';
 import { WeaponType } from '@/types/sprite';
 import { PlayerConfig } from './config/player';
 import { EnemyConfig } from './config/enemies/entities';
 import { createEntity } from './types/world';
-import { MovePattern } from './types/world';
 
 export function spawnPlayer(world: World, x: number, y: number): string {
   const id = createEntity(world, EntityType.PLAYER);
-  world.player = id;
 
   const { components } = world;
 
@@ -23,7 +21,7 @@ export function spawnPlayer(world: World, x: number, y: number): string {
   components.colliders.set(id, {
     width: PlayerConfig.size.width,
     height: PlayerConfig.size.height,
-    collisionType: 'player' as any,
+    collisionType: CollisionType.PLAYER,
     hitboxShrink: PlayerConfig.hitboxShrink
   });
   components.combats.set(id, {
@@ -72,8 +70,7 @@ export function spawnEnemy(
   world.components.colliders.set(id, {
     width: config.size.width,
     height: config.size.height,
-    collisionType: 'enemy' as any,
-    isElite
+    collisionType: CollisionType.ENEMY
   });
   world.components.combats.set(id, {
     hp: config.baseHp * (isElite ? 2 : 1),
@@ -107,7 +104,7 @@ export function spawnBoss(world: World, x: number, y: number, bossType: BossType
   world.components.colliders.set(id, {
     width: 120,
     height: 120,
-    collisionType: 'enemy' as any
+    collisionType: CollisionType.ENEMY
   });
   world.components.combats.set(id, {
     hp: 5000,
@@ -153,7 +150,7 @@ export function spawnBullet(
   world.components.colliders.set(id, {
     width: 8,
     height: 16,
-    collisionType: 'bullet' as any
+    collisionType: CollisionType.BULLET
   });
   world.components.combats.set(id, {
     hp: 1,
@@ -193,7 +190,7 @@ export function spawnPowerup(
   world.components.colliders.set(id, {
     width: 20,
     height: 20,
-    collisionType: 'powerup' as any
+    collisionType: CollisionType.POWERUP
   });
   world.components.lifetimes.set(id, {
     lifetime: 10000,

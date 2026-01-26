@@ -59,6 +59,7 @@ export class AssetsLoader {
     }
 
     static loadSVG(src: string, width: number, height: number): HTMLImageElement {
+        console.log(`Loading SVG: ${src} (${width}x${height})`);
         if (this.cache.has(src)) {
             const cached = this.cache.get(src)!;
             // Update display size properties just in case, though naturalWidth/Height are fixed

@@ -69,6 +69,16 @@ function App() {
       setWeaponType(engine.weaponType);
       setSecondaryWeapon(engine.secondaryWeapon);
       setWeaponLevel(engine.weaponLevel);
+      
+      // 添加调试日志
+      if (engine.lastSnapshot) {
+        console.log('[Debug] Snapshot update:', {
+          player: engine.lastSnapshot.player ? 'exists' : 'none',
+          enemies: engine.lastSnapshot.enemies.length,
+          bullets: engine.lastSnapshot.bullets.length,
+          score: engine.lastSnapshot.score
+        });
+      }
     }, 100);
 
     const handleResize = () => {

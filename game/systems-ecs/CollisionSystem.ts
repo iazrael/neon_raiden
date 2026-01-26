@@ -5,6 +5,12 @@ export function CollisionSystem(world: World, dt: number): void {
   const colliders = Array.from(world.components.colliders.entries());
   const positions = world.components.positions;
 
+  // 调试：显示碰撞检测信息
+  const collisionCount = world.events.filter(e => e.type === 'collision').length;
+  if (collisionCount > 0) {
+    console.log(`[Collision] Found ${collisionCount} collisions this frame`);
+  }
+
   for (let i = 0; i < colliders.length; i++) {
     const [id1, collider1] = colliders[i];
     const pos1 = positions.get(id1);
@@ -18,6 +24,7 @@ export function CollisionSystem(world: World, dt: number): void {
       if (!shouldCollide(collider1, collider2)) continue;
 
       if (checkCollision(pos1, collider1, pos2, collider2)) {
+        console.log(`[Collision] Collision: ${id1} <-> ${id2}`);
         world.events.push({
           type: 'collision',
           entityId: id1,

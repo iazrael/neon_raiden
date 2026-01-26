@@ -240,6 +240,8 @@ export interface WeaponEntity extends BaseEntityMeta {
     baseSpeed?: number;         // 基准速度（用于DPS计算，默认为15）
     maxLevel?: number;          // 最高等级（默认9，用于展示与约束）
     attenuation?: number;       // 穿透伤害衰减比例 (0-1)
+    requiredWeapons?: WeaponType[]; // 协同所需武器（可选，用于组合技）
+    description?: string;       // 描述（可选，用于组合技）
 }
 
 /**

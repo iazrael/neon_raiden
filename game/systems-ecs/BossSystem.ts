@@ -1,4 +1,4 @@
-import { World } from '../types/world';
+import { World, CollisionType } from '../types/world';
 import { EntityType } from '@/types';
 
 export function BossSystem(world: World, dt: number): void {

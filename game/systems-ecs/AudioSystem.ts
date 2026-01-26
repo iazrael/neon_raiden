@@ -1,14 +1,127 @@
 import { World } from '../types/world';
 import { EntityType } from '@/types';
 
+// 程序化音频生成器
+class ProceduralAudio {
+  private audioContext: AudioContext;
+  private masterGain: GainNode;
+
+  constructor(audioContext: AudioContext) {
+    this.audioContext = audioContext;
+    this.masterGain = audioContext.createGain();
+    this.masterGain.connect(audioContext.destination);
+    this.masterGain.gain.value = 0.3; // 降低音量
+  }
+
+  playShoot(): void {
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.masterGain);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'square';
+    
+    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
+    
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.1);
+    
+    console.log('[Audio] Playing shoot sound');
+  }
+
+  playExplosion(): void {
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    const filter = this.audioContext.createBiquadFilter();
+    
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(this.masterGain);
+    
+    oscillator.frequency.value = 200;
+    oscillator.type = 'sawtooth';
+    filter.frequency.value = 100;
+    filter.Q.value = 10;
+    
+    gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2);
+    
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.2);
+    
+    console.log('[Audio] Playing explosion sound');
+  }
+
+  playHit(): void {
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.masterGain);
+    
+    oscillator.frequency.value = 400;
+    oscillator.type = 'triangle';
+    
+    gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.05);
+    
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.05);
+    
+    console.log('[Audio] Playing hit sound');
+  }
+
+  playPowerup(): void {
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.masterGain);
+    
+    oscillator.frequency.value = 1200;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
+    
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.3);
+    
+    console.log('[Audio] Playing powerup sound');
+  }
+}
+
+// 全局音频实例
+let proceduralAudio: ProceduralAudio | null = null;
+
 export function AudioSystem(world: World, dt: number): void {
+  // 初始化音频系统
+  if (!proceduralAudio) {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    proceduralAudio = new ProceduralAudio(audioContext);
+  }
+
   const audioEvents = world.events.filter(e => e.type === 'audio');
 
   for (const event of audioEvents as any[]) {
-    console.log(`[Audio] Playing sound: ${event.sound}`);
-
-    if (event.sound === 'explosion') {
-    } else if (event.sound === 'shoot') {
+    switch (event.sound) {
+      case 'shoot':
+        proceduralAudio.playShoot();
+        break;
+      case 'explosion':
+        proceduralAudio.playExplosion();
+        break;
+      case 'hit':
+        proceduralAudio.playHit();
+        break;
+      case 'powerup':
+        proceduralAudio.playPowerup();
+        break;
+      default:
+        console.log(`[Audio] Unknown sound: ${event.sound}`);
     }
   }
 }

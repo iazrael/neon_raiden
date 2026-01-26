@@ -83,12 +83,13 @@ function spawnEnemy(world: World, x: number, y: number, enemyType: EnemyType): v
   world.components.colliders.set(enemyId, {
     width: config.size.width,
     height: config.size.height,
-    collisionType: 'enemy' as any
+    collisionType: CollisionType.ENEMY
   });
+  const isEliteVar = true;
   world.components.combats.set(enemyId, {
-    hp: config.baseHp,
-    maxHp: config.baseHp,
-    damage: 10
+    hp: config.baseHp * (isEliteVar ? 2 : 1),
+    maxHp: config.baseHp * (isEliteVar ? 2 : 1),
+    damage: config.weapon.damage || 10
   });
   world.components.ais.set(enemyId, {
     state: 0,
