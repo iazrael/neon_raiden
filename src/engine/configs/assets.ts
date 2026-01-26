@@ -23,7 +23,7 @@ export const ASSETS = {
         option: BASE_ASSET_PATH + 'powerups/powerup_option.svg',
         power: BASE_ASSET_PATH + 'powerups/powerup_power.svg',
         timeSlow: BASE_ASSET_PATH + 'powerups/powerup_time_slow.svg',
-        // shield: BASE_ASSET_PATH + 'powerups/powerup_shield.svg',
+        shield: BASE_ASSET_PATH + 'powerups/powerup_shield.svg',
     },
     ENEMIES: {
         normal: BASE_ASSET_PATH + 'enemies/enemy_normal.svg',
@@ -45,10 +45,9 @@ export const ASSETS = {
         heavy: BASE_ASSET_PATH + 'bullets/bullet_enemy_heavy.svg',
         homing: BASE_ASSET_PATH + 'bullets/bullet_enemy_homing.svg',
         spiral: BASE_ASSET_PATH + 'bullets/bullet_enemy_spiral.svg',
-        // 下面三个还没有
-        missile: BASE_ASSET_PATH + 'bullets/bullet_enemy_missile.png',
-        voidOrb: BASE_ASSET_PATH + 'bullets/bullet_enemy_void_orb.png',
-        pulse: BASE_ASSET_PATH + 'bullets/bullet_enemy_pulse.png',
+        missile: BASE_ASSET_PATH + 'bullets/bullet_enemy_missile.svg',
+        voidOrb: BASE_ASSET_PATH + 'bullets/bullet_enemy_void_orb.svg',
+        pulse: BASE_ASSET_PATH + 'bullets/bullet_enemy_pulse.svg',
     },
     BOSSES: {
         annihilator: BASE_ASSET_PATH + 'bosses/boss_annihilator.svg',
