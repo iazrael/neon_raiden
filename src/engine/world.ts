@@ -119,6 +119,11 @@ export function hasComponent<T extends Component>(w: World, id: EntityId, compCt
     return false;
 }
 
+// 获取指定实体
+export function getEntity(w: World, id: EntityId): Component[] | null {
+    return w.entities.get(id) || null;
+}
+
 // ========== 删除实体 ==========
 export function removeEntity(w: World, id: EntityId) {
     w.entities.delete(id);

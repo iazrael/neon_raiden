@@ -48,16 +48,17 @@ export interface AmmoSpec {
     onHit: string[];
 }
 
-// ============== 玩家武器配置 =================
+// ============== 武器配置（统一 - 玩家 + 敌人）=================
 export interface WeaponSpec {
-    id: WeaponId;
+    /** 武器 ID（玩家或敌人） */
+    id: WeaponId | EnemyWeaponId;
     /** 使用的弹药类型 */
     ammoType: AmmoType;
     /** 基础冷却时间（毫秒） */
     cooldown: number;
     /** 当前冷却时间（运行时） */
     curCD?: number;
-    /** 最大等级 */
+    /** 最大等级（仅玩家武器使用） */
     maxLevel?: number;
     /** 弹幕模式 */
     pattern: WeaponPattern;
@@ -65,25 +66,10 @@ export interface WeaponSpec {
     bulletCount: number;
     /** 扩散角度（度），默认 0 */
     spread?: number;
-    /** 穿透次数加成（在弹药基础值上增加），默认 0 */
-    pierceBonus: number;
-    /** 反弹次数加成（在弹药基础值上增加），默认 0 */
-    bouncesBonus: number;
-}
-
-// ============== 敌人武器配置 =================
-export interface EnemyWeaponSpec {
-    id: EnemyWeaponId;
-    /** 弹药类型 */
-    ammoType: AmmoType;
-    /** 冷却时间（毫秒） */
-    cooldown: number;
-    /** 子弹数量 */
-    bulletCount: number;
-    /** 扩散角度（度） */
-    spread?: number;
-    /** 弹幕模式 */
-    pattern: WeaponPattern;
+    /** 穿透次数加成（在弹药基础值上增加），仅玩家武器使用 */
+    pierceBonus?: number;
+    /** 反弹次数加成（在弹药基础值上增加），仅玩家武器使用 */
+    bouncesBonus?: number;
 }
 
 // ============== 武器升级配置 =================

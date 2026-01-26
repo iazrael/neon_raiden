@@ -121,7 +121,7 @@ export class InputManager {
     }
 
     public isFiring() {
-        return true
+        // return true
         return this.keys.has('Space') || this._isFiring;
     }
 

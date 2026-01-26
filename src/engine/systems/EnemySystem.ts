@@ -12,6 +12,7 @@
 
 import { World, EntityId, EnemyId } from '../types';
 import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon, PlayerTag } from '../components';
+import { addComponent, view } from '../world';
 
 /**
  * 敌人行为状态
@@ -85,26 +86,17 @@ const ENEMY_BEHAVIORS: Partial<Record<EnemyId, EnemyBehaviorConfig>> = {
 export function EnemySystem(world: World, dt: number): void {
     // 获取玩家位置
     let playerPos: { x: number; y: number } | null = null;
-    for (const [id, comps] of world.entities) {
-        const playerTag = comps.find(PlayerTag.check);
-        if (playerTag) {
-            const transform = comps.find(Transform.check) as Transform | undefined;
-            if (transform) {
-                playerPos = { x: transform.x, y: transform.y };
-            }
-            break;
-        }
+    const player = world.entities.get(world.playerId);
+
+    const transform = player.find(Transform.check);
+    if (transform) {
+        playerPos = { x: transform.x, y: transform.y };
     }
 
     if (!playerPos) return; // 没有玩家，不处理
 
     // 处理每个敌人
-    for (const [enemyId, comps] of world.entities) {
-        const enemyTag = comps.find(EnemyTag.check) as EnemyTag | undefined;
-        if (!enemyTag) continue;
-
-        const transform = comps.find(Transform.check) as Transform | undefined;
-        if (!transform) continue;
+    for (const [enemyId, [enemyTag, transform]] of view(world, [EnemyTag, Transform])) {
 
         // 获取敌人行为配置
         const config = ENEMY_BEHAVIORS[enemyTag.id] || ENEMY_BEHAVIORS[EnemyId.NORMAL];
@@ -113,10 +105,10 @@ export function EnemySystem(world: World, dt: number): void {
         enemyTag.timer += dt;
 
         // 根据行为模式生成移动意图
-        generateMoveIntent(comps, transform, playerPos, config, enemyTag);
+        generateMoveIntent(world, enemyId, transform, playerPos, config, enemyTag);
 
         // 根据攻击配置生成开火意图
-        generateFireIntent(comps, config, enemyTag);
+        generateFireIntent(world, enemyId, config, enemyTag);
     }
 }
 
@@ -124,7 +116,8 @@ export function EnemySystem(world: World, dt: number): void {
  * 生成移动意图
  */
 function generateMoveIntent(
-    comps: unknown[],
+    world: World,
+    enemyId: EntityId,
     transform: Transform,
     playerPos: { x: number; y: number },
     config: EnemyBehaviorConfig,
@@ -191,7 +184,7 @@ function generateMoveIntent(
 
     // 添加移动意图
     if (dx !== 0 || dy !== 0) {
-        comps.push(new MoveIntent({
+        addComponent(world, enemyId, new MoveIntent({
             dx,
             dy,
             type: 'velocity'
@@ -203,12 +196,16 @@ function generateMoveIntent(
  * 生成开火意图
  */
 function generateFireIntent(
-    comps: unknown[],
+    world: World,
+    enemyId: EntityId,
     config: EnemyBehaviorConfig,
     enemyTag: EnemyTag
 ): void {
     // 检查是否有武器组件
-    const weapon = comps.find(Weapon.check) as Weapon | undefined;
+    const comps = world.entities.get(enemyId);
+    if (!comps) return;
+
+    const weapon = comps.find(Weapon.check);
     if (!weapon) return;
 
     // 检查是否在冷却中
@@ -221,7 +218,7 @@ function generateFireIntent(
     if (Math.random() > config.aggressiveness) return;
 
     // 生成开火意图
-    comps.push(new FireIntent({
+    addComponent(world, enemyId, new FireIntent({
         firing: true
     }));
 

@@ -4,7 +4,7 @@
 //
 
 import { AmmoType, EnemyWeaponId, WeaponId, WeaponPattern } from '../types';
-import { EnemyWeaponSpec, WeaponSpec } from './base';
+import { WeaponSpec } from './base';
 
 /**
  * 武器配置表
@@ -151,7 +151,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
 };
 
 // ==================== 敌人武器 ====================
-export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, EnemyWeaponSpec> = {
+export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, WeaponSpec> = {
     [EnemyWeaponId.ENEMY_NORMAL]: { // 侦察机: 低频单发
         id: EnemyWeaponId.ENEMY_NORMAL, ammoType: AmmoType.ENEMY_ORB_RED,
         cooldown: 2000, bulletCount: 1, pattern: WeaponPattern.AIMED

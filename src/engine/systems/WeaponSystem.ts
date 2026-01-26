@@ -17,7 +17,7 @@ import { World } from '../types';
 import { Transform, Weapon, FireIntent, PlayerTag } from '../components';
 import { spawnBullet } from '../factory';
 import { AMMO_TABLE } from '../blueprints/ammo';
-import { WEAPON_TABLE } from '../blueprints/weapons';
+import { ALL_WEAPONS_TABLE } from '../blueprints/weapons';
 import { Blueprint, WeaponSpec, AmmoSpec } from '../blueprints';
 import { pushEvent, removeComponent, view } from '../world';
 import { WeaponFiredEvent } from '../events';
@@ -78,7 +78,7 @@ function fireWeapon(
     const ammoSpec = AMMO_TABLE[weapon.ammoType];
     if (!ammoSpec) return;
 
-    const weaponSpec = WEAPON_TABLE[weapon.id];
+    const weaponSpec = ALL_WEAPONS_TABLE[weapon.id];
     if (!weaponSpec) return;
 
     const spriteSpec = BULLET_SPRITE_CONFIG[weapon.ammoType];
@@ -207,8 +207,8 @@ function createBullet(ctx: FireContext, angle: number): void {
 
     // 计算最终属性
     const finalDamage = ammoSpec.damage * upgradeSpec.damageMultiplier;
-    const finalPierce = ammoSpec.pierce + weaponSpec.pierceBonus;
-    const finalBounces = ammoSpec.bounces + weaponSpec.bouncesBonus;
+    const finalPierce = ammoSpec.pierce + (weaponSpec.pierceBonus ?? 0);
+    const finalBounces = ammoSpec.bounces + (weaponSpec.bouncesBonus ?? 0);
 
     // 计算速度向量 - speed 是像素/秒，需要转换为像素/毫秒
     const vx = Math.cos(angle) * ammoSpec.speed / 1000;

@@ -11,13 +11,14 @@
  * 执行顺序：P6 - 在结算层之后
  */
 
-import { World } from '../types';
+import { BossId, World } from '../types';
 import { LEVEL_CONFIGS } from '../configs/levels';
 import { spawnEnemy, spawnBoss } from '../factory';
 import { BossTag } from '../components';
 import { EnemyId } from '../types';
 import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
+import { view } from '../world';
 
 /**
  * 敌人池项
@@ -175,7 +176,7 @@ const bossSpawnState: BossSpawnState = {
 /**
  * Boss 出现时间（毫秒）
  */
-const BOSS_SPAWN_TIME = 60 * 1000; // 60秒后Boss出现
+const BOSS_SPAWN_TIME = 1 * 1000; // 60秒后Boss出现
 
 /**
  * 检查是否需要刷 Boss
@@ -184,9 +185,8 @@ function shouldSpawnBoss(world: World): boolean {
     if (bossSpawnState.spawned) return false;
 
     // 检查场上是否已有 Boss
-    for (const [id, comps] of world.entities) {
-        const bossTag = comps.find(BossTag.check);
-        if (bossTag) return false;
+    for (const [id, [_]] of view(world, [ BossTag ])) {
+        return false; // 已有 Boss，不刷新的
     }
 
     // 时间到了，刷 Boss (使用配置的时间或默认 60 秒)
@@ -202,8 +202,8 @@ function shouldSpawnBoss(world: World): boolean {
 /**
  * 刷 Boss
  */
-function doSpawnBoss(world: World, bossId: string): void {
-    const blueprint = BOSSES_TABLE[bossId as keyof typeof BOSSES_TABLE];
+function doSpawnBoss(world: World, bossId: BossId): void {
+    const blueprint = BOSSES_TABLE[bossId];
     if (!blueprint) {
         console.warn(`SpawnSystem: No blueprint found for Boss ID '${bossId}'`);
         return;
@@ -213,6 +213,7 @@ function doSpawnBoss(world: World, bossId: string): void {
     const x = world.width / 2;
     const y = -150;
     spawnBoss(world, blueprint, x, y, 0);
+    console.log(`Spawned Boss '${bossId}' at (${x}, ${y})`);
 }
 
 /**
