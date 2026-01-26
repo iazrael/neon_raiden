@@ -11,72 +11,9 @@
  */
 
 import { World, EntityId, EnemyId } from '../types';
-import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon, PlayerTag } from '../components';
+import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon } from '../components';
 import { addComponent, view } from '../world';
-
-/**
- * 敌人行为状态
- */
-enum EnemyBehavior {
-    IDLE = 'idle',           // 闲置
-    MOVE_DOWN = 'move_down', // 直线向下
-    SINE_WAVE = 'sine_wave', // 正弦波移动
-    CHASE = 'chase',         // 追踪玩家
-    RAM = 'ram',             // 冲撞
-    STRAFE = 'strafe',       // 侧移
-    CIRCLE = 'circle'        // 环绕
-}
-
-/**
- * 敌人行为配置
- */
-interface EnemyBehaviorConfig {
-    moveSpeed: number; // 像素/秒
-    fireInterval: number; // 发射间隔（毫秒）
-    behavior: EnemyBehavior;
-    aggressiveness: number; // 0-1，影响攻击频率
-}
-
-/**
- * 敌人类型对应的默认行为配置
- */
-const ENEMY_BEHAVIORS: Partial<Record<EnemyId, EnemyBehaviorConfig>> = {
-    // NORMAL - 普通敌人：正弦波移动，低攻击性
-    [EnemyId.NORMAL]: {
-        moveSpeed: 100,
-        fireInterval: 2000,
-        behavior: EnemyBehavior.SINE_WAVE,
-        aggressiveness: 0.3
-    },
-    // FAST - 飞翼：快速直线移动
-    [EnemyId.FAST]: {
-        moveSpeed: 250,
-        fireInterval: 1500,
-        behavior: EnemyBehavior.MOVE_DOWN,
-        aggressiveness: 0.5
-    },
-    // TANK - 坦克：慢速，高攻击性
-    [EnemyId.TANK]: {
-        moveSpeed: 50,
-        fireInterval: 3000,
-        behavior: EnemyBehavior.MOVE_DOWN,
-        aggressiveness: 0.8
-    },
-    // KAMIKAZE - 神风特攻：追踪玩家冲撞
-    [EnemyId.KAMIKAZE]: {
-        moveSpeed: 200,
-        fireInterval: Infinity,
-        behavior: EnemyBehavior.CHASE,
-        aggressiveness: 1.0
-    },
-    // ELITE_GUNBOAT - 精英炮艇：快速连射
-    [EnemyId.ELITE_GUNBOAT]: {
-        moveSpeed: 80,
-        fireInterval: 500,
-        behavior: EnemyBehavior.STRAFE,
-        aggressiveness: 0.9
-    }
-};
+import { getEnemyBehavior, EnemyBehavior } from '../configs/enemyGrowth';
 
 /**
  * 敌人系统主函数
@@ -98,17 +35,17 @@ export function EnemySystem(world: World, dt: number): void {
     // 处理每个敌人
     for (const [enemyId, [enemyTag, transform]] of view(world, [EnemyTag, Transform])) {
 
-        // 获取敌人行为配置
-        const config = ENEMY_BEHAVIORS[enemyTag.id] || ENEMY_BEHAVIORS[EnemyId.NORMAL];
+        // 从配置文件获取行为配置
+        const behavior = getEnemyBehavior(enemyTag.id);
 
         // 更新状态计时器
         enemyTag.timer += dt;
 
         // 根据行为模式生成移动意图
-        generateMoveIntent(world, enemyId, transform, playerPos, config, enemyTag);
+        generateMoveIntent(world, enemyId, transform, playerPos, behavior, enemyTag);
 
         // 根据攻击配置生成开火意图
-        generateFireIntent(world, enemyId, config, enemyTag);
+        generateFireIntent(world, enemyId, behavior, enemyTag);
     }
 }
 
@@ -120,22 +57,22 @@ function generateMoveIntent(
     enemyId: EntityId,
     transform: Transform,
     playerPos: { x: number; y: number },
-    config: EnemyBehaviorConfig,
+    behavior: { moveSpeed: number; behavior: EnemyBehavior },
     enemyTag: EnemyTag
 ): void {
     let dx = 0;
     let dy = 0;
 
-    switch (config.behavior) {
+    switch (behavior.behavior) {
         case EnemyBehavior.MOVE_DOWN:
             // 直线向下
-            dy = config.moveSpeed / 1000; // 转换为像素/毫秒
+            dy = behavior.moveSpeed / 1000; // 转换为像素/毫秒
             break;
 
         case EnemyBehavior.SINE_WAVE:
             // 正弦波移动：向下 + 横向正弦
-            dy = config.moveSpeed / 1000;
-            dx = Math.sin(transform.y * 0.02) * config.moveSpeed * 0.5 / 1000;
+            dy = behavior.moveSpeed / 1000;
+            dx = Math.sin(transform.y * 0.02) * behavior.moveSpeed * 0.5 / 1000;
             break;
 
         case EnemyBehavior.CHASE:
@@ -144,8 +81,8 @@ function generateMoveIntent(
                 playerPos.y - transform.y,
                 playerPos.x - transform.x
             );
-            dx = Math.cos(angleToPlayer) * config.moveSpeed / 1000;
-            dy = Math.sin(angleToPlayer) * config.moveSpeed / 1000;
+            dx = Math.cos(angleToPlayer) * behavior.moveSpeed / 1000;
+            dy = Math.sin(angleToPlayer) * behavior.moveSpeed / 1000;
             break;
 
         case EnemyBehavior.RAM:
@@ -154,15 +91,15 @@ function generateMoveIntent(
                 playerPos.y - transform.y,
                 playerPos.x - transform.x
             );
-            dx = Math.cos(ramAngle) * config.moveSpeed * 1.5 / 1000;
-            dy = Math.sin(ramAngle) * config.moveSpeed * 1.5 / 1000;
+            dx = Math.cos(ramAngle) * behavior.moveSpeed * 1.5 / 1000;
+            dy = Math.sin(ramAngle) * behavior.moveSpeed * 1.5 / 1000;
             break;
 
         case EnemyBehavior.STRAFE:
             // 侧移：向下 + 周期性横向
-            dy = config.moveSpeed * 0.5 / 1000;
+            dy = behavior.moveSpeed * 0.5 / 1000;
             const strafeDir = Math.sin(enemyTag.timer * 0.002) > 0 ? 1 : -1;
-            dx = strafeDir * config.moveSpeed / 1000;
+            dx = strafeDir * behavior.moveSpeed / 1000;
             break;
 
         case EnemyBehavior.CIRCLE:
@@ -179,7 +116,7 @@ function generateMoveIntent(
             break;
 
         default:
-            dy = config.moveSpeed / 1000;
+            dy = behavior.moveSpeed / 1000;
     }
 
     // 添加移动意图
@@ -198,7 +135,7 @@ function generateMoveIntent(
 function generateFireIntent(
     world: World,
     enemyId: EntityId,
-    config: EnemyBehaviorConfig,
+    behavior: { fireInterval: number },
     enemyTag: EnemyTag
 ): void {
     // 检查是否有武器组件
@@ -212,12 +149,9 @@ function generateFireIntent(
     if (weapon.curCD > 0) return;
 
     // 检查是否达到攻击间隔
-    if (enemyTag.timer < config.fireInterval) return;
+    if (enemyTag.timer < behavior.fireInterval) return;
 
-    // 根据攻击性决定是否开火
-    if (Math.random() > config.aggressiveness) return;
-
-    // 生成开火意图
+    // 生成开火意图（移除了 aggressiveness 概率判断）
     addComponent(world, enemyId, new FireIntent({
         firing: true
     }));

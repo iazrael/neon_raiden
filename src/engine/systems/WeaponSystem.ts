@@ -84,10 +84,13 @@ function fireWeapon(
     const spriteSpec = BULLET_SPRITE_CONFIG[weapon.ammoType];
     if (!spriteSpec) return;
 
-    // 获取升级配置（仅玩家武器）
+    // 获取升级配置（玩家使用升级表，敌人使用 weapon 自身的倍率）
     const upgradeSpec = entity.isPlayer
         ? getWeaponUpgrade(weapon.id as any, weapon.level || 1)
-        : { damageMultiplier: 1.0, fireRateMultiplier: 1.0 };
+        : {
+            damageMultiplier: weapon.damageMultiplier || 1.0,
+            fireRateMultiplier: weapon.fireRateMultiplier || 1.0
+        };
 
     // 计算发射角度
     let baseAngle = intent.angle ?? -Math.PI / 2; // 默认向上

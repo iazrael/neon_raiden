@@ -11,23 +11,16 @@
  * 执行顺序：P6 - 在结算层之后
  */
 
-import { BossId, World } from '../types';
-import { LEVEL_CONFIGS } from '../configs/levels';
+import { BossId, World, EntityId } from '../types';
+import { EnemyPoolItem, LEVEL_CONFIGS } from '../configs/levels';
 import { spawnEnemy, spawnBoss } from '../factory';
-import { BossTag } from '../components';
+import { BossTag, Health, ScoreValue, Weapon } from '../components';
 import { EnemyId } from '../types';
 import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
 import { view } from '../world';
+import { getEnemyStats } from '../configs/enemyGrowth';
 
-/**
- * 敌人池项
- */
-interface EnemyPoolItem {
-    id: EnemyId;
-    cost: number;
-    weight: number;
-}
 
 /**
  * 根据权重随机选择敌人
@@ -53,6 +46,74 @@ function getRandomSpawnPos(world: World): { x: number; y: number } {
         x: margin + Math.random() * (world.width - margin * 2),
         y: -50 // 从屏幕上方生成
     };
+}
+
+/**
+ * 应用敌人关卡成长属性（内部辅助函数）
+ * @param world 世界对象
+ * @param enemyId 敌人实体ID
+ * @param enemyType 敌人类型
+ */
+function applyEnemyGrowth(world: World, enemyId: EntityId, enemyType: EnemyId): void {
+    // 获取关卡成长后的属性
+    const stats = getEnemyStats(enemyType, world.level);
+
+    // 获取敌人组件数组
+    const comps = world.entities.get(enemyId);
+    if (!comps) {
+        console.warn(`[applyEnemyGrowth] Enemy ${enemyId} not found`);
+        return;
+    }
+
+    // 1. 更新血量
+    const health = comps.find(Health.check);
+    if (health) {
+        health.hp = stats.hp;
+        health.max = stats.hp;
+    }
+
+    // 2. 更新武器成长倍率（让 WeaponSystem 使用这些倍率）
+    const weapon = comps.find(Weapon.check);
+    if (weapon) {
+        weapon.damageMultiplier = stats.damageMultiplier;
+        weapon.fireRateMultiplier = stats.fireRateMultiplier;
+    }
+
+    // 3. 添加击杀分数组件
+    comps.push(new ScoreValue({value: stats.score}));
+}
+
+/**
+ * 刷敌人（封装创建、成长应用、点数扣除）
+ * @param world 世界对象
+ * @param enemyType 敌人类型
+ * @param cost 消费点数
+ * @param pos 生成位置
+ */
+function doSpawnEnemy(
+    world: World,
+    enemyType: EnemyId,
+    cost: number,
+    pos: { x: number; y: number }
+): void {
+    // 1. 获取蓝图
+    const blueprint = ENEMIES_TABLE[enemyType];
+    if (!blueprint) {
+        console.warn(`doSpawnEnemy: No blueprint found for '${enemyType}'`);
+        return;
+    }
+
+    // 2. 创建敌人
+    const enemyId = spawnEnemy(world, blueprint, pos.x, pos.y, 0);
+
+    // 3. 应用关卡成长
+    applyEnemyGrowth(world, enemyId, enemyType);
+
+    // 4. 扣除点数
+    world.spawnCredits -= cost;
+
+    // 5. 日志
+    console.log(`Spawned enemy '${enemyType}' costing ${cost} credits, remaining: ${world.spawnCredits.toFixed(2)}`);
 }
 
 /**
@@ -141,18 +202,9 @@ export function SpawnSystem(world: World, dt: number): void {
 
         // C. 检查买不买得起
         if (world.spawnCredits >= enemyProto.cost) {
-            // D. 找到对应蓝图
-            const blueprint = ENEMIES_TABLE[enemyProto.id];
-            if (!blueprint) {
-                console.warn(`SpawnSystem: No blueprint found for enemy ID '${enemyProto.id}'`);
-                continue;
-            }
-
-            // E. 成交！刷怪
-            world.spawnCredits -= enemyProto.cost;
+            // D. 成交！刷怪（使用封装函数，包含创建、成长应用、点数扣除）
             const pos = getRandomSpawnPos(world);
-            spawnEnemy(world, blueprint, pos.x, pos.y, 0);
-            console.log(`Spawned enemy '${enemyProto.id}' costing ${enemyProto.cost} credits, remaining credits: ${world.spawnCredits.toFixed(2)}`);
+            doSpawnEnemy(world, enemyProto.id, enemyProto.cost, pos);
         } else {
             // 买不起，跳出循环存钱
             break;

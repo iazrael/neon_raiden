@@ -153,35 +153,60 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
 // ==================== 敌人武器 ====================
 export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, WeaponSpec> = {
     [EnemyWeaponId.ENEMY_NORMAL]: { // 侦察机: 低频单发
-        id: EnemyWeaponId.ENEMY_NORMAL, ammoType: AmmoType.ENEMY_ORB_RED,
-        cooldown: 2000, bulletCount: 1, pattern: WeaponPattern.AIMED
+        id: EnemyWeaponId.ENEMY_NORMAL,
+        ammoType: AmmoType.ENEMY_ORB_RED,
+        cooldown: 2000,
+        bulletCount: 1,
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_FAST]: { // 飞翼: 稍微快一点
-        id: EnemyWeaponId.ENEMY_FAST, ammoType: AmmoType.ENEMY_PULSE,
-        cooldown: 1200, bulletCount: 1, pattern: WeaponPattern.AIMED
+        id: EnemyWeaponId.ENEMY_FAST,
+        ammoType: AmmoType.ENEMY_PULSE,
+        cooldown: 1200,
+        bulletCount: 1,
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_TANK]: { // 坦克: 慢速重弹
-        id: EnemyWeaponId.ENEMY_TANK, ammoType: AmmoType.ENEMY_ORB_BLUE,
-        cooldown: 3000, bulletCount: 1, pattern: WeaponPattern.AIMED
+        id: EnemyWeaponId.ENEMY_TANK,
+        ammoType: AmmoType.ENEMY_ORB_BLUE,
+        cooldown: 3000,
+        bulletCount: 1,
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_ELITE]: { // 精英炮艇: 快速连射
-        id: EnemyWeaponId.ENEMY_ELITE, ammoType: AmmoType.ENEMY_ORB_RED,
-        cooldown: 800, bulletCount: 3, spread: 15, pattern: WeaponPattern.AIMED
+        id: EnemyWeaponId.ENEMY_ELITE,
+        ammoType: AmmoType.ENEMY_ORB_RED,
+        cooldown: 800,
+        bulletCount: 3,
+        spread: 15,
+        pattern: WeaponPattern.AIMED
     },
     [EnemyWeaponId.ENEMY_SNIPER]: { // 拦截机: 激光
-        id: EnemyWeaponId.ENEMY_SNIPER, ammoType: AmmoType.ENEMY_BEAM_THIN,
-        cooldown: 4000, bulletCount: 1, pattern: WeaponPattern.AIMED // 需配合蓄力逻辑
+        id: EnemyWeaponId.ENEMY_SNIPER,
+        ammoType: AmmoType.ENEMY_BEAM_THIN,
+        cooldown: 4000,
+
+        bulletCount: 1,
+        pattern: WeaponPattern.AIMED // 需配合蓄力逻辑
     },
     [EnemyWeaponId.ENEMY_LAYER]: { // 布雷机: 放置地雷(这里用重弹模拟)
-        id: EnemyWeaponId.ENEMY_LAYER, ammoType: AmmoType.ENEMY_ORB_GREEN,
-        cooldown: 1500, bulletCount: 1, pattern: WeaponPattern.FIXED_REAR // 向后发射
+        id: EnemyWeaponId.ENEMY_LAYER,
+        ammoType: AmmoType.ENEMY_ORB_GREEN,
+        cooldown: 1500,
+        bulletCount: 1,
+        pattern: WeaponPattern.FIXED_REAR // 向后发射
     },
     [EnemyWeaponId.ENEMY_PULSAR]: { // 脉冲机: 快速散射
-        id: EnemyWeaponId.ENEMY_PULSAR, ammoType: AmmoType.ENEMY_PULSE,
-        cooldown: 1000, bulletCount: 3, spread: 30, pattern: WeaponPattern.SPREAD
+        id: EnemyWeaponId.ENEMY_PULSAR,
+        ammoType: AmmoType.ENEMY_PULSE,
+        cooldown: 1000,
+        bulletCount: 3,
+        spread: 30,
+        pattern: WeaponPattern.SPREAD
     },
     [EnemyWeaponId.ENEMY_BARRAGE]: { // 弹幕机: 螺旋弹
-        id: EnemyWeaponId.ENEMY_BARRAGE, ammoType: AmmoType.ENEMY_ORB_BLUE,
+        id: EnemyWeaponId.ENEMY_BARRAGE,
+        ammoType: AmmoType.ENEMY_ORB_BLUE,
         cooldown: 1500, bulletCount: 8, spread: 360, pattern: WeaponPattern.SPIRAL
     },
 
@@ -292,11 +317,43 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, WeaponSpec> = {
     },
 
     // --- Generic Boss Weapons ---
-    [EnemyWeaponId.GENERIC_TARGETED]: { id: EnemyWeaponId.GENERIC_TARGETED, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_RED, bulletCount: 1, pattern: WeaponPattern.AIMED },
-    [EnemyWeaponId.GENERIC_RADIAL]: { id: EnemyWeaponId.GENERIC_RADIAL, cooldown: 1200, ammoType: AmmoType.ENEMY_ORB_BLUE, bulletCount: 8, spread: 360, pattern: WeaponPattern.RADIAL },
-    [EnemyWeaponId.GENERIC_LASER]: { id: EnemyWeaponId.GENERIC_LASER, cooldown: 2500, ammoType: AmmoType.ENEMY_BEAM_THIN, bulletCount: 1, pattern: WeaponPattern.AIMED },
-    [EnemyWeaponId.GENERIC_SPREAD]: { id: EnemyWeaponId.GENERIC_SPREAD, cooldown: 1000, ammoType: AmmoType.ENEMY_ORB_GREEN, bulletCount: 5, spread: 90, pattern: WeaponPattern.SPREAD },
-    [EnemyWeaponId.GENERIC_HOMING]: { id: EnemyWeaponId.GENERIC_HOMING, cooldown: 1500, ammoType: AmmoType.ENEMY_MISSILE, bulletCount: 2, pattern: WeaponPattern.AIMED },
+    [EnemyWeaponId.GENERIC_TARGETED]: {
+        id: EnemyWeaponId.GENERIC_TARGETED,
+        cooldown: 1000,
+        ammoType: AmmoType.ENEMY_ORB_RED,
+        bulletCount: 1,
+        pattern: WeaponPattern.AIMED
+    },
+    [EnemyWeaponId.GENERIC_RADIAL]: {
+        id: EnemyWeaponId.GENERIC_RADIAL,
+        cooldown: 1200,
+        ammoType: AmmoType.ENEMY_ORB_BLUE,
+        bulletCount: 8,
+        spread: 360,
+        pattern: WeaponPattern.RADIAL
+    },
+    [EnemyWeaponId.GENERIC_LASER]: {
+        id: EnemyWeaponId.GENERIC_LASER,
+        cooldown: 2500,
+        ammoType: AmmoType.ENEMY_BEAM_THIN,
+        bulletCount: 1,
+        pattern: WeaponPattern.AIMED
+    },
+    [EnemyWeaponId.GENERIC_SPREAD]: {
+        id: EnemyWeaponId.GENERIC_SPREAD,
+        cooldown: 1000,
+        ammoType: AmmoType.ENEMY_ORB_GREEN,
+        bulletCount: 5,
+        spread: 90,
+        pattern: WeaponPattern.SPREAD
+    },
+    [EnemyWeaponId.GENERIC_HOMING]: {
+        id: EnemyWeaponId.GENERIC_HOMING,
+        cooldown: 1500,
+        ammoType: AmmoType.ENEMY_MISSILE,
+        bulletCount: 2,
+        pattern: WeaponPattern.AIMED
+    },
 };
 
 /**

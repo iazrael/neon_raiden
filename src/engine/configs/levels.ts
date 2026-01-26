@@ -2,13 +2,18 @@
 
 import { BossId, EnemyId } from "../types";
 
+export interface EnemyPoolItem {
+    id: EnemyId;
+    cost: number;
+    weight: number;
+}
 
 export interface LevelSpec {
     id: number;
     baseIncome: number; // 基础工资 (每秒)
     creditCap: number;  // 钱包上限
     startingCredits: number; // 开局赠送点数
-    enemyPool: { id: EnemyId; cost: number; weight: number }[];
+    enemyPool: EnemyPoolItem[];
     boss: BossId;
 }
 
@@ -21,7 +26,7 @@ export const LEVEL_CONFIGS: Record<number, LevelSpec> = {
         creditCap: 100,
         startingCredits: 25,
         enemyPool: [
-            { id: EnemyId.NORMAL, cost: 10, weight: 3 },  // 33%
+            // { id: EnemyId.NORMAL, cost: 10, weight: 3 },  // 33%
             { id: EnemyId.FAST, cost: 30, weight: 3 },   // 33%
             { id: EnemyId.TANK, cost: 60, weight: 2 },   // 22%
             { id: EnemyId.STALKER, cost: 70, weight: 1 }, // 11%
