@@ -561,14 +561,14 @@ function handlePlayerHitEnemy(
     }
 
     // 获取敌人位置
-    const enemyTransform = enemyComps.find(Transform.check) as Transform;
+    const enemyTransform = enemyComps.find(Transform.check);
     if (!enemyTransform) return;
 
     // 生成 HitEvent（玩家受到冲撞伤害）
     const hitEvent: HitEvent = {
         type: 'Hit',
         pos: { x: enemyTransform.x, y: enemyTransform.y },
-        damage: 20,
+        damage: 20, // FIXME: 冲撞伤害值可配置
         owner: enemyId,
         victim: playerId,
         bloodLevel: 2
@@ -579,7 +579,7 @@ function handlePlayerHitEnemy(
     const enemyHitEvent: HitEvent = {
         type: 'Hit',
         pos: { x: enemyTransform.x, y: enemyTransform.y },
-        damage: 10,
+        damage: 10, // FIXME: 冲撞伤害值可配置
         owner: playerId,
         victim: enemyId,
         bloodLevel: 1
