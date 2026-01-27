@@ -16,6 +16,31 @@ export type Event =
     | BerserkModeEvent
     | ComboUpgradeEvent;
 
+
+/**
+ * 事件类型标签（用于类型安全的过滤）
+ */
+export const EventTags = {
+    Hit: 'Hit',
+    Kill: 'Kill',
+    Pickup: 'Pickup',
+    WeaponFired: 'WeaponFired',
+    BossPhaseChange: 'BossPhaseChange',
+    CamShake: 'CamShake',
+    BloodFog: 'BloodFog',
+    LevelUp: 'LevelUp',
+    ComboBreak: 'ComboBreak',
+    ScreenClear: 'ScreenClear',
+    PlaySound: 'PlaySound',
+    BerserkMode: 'BerserkMode',
+    ComboUpgrade: 'ComboUpgrade',
+} as const;
+
+
+/** 事件类型标签值的联合类型 */
+export type EventTag = typeof EventTags[keyof typeof EventTags];
+
+
 // ① 命中（碰撞瞬间）
 export interface HitEvent {
     type: 'Hit';

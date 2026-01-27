@@ -14,8 +14,8 @@
 
 import { World, EntityId } from '../types';
 import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from '../components';
-import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent } from '../events';
-import { removeComponent, view } from '../world';
+import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, EventTags } from '../events';
+import { removeComponent, view, getEvents } from '../world';
 
 /**
  * 伤害结算系统主函数
@@ -24,7 +24,7 @@ import { removeComponent, view } from '../world';
  */
 export function DamageResolutionSystem(world: World, dt: number): void {
     // 处理所有 HitEvent
-    const hitEvents = world.events.filter((e): e is HitEvent => e.type === 'Hit');
+    const hitEvents = getEvents<HitEvent>(world, EventTags.Hit);
 
     for (const event of hitEvents) {
         applyDamage(world, event);

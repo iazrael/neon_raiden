@@ -134,6 +134,28 @@ export function pushEvent(w: World, event: GameEvent) {
     w.events.push(event);
 }
 
+/**
+ * 获取指定类型的事件（类型安全）
+ * @param w World 对象
+ * @param eventType 事件类型（使用 EventTags，如 EventTags.Hit）
+ * @returns 匹配的事件数组
+ *
+ * @example
+ * ```ts
+ * // 旧方式（需要硬编码字符串）
+ * const hitEvents = world.events.filter((e): e is HitEvent => e.type === 'Hit');
+ *
+ * // 新方式（类型安全）
+ * const hitEvents = getEvents(world, EventTags.Hit); // 类型自动推断为 HitEvent[]
+ * ```
+ */
+export function getEvents<T extends GameEvent>(
+    w: World,
+    eventType: T['type']
+): T[] {
+    return w.events.filter((e): e is T => e.type === eventType);
+}
+
 // ========== 对象池 ==========
 
 // 与 world 同文件即可
