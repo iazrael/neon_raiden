@@ -15,16 +15,12 @@ import { Transform, Sprite, Particle, Lifetime } from '../components';
 import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent } from '../events';
 import { triggerCameraShake } from './RenderSystem';
 import { generateId } from '../world';
+import { SpriteKey } from '../configs/sprites';
 
 /**
  * 粒子类型配置
  */
 interface ParticleConfig {
-    texture: string;
-    srcX: number;
-    srcY: number;
-    srcW: number;
-    srcH: number;
     scale: number;
     color: string;
     frames: number;
@@ -38,8 +34,6 @@ interface ParticleConfig {
 const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
     // 爆炸特效
     explosion_small: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 32, srcH: 32,
         scale: 1,
         color: '#ff6600',
         frames: 8,
@@ -47,8 +41,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
         lifetime: 0.5
     },
     explosion_medium: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 64, srcH: 64,
         scale: 1.5,
         color: '#ff4400',
         frames: 12,
@@ -56,8 +48,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
         lifetime: 0.75
     },
     explosion_large: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 96, srcH: 96,
         scale: 2,
         color: '#ff2200',
         frames: 16,
@@ -67,8 +57,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
 
     // 飙血特效
     blood_light: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 16, srcH: 16,
         scale: 0.5,
         color: '#ff3333',
         frames: 4,
@@ -76,8 +64,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
         lifetime: 0.3
     },
     blood_medium: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24,
         scale: 0.8,
         color: '#ff0000',
         frames: 6,
@@ -85,8 +71,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
         lifetime: 0.4
     },
     blood_heavy: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 32, srcH: 32,
         scale: 1.2,
         color: '#cc0000',
         frames: 8,
@@ -96,8 +80,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
 
     // 拾取特效
     pickup: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 32, srcH: 32,
         scale: 1,
         color: '#00ff88',
         frames: 10,
@@ -107,8 +89,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
 
     // 升级特效
     levelup: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 64, srcH: 64,
         scale: 2,
         color: '#ffff00',
         frames: 20,
@@ -118,8 +98,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
 
     // 连击升级特效
     combo_upgrade: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 48, srcH: 48,
         scale: 1.5,
         color: '#00ffff',
         frames: 15,
@@ -129,8 +107,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
 
     // Boss 阶段切换特效
     boss_phase: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 128, srcH: 128,
         scale: 3,
         color: '#ff00ff',
         frames: 24,
@@ -140,8 +116,6 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
 
     // 狂暴模式特效
     berserk: {
-        texture: '',
-        srcX: 0, srcY: 0, srcW: 160, srcH: 160,
         scale: 4,
         color: '#ff0000',
         frames: 30,
@@ -305,15 +279,12 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
 
     // 创建粒子组件
     const transform = new Transform({ x, y, rot: 0 });
-    const sprite = new Sprite({
-        texture: config.texture,
-        color: config.color,
-        srcX: config.srcX,
-        srcY: config.srcY,
-        srcW: config.srcW,
-        srcH: config.srcH,
-        scale: config.scale
-    });
+    // TODO: 粒子效果不需要精灵图吧？
+    // const sprite = new Sprite({
+    //     spriteKey: SpriteKey.PARTICLE,
+    //     color: config.color,
+    //     scale: config.scale
+    // });
     const particle = new Particle({
         frame: 0,
         maxFrame: config.frames,
@@ -326,7 +297,7 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
     const id = generateId();
 
     // 存储组件
-    world.entities.set(id, [transform, sprite, particle, lifetime]);
+    world.entities.set(id, [transform, particle, lifetime]);
 
     return id;
 }

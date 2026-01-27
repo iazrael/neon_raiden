@@ -3,11 +3,11 @@
 // 包含游戏中所有敌人类型的蓝图定义
 //
 
-import { ASSETS } from '../configs';
 import { DROPTABLE_COMMON } from '../configs/droptables';
-import { EnemyId, EnemyWeaponId, AmmoType } from '../types';
+import { EnemyId, EnemyWeaponId } from '../types';
 import { Blueprint } from './base';
 import { ENEMY_WEAPON_TABLE } from './weapons';
+import { SpriteKey } from '../configs/sprites';
 
 /**
  * 普通敌人蓝图
@@ -23,8 +23,8 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.12, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.normal, srcX: 0, srcY: 0, srcW: 40, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_NORMAL, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为普通敌人 */
     EnemyTag: { id: EnemyId.NORMAL },
@@ -56,8 +56,8 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.4, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.fast, srcX: 0, srcY: 0, srcW: 30, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_FAST, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为快速敌人 */
     EnemyTag: { id: EnemyId.FAST },
@@ -86,8 +86,8 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.06, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.tank, srcX: 0, srcY: 0, srcW: 60, srcH: 60, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_TANK, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为坦克敌人 */
     EnemyTag: { id: EnemyId.TANK },
@@ -116,8 +116,8 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.4, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.kamikaze, srcX: 0, srcY: 0, srcW: 30, srcH: 30, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_KAMIKAZE, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为自杀式敌人 */
     EnemyTag: { id: EnemyId.KAMIKAZE },
@@ -146,8 +146,8 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.03, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.gunboat, srcX: 0, srcY: 0, srcW: 70, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_GUNBOAT, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为精英炮艇敌人 */
     EnemyTag: { id: EnemyId.ELITE_GUNBOAT },
@@ -176,8 +176,8 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.25, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.interceptor, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_INTERCEPTOR, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为激光拦截机敌人 */
     EnemyTag: { id: EnemyId.LASER_INTERCEPTOR },
@@ -206,8 +206,8 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.09, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.layer, srcX: 0, srcY: 0, srcW: 60, srcH: 40, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_LAYER, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为布雷船敌人 */
     EnemyTag: { id: EnemyId.MINE_LAYER },
@@ -236,8 +236,8 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.3, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.pulsar, srcX: 0, srcY: 0, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_PULSAR, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为脉冲敌人 */
     EnemyTag: { id: EnemyId.PULSAR },
@@ -266,8 +266,8 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.05, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.fortress, srcX: 0, srcY: 0, srcW: 70, srcH: 70, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_FORTRESS, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为堡垒敌人 */
     EnemyTag: { id: EnemyId.FORTRESS },
@@ -296,8 +296,8 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.25, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.stalker, srcX: 0, srcY: 0, srcW: 36, srcH: 36, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_STALKER, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为追踪者敌人 */
     EnemyTag: { id: EnemyId.STALKER },
@@ -326,8 +326,8 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
     /** 速度组件 - 设置敌人的移动速度 */
     Velocity: { vx: 0, vy: 0.07, vrot: 0 },
 
-    /** 精灵组件 - 设置敌人的纹理信息 */
-    Sprite: { texture: ASSETS.ENEMIES.barrage, srcX: 0, srcY: 0, srcW: 50, srcH: 50, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.ENEMY_BARRAGE, scale: 1 },
 
     /** 敌人标签组件 - 标识此实体为弹幕敌人 */
     EnemyTag: { id: EnemyId.BARRAGE },

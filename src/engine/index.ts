@@ -28,8 +28,7 @@ export { buildSnapshot } from './snapshot';
 export type { GameSnapshot } from './snapshot';
 
 // ========== 渲染支持 ==========
-export { SpriteRenderer } from './SpriteRenderer';
-export type { CachedSprite } from './SpriteRenderer';
+export { SpriteManager } from './SpriteManager';
 
 // ========== 事件 ==========
 export * from './events';

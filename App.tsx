@@ -5,8 +5,7 @@ import { GameState, WeaponType, ClickType } from './types';
 import type { ComboState } from './game/systems/ComboSystem';
 import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
-import { SpriteGenerator } from './game/SpriteGenerator';
-import { SpriteRenderer } from './src/engine/SpriteRenderer';
+import { SpriteManager } from './src/engine/SpriteManager';
 import { GameConfig } from './game/config/game';
 import ReloadPrompt from './components/ReloadPrompt';
 
@@ -35,8 +34,7 @@ function App() {
   useEffect(() => {
     // Preload assets - both old and new systems
     Promise.all([
-      SpriteGenerator.preloadAssets(),
-      SpriteRenderer.preloadAssets(),
+      SpriteManager.preloadAll(),
     ]).then(() => {
       console.log('[App] All assets preloaded');
     });

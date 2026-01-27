@@ -1,8 +1,7 @@
-import { ASSETS } from '../configs';
 import { WeaponId } from '../types';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
-
+import { SpriteKey } from '../configs/sprites';
 
 /**
  * 玩家战机蓝图 - Neon战机
@@ -27,8 +26,8 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
     /** 碰撞盒组件 - 设置战机的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 24 * (1 - 0.2) },
 
-    /** 精灵组件 - 设置战机的纹理信息 */
-    Sprite: { texture: ASSETS.FIGHTERS.player, srcX: 0, srcY: 0, srcW: 48, srcH: 48, scale: 1, pivotX: 0.5, pivotY: 0.5 },
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.PLAYER, scale: 1 },
 
     /** 玩家标签组件 - 标识此实体为玩家 */
     PlayerTag: {},

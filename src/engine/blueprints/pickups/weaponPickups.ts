@@ -1,7 +1,6 @@
 import { AmmoType, WeaponId } from "../../types";
 import { Blueprint } from "../base";
-import { PLAYER_BULLET_SPRITES } from "../../configs/sprites/bullets";
-
+import { BULLET_SPRITE_CONFIG } from "../../configs/sprites/bullets";
 
 /**
  * 离子机炮道具蓝图
@@ -11,11 +10,11 @@ export const BLUEPRINT_POWERUP_VULCAN: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.VULCAN_SPREAD].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.VULCAN_SPREAD].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.VULCAN_SPREAD].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.VULCAN_SPREAD].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -33,11 +32,11 @@ export const BLUEPRINT_POWERUP_LASER: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.LASER_BEAM].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.LASER_BEAM].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.LASER_BEAM].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.LASER_BEAM].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -55,11 +54,11 @@ export const BLUEPRINT_POWERUP_MISSILE: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.MISSILE_HOMING].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.MISSILE_HOMING].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.MISSILE_HOMING].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.MISSILE_HOMING].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -77,11 +76,11 @@ export const BLUEPRINT_POWERUP_SHURIKEN: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.SHURIKEN_BOUNCE].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.SHURIKEN_BOUNCE].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.SHURIKEN_BOUNCE].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.SHURIKEN_BOUNCE].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -99,11 +98,11 @@ export const BLUEPRINT_POWERUP_TESLA: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.TESLA_CHAIN].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.TESLA_CHAIN].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.TESLA_CHAIN].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.TESLA_CHAIN].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -121,11 +120,11 @@ export const BLUEPRINT_POWERUP_MAGMA: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.MAGMA_POOL].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.MAGMA_POOL].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.MAGMA_POOL].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.MAGMA_POOL].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -143,11 +142,11 @@ export const BLUEPRINT_POWERUP_WAVE: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.WAVE_PULSE].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.WAVE_PULSE].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.WAVE_PULSE].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.WAVE_PULSE].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -165,11 +164,11 @@ export const BLUEPRINT_POWERUP_PLASMA: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
-    /** 精灵组件 - 设置道具的纹理信息 */
+    /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
-        texture: PLAYER_BULLET_SPRITES[AmmoType.PLASMA_ORB].texture,
-        color: PLAYER_BULLET_SPRITES[AmmoType.PLASMA_ORB].color,
-        srcX: 0, srcY: 0, srcW: 24, srcH: 24, scale: 1, pivotX: 0.5, pivotY: 0.5
+        spriteKey: BULLET_SPRITE_CONFIG[AmmoType.PLASMA_ORB].spriteKey,
+        color: BULLET_SPRITE_CONFIG[AmmoType.PLASMA_ORB].color,
+        scale: 1
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */

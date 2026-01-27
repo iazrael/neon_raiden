@@ -18,7 +18,9 @@
       "Bash(pnpm remove:*)",
       "mcp__plugin_playwright_playwright__browser_evaluate",
       "mcp__plugin_playwright_playwright__browser_run_code",
-      "mcp__plugin_playwright_playwright__browser_click"
+      "mcp__plugin_playwright_playwright__browser_click",
+      "Bash(npm run check:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

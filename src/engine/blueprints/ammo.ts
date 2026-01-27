@@ -4,7 +4,6 @@
 
 import { AmmoSpec } from './base';
 import { AmmoType } from '../types';
-import { ASSETS } from '../configs';
 
 
 // =============================================================================

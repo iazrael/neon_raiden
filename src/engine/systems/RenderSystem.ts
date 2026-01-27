@@ -15,8 +15,8 @@
  */
 
 import { World } from '../types';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Bullet, Shield, InvulnerableState, Health, BossTag } from '../components';
-import { SpriteRenderer } from '../SpriteRenderer';
+import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag } from '../components';
+import { SpriteManager } from '../SpriteManager';
 import { view } from '../world';
 
 /**
@@ -209,7 +209,6 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
         if (RenderDebug.enabled && RenderDebug.logTextures) {
             console.log('[RenderSystem] Drawing:', {
                 position: { x: item.transform.x, y: item.transform.y },
-                texture: item.sprite.texture,
                 spriteKey: item.sprite.spriteKey,
                 color: item.sprite.color
             });
@@ -260,11 +259,15 @@ function drawSprite(
     const screenX = transform.x - camX;
     const screenY = transform.y - camY;
 
+    // 从 SpriteManager 获取配置
+    const config = sprite.config;
+    const image = sprite.image;
+
     // 计算绘制参数
-    const width = sprite.srcW * sprite.scale * zoom;
-    const height = sprite.srcH * sprite.scale * zoom;
-    const pivotX = width * sprite.pivotX;
-    const pivotY = height * sprite.pivotY;
+    const width = config.width * sprite.scale * zoom;
+    const height = config.height * sprite.scale * zoom;
+    const pivotX = width * (config.pivotX ?? 0.5);
+    const pivotY = height * (config.pivotY ?? 0.5);
 
     // 保存上下文状态
     ctx.save();
@@ -276,41 +279,11 @@ function drawSprite(
     const rotation = transform.rot + sprite.rotate90 * 90;
     ctx.rotate((rotation * Math.PI) / 180);
 
-    // 绘制
-    if (sprite.texture) {
-        // 使用纹理（SVG 图像）
-        const textureImage = getTextureImage(sprite.texture);
-        if (textureImage && textureImage.complete) {
-            ctx.drawImage(
-                textureImage,
-                -pivotX,
-                -pivotY,
-                width,
-                height
-            );
-        } else {
-            // 图像未加载，使用颜色占位
-            ctx.fillStyle = sprite.color || '#fff';
-            ctx.fillRect(-pivotX, -pivotY, width, height);
-        }
-    } else if (sprite.spriteKey) {
-        // 使用 spriteKey 加载图像
-        const spriteImage = loadSpriteByKey(sprite.spriteKey, sprite.srcW, sprite.srcH);
-        if (spriteImage && spriteImage.complete) {
-            ctx.drawImage(
-                spriteImage,
-                -pivotX,
-                -pivotY,
-                width,
-                height
-            );
-        } else {
-            // 图像未加载，使用颜色占位
-            ctx.fillStyle = sprite.color || '#fff';
-            ctx.fillRect(-pivotX, -pivotY, width, height);
-        }
+    // 绘制图片
+    if (image && image.complete) {
+        ctx.drawImage(image, -pivotX, -pivotY, width, height);
     } else {
-        // 使用颜色绘制矩形
+        // 图片未加载，使用颜色占位
         ctx.fillStyle = sprite.color || '#fff';
         ctx.fillRect(-pivotX, -pivotY, width, height);
     }
@@ -323,54 +296,6 @@ function drawSprite(
 
     // 恢复上下文状态
     ctx.restore();
-}
-
-/**
- * 根据 spriteKey 加载图像
- */
-function loadSpriteByKey(spriteKey: string, width: number, height: number): HTMLImageElement | null {
-    if (spriteKey.startsWith('player')) {
-        return SpriteRenderer.getImage('player') || null;
-    } else if (spriteKey.startsWith('bullet_')) {
-        return SpriteRenderer.getImage(spriteKey) || null;
-    } else if (spriteKey.startsWith('enemy_')) {
-        return SpriteRenderer.getImage(spriteKey) || null;
-    } else if (spriteKey.startsWith('boss_')) {
-        return SpriteRenderer.getImage(spriteKey) || null;
-    }
-    return null;
-}
-
-/**
- * 获取纹理图像
- * 从完整路径中提取资源 key，然后从 SpriteRenderer 获取图像
- */
-function getTextureImage(texture: string): HTMLImageElement | null {
-    // 从路径中提取资源 key
-    // 例如: "/assets/fighters/player.svg" -> "player"
-    //        "/assets/bullets/bullet_laser.svg" -> "bullet_laser"
-    //        "/assets/bosses/boss_guardian.svg" -> "boss_guardian"
-    const filename = texture.split('/').pop() || texture;
-    const key = filename.replace('.svg', '').replace('.png', '');
-
-    // 尝试通过 key 获取图像
-    let image = SpriteRenderer.getImage(key);
-
-    // 如果没找到，尝试其他 key 格式
-    if (!image) {
-        // 尝试带 bullet_ 前缀
-        image = SpriteRenderer.getImage(`bullet_${key}`);
-    }
-    if (!image) {
-        // 尝试带 enemy_ 前缀
-        image = SpriteRenderer.getImage(`enemy_${key}`);
-    }
-    if (!image) {
-        // 尝试带 boss_ 前缀
-        image = SpriteRenderer.getImage(`boss_${key}`);
-    }
-
-    return image || null;
 }
 
 /**

@@ -1,7 +1,8 @@
 import { Component } from '../types';
+import { SpriteKey, SpriteEntry } from '../configs/sprites';
+import { SpriteManager } from '../SpriteManager';
 
 // 「精灵、帧动画、震屏、闪光、光斑、弹痕」
-
 
 
 /** 粒子组件 - 控制粒子系统 */
@@ -37,47 +38,122 @@ export class Sprite extends Component {
      * @param cfg 精灵配置
      */
     constructor(cfg: {
-        texture?: string;        // 图集名
-        color?: string;         // 颜色
-        srcX?: number;          // 切图起始（像素）
+        /** Sprite 唯一标识符 */
+        spriteKey: SpriteKey;
+        /** 颜色（可选覆盖） */
+        color?: string;
+        /** 视觉缩放（不影响碰撞） */
+        scale?: number;
+        /** 旋转角度（度） */
+        rotate90?: number;
+        /** 受伤闪烁截止时间 */
+        hitFlashUntil?: number;
+
+        // === 以下为兼容性字段，已废弃 ===
+        /** @deprecated 使用 spriteKey 替代 */
+        texture?: string;
+        /** @deprecated 从 registry 自动获取 */
+        srcX?: number;
+        /** @deprecated 从 registry 自动获取 */
         srcY?: number;
-        srcW?: number;          // 切图宽高（像素）
+        /** @deprecated 从 registry 自动获取 */
+        srcW?: number;
+        /** @deprecated 从 registry 自动获取 */
         srcH?: number;
-        scale?: number;         // 视觉缩放（不影响碰撞）
-        pivotX?: number;        // 轴心 0-1
+        /** @deprecated 从 registry 自动获取 */
+        pivotX?: number;
+        /** @deprecated 从 registry 自动获取 */
         pivotY?: number;
-        rotate90?: number;      // 0/1/2/3 = 0°/90°/180°/270°
-        spriteKey?: string;     // 精灵键值，用于查找资源
-        hitFlashUntil?: number; // 受伤闪烁截止时间
     }) {
         super();
-        this.texture = cfg.texture ?? '';
+        this.spriteKey = cfg.spriteKey;
         this.color = cfg.color ?? '';
+        this.scale = cfg.scale ?? 1;
+        this.rotate90 = cfg.rotate90 ?? 0;
+        this.hitFlashUntil = cfg.hitFlashUntil;
+
+        // 兼容性字段
+        this.texture = cfg.texture ?? '';
         this.srcX = cfg.srcX ?? 0;
         this.srcY = cfg.srcY ?? 0;
         this.srcW = cfg.srcW ?? 1;
         this.srcH = cfg.srcH ?? 1;
-        this.scale = cfg.scale ?? 1;
         this.pivotX = cfg.pivotX ?? 0.5;
         this.pivotY = cfg.pivotY ?? 0.5;
-        this.rotate90 = cfg.rotate90 ?? 0;
-        this.spriteKey = cfg.spriteKey ?? '';
-        this.hitFlashUntil = cfg.hitFlashUntil;
     }
-    public texture: string;        // 图集名
+
+    /** Sprite 唯一标识符 */
+    public spriteKey: SpriteKey;
+
+    /** 颜色（可选覆盖） */
     public color = '';
-    public srcX = 0;               // 切图起始（像素）
+
+    /** 视觉缩放（不影响碰撞） */
+    public scale = 1;
+
+    /** 旋转角度（度） */
+    public rotate90 = 0;
+
+    /** 受伤闪烁截止时间 */
+    public hitFlashUntil?: number;
+
+    // === 以下为兼容性字段，已废弃 ===
+    /** @deprecated 使用 spriteKey 替代 */
+    public texture: string;
+    /** @deprecated 使用 width getter 替代 */
+    public srcX = 0;
+    /** @deprecated 使用 height getter 替代 */
     public srcY = 0;
-    public srcW = 1;               // 切图宽高（像素）
+    /** @deprecated 使用 width getter 替代 */
+    public srcW = 1;
+    /** @deprecated 使用 height getter 替代 */
     public srcH = 1;
-    public scale = 1;              // 视觉缩放（不影响碰撞）
-    public pivotX = 0.5;           // 轴心 0-1
+    /** @deprecated 从 registry 自动获取 */
+    public pivotX = 0.5;
+    /** @deprecated 从 registry 自动获取 */
     public pivotY = 0.5;
-    public rotate90 = 0;           // 0/1/2/3 = 0°/90°/180°/270°
-    public spriteKey = '';         // 精灵键值
-    public hitFlashUntil?: number;  // 受伤闪烁截止时间
+
+    /**
+     * 获取 sprite 配置
+     */
+    get config(): SpriteEntry {
+        return SpriteManager.getConfig(this.spriteKey);
+    }
+
+    /**
+     * 获取原始宽度（像素）
+     */
+    get width(): number {
+        return this.config.width;
+    }
+
+    /**
+     * 获取原始高度（像素）
+     */
+    get height(): number {
+        return this.config.height;
+    }
+
+    /**
+     * 获取缓存中的图片
+     */
+    get image(): HTMLImageElement | undefined {
+        return SpriteManager.getImage(this.spriteKey);
+    }
+
+    /**
+     * 触发受伤闪烁效果
+     */
+    flash(durationMs: number = 100): void {
+        this.hitFlashUntil = Date.now() + durationMs;
+    }
+
+    /**
+     * 检查是否正在闪烁
+     */
+    get isFlashing(): boolean {
+        return this.hitFlashUntil !== undefined && Date.now() < this.hitFlashUntil;
+    }
+
     static check(c: any): c is Sprite { return c instanceof Sprite; }
 }
-
-
-

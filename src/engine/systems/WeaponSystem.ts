@@ -21,7 +21,9 @@ import { ALL_WEAPONS_TABLE } from '../blueprints/weapons';
 import { Blueprint, WeaponSpec, AmmoSpec } from '../blueprints';
 import { pushEvent, removeComponent, view } from '../world';
 import { WeaponFiredEvent } from '../events';
-import { BULLET_SPRITE_CONFIG, getWeaponUpgrade, SpriteSpec } from '../configs';
+import { BULLET_SPRITE_CONFIG } from '../configs/sprites/bullets';
+import { getWeaponUpgrade } from '../configs/weapon-upgrades';
+import { BulletSpriteSpec } from '../configs/sprites/bullets';
 
 /**
  * 武器系统主函数
@@ -45,7 +47,7 @@ export function WeaponSystem(world: World, dt: number): void {
         }
         // 消费掉开火意图
         removeComponent(world, id, FireIntent);
-        
+
         // 第三步：发射武器
         const isPlayer = !!entity.find(PlayerTag.check);
         // console.log(`Entity ${id} firing weapon ${weapon.id}`);
@@ -148,7 +150,7 @@ interface FireContext {
     weapon: Weapon;
     weaponSpec: WeaponSpec;
     ammoSpec: AmmoSpec;
-    spriteSpec: SpriteSpec;
+    spriteSpec: BulletSpriteSpec;
     upgradeSpec: { damageMultiplier: number; fireRateMultiplier: number };
     ownerId: number;
 }
@@ -222,14 +224,9 @@ function createBullet(ctx: FireContext, angle: number): void {
         Transform: { x: transform.x, y: transform.y, rot: angle },
         Velocity: { vx, vy },
         Sprite: {
-            texture: spriteSpec.texture,
+            spriteKey: spriteSpec.spriteKey,
             color: spriteSpec.color,
-            srcX: 0,
-            srcY: 0,
-            srcW: spriteSpec.srcW,
-            srcH: spriteSpec.srcH,
-            pivotX: spriteSpec.pivotX,
-            pivotY: spriteSpec.pivotY,
+            scale: 1
         },
         Bullet: {
             owner: ownerId,
