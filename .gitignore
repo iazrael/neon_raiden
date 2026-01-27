@@ -25,4 +25,4 @@ dist-ssr
 
 .qoder/quests/*
 .trae/documents/*
-dev-dist/*
+dev-dist/*.claude/settings.local.json
