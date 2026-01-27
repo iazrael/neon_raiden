@@ -15,6 +15,7 @@
 import { World, EntityId } from '../types';
 import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from '../components';
 import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent } from '../events';
+import { removeComponent, view } from '../world';
 
 /**
  * 伤害结算系统主函数
@@ -106,41 +107,27 @@ function applyDamage(world: World, event: HitEvent): void {
  * 处理持续伤害 (DOT)
  */
 function processDamageOverTime(world: World, dt: number): void {
-    for (const [id, comps] of world.entities) {
-        const dots = comps.filter(DamageOverTime.check);
+    for (const [id, [dot]] of view(world, [DamageOverTime])) {
+        // 更新 DOT
+        const shouldDamage = dot.tick(dt);
+        if (shouldDamage) {
+            const comps = world.entities.get(id);
+            // 应用 DOT 伤害
+            const transform = comps.find(Transform.check);
+            const health = comps.find(Health.check);
 
-        for (const dot of dots) {
-            // 检查 DOT 是否结束
-            if (dot.isFinished()) {
-                const idx = comps.indexOf(dot);
-                if (idx !== -1) comps.splice(idx, 1);
-                continue;
-            }
+            if (health && transform) {
+                health.hp -= dot.damagePerSecond * dot.interval / 1000;
 
-            // 更新 DOT
-            const shouldDamage = dot.tick(dt);
-
-            if (shouldDamage) {
-                // 应用 DOT 伤害
-                const transform = comps.find(Transform.check);
-                const health = comps.find(Health.check);
-
-                if (health && transform) {
-                    health.hp -= dot.damagePerSecond * dot.interval / 1000;
-
-                    // 检查死亡
-                    if (health.hp <= 0) {
-                        handleDeath(world, id, 0, { x: transform.x, y: transform.y });
-                    }
+                // 检查死亡
+                if (health.hp <= 0) {
+                    handleDeath(world, id, 0, { x: transform.x, y: transform.y });
                 }
             }
         }
-
-        // 清理已结束的 DOT
-        const finishedDots = comps.filter(c => c instanceof DamageOverTime && (c as DamageOverTime).isFinished());
-        for (const dot of finishedDots) {
-            const idx = comps.indexOf(dot);
-            if (idx !== -1) comps.splice(idx, 1);
+        // 检查 DOT 是否结束
+        if (dot.isFinished()) {
+            removeComponent(world, id, dot);
         }
     }
 }

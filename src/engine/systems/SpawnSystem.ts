@@ -45,7 +45,7 @@ function getRandomSpawnPos(world: World): { x: number; y: number } {
     return {
         x: margin + Math.random() * (world.width - margin * 2),
         // y轴也随机一下，避免总是同一高度生成
-        y: -50 - Math.random() * 50 // 从屏幕上方生成
+        y: -50 + Math.random() * 50 // 从屏幕上方生成
     };
 }
 
@@ -114,7 +114,7 @@ function doSpawnEnemy(
     world.spawnCredits -= cost;
 
     // 5. 日志
-    console.log(`Spawned enemy '${enemyType}' costing ${cost} credits, remaining: ${world.spawnCredits.toFixed(2)}`);
+    console.log(`Spawned enemy '${enemyType}' costing ${cost} credits, remaining: ${world.spawnCredits.toFixed(2)} born at (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})`);
 }
 
 /**
