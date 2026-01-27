@@ -13,7 +13,7 @@
 import { World, EntityId } from '../types';
 import { Transform, Velocity, BossTag, BossAI, Weapon, MoveIntent, FireIntent } from '../components';
 import { BOSS_DATA, BossMovementPattern } from '../configs/bossData';
-import { pushEvent } from '../world';
+import { pushEvent, view } from '../world';
 
 /**
  * 检查组件是否为 Transform
@@ -28,39 +28,15 @@ function isTransform(c: any): c is Transform {
  * @param dt 时间增量（毫秒）
  */
 export function BossSystem(world: World, dt: number): void {
-    // 收集所有 Boss 实体
-    const bossEntities: Array<{
-        id: EntityId;
-        transform: Transform;
-        velocity: Velocity;
-        bossTag: BossTag;
-        bossAI: BossAI;
-        weapon?: Weapon;
-    }> = [];
-
-    for (const [id, comps] of world.entities) {
-        const bossTag = comps.find(BossTag.check) as BossTag | undefined;
-        if (!bossTag) continue;
-
-        const transform = comps.find(Transform.check) as Transform | undefined;
-        const velocity = comps.find(Velocity.check) as Velocity | undefined;
-        const bossAI = comps.find(BossAI.check) as BossAI | undefined;
-        const weapon = comps.find(Weapon.check) as Weapon | undefined;
-
-        if (!transform || !bossAI) continue;
-
-        bossEntities.push({
+    for (const [id, [bossTag, bossAI, weapon, transform, velocity]] of view(world, [BossTag, BossAI, Weapon, Transform, Velocity])) {
+        const boss = {
             id,
             transform,
-            velocity: velocity || new Velocity({ vx: 0, vy: 0, vrot: 0 }),
+            velocity,
             bossTag,
             bossAI,
             weapon
-        });
-    }
-
-    // 处理每个 Boss
-    for (const boss of bossEntities) {
+        };
         processBoss(world, boss, dt);
     }
 }
@@ -80,7 +56,7 @@ function processBoss(
     },
     dt: number
 ): void {
-    const bossSpec = BOSS_DATA[boss.bossTag.id as keyof typeof BOSS_DATA];
+    const bossSpec = BOSS_DATA[boss.bossTag.id];
     if (!bossSpec) return;
 
     const phaseSpec = bossSpec.phases[boss.bossAI.phase];
@@ -166,7 +142,7 @@ function handleBossMovement(
             // 紧密追踪
             const playerComps2 = world.entities.get(world.playerId);
             if (playerComps2) {
-                const playerTransform = playerComps2.find(c => c.constructor.name === 'Transform') as any;
+                const playerTransform = playerComps2.find(Transform.check);
                 if (playerTransform) {
                     const dx = playerTransform.x - boss.transform.x;
                     const dy = playerTransform.y - boss.transform.y;

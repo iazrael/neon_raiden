@@ -11,11 +11,11 @@
  * 执行顺序：P6 - 在 BossSystem 之前
  */
 
-import { World } from '../types';
+import { BossId, Component, World } from '../types';
 import { Health, BossTag, BossAI, Weapon, SpeedStat } from '../components';
-import { BOSS_DATA } from '../configs/bossData';
+import { BOSS_DATA, BossPhaseSpec } from '../configs/bossData';
 import { BossPhaseChangeEvent, PlaySoundEvent } from '../events';
-import { pushEvent } from '../world';
+import { pushEvent, view } from '../world';
 import { EnemyWeaponId } from '../types';
 
 /**
@@ -30,15 +30,8 @@ const bossPreviousPhases = new Map<number, number>();
  */
 export function BossPhaseSystem(world: World, dt: number): void {
     // 收集所有 Boss 实体
-    for (const [id, comps] of world.entities) {
-        const bossTag = comps.find(BossTag.check) as BossTag | undefined;
-        if (!bossTag) continue;
-
-        const health = comps.find(Health.check) as Health | undefined;
-        const bossAI = comps.find(BossAI.check) as BossAI | undefined;
-
-        if (!health || !bossAI) continue;
-
+    for (const [id, [bossTag, health, bossAI]] of view(world, [BossTag, Health, BossAI])) {
+        const comps = world.entities.get(id);
         // 检查是否需要切换阶段
         checkPhaseTransition(world, id, bossTag.id, health, bossAI, comps);
     }
@@ -50,12 +43,12 @@ export function BossPhaseSystem(world: World, dt: number): void {
 function checkPhaseTransition(
     world: World,
     entityId: number,
-    bossId: string,
+    bossId: BossId,
     health: Health,
     bossAI: BossAI,
-    comps: any[]
+    comps: Component[]
 ): void {
-    const bossSpec = BOSS_DATA[bossId as keyof typeof BOSS_DATA];
+    const bossSpec = BOSS_DATA[bossId];
     if (!bossSpec) return;
 
     // 计算当前血量百分比
@@ -86,8 +79,8 @@ function applyPhase(
     entityId: number,
     bossAI: BossAI,
     phaseIndex: number,
-    phaseSpec: any,
-    comps: any[]
+    phaseSpec: BossPhaseSpec,
+    comps: Component[]
 ): void {
     // 更新 Boss AI 阶段
     bossAI.phase = phaseIndex;
@@ -112,20 +105,20 @@ function applyPhase(
 /**
  * 应用阶段属性修正
  */
-function applyPhaseModifiers(comps: any[], phaseSpec: any): void {
+function applyPhaseModifiers(comps: Component[], phaseSpec: BossPhaseSpec): void {
     const modifiers = phaseSpec.modifiers || {};
 
     // 应用速度修正
-    const speedStat = comps.find(SpeedStat.check) as SpeedStat | undefined;
+    const speedStat = comps.find(SpeedStat.check);
     if (speedStat && modifiers.moveSpeed) {
         speedStat.maxLinear *= modifiers.moveSpeed;
     }
 
     // 应用武器切换
     if (phaseSpec.weaponId) {
-        const weapon = comps.find(Weapon.check) as Weapon | undefined;
+        const weapon = comps.find(Weapon.check);
         if (weapon) {
-            // 这里需要根据 weaponId 切换武器
+            // TODO: 这里需要根据 weaponId 切换武器
             // 简化处理：更新武器配置
             // 实际项目中可能需要从 WEAPON_TABLE 获取新武器配置
         }

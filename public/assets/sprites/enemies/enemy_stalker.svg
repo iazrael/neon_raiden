@@ -2,6 +2,10 @@
   <!-- Stalker: High Speed, High Damage - Aggressive, forward-swept, green/hunter theme -->
   <path d="M32 2L48 16L62 10L52 40L32 62L12 40L2 10L16 16L32 2Z" fill="#48BB78" stroke="#2F855A" stroke-width="2"/>
   <path d="M32 20L42 30L32 50L22 30L32 20Z" fill="#22543D"/>
+  <!-- Eye Core with Multi-layer Glow Effect -->
+  <circle cx="32" cy="32" r="6" fill="#E6FFFA" fill-opacity="0.3"/>
+  <circle cx="32" cy="32" r="4.5" fill="#E6FFFA" fill-opacity="0.5"/>
+  <circle cx="32" cy="32" r="3" fill="#E6FFFA"/>
   <circle cx="22" cy="30" r="3" fill="#9AE6B4"/>
   <circle cx="42" cy="30" r="3" fill="#9AE6B4"/>
   <path d="M32 2V20" stroke="#2F855A" stroke-width="2"/>

@@ -130,8 +130,8 @@ export class Engine {
         InputSystem(world, dt);                         // 1. 输入系统
         // DifficultySystem(world, dt);                    // 2. 难度系统
         SpawnSystem(world, dt);                         // 3. 生成系统
-        // BossPhaseSystem(world, dt);                     // 4. Boss阶段系统
-        // BossSystem(world, dt);                          // 5. Boss系统
+        BossPhaseSystem(world, dt);                     // 4. Boss阶段系统
+        BossSystem(world, dt);                          // 5. Boss系统
         EnemySystem(world, dt);                         // 6. 敌人系统
         // AISteerSystem(world, dt);                       // 7. AI转向系统
 

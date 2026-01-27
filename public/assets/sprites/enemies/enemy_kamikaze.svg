@@ -10,7 +10,9 @@
     <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(225)"/>
     <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(270)"/>
     <path d="M15 0 L25 0 L18 5 Z" fill="#ed8936" transform="rotate(315)"/>
-    <!-- Core -->
-    <circle cx="0" cy="0" r="8" fill="#fbd38d"/>
+    <!-- Energy Core with Intense Glow Effect -->
+    <circle cx="0" cy="0" r="10" fill="#FEB2B2" fill-opacity="0.4"/>
+    <circle cx="0" cy="0" r="8" fill="#FEB2B2" fill-opacity="0.6"/>
+    <circle cx="0" cy="0" r="6" fill="#FEB2B2"/>
   </g>
 </svg>
