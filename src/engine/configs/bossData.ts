@@ -12,6 +12,33 @@ export interface BossSpec {
 }
 
 /**
+ * Boss移动配置参数
+ * 用于微调各个移动模式的行为
+ */
+export interface MovementConfig {
+    /** 速度倍率（1.0 = 基准速度） */
+    speedMultiplier?: number;
+    /** 圆形/8字移动半径 */
+    radius?: number;
+    /** 振动/摆动频率 */
+    frequency?: number;
+    /** 振幅 */
+    amplitude?: number;
+    /** 垂直速度 */
+    verticalSpeed?: number;
+    /** 瞬移间隔（毫秒） */
+    teleportInterval?: number;
+    /** 冲刺速度 */
+    dashSpeed?: number;
+    /** 圆心Y坐标 */
+    centerY?: number;
+    /** 之字形切换间隔 */
+    zigzagInterval?: number;
+    /** 自适应模式近距离阈值 */
+    closeRangeThreshold?: number;
+}
+
+/**
  * Boss 的移动模式
  */
 export enum BossMovementPattern {
@@ -46,6 +73,8 @@ export interface BossPhaseSpec {
     threshold: number;
     /** 该阶段的移动模式 */
     movePattern: BossMovementPattern;
+    /** 移动参数配置 */
+    movementConfig?: MovementConfig;
     /** 该阶段使用的武器 ID (引用 weapons.ts) */
     weaponId: EnemyWeaponId;
     /** 阶段属性修正 (相对于基础值的倍率) */
@@ -218,3 +247,106 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
         phases: [{ threshold: 1.0, movePattern: BossMovementPattern.FIGURE_8, weaponId: EnemyWeaponId.GENERIC_HOMING, modifiers: {} }]
     },
 };
+
+/**
+ * Boss配置验证结果
+ */
+export interface ValidationResult {
+    /** 是否验证通过 */
+    valid: boolean;
+    /** 错误信息列表 */
+    errors: string[];
+    /** 警告信息列表 */
+    warnings: string[];
+}
+
+/**
+ * 验证Boss配置的完整性和正确性
+ *
+ * 检查项：
+ * 1. 所有Boss至少有一个阶段
+ * 2. 阶段阈值按降序排列（1.0 -> 0）
+ * 3. 所有weaponId在ENEMY_WEAPON_TABLE中存在
+ * 4. 所有movePattern在BossMovementPattern中存在
+ * 5. modifiers字段结构正确
+ *
+ * @returns 验证结果对象
+ */
+export function validateBossConfigs(): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    // 导入武器表用于验证
+    // 注意：这里使用动态导入以避免循环依赖
+    let weaponTable: Record<string, unknown> = {};
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const weaponsModule = require('../blueprints/weapons');
+        weaponTable = weaponsModule.ENEMY_WEAPON_TABLE || {};
+    } catch (e) {
+        warnings.push('无法加载武器表进行验证');
+    }
+
+    // 验证每个Boss
+    for (const [bossId, bossSpec] of Object.entries(BOSS_DATA)) {
+        // 检查1: 至少有一个阶段
+        if (!bossSpec.phases || bossSpec.phases.length === 0) {
+            errors.push(`Boss ${bossId}: 没有定义阶段`);
+            continue;
+        }
+
+        // 检查2: 阶段阈值降序排列
+        let lastThreshold = 2.0; // 初始值大于1.0
+        for (let i = 0; i < bossSpec.phases.length; i++) {
+            const phase = bossSpec.phases[i];
+
+            if (phase.threshold > lastThreshold) {
+                errors.push(`Boss ${bossId} Phase ${i}: 阈值未按降序排列 (${phase.threshold} > ${lastThreshold})`);
+            }
+            lastThreshold = phase.threshold;
+
+            // 检查3: weaponId存在
+            if (weaponTable && !weaponTable[phase.weaponId]) {
+                errors.push(`Boss ${bossId} Phase ${i}: 武器ID ${phase.weaponId} 在武器表中不存在`);
+            }
+
+            // 检查4: movePattern存在
+            const patternValues = Object.values(BossMovementPattern);
+            if (!patternValues.includes(phase.movePattern)) {
+                errors.push(`Boss ${bossId} Phase ${i}: 移动模式 ${phase.movePattern} 无效`);
+            }
+
+            // 检查5: modifiers结构
+            if (phase.modifiers) {
+                const validKeys = ['moveSpeed', 'fireRate', 'damage'];
+                for (const key of Object.keys(phase.modifiers)) {
+                    if (!validKeys.includes(key)) {
+                        warnings.push(`Boss ${bossId} Phase ${i}: 未知的modifier字段 "${key}"`);
+                    }
+                }
+            }
+        }
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings
+    };
+}
+
+// 开发环境自动验证
+if (process.env.NODE_ENV !== 'production') {
+    const validation = validateBossConfigs();
+    if (!validation.valid) {
+        console.error('Boss配置验证失败:');
+        validation.errors.forEach(err => console.error(`  ✗ ${err}`));
+    }
+    if (validation.warnings.length > 0) {
+        console.warn('Boss配置警告:');
+        validation.warnings.forEach(warn => console.warn(`  ⚠ ${warn}`));
+    }
+    if (validation.valid && validation.warnings.length === 0) {
+        console.log('✓ Boss配置验证通过');
+    }
+}
