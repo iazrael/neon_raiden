@@ -32,6 +32,8 @@ export interface MovementConfig {
     dashSpeed?: number;
     /** 圆心Y坐标 */
     centerY?: number;
+    /** 圆心X坐标 */
+    centerX?: number;
     /** 之字形切换间隔 */
     zigzagInterval?: number;
     /** 自适应模式近距离阈值 */

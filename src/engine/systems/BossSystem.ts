@@ -129,7 +129,7 @@ function handleBossMovement(
 
         case BossMovementPattern.CIRCLE:
             // 绕圈移动
-            const centerX = world.width * (config.centerX ? config.centerX / world.width : CIRCLE_MOVE.DEFAULT_CENTER_X_RATIO);
+            const centerX = config.centerX ?? world.width * CIRCLE_MOVE.DEFAULT_CENTER_X_RATIO;
             const centerY = config.centerY || CIRCLE_MOVE.DEFAULT_CENTER_Y;
             const radius = config.radius || CIRCLE_MOVE.DEFAULT_RADIUS;
             const angle = time * (config.frequency || CIRCLE_MOVE.DEFAULT_FREQUENCY);
@@ -155,8 +155,9 @@ function handleBossMovement(
                 if (playerTransform) {
                     const dx = playerTransform.x - boss.transform.x;
                     const dy = playerTransform.y - boss.transform.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist > 0) {
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq > 0.01) {
+                        const dist = Math.sqrt(distSq);
                         boss.velocity.vx = (dx / dist) * baseSpeed;
                         boss.velocity.vy = (dy / dist) * baseSpeed * 0.5;
                     }
@@ -175,8 +176,9 @@ function handleBossMovement(
                 if (playerTransform) {
                     const dx = playerTransform.x - boss.transform.x;
                     const dy = playerTransform.y - boss.transform.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist > 0) {
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq > 0.01) {
+                        const dist = Math.sqrt(distSq);
                         boss.velocity.vx = (dx / dist) * baseSpeed * 1.5;
                         boss.velocity.vy = (dy / dist) * baseSpeed;
                     }
@@ -244,14 +246,15 @@ function handleBossMovement(
                 if (playerTransform) {
                     const dx = playerTransform.x - boss.transform.x;
                     const dy = playerTransform.y - boss.transform.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const distSq = dx * dx + dy * dy;
+                    const dist = Math.sqrt(distSq);
 
                     if (dist < threshold) {
                         // 近距离：闪避（8字形）
                         const dodgeSpeed = baseSpeed * ADAPTIVE.DODGE_SPEED_MULTIPLIER;
                         boss.velocity.vx = Math.sin(time * 3) * dodgeSpeed;
                         boss.velocity.vy = Math.cos(time * 3) * baseSpeed;
-                    } else {
+                    } else if (distSq > 0.01) {
                         // 远距离：追踪
                         const trackSpeed = baseSpeed * ADAPTIVE.TRACKING_SPEED_MULTIPLIER;
                         boss.velocity.vx = (dx / dist) * trackSpeed;

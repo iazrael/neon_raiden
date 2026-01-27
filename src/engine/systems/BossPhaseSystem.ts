@@ -95,7 +95,7 @@ function applyPhaseModifiers(
     // 2. 生成阶段切换事件
     pushEvent(world, {
         type: 'BossPhaseChange',
-        phase: phaseIndex + 1, // 阶段从1开始显示
+        phase: phaseIndex + 1,  // 显示使用1-based索引（内部是0-based）
         bossId: entityId
     } as BossPhaseChangeEvent);
 
@@ -119,21 +119,20 @@ function applyPhaseModifiers(
         const weapon = comps.find(Weapon.check);
         if (weapon) {
             const newWeaponSpec = ENEMY_WEAPON_TABLE[phaseSpec.weaponId];
-            if (newWeaponSpec) {
-                // 应用新武器配置
-                Object.assign(weapon, {
-                    id: newWeaponSpec.id,
-                    ammoType: newWeaponSpec.ammoType,
-                    cooldown: newWeaponSpec.cooldown,
-                    bulletCount: newWeaponSpec.bulletCount,
-                    spread: newWeaponSpec.spread || 0,
-                    pattern: newWeaponSpec.pattern,
-                    curCD: 0, // 重置冷却时间
-                    // 应用修正器
-                    damageMultiplier: modifiers.damage || 1.0,
-                    fireRateMultiplier: modifiers.fireRate || 1.0
-                });
+            if (!newWeaponSpec) {
+                console.error(`[BossPhaseSystem] Weapon ID ${phaseSpec.weaponId} not found in ENEMY_WEAPON_TABLE`);
+                return;
             }
+            // 应用新武器配置
+            weapon.id = newWeaponSpec.id;
+            weapon.ammoType = newWeaponSpec.ammoType;
+            weapon.cooldown = newWeaponSpec.cooldown;
+            weapon.bulletCount = newWeaponSpec.bulletCount;
+            weapon.spread = newWeaponSpec.spread || 0;
+            weapon.pattern = newWeaponSpec.pattern;
+            weapon.curCD = 0;
+            weapon.damageMultiplier = modifiers.damage || 1.0;
+            weapon.fireRateMultiplier = modifiers.fireRate || 1.0;
         }
     }
 
