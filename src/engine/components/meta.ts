@@ -93,18 +93,39 @@ export class BossAI extends Component {
      * @param cfg Boss AI配置
      */
     constructor(cfg: {
-        /** 当前阶段 */
+        /** 当前阶段（0-based索引） */
         phase?: number;
         /** 下次行为模式切换时间 */
         nextPatternTime?: number;
     }) {
         super();
-        this.phase = cfg.phase ?? 1;
+        this.phase = cfg.phase ?? 0; // 修复：初始化为0（0-based索引）
         this.nextPatternTime = cfg.nextPatternTime ?? 0;
     }
-    public phase = 1;
+    public phase = 0; // 0-based索引
     public nextPatternTime = 0;
     static check(c: any): c is BossAI { return c instanceof BossAI; }
+}
+
+/**
+ * Boss视觉组件 - 控制Boss的视觉表现
+ * 用于阶段切换时的颜色变化等视觉效果
+ */
+export class BossVisual extends Component {
+    /**
+     * 构造函数
+     * @param cfg 视觉配置
+     */
+    constructor(cfg: {
+        /** 阶段颜色（HEX格式） */
+        color: string;
+    }) {
+        super();
+        this.color = cfg.color;
+    }
+    /** 阶段颜色 */
+    public color: string;
+    static check(c: any): c is BossVisual { return c instanceof BossVisual; }
 }
 
 /** 分数值组件 - 击杀该实体可获得的分数 */

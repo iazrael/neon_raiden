@@ -4,9 +4,11 @@
 //
 
 import { DROPTABLE_BOSS } from '../configs/droptables/common';
+import { BOSS_DATA } from '../configs/bossData';
 import { BossId, CollisionLayer } from '../types';
 import { Blueprint } from './base';
 import { SpriteKey } from '../configs/sprites';
+import { ENEMY_WEAPON_TABLE } from './weapons';
 
 // Boss SpriteKey 映射
 const BOSS_SPRITE_MAP: Record<BossId, SpriteKey> = {
@@ -22,23 +24,34 @@ const BOSS_SPRITE_MAP: Record<BossId, SpriteKey> = {
     [BossId.APOCALYPSE]: SpriteKey.BOSS_APOCALYPSE,
 };
 
-// 辅助函数：快速生成 Boss 蓝图
+/**
+ * 辅助函数：快速生成 Boss 蓝图
+ *
+ * 从BOSS_DATA读取第一阶段武器并初始化到Weapon组件中
+ * BossAI.phase初始化为0（0-based索引）
+ */
 function createBossBlueprint(
     bossId: BossId,
     hp: number,
     radius: number,
     score: number
 ): Blueprint {
+    // 读取Boss配置，获取第一阶段武器
+    const bossSpec = BOSS_DATA[bossId];
+    const phase1WeaponId = bossSpec?.phases[0]?.weaponId;
+    const weaponSpec = phase1WeaponId ? ENEMY_WEAPON_TABLE[phase1WeaponId] : undefined;
+
     return {
         Transform: { x: 400, y: -200, rot: 180 },
         Health: { hp, max: hp },
         Sprite: { spriteKey: BOSS_SPRITE_MAP[bossId], scale: 1 },
         BossTag: { id: bossId },
-        BossAI: { phase: 0, nextPatternTime: 0 },
+        BossAI: { phase: 0, nextPatternTime: 0 }, // 确保0-based索引
         HitBox: { shape: 'circle', radius: radius * 0.8, layer: CollisionLayer.Enemy },
         SpeedStat: { maxLinear: 120, maxAngular: 2 },
         ScoreValue: { value: score },
-        DropTable: { table: DROPTABLE_BOSS }
+        DropTable: { table: DROPTABLE_BOSS },
+        Weapon: weaponSpec ? { ...weaponSpec } : undefined // 初始化第一阶段武器
     };
 }
 
