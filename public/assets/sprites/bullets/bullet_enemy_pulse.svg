@@ -1,0 +1,23 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Ripple Ring -->
+  <circle cx="10" cy="10" r="9.5" stroke="url(#pulseRingGrad)" stroke-width="2" opacity="0.8"/>
+  
+  <!-- Inner Energy Core -->
+  <circle cx="10" cy="10" r="5" fill="url(#pulseCoreGrad)"/>
+
+  <defs>
+    <!-- Ring Gradient (Cyan) -->
+    <linearGradient id="pulseRingGrad" x1="10" y1="0" x2="10" y2="20" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00FFFF" stop-opacity="0.2"/>
+      <stop offset="0.5" stop-color="#00FFFF"/>
+      <stop offset="1" stop-color="#00FFFF" stop-opacity="0.2"/>
+    </linearGradient>
+    
+    <!-- Core Gradient (White to Blue) -->
+    <radialGradient id="pulseCoreGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(10 10) rotate(90) scale(5)">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.6" stop-color="#00BFFF"/>
+      <stop offset="1" stop-color="#00BFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

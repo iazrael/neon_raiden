@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { GameEngine } from './game/GameEngine';
+import { ReactEngine } from './src/engine/ReactEngine';
 import { GameUI } from './components/GameUI';
 import { GameState, WeaponType, ClickType } from './types';
 import type { ComboState } from './game/systems/ComboSystem';
 import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
 
-import { SpriteGenerator } from './game/SpriteGenerator';
+import { SpriteManager } from './src/engine/SpriteManager';
 import { GameConfig } from './game/config/game';
 import ReloadPrompt from './components/ReloadPrompt';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const engineRef = useRef<GameEngine | null>(null);
+  const engineRef = useRef<ReactEngine | null>(null);
 
   // React State for UI Sync
   const [score, setScore] = useState(0);
@@ -32,8 +32,12 @@ function App() {
   const [weaponLevel, setWeaponLevel] = useState<number>(1);
 
   useEffect(() => {
-    // Preload assets
-    SpriteGenerator.preloadAssets();
+    // Preload assets - both old and new systems
+    Promise.all([
+      SpriteManager.preloadAll(),
+    ]).then(() => {
+      console.log('[App] All assets preloaded');
+    });
 
     // 隐藏加载指示器
     const loadingIndicator = document.getElementById('loading-indicator');
@@ -55,8 +59,8 @@ function App() {
 
     if (!canvasRef.current) return;
 
-    // Initialize Engine
-    const engine = new GameEngine(
+    // Initialize ReactEngine
+    const engine = new ReactEngine(
       canvasRef.current,
       (newScore) => setScore(newScore),
       (newLevel) => setLevel(newLevel),
@@ -65,40 +69,24 @@ function App() {
       (newBombs) => setBombs(newBombs),
       (maxLevel) => setMaxLevelReached(maxLevel),
       (show) => setShowBossWarning(show),
-      (newComboState) => setComboState(newComboState) // P2 Combo
+      (newComboState) => setComboState(newComboState)
     );
     engineRef.current = engine;
 
-    // Animation Loop
-    let lastTime = performance.now();
-    let animationId: number;
-
-    const loop = (time: number) => {
-      const dt = time - lastTime;
-      lastTime = time;
-
-      engine.loop(Math.min(dt, 50)); // Cap dt to prevent huge jumps
-
-      // Sync level transition state
+    // ReactEngine 内部通过 snapshot$ 同步状态，不需要手动动画循环
+    // 只需要定期同步额外的 UI 状态
+    const syncInterval = setInterval(() => {
       setShowLevelTransition(engine.showLevelTransition);
       setLevelTransitionTimer(engine.levelTransitionTimer);
-
-      // P2 Sync weapon synergy state
       setActiveSynergies(engine.synergySys.getActiveSynergies());
-      setWeaponType(engine.weaponType);
-      setSecondaryWeapon(engine.secondaryWeapon);
+      setWeaponType(engine.weaponId as any as WeaponType);
+      setSecondaryWeapon(engine.secondaryWeapon as any as WeaponType);
       setWeaponLevel(engine.weaponLevel);
-
       setShieldPercent(engine.getShieldPercent());
-
-      animationId = requestAnimationFrame(loop);
-    };
-
-    animationId = requestAnimationFrame(loop);
+    }, 100); // 每 100ms 同步一次 UI 状态
 
     return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', () => engine.resize());
+      clearInterval(syncInterval);
     };
   }, []);
 

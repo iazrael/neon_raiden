@@ -25,4 +25,9 @@ dist-ssr
 
 .qoder/quests/*
 .trae/documents/*
-dev-dist/*.claude/settings.local.json
+dev-dist/*
+.playwright-mcp
+
+# Git worktrees
+.worktrees/
+.claude/settings.local.json

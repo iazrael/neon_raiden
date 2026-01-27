@@ -2,7 +2,11 @@
   <!-- Fortress: High HP, High Damage - Bulky, square/hexagonal, purple/heavy theme -->
   <path d="M20 10H60L70 30V60L60 75H20L10 60V30L20 10Z" fill="#805AD5" stroke="#553C9A" stroke-width="3"/>
   <rect x="25" y="25" width="30" height="30" fill="#44337A"/>
-  <circle cx="40" cy="40" r="10" fill="#E9D8FD"/>
+  <!-- Octagonal Core with 3-layer Concentric Glow Effect -->
+  <circle cx="40" cy="40" r="14" fill="#E6FFFA" fill-opacity="0.2"/>
+  <circle cx="40" cy="40" r="11" fill="#E6FFFA" fill-opacity="0.4"/>
+  <circle cx="40" cy="40" r="8" fill="#E6FFFA" fill-opacity="0.6"/>
+  <circle cx="40" cy="40" r="5" fill="#E6FFFA"/>
   <rect x="15" y="35" width="10" height="10" fill="#9F7AEA"/>
   <rect x="55" y="35" width="10" height="10" fill="#9F7AEA"/>
   <rect x="35" y="15" width="10" height="10" fill="#9F7AEA"/>

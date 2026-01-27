@@ -4,6 +4,10 @@
     <path d="M-30 -20 L30 -20 L40 0 L30 20 L-30 20 L-40 0 Z" fill="#2d3748"/>
     <!-- Armor Plates -->
     <rect x="-20" y="-15" width="40" height="30" fill="#4a5568"/>
+    <!-- Energy Core with Glow Effect -->
+    <circle cx="0" cy="0" r="8" fill="#68D391" fill-opacity="0.3"/>
+    <circle cx="0" cy="0" r="6" fill="#68D391" fill-opacity="0.5"/>
+    <circle cx="0" cy="0" r="4" fill="#68D391"/>
     <!-- Warning Stripes -->
     <path d="M-15 -10 L-5 10 L-10 10 L-20 -10 Z" fill="#ecc94b"/>
     <path d="M5 -10 L15 10 L10 10 L0 -10 Z" fill="#ecc94b"/>

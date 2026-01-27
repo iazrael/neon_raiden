@@ -1,5 +1,10 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(24, 24)">
+    <!-- Energy Core with Glow Effect -->
+    <circle cx="0" cy="0" r="7" fill="#FBD38D" fill-opacity="0.3"/>
+    <circle cx="0" cy="0" r="5" fill="#FBD38D" fill-opacity="0.5"/>
+    <circle cx="0" cy="0" r="4" fill="#FBD38D"/>
+    <!-- Main Body -->
     <path d="M0 15 L15 -10 L0 -5 L-15 -10 Z" fill="#c53030"/>
     <circle cx="0" cy="0" r="5" fill="#feb2b2"/>
   </g>

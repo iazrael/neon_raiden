@@ -1,0 +1,537 @@
+# 太空射击游戏程序化音频设计指南
+
+## 1. 核心理念
+*   **零素材**：无需 WAV/MP3 文件，全靠代码实时合成，极大减小包体体积。
+*   **数据驱动**：音效由 JSON 配置定义，支持热更新和快速迭代。
+*   **多层叠加 (Layering)**：通过叠加不同波形（Attack/Body/Tail）来模拟真实和复杂的听感。
+*   **动态控制**：支持实时改变音调（Pitch）、音量和播放速度，实现多普勒效应、慢动作等效果。
+
+---
+
+## 2. 基础设施：音频引擎
+
+### 2.1 类型定义 (TypeScript)
+保存为 `AudioTypes.ts`。
+
+```typescript
+export type WaveType = 'sine' | 'square' | 'sawtooth' | 'triangle' | 'noise';
+
+export interface SoundLayer {
+    type: WaveType;      // 波形类型
+    vol?: number;        // 音量 (0~1)
+    duration?: number;   // 持续时间 (秒)
+    delay?: number;      // 延迟播放 (秒)
+    attack?: number;     // 起音时间 (渐入)
+    decay?: number;      // 衰减时间
+    freqStart?: number;  // 起始频率 (Hz)
+    freqEnd?: number;    // 结束频率 (Hz)
+}
+
+export interface SoundOptions {
+    loop?: boolean;      // 是否循环
+    pitch?: number;      // 音调/速率倍率
+    vol?: number;        // 音量倍率
+}
+
+export interface SoundHandle {
+    stop: () => void;
+    setPitch: (val: number) => void;  // 实时改音调
+    setVolume: (val: number) => void; // 实时改音量
+}
+```
+
+### 2.2 核心引擎 (AudioEngine.ts)
+支持多层合成、循环控制、白噪 `playbackRate` 控制的完整版本。
+
+```typescript
+import { SoundLayer, SoundOptions, SoundHandle } from "./AudioTypes";
+
+export class AudioEngine {
+    private ctx: AudioContext;
+    private masterGain: GainNode;
+    private _noiseBuffer: AudioBuffer | null = null;
+
+    constructor(globalVolume: number = 0.5) {
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+        this.ctx = new AudioContextClass();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = globalVolume;
+        this.masterGain.connect(this.ctx.destination);
+    }
+
+    resume() { if (this.ctx.state === 'suspended') this.ctx.resume(); }
+
+    play(soundDef: SoundLayer | SoundLayer[], options: SoundOptions = {}): SoundHandle {
+        this.resume();
+        const t = this.ctx.currentTime;
+        const layers = Array.isArray(soundDef) ? soundDef : [soundDef];
+        const activeNodes: any[] = [];
+
+        layers.forEach(layer => {
+            const startTime = t + (layer.delay || 0);
+            let source: OscillatorNode | AudioBufferSourceNode;
+            let baseFreq = layer.freqStart || 440;
+            const pitchMod = options.pitch || 1.0;
+
+            // 1. 创建源
+            if (layer.type === 'noise') {
+                source = this._createNoiseSource();
+                source.playbackRate.value = pitchMod; // Noise 使用 playbackRate 控制音调
+            } else {
+                const osc = this.ctx.createOscillator();
+                osc.type = layer.type || 'sine';
+                const startFreq = baseFreq * pitchMod;
+                osc.frequency.setValueAtTime(startFreq, startTime);
+
+                // 滑音处理 (Slide/Sweep)
+                if (!options.loop && layer.freqEnd && layer.freqEnd !== layer.freqStart) {
+                    const endFreq = layer.freqEnd * pitchMod;
+                    const duration = layer.duration || 0.3;
+                    // 防止频率归零报错
+                    if (endFreq <= 0.1) osc.frequency.linearRampToValueAtTime(0.1, startTime + duration);
+                    else osc.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
+                }
+                source = osc;
+            }
+
+            // 2. 音量包络
+            const gainNode = this.ctx.createGain();
+            const targetVol = (layer.vol ?? 0.5) * (options.vol ?? 1.0);
+            const attack = layer.attack || 0.01;
+            const duration = layer.duration || 0.3;
+
+            gainNode.gain.setValueAtTime(0, startTime);
+            if (options.loop) {
+                if (source instanceof AudioBufferSourceNode) source.loop = true;
+                gainNode.gain.linearRampToValueAtTime(targetVol, startTime + attack);
+            } else {
+                gainNode.gain.linearRampToValueAtTime(targetVol, startTime + attack);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                source.stop(startTime + duration + 0.2);
+            }
+
+            source.connect(gainNode);
+            gainNode.connect(this.masterGain);
+            source.start(startTime);
+
+            activeNodes.push({ source, gain: gainNode, config: layer, baseFreq });
+        });
+
+        // 3. 返回控制句柄
+        return {
+            stop: () => {
+                const now = this.ctx.currentTime;
+                activeNodes.forEach(n => {
+                    try {
+                        n.gain.gain.cancelScheduledValues(now);
+                        n.gain.gain.setValueAtTime(n.gain.gain.value, now);
+                        n.gain.gain.linearRampToValueAtTime(0, now + 0.1); // 淡出
+                        n.source.stop(now + 0.11);
+                    } catch(e){}
+                });
+            },
+            setPitch: (val: number) => {
+                const now = this.ctx.currentTime;
+                activeNodes.forEach(n => {
+                    if (n.source instanceof OscillatorNode) {
+                        n.source.frequency.setValueAtTime(n.baseFreq * val, now);
+                    } else if (n.source instanceof AudioBufferSourceNode) {
+                        n.source.playbackRate.setValueAtTime(val, now);
+                    }
+                });
+            },
+            setVolume: (val: number) => {
+                const now = this.ctx.currentTime;
+                activeNodes.forEach(n => {
+                    const baseVol = n.config.vol ?? 0.5;
+                    n.gain.gain.setTargetAtTime(baseVol * val, now, 0.1);
+                });
+            }
+        };
+    }
+
+    private _createNoiseSource(): AudioBufferSourceNode {
+        if (!this._noiseBuffer) {
+            const bufferSize = this.ctx.sampleRate * 2;
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            this._noiseBuffer = buffer;
+        }
+        const node = this.ctx.createBufferSource();
+        node.buffer = this._noiseBuffer;
+        node.loop = true;
+        return node;
+    }
+}
+```
+
+---
+
+## 3. ECS 架构集成
+
+为了统一管理声音的生命周期和特殊模式（如脉冲循环），我们需要构建组件和系统。
+
+### 3.1 音频组件 (AudioEmitter)
+```javascript
+export const AudioMode = {
+    ONESHOT: 0,    // 单次
+    LOOP_NATIVE: 1,// 原生平滑循环 (引擎声)
+    LOOP_PULSE: 2  // 脉冲断奏循环 (警报、无敌)
+};
+
+export class AudioEmitter {
+    constructor(config) {
+        this.soundConfig = config.sound || [];
+        this.mode = config.mode || AudioMode.ONESHOT;
+        this.volume = config.volume || 1.0;
+        this.pitch = config.pitch || 1.0;
+        
+        // 脉冲模式参数
+        this.interval = config.interval || 0.5; 
+        this.timer = 0;
+        
+        // 生命周期 (-1 为无限)
+        this.duration = config.duration || -1; 
+        
+        // 内部句柄
+        this._handle = null;
+        this._isPlaying = false;
+    }
+}
+```
+
+### 3.2 音频系统 (AudioSystem)
+```javascript
+export class AudioSystem {
+    constructor(engine) {
+        this.engine = engine;
+        this.globalTimeScale = 1.0; // 全局时间缩放（支持慢动作）
+    }
+
+    update(dt, entities) {
+        entities.forEach(entity => {
+            const audio = entity.getComponent(AudioEmitter);
+            if (!audio) return;
+
+            // 1. 生命周期管理
+            if (audio.duration > 0) {
+                audio.duration -= dt;
+                if (audio.duration <= 0) {
+                    this._stopAndRemove(entity, audio);
+                    return;
+                }
+            }
+
+            // 2. 计算最终音调 (应用全局慢动作)
+            const finalPitch = audio.pitch * this.globalTimeScale;
+
+            // 3. 播放状态机
+            if (!audio._isPlaying) {
+                audio._isPlaying = true;
+                if (audio.mode === AudioMode.LOOP_NATIVE) {
+                    audio._handle = this.engine.play(audio.soundConfig, { 
+                        loop: true, pitch: finalPitch, vol: audio.volume 
+                    });
+                } else if (audio.mode === AudioMode.ONESHOT) {
+                    this.engine.play(audio.soundConfig, { pitch: finalPitch, vol: audio.volume });
+                }
+            } else {
+                // 持续更新
+                if (audio.mode === AudioMode.LOOP_NATIVE && audio._handle) {
+                    audio._handle.setPitch(finalPitch);
+                    audio._handle.setVolume(audio.volume);
+                }
+                if (audio.mode === AudioMode.LOOP_PULSE) {
+                    audio.timer += dt;
+                    // 慢动作下，脉冲间隔变长
+                    if (audio.timer >= audio.interval / this.globalTimeScale) {
+                        audio.timer = 0;
+                        this.engine.play(audio.soundConfig, { pitch: finalPitch, vol: audio.volume });
+                    }
+                }
+            }
+        });
+    }
+
+    _stopAndRemove(entity, audio) {
+        if (audio._handle) audio._handle.stop();
+        entity.removeComponent(AudioEmitter);
+    }
+}
+```
+
+---
+
+## 4. 音效库 (Sound Library)
+
+以下是可以直接复制使用的 JSON 配置。
+
+### 4.1 基础武器
+
+#### 电磁波弹射 (Railgun)
+*   **原理**：Sawtooth (高频撕裂) + Triangle (重击) + Sine (音爆拖尾)。
+*   **特点**：高压电流感，迅猛。
+```json
+[
+  { "type": "sawtooth", "vol": 0.3, "duration": 0.15, "freqStart": 2200, "freqEnd": 100, "attack": 0.005 },
+  { "type": "triangle", "vol": 0.8, "duration": 0.2, "freqStart": 600, "freqEnd": 40, "attack": 0.001 },
+  { "type": "sine", "vol": 0.25, "duration": 0.35, "freqStart": 3000, "freqEnd": 800, "attack": 0.02, "delay": 0.02 },
+  { "type": "noise", "vol": 0.15, "duration": 0.1, "attack": 0.001 }
+]
+```
+*   **微调**：想更重口径，把 `triangle` 的 `freqStart` 降到 300。
+
+#### 光束步枪 (Laser Blaster)
+*   **原理**：Square (8-bit 质感) + Sawtooth (锐利)。
+*   **特点**：短促、清脆，典型的 "Pew Pew"。
+```json
+[
+  { "type": "square", "vol": 0.3, "duration": 0.15, "freqStart": 1500, "freqEnd": 300, "attack": 0.005 },
+  { "type": "sawtooth", "vol": 0.2, "duration": 0.2, "freqStart": 2000, "freqEnd": 500, "attack": 0.005, "delay": 0.02 },
+  { "type": "sine", "vol": 0.4, "duration": 0.25, "freqStart": 2500, "freqEnd": 1000, "attack": 0.01 }
+]
+```
+
+#### 等离子炮 (Plasma)
+*   **原理**：Sine (液体感) + Square (不稳定的电磁杂音)。
+*   **特点**：粘稠、不稳定的 "Gloop/Wub" 声。
+```json
+[
+  { "type": "sine", "vol": 0.6, "duration": 0.3, "freqStart": 900, "freqEnd": 150, "attack": 0.03 },
+  { "type": "square", "vol": 0.15, "duration": 0.25, "freqStart": 600, "freqEnd": 200, "attack": 0.01 },
+  { "type": "triangle", "vol": 0.5, "duration": 0.2, "freqStart": 300, "freqEnd": 50, "attack": 0.001 }
+]
+```
+
+### 4.2 特殊武器
+
+#### 追踪导弹 (Homing Missile)
+*   **原理**：Noise (喷气) + 上升的 Sawtooth (火箭加速)。
+*   **配置**：
+```json
+[
+  { "type": "noise", "vol": 0.6, "duration": 0.6, "attack": 0.05, "delay": 0.02 },
+  { "type": "sawtooth", "vol": 0.3, "duration": 0.5, "freqStart": 200, "freqEnd": 600, "attack": 0.1, "delay": 0.05 },
+  { "type": "triangle", "vol": 0.5, "duration": 0.15, "freqStart": 150, "freqEnd": 50, "attack": 0.01 }
+]
+```
+
+#### 能量波/斩击 (Sonic Wave)
+*   **原理**：两个频率极近的 Sawtooth 叠加（如 150Hz 和 155Hz），利用相位差产生“宽广”的震动感。
+```json
+[
+  { "type": "noise", "vol": 0.4, "duration": 0.5, "attack": 0.1 },
+  { "type": "sawtooth", "vol": 0.3, "duration": 0.4, "freqStart": 150, "freqEnd": 50, "attack": 0.05, "delay": 0.02 },
+  { "type": "sawtooth", "vol": 0.3, "duration": 0.4, "freqStart": 155, "freqEnd": 55, "attack": 0.05, "delay": 0.02 },
+  { "type": "sine", "vol": 0.5, "duration": 0.3, "freqStart": 800, "freqEnd": 200, "attack": 0.1 }
+]
+```
+
+#### 手里剑/回旋镖 (Shuriken)
+*   **发射**：高频 Noise (切风) + 下降 Triangle (金属哨音)。
+*   **反弹**：Square (撞击) + **上升** Sine (弹开的动能)。
+```json
+// 发射
+[
+  { "type": "noise", "vol": 0.3, "duration": 0.15, "attack": 0.01 },
+  { "type": "triangle", "vol": 0.4, "duration": 0.2, "freqStart": 1800, "freqEnd": 800, "attack": 0.01 },
+  { "type": "sawtooth", "vol": 0.1, "duration": 0.1, "freqStart": 2500, "freqEnd": 2000, "attack": 0.005, "delay": 0.02 }
+]
+// 反弹 (Ricochet)
+[
+  { "type": "square", "vol": 0.3, "duration": 0.05, "freqStart": 3000, "freqEnd": 3000, "attack": 0.001 },
+  { "type": "sine", "vol": 0.6, "duration": 0.4, "freqStart": 2000, "freqEnd": 2500, "attack": 0.001 }, 
+  { "type": "triangle", "vol": 0.2, "duration": 0.2, "freqStart": 1500, "freqEnd": 2000, "attack": 0.01, "delay": 0.01 }
+]
+```
+
+### 4.3 游戏事件
+
+#### 升级 (Level Up / Power Up)
+*   **原理**：快速琶音 (Arpeggio)，一系列音符快速阶梯式上升。
+```json
+[
+  { "type": "square", "vol": 0.3, "duration": 0.1, "freqStart": 440, "attack": 0.01, "delay": 0 },
+  { "type": "square", "vol": 0.3, "duration": 0.1, "freqStart": 554, "attack": 0.01, "delay": 0.08 },
+  { "type": "square", "vol": 0.3, "duration": 0.1, "freqStart": 659, "attack": 0.01, "delay": 0.16 },
+  { "type": "square", "vol": 0.3, "duration": 0.1, "freqStart": 880, "attack": 0.01, "delay": 0.24 },
+  { "type": "square", "vol": 0.3, "duration": 0.1, "freqStart": 1108, "attack": 0.01, "delay": 0.32 },
+  { "type": "square", "vol": 0.3, "duration": 0.4, "freqStart": 1318, "attack": 0.01, "delay": 0.40 }
+]
+```
+
+#### 护盾破碎 (Shield Break)
+*   **原理**：Triangle (玻璃碎裂) + 下降 Sine (能量熄灭) + Square (电路故障)。
+```json
+[
+  { "type": "triangle", "vol": 0.6, "duration": 0.15, "freqStart": 2200, "freqEnd": 1200, "attack": 0.001 },
+  { "type": "sine", "vol": 0.5, "duration": 0.5, "freqStart": 800, "freqEnd": 20, "attack": 0.05, "delay": 0.05 },
+  { "type": "noise", "vol": 0.4, "duration": 0.3, "attack": 0.01 },
+  { "type": "square", "vol": 0.2, "duration": 0.2, "freqStart": 1500, "freqEnd": 1400, "attack": 0.01, "delay": 0.02 }
+]
+```
+
+---
+
+## 5. 高级逻辑与特殊音效
+
+### 5.1 火神炮 (Vulcan Cannon) - 连射逻辑
+**难点**：射速过快会导致声音糊成一团。
+**解决**：使用极短的单发颗粒音效，配合代码逻辑。
+
+**单发音效 (Grain):**
+```json
+[
+  { "type": "noise", "vol": 0.25, "duration": 0.08, "attack": 0.005 },
+  { "type": "sawtooth", "vol": 0.3, "duration": 0.06, "freqStart": 300, "freqEnd": 100, "attack": 0.005 }
+]
+```
+**逻辑代码:**
+```javascript
+// 在开火循环中：
+let sound = deepCopy(VULCAN_SHOT);
+// 关键：音调随机抖动，避免相位抵消
+let pitch = 0.85 + Math.random() * 0.3; 
+audioEngine.play(sound, { pitch: pitch });
+```
+
+### 5.2 全屏大炸弹 (Screen Nuke) - 压制感
+**难点**：单纯大声并不震撼。
+**解决**：低频压制 + 视觉配合 + **Ducking (闪避)**。
+
+**音效配置:**
+```json
+[
+  { "type": "noise", "vol": 1.0, "duration": 2.0, "attack": 0.05 }, // 冲击波
+  { "type": "triangle", "vol": 1.0, "duration": 2.5, "freqStart": 100, "freqEnd": 10 }, // 地动山摇
+  { "type": "sine", "vol": 0.15, "duration": 2.0, "freqStart": 4000, "freqEnd": 3800, "attack": 0.5, "delay": 0.5 } // 爆炸后的耳鸣
+]
+```
+**逻辑代码:**
+```javascript
+// 触发时
+audioEngine.masterGain.gain.setValueAtTime(0.2, currentTime); // 瞬间压低所有背景音
+audioEngine.masterGain.gain.linearRampToValueAtTime(1.0, currentTime + 2.5); // 缓慢恢复
+camera.shake(2.0); // 震屏
+```
+
+### 5.3 慢动作模式 (Slow Motion) - 沉浸感
+**原理**：低通滤波错觉 + 音调降低 + 持续的低频脉冲。
+
+**持续音效 (Loop):**
+```json
+[
+  { "type": "triangle", "vol": 0.8, "duration": 0.4, "freqStart": 80, "freqEnd": 20, "attack": 0.01 }, // 心跳
+  { "type": "sine", "vol": 0.3, "duration": 1.5, "freqStart": 50, "freqEnd": 50, "attack": 0.5 } // 空间嗡鸣
+]
+```
+**逻辑代码:**
+通过 `AudioSystem` 的 `globalTimeScale` 控制。
+```javascript
+// 进入慢动作
+world.getSystem(AudioSystem).globalTimeScale = 0.5; // 所有音效音调减半
+game.timeScale = 0.5;
+```
+
+### 5.4 无敌状态 (Invincibility) - 律动感
+**原理**：使用 `LOOP_PULSE` 模式，每隔 0.25s 播放一次短促的警报声。
+
+**音效配置 (Loop Piece):**
+```json
+[
+  { "type": "square", "vol": 0.25, "duration": 0.1, "freqStart": 880, "freqEnd": 880 },
+  { "type": "square", "vol": 0.25, "duration": 0.1, "freqStart": 1100, "freqEnd": 1100, "delay": 0.12 }
+]
+```
+**ECS 使用:**
+```javascript
+entity.addComponent(new AudioEmitter({
+    sound: SFX_INVINCIBLE,
+    mode: AudioMode.LOOP_PULSE,
+    interval: 0.25, // 节奏
+    duration: 5.0
+}));
+// 快结束时，修改 interval = 0.15 实现节奏加快
+```
+
+---
+
+## 6. 总结与最佳实践
+
+1.  **随机性 (Randomization)**：这是让程序生成音效听起来不机械的灵魂。对于高频重复的音效（如枪声、脚步、反弹），务必在播放时给 `pitch` 一个 `0.9 ~ 1.1` 的随机乘数。
+2.  **对象池优化**：虽然 Web Audio API 的节点创建开销比 DOM 小，但在极高密度的弹幕下（如熔岩炮），建议进行节流（Throttle），比如同一帧内同类音效最多播放 3 个，或者根据距离玩家的远近衰减音量。
+3.  **多层设计**：如果你觉得声音单薄，不要只增加音量。
+    *   加 **Noise** 增加打击感。
+    *   加 **Triangle/Sine** 增加厚度。
+    *   加 **Sawtooth** 增加锐利感。
+4.  **视觉配合**：声音不是孤立的。大爆炸必须配合震屏、闪白；时间停止必须配合画面变色；护盾破碎必须配合粒子炸裂和顿帧（Hit Stop）。
+
+# 附录. 旧版音效说明
+
+本文档描述了 AudioEngine 使用的音频配置数据。所有音效均采用声明式配置，通过波形合成（Synthesizer）实时生成，无需加载外部音频文件。
+
+## 1. UI 交互音效 (User Interface)
+
+此类音效用于界面的点击、确认及导航反馈。
+
+| ID | 名称 | 波形 | 频率变化 (Hz) | 听觉特征 |
+| :--- | :--- | :--- | :--- | :--- |
+| **click_default** | 默认点击 | Sine (正弦波) | 800 $\to$ 1200 | 短促明快的上升音调，通用按钮音。 |
+| **click_confirm** | 确认点击 | Sine (正弦波) | 800 $\to$ 1600 | 高音快速上升，比默认点击更激昂，表示成功或开始。 |
+| **click_cancel** | 取消点击 | Triangle (三角波) | 600 $\to$ 300 | 低音快速下降，柔和但带有否定感，表示返回或关闭。 |
+| **click_menu** | 菜单点击 | Sine (正弦波) | 1000 (恒定) | 极短促的定音，柔和不刺耳，适合高频次的导航切换。 |
+
+## 2. 武器发射音效 (Weapons)
+
+每种武器拥有独特的波形和频率包络，以区分其攻击特性。
+
+| ID | 名称 | 波形 | 频率特征 | 听觉特征 |
+| :--- | :--- | :--- | :--- | :--- |
+| **weapon_vulcan** | 火神炮 | Square (方波) | 400 $\to$ 100 (快降) | 金属质感，快速下降的“哒哒”声。 |
+| **weapon_laser** | 激光 | Sawtooth (锯齿波) | 800 $\to$ 1200 (上升) | 尖锐、充满能量的上升音束。 |
+| **weapon_missile** | 导弹 | Triangle (三角波) | 150 $\to$ 50 (慢降) | 低沉轰鸣，模拟推进器声音。 |
+| **weapon_wave** | 波动炮 | Sine (正弦波) | 300 $\to$ 800 (上升) | 纯净且厚实的能量扩散声。 |
+| **weapon_plasma** | 等离子炮 | Square (方波) | 100 $\to$ 50 (慢降) | 沉重的低频嗡嗡声，带有电离感。 |
+| **weapon_tesla** | 特斯拉炮 | Square (方波) | 1500 $\to$ 2000 $\to$ 1500 | 高频电流滋滋声，频率先升后降。 |
+| **weapon_magma** | 岩浆炮 | Sawtooth (锯齿波) | 200 $\to$ 80 (下降) | 粗糙的低频撕裂声，模拟岩浆喷发。 |
+| **weapon_shuriken** | 手里剑 | Triangle (三角波) | 1000 $\to$ 600 (下降) | 快速划破空气的高频哨音。 |
+
+## 3. 战斗与环境音效 (Combat & FX)
+
+包含爆炸、受击及特殊状态的音效。部分复杂音效由多层合成器叠加而成。
+
+### 爆炸效果 (Composite Sounds)
+爆炸音效由“高频噪声层”和“低频震动层”混合而成。
+
+| ID | 名称 | 构成 | 描述 |
+| :--- | :--- | :--- | :--- |
+| **EXPLOSION_SMALL** | 小爆炸 | **层1 (噪声):** 白噪声 + 1kHz-100Hz 低通扫频<br>**层2 (低音):** 锯齿波 100Hz-10Hz | 短促的冲击声伴随轻微的低音震动。 |
+| **EXPLOSION_LARGE** | 大爆炸 | **层1 (噪声):** 更大音量的白噪声扫频<br>**层2 (低音):** 更长时值(0.8s)的锯齿波 | 巨大的冲击声，伴随长时间的深沉轰鸣。 |
+
+### 单体效果
+| ID | 名称 | 波形 | 特征描述 |
+| :--- | :--- | :--- | :--- |
+| **hit** | 受击 | Triangle | 短促的低频(200Hz$\to$50Hz)闷响，表示受到轻微伤害。 |
+| **bomb** | 炸弹 | Sawtooth | 极长(1.5s)的低频扫频(100Hz$\to$10Hz)，全屏轰炸的余波感。 |
+| **shield_loop** | 护盾循环 | Sine | **持续音**。880Hz，叠加 8Hz 的 LFO (低频振荡) 调制，产生高频颤动的力场声。支持淡入淡出。 |
+| **slow_motion_enter** | 慢动作 | Sawtooth | 1.0秒的长时值下降音(400Hz$\to$50Hz)，模拟时间被拉长、扭曲的感觉。 |
+
+### 护盾破碎 (Composite Sounds)
+由三层声音叠加，模拟复杂的物理破碎效果：
+1.  **Pop:** 正弦波破裂声 (主音体)。
+2.  **Crisp:** 三角波高频清脆声 (碎片感)。
+3.  **Bubble:** 正弦波气泡声 (能量消散，频率微升后急降)。
+
+## 4. 游戏状态/旋律音效 (Game State)
+
+此类音效具有明显的旋律性，由多个音符按时间序列组合而成。
+
+| ID | 名称 | 构成/旋律 | 描述 |
+| :--- | :--- | :--- | :--- |
+| **power_up** | 拾取道具 | **Sine波双音:** <br>1. B5 (987Hz) <br>2. E6 (1318Hz) | 经典的“吃金币”音效，两个音符快速跳变，清脆悦耳。 |
+| **victory** | 胜利 | **Square波 (8-bit风格) 四音符:**<br>C $\to$ E $\to$ G $\to$ C (上行琶音) | 激昂的大调分解和弦，节奏紧凑。 |
+| **defeat** | 失败 | **Sawtooth波 (悲伤感) 四音符:**<br>300Hz $\to$ 250Hz $\to$ 200Hz $\to$ 150Hz | 下行音阶，音色粗糙，表达沮丧感。 |
+| **boss_defeat** | Boss击败 | **Square波 六音符:**<br>C5 $\to$ E5 $\to$ G5 $\to$ C6 $\to$ E6 $\to$ G6 | 马里奥风格的长上行琶音，最后一个音符长延音(1.0s)，极具成就感。 |
+| **level_up** | 升级 | **Square波 三音符:**<br>C5 $\to$ E5 $\to$ G5 | 类似马里奥吃蘑菇的“嘣~嘣~嘣”三连音，每个音符有独特的起伏包络。 |
+| **warning** | 警告 | **Sawtooth波 + 带通滤波器:**<br>滤波器频率在 200Hz 与 800Hz 之间往复扫描 | 模拟警报器的“哇-哇”声，配合复杂的增益包络产生紧迫感。 |

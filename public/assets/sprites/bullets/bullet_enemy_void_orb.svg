@@ -1,0 +1,25 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Glow/Distortion -->
+  <circle cx="12" cy="12" r="12" fill="url(#voidOuterGrad)" opacity="0.6"/>
+  
+  <!-- Inner Dark Core -->
+  <circle cx="12" cy="12" r="8" fill="url(#voidInnerGrad)"/>
+  
+  <!-- Unstable Core Highlight -->
+  <circle cx="12" cy="12" r="3" fill="#FFFFFF"/>
+
+  <defs>
+    <!-- Purple to Transparent fade -->
+    <radialGradient id="voidOuterGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 12) rotate(90) scale(12)">
+      <stop offset="0.5" stop-color="#805AD5"/>
+      <stop offset="1" stop-color="#2D3748" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- White to Black (Void) -->
+    <radialGradient id="voidInnerGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 12) rotate(90) scale(8)">
+      <stop offset="0.2" stop-color="#D53F8C"/>
+      <stop offset="0.7" stop-color="#000000"/>
+      <stop offset="1" stop-color="#2D3748"/>
+    </radialGradient>
+  </defs>
+</svg>
