@@ -223,9 +223,9 @@ function createBullet(ctx: FireContext, angle: number): void {
     const finalPierce = ammoSpec.pierce + (weaponSpec.pierceBonus ?? 0);
     const finalBounces = ammoSpec.bounces + (weaponSpec.bouncesBonus ?? 0);
 
-    // 计算速度向量 - speed 是像素/秒，需要转换为像素/毫秒
-    const vx = Math.cos(angle) * ammoSpec.speed / 1000;
-    const vy = Math.sin(angle) * ammoSpec.speed / 1000;
+    // 计算速度向量 - speed 是像素/秒
+    const vx = Math.cos(angle) * ammoSpec.speed;
+    const vy = Math.sin(angle) * ammoSpec.speed;
 
     // 创建子弹蓝图
     const bulletBlueprint: Blueprint = {

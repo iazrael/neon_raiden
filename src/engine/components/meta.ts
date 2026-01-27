@@ -128,6 +128,28 @@ export class BossVisual extends Component {
     static check(c: any): c is BossVisual { return c instanceof BossVisual; }
 }
 
+/**
+ * Boss入场状态组件 - 标记Boss正在进入战场
+ * 当此组件存在时，Boss会快速向下移动到目标位置，到达后组件被移除
+ */
+export class BossEntrance extends Component {
+    constructor(cfg: {
+        /** 目标Y坐标（到达此位置后完成入场） */
+        targetY: number;
+        /** 入场速度（像素/秒） */
+        entranceSpeed: number;
+    }) {
+        super();
+        this.targetY = cfg.targetY;
+        this.entranceSpeed = cfg.entranceSpeed;
+    }
+    /** 目标Y坐标 */
+    public targetY: number;
+    /** 入场速度（像素/秒） */
+    public entranceSpeed: number;
+    static check(c: any): c is BossEntrance { return c instanceof BossEntrance; }
+}
+
 /** 分数值组件 - 击杀该实体可获得的分数 */
 export class ScoreValue extends Component {
     constructor(cfg: { value: number }) {

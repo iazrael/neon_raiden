@@ -1,5 +1,5 @@
 import { Blueprint } from './blueprints';
-import { BossAI, BossTag, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon } from './components';
+import { BossAI, BossTag, BossEntrance, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon } from './components';
 import { World, EntityId, Component } from './types';
 import { AmmoType } from './types/ids';
 import { addComponent, generateId, getFromPool } from './world';
@@ -122,6 +122,13 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
                 speedStat = new SpeedStat({ maxLinear: 120, maxAngular: 2 });
                 bossComps.push(speedStat);
             }
+
+            // 添加Boss入场状态组件（使Boss快速进入可视区域）
+            const entrance = new BossEntrance({
+                targetY: 150,      // 可视区域顶部
+                entranceSpeed: 50 // 快速向下移动（150像素/秒）
+            });
+            bossComps.push(entrance);
         }
     }
 

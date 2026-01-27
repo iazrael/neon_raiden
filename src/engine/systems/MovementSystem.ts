@@ -12,7 +12,7 @@
  */
 
 import { World } from '../types';
-import { Transform, Velocity, SpeedStat, MoveIntent, Knockback, PlayerTag, BossTag, DestroyTag } from '../components';
+import { Transform, Velocity, SpeedStat, MoveIntent, Knockback, PlayerTag, BossTag, DestroyTag, BossEntrance } from '../components';
 import { removeComponent, view } from '../world';
 import { destroyEntity } from './CleanupSystem';
 
@@ -44,9 +44,9 @@ export function MovementSystem(world: World, dt: number): void {
         // 如果有移动意图，应用意图速度
         if (moveIntent) {
             if (moveIntent.type === 'velocity') {
-                // 意图是设置速度方向
-                vx = moveIntent.dx;
-                vy = moveIntent.dy;
+                // 意图是设置速度方向（dx/dy是像素/毫秒，需要转换为像素/秒）
+                vx = moveIntent.dx * 1000;
+                vy = moveIntent.dy * 1000;
             } else {
                 // 意图是绝对位移，直接应用到位置
                 transform.x += moveIntent.dx;
@@ -86,17 +86,21 @@ export function MovementSystem(world: World, dt: number): void {
         velocity.vx = vx;
         velocity.vy = vy;
 
-        // 更新位置
-        transform.x += vx * dt;
-        transform.y += vy * dt;
+        // 更新位置（dt是毫秒，velocity是像素/秒，需要转换）
+        const dtInSeconds = dt / 1000;
+        transform.x += vx * dtInSeconds;
+        transform.y += vy * dtInSeconds;
 
-        // 更新旋转
+        // 更新旋转（vrot是弧度/秒）
         if (velocity.vrot !== 0) {
-            transform.rot += velocity.vrot * dt;
+            transform.rot += velocity.vrot * dtInSeconds;
         }
 
-        // 边界限制
-        applyBounds(world, transform, id);
+        // 边界限制（Boss入场期间跳过）
+        const entrance = comps.find(BossEntrance.check);
+        if (!entrance) {
+            applyBounds(world, transform, id);
+        }
     }
 }
 

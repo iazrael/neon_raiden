@@ -51,7 +51,8 @@ function createBossBlueprint(
         SpeedStat: { maxLinear: 120, maxAngular: 2 },
         ScoreValue: { value: score },
         DropTable: { table: DROPTABLE_BOSS },
-        Weapon: weaponSpec ? { ...weaponSpec } : undefined // 初始化第一阶段武器
+        Weapon: weaponSpec ? { ...weaponSpec } : undefined, // 初始化第一阶段武器
+        Velocity: { vx: 0, vy: 0 } // 初始化速度为0（由BossSystem控制）
     };
 }
 

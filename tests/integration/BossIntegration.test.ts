@@ -235,11 +235,13 @@ describe('Boss集成测试', () => {
             const bossAI = bossComps?.find(BossAI.check) as BossAI;
             const velocity = bossComps?.find(Velocity.check) as Velocity;
 
-            // Guardian P1: SINE模式
+            // Guardian P1: SINE模式（vy=0，只有横向移动）
             mockWorld.time = 1000;
             BossSystem(mockWorld, 16);
-            const vx1 = velocity!.vx;
             const vy1 = velocity!.vy;
+
+            // SINE模式不应该有垂直速度
+            expect(vy1).toBe(0);
 
             // 切换到P2: FOLLOW模式
             health!.hp = 900;
@@ -248,11 +250,11 @@ describe('Boss集成测试', () => {
 
             mockWorld.time += 100;
             BossSystem(mockWorld, 16);
-            const vx2 = velocity!.vx;
             const vy2 = velocity!.vy;
 
-            // 速度向量应该改变（因为移动模式改变）
-            expect(vx2).not.toBe(vx1);
+            // FOLLOW模式应该有轻微的垂直波动（Math.sin(time * 3) * 5）
+            // 在time=1100ms时，Math.sin(3.3) * 5 ≈ -4.9
+            expect(vy2).not.toBe(0);
         });
     });
 
