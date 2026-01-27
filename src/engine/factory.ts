@@ -85,7 +85,7 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
             // 初始化Boss AI组件
             let bossAI = bossComps.find(BossAI.check);
             if (!bossAI) {
-                bossAI = new BossAI({ phase: 1, nextPatternTime: 0 });
+                bossAI = new BossAI({ phase: 0, nextPatternTime: 0 }); // 修复：初始化为0（0-based索引）
                 bossComps.push(bossAI);
             }
 
