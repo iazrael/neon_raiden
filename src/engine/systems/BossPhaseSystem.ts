@@ -54,9 +54,9 @@ function checkPhaseTransition(
     // 计算当前血量百分比
     const hpPercent = health.hp / health.max;
 
-    // 找到应该处于的阶段
+    // 找到应该处于的阶段（从后往前遍历，找第一个满足条件的）
     let targetPhase = 0;
-    for (let i = 0; i < bossSpec.phases.length; i++) {
+    for (let i = bossSpec.phases.length - 1; i >= 0; i--) {
         if (hpPercent <= bossSpec.phases[i].threshold) {
             targetPhase = i;
             break;
@@ -64,8 +64,7 @@ function checkPhaseTransition(
     }
 
     // 如果阶段变化，应用新阶段
-    const previousPhase = bossPreviousPhases.get(entityId) ?? 0;
-    if (targetPhase !== previousPhase && targetPhase !== bossAI.phase) {
+    if (targetPhase !== bossAI.phase) {
         applyPhaseModifiers(world, entityId, bossAI, targetPhase, bossSpec.phases[targetPhase], comps);
         bossPreviousPhases.set(entityId, targetPhase);
     }

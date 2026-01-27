@@ -141,8 +141,8 @@ describe('Boss配置验证', () => {
         it('movementConfig应该是可选的', () => {
             Object.values(BOSS_DATA).forEach(bossSpec => {
                 bossSpec.phases.forEach(phase => {
-                    // movementConfig是可选的，不应该总是存在
-                    expect(phase.movementConfig).toBeAnyOf([undefined, expect.any(Object)]);
+                    // movementConfig是可选的，应该是undefined或对象
+                    expect([undefined, expect.any(Object)]).toContainEqual(phase.movementConfig);
                 });
             });
         });

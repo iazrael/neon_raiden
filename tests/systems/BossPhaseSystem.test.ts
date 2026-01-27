@@ -101,15 +101,17 @@ describe('BossPhaseSystem', () => {
         it('应该处理阶段相关逻辑', () => {
             const bossComps = mockWorld.entities.get(bossId);
             const bossAI = bossComps?.find(BossAI.check) as BossAI;
+            const health = bossComps?.find(Health.check) as Health;
 
-            // 设置为阶段 1
+            // 设置为阶段 1，但血量是100%应该回到阶段0
             bossAI!.phase = 1;
+            health!.hp = 2000; // 100%血量
             mockWorld.events = [];
 
             BossPhaseSystem(mockWorld, 0.1);
 
-            // 系统应该正常运行
-            expect(bossAI!.phase).toBe(1);
+            // 系统应该根据血量重新计算阶段（100%血量应该在P1=阶段0）
+            expect(bossAI!.phase).toBe(0);
         });
     });
 
