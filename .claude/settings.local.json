@@ -20,7 +20,9 @@
       "mcp__plugin_playwright_playwright__browser_run_code",
       "mcp__plugin_playwright_playwright__browser_click",
       "Bash(npm run check:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git rev-parse:*)",
+      "Read(//Users/azrael/Code/neon_raiden/**)"
     ]
   }
 }

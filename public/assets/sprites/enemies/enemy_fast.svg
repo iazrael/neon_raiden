@@ -6,5 +6,12 @@
     <rect x="-10" y="-2" width="20" height="4" fill="#E6FFFA" rx="2"/>
     <!-- Main Body -->
     <path d="M0 -20 C15 -10 20 10 0 20 C-20 10 -15 -10 0 -20 Z" fill="#805ad5" stroke="#d6bcfa" stroke-width="2"/>
+    <!-- Weapon Systems - Front Dual Machine Guns -->
+    <!-- Left Gun (Dual Barrel) -->
+    <circle cx="-7" cy="-15" r="1.5" fill="#81E6D9"/>
+    <circle cx="-9" cy="-15" r="1.5" fill="#81E6D9"/>
+    <!-- Right Gun (Dual Barrel) -->
+    <circle cx="7" cy="-15" r="1.5" fill="#81E6D9"/>
+    <circle cx="9" cy="-15" r="1.5" fill="#81E6D9"/>
   </g>
 </svg>
