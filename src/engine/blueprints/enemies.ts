@@ -5,6 +5,7 @@
 
 import { DROPTABLE_COMMON } from '../configs/droptables';
 import { EnemyId, EnemyWeaponId } from '../types';
+import { CollisionLayer } from '../types/collision';
 import { Blueprint } from './base';
 import { ENEMY_WEAPON_TABLE } from './weapons';
 import { SpriteKey } from '../configs/sprites';
@@ -33,7 +34,7 @@ export const BLUEPRINT_ENEMY_NORMAL: Blueprint = {
     SpeedStat: { maxLinear: 150 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 20 },
+    HitBox: { shape: 'circle', radius: 20, layer: CollisionLayer.Enemy },
 
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
@@ -64,7 +65,7 @@ export const BLUEPRINT_ENEMY_FAST: Blueprint = {
     SpeedStat: { maxLinear: 300 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 15 },
+    HitBox: { shape: 'circle', radius: 15, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -94,7 +95,7 @@ export const BLUEPRINT_ENEMY_TANK: Blueprint = {
     SpeedStat: { maxLinear: 100 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 30 },
+    HitBox: { shape: 'circle', radius: 30, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -124,7 +125,7 @@ export const BLUEPRINT_ENEMY_KAMIKAZE: Blueprint = {
     SpeedStat: { maxLinear: 400 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 15 },
+    HitBox: { shape: 'circle', radius: 15, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -154,7 +155,7 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
     SpeedStat: { maxLinear: 80 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 35 },
+    HitBox: { shape: 'circle', radius: 35, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -184,7 +185,7 @@ export const BLUEPRINT_ENEMY_LASER_INTERCEPTOR: Blueprint = {
     SpeedStat: { maxLinear: 150 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 25 },
+    HitBox: { shape: 'circle', radius: 25, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -214,7 +215,7 @@ export const BLUEPRINT_ENEMY_MINE_LAYER: Blueprint = {
     SpeedStat: { maxLinear: 100 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 30 },
+    HitBox: { shape: 'circle', radius: 30, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -244,7 +245,7 @@ export const BLUEPRINT_ENEMY_PULSAR: Blueprint = {
     SpeedStat: { maxLinear: 200 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 16 },
+    HitBox: { shape: 'circle', radius: 16, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -274,7 +275,7 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
     SpeedStat: { maxLinear: 50 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 35 },
+    HitBox: { shape: 'circle', radius: 35, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -304,7 +305,7 @@ export const BLUEPRINT_ENEMY_STALKER: Blueprint = {
     SpeedStat: { maxLinear: 250 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 18 },
+    HitBox: { shape: 'circle', radius: 18, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 
@@ -334,7 +335,7 @@ export const BLUEPRINT_ENEMY_BARRAGE: Blueprint = {
     SpeedStat: { maxLinear: 100 },
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 25 },
+    HitBox: { shape: 'circle', radius: 25, layer: CollisionLayer.Enemy },
     // 挂载掉落表组件，直接引用配置数组
     DropTable: { table: DROPTABLE_COMMON },
 

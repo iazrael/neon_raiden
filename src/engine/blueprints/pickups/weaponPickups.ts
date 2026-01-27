@@ -1,6 +1,7 @@
 import { AmmoType, WeaponId } from "../../types";
 import { Blueprint } from "../base";
 import { BULLET_SPRITE_CONFIG } from "../../configs/sprites/bullets";
+import { CollisionLayer } from "../../types/collision";
 
 /**
  * 离子机炮道具蓝图
@@ -21,7 +22,7 @@ export const BLUEPRINT_POWERUP_VULCAN: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.VULCAN, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -43,7 +44,7 @@ export const BLUEPRINT_POWERUP_LASER: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.LASER, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -65,7 +66,7 @@ export const BLUEPRINT_POWERUP_MISSILE: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.MISSILE, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -87,7 +88,7 @@ export const BLUEPRINT_POWERUP_SHURIKEN: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.SHURIKEN, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -109,7 +110,7 @@ export const BLUEPRINT_POWERUP_TESLA: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.TESLA, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -131,7 +132,7 @@ export const BLUEPRINT_POWERUP_MAGMA: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.MAGMA, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -153,7 +154,7 @@ export const BLUEPRINT_POWERUP_WAVE: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.WAVE, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -175,5 +176,5 @@ export const BLUEPRINT_POWERUP_PLASMA: Blueprint = {
     PickupItem: { kind: 'weapon', blueprint: WeaponId.PLASMA, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };

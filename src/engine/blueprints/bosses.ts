@@ -4,7 +4,7 @@
 //
 
 import { DROPTABLE_BOSS } from '../configs/droptables/common';
-import { BossId } from '../types';
+import { BossId, CollisionLayer } from '../types';
 import { Blueprint } from './base';
 import { SpriteKey } from '../configs/sprites';
 
@@ -35,7 +35,7 @@ function createBossBlueprint(
         Sprite: { spriteKey: BOSS_SPRITE_MAP[bossId], scale: 1 },
         BossTag: { id: bossId },
         BossAI: { phase: 0, nextPatternTime: 0 },
-        HitBox: { shape: 'circle', radius: radius * 0.8 },
+        HitBox: { shape: 'circle', radius: radius * 0.8, layer: CollisionLayer.Enemy },
         SpeedStat: { maxLinear: 120, maxAngular: 2 },
         ScoreValue: { value: score },
         DropTable: { table: DROPTABLE_BOSS }

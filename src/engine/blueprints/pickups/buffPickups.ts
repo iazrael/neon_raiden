@@ -6,6 +6,7 @@
 import { BuffType } from '../../types';
 import { Blueprint } from '../base';
 import { SpriteKey } from '../../configs/sprites';
+import { CollisionLayer } from '../../types/collision';
 
 /**
  * 能量提升道具蓝图
@@ -22,7 +23,7 @@ export const BLUEPRINT_POWERUP_POWER: Blueprint = {
     PickupItem: { kind: 'buff', blueprint: BuffType.POWER, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -40,7 +41,7 @@ export const BLUEPRINT_POWERUP_HP: Blueprint = {
     PickupItem: { kind: 'buff', blueprint: BuffType.HP, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -58,7 +59,7 @@ export const BLUEPRINT_POWERUP_BOMB: Blueprint = {
     PickupItem: { kind: 'buff', blueprint: BuffType.BOMB, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -76,7 +77,7 @@ export const BLUEPRINT_POWERUP_OPTION: Blueprint = {
     PickupItem: { kind: 'buff', blueprint: BuffType.OPTION, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -94,7 +95,7 @@ export const BLUEPRINT_POWERUP_INVINCIBILITY: Blueprint = {
     PickupItem: { kind: 'buff', blueprint: BuffType.INVINCIBILITY, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };
 
 /**
@@ -112,5 +113,5 @@ export const BLUEPRINT_POWERUP_TIME_SLOW: Blueprint = {
     PickupItem: { kind: 'buff', blueprint: BuffType.TIME_SLOW, autoPickup: true },
 
     /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
-    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12 },
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
 };

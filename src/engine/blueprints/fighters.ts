@@ -1,4 +1,5 @@
 import { WeaponId } from '../types';
+import { CollisionLayer } from '../types/collision';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
 import { SpriteKey } from '../configs/sprites';
@@ -24,7 +25,7 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
     SpeedStat: { maxLinear: 7 * 60, maxAngular: 5 },
 
     /** 碰撞盒组件 - 设置战机的碰撞检测区域 */
-    HitBox: { shape: 'circle', radius: 24 * (1 - 0.2) },
+    HitBox: { shape: 'circle', radius: 24 * (1 - 0.2), layer: CollisionLayer.Player },
 
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.PLAYER, scale: 1 },

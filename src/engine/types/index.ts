@@ -1,5 +1,6 @@
 export * from './ids'
 export * from './base'
+export * from './collision'
 
 // Boss移动模式枚举 - 定义所有Boss移动行为模式
 export enum BossMovementPattern {

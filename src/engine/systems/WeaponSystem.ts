@@ -16,6 +16,7 @@
 import { World } from '../types';
 import { Transform, Weapon, FireIntent, PlayerTag } from '../components';
 import { spawnBullet } from '../factory';
+import { CollisionLayer } from '../types/collision';
 import { AMMO_TABLE } from '../blueprints/ammo';
 import { ALL_WEAPONS_TABLE } from '../blueprints/weapons';
 import { Blueprint, WeaponSpec, AmmoSpec } from '../blueprints';
@@ -45,8 +46,8 @@ export function WeaponSystem(world: World, dt: number): void {
         if (!intent || !intent.firing) {
             continue; // 没有开火意图，跳过
         }
-        // 消费掉开火意图
-        removeComponent(world, id, FireIntent);
+        // 消费掉开火意图（传入实例而非类）
+        removeComponent(world, id, intent);
 
         // 第三步：发射武器
         const isPlayer = !!entity.find(PlayerTag.check);
@@ -86,9 +87,14 @@ function fireWeapon(
     const spriteSpec = BULLET_SPRITE_CONFIG[weapon.ammoType];
     if (!spriteSpec) return;
 
-    // 获取升级配置（玩家使用升级表，敌人使用 weapon 自身的倍率）
+    // 获取升级配置（敌人使用 weapon 自身的倍率）
+    // 玩家优先使用实例上的倍率，否则使用升级表
+    // FIXME: 后续记得玩家升级后, 要先修改 Weapon 组件的倍率字段
     const upgradeSpec = entity.isPlayer
-        ? getWeaponUpgrade(weapon.id as any, weapon.level || 1)
+        ? {
+            damageMultiplier: weapon.damageMultiplier ?? getWeaponUpgrade(weapon.id as any, weapon.level || 1).damageMultiplier,
+            fireRateMultiplier: weapon.fireRateMultiplier ?? getWeaponUpgrade(weapon.id as any, weapon.level || 1).fireRateMultiplier
+        }
         : {
             damageMultiplier: weapon.damageMultiplier || 1.0,
             fireRateMultiplier: weapon.fireRateMultiplier || 1.0
@@ -115,6 +121,7 @@ function fireWeapon(
         spriteSpec,
         upgradeSpec,
         ownerId: id,
+        isPlayer: entity.isPlayer,
     };
 
     if (weaponSpec.pattern === 'radial') {
@@ -131,8 +138,8 @@ function fireWeapon(
         fireSpread(fireContext, bulletCount, spread, baseAngle);
     }
 
-    // 重置冷却：实际冷却 = 基础冷却 / 射速倍率
-    weapon.curCD = weaponSpec.cooldown / upgradeSpec.fireRateMultiplier;
+    // 重置冷却：实际冷却 = 武器冷却 / 射速倍率
+    weapon.curCD = weapon.cooldown / upgradeSpec.fireRateMultiplier;
 
     // 生成武器发射事件
     const firedEvent: WeaponFiredEvent = {
@@ -153,6 +160,7 @@ interface FireContext {
     spriteSpec: BulletSpriteSpec;
     upgradeSpec: { damageMultiplier: number; fireRateMultiplier: number };
     ownerId: number;
+    isPlayer: boolean;
 }
 
 /**
@@ -237,7 +245,8 @@ function createBullet(ctx: FireContext, angle: number): void {
         },
         HitBox: {
             shape: 'circle',
-            radius: ammoSpec.radius
+            radius: ammoSpec.radius,
+            layer: ctx.isPlayer ? CollisionLayer.PlayerBullet : CollisionLayer.EnemyBullet
         },
         Lifetime: {
             timer: 3 // 3秒后销毁

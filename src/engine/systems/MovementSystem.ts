@@ -54,7 +54,7 @@ export function MovementSystem(world: World, dt: number): void {
             }
 
             // 意图组件是"一次性的"，用完即删
-            removeComponent(world, id, MoveIntent);
+            removeComponent(world, id, moveIntent);
         }
 
         // 如果有击退效果，叠加击退速度
@@ -68,7 +68,7 @@ export function MovementSystem(world: World, dt: number): void {
 
             // 击退效果很小时移除组件
             if (Math.abs(knockback.vx) < 1 && Math.abs(knockback.vy) < 1) {
-                removeComponent(world, id, Knockback);
+                removeComponent(world, id, knockback);
             }
         }
 

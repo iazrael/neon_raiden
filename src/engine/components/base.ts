@@ -1,4 +1,5 @@
 import { Component } from '../types';
+import { CollisionLayer } from '../types/collision';
 
 // 「空间 & 生命 & 基础运动」相关组件
 
@@ -99,7 +100,7 @@ export class Health extends Component {
 /** 碰撞盒组件 - 定义实体的碰撞区域 */
 export class HitBox extends Component {
     /** 碰撞形状 */
-    shape: 'circle' | 'rect' | 'capsule' = 'circle';
+    shape: 'circle' | 'rect' | 'capsule';
     /** 圆形半径 */
     radius?: number;
     /** 矩形半宽 */
@@ -110,14 +111,37 @@ export class HitBox extends Component {
     capRadius?: number;
     /** 胶囊高度 */
     capHeight?: number;
+    /** 碰撞层 - 必须在蓝图中显式设置 */
+    layer: CollisionLayer;
 
     /**
      * 构造函数
      * @param cfg 碰撞盒配置
      */
-    constructor(cfg: Partial<HitBox> = {}) {
+    constructor(cfg: {
+        /** 碰撞形状 */
+        shape?: 'circle' | 'rect' | 'capsule';
+        /** 圆形半径 */
+        radius?: number;
+        /** 矩形半宽 */
+        halfWidth?: number;
+        /** 矩形半高 */
+        halfHeight?: number;
+        /** 胶囊半径 */
+        capRadius?: number;
+        /** 胶囊高度 */
+        capHeight?: number;
+        /** 碰撞层 - 必须在蓝图中显式设置 */
+        layer: CollisionLayer;
+    }) {
         super();
-        Object.assign(this, cfg);
+        this.shape = cfg.shape ?? 'rect';
+        this.radius = cfg.radius;
+        this.halfWidth = cfg.halfWidth;
+        this.halfHeight = cfg.halfHeight;
+        this.capRadius = cfg.capRadius;
+        this.capHeight = cfg.capHeight;
+        this.layer = cfg.layer;
     }
     static check(c: any): c is HitBox { return c instanceof HitBox; }
 }
