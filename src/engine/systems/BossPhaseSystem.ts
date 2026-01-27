@@ -12,11 +12,11 @@
  */
 
 import { BossId, Component, World } from '../types';
-import { Health, BossTag, BossAI, Weapon, SpeedStat } from '../components';
+import { Health, BossTag, BossAI, Weapon, SpeedStat, BossVisual } from '../components';
 import { BOSS_DATA, BossPhaseSpec } from '../configs/bossData';
-import { BossPhaseChangeEvent, PlaySoundEvent } from '../events';
+import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../events';
 import { pushEvent, view } from '../world';
-import { EnemyWeaponId } from '../types';
+import { ENEMY_WEAPON_TABLE } from '../blueprints/weapons';
 
 /**
  * 记录每个 Boss 的上一阶段
@@ -66,15 +66,23 @@ function checkPhaseTransition(
     // 如果阶段变化，应用新阶段
     const previousPhase = bossPreviousPhases.get(entityId) ?? 0;
     if (targetPhase !== previousPhase && targetPhase !== bossAI.phase) {
-        applyPhase(world, entityId, bossAI, targetPhase, bossSpec.phases[targetPhase], comps);
+        applyPhaseModifiers(world, entityId, bossAI, targetPhase, bossSpec.phases[targetPhase], comps);
         bossPreviousPhases.set(entityId, targetPhase);
     }
 }
 
 /**
- * 应用新阶段
+ * 应用阶段属性修正
+ *
+ * 实现内容：
+ * - 速度修正器（覆盖模式，使用基础值120）
+ * - 武器切换（从ENEMY_WEAPON_TABLE读取新武器配置）
+ * - 伤害和射速修正器（应用到Weapon组件）
+ * - 阶段颜色（应用到BossVisual组件）
+ * - 特殊事件触发
+ * - 武器冷却重置
  */
-function applyPhase(
+function applyPhaseModifiers(
     world: World,
     entityId: number,
     bossAI: BossAI,
@@ -82,45 +90,76 @@ function applyPhase(
     phaseSpec: BossPhaseSpec,
     comps: Component[]
 ): void {
-    // 更新 Boss AI 阶段
+    // 1. 更新阶段索引
     bossAI.phase = phaseIndex;
 
-    // 生成阶段切换事件
+    // 2. 生成阶段切换事件
     pushEvent(world, {
         type: 'BossPhaseChange',
-        phase: phaseIndex + 1, // 阶段从 1 开始显示
+        phase: phaseIndex + 1, // 阶段从1开始显示
         bossId: entityId
     } as BossPhaseChangeEvent);
 
-    // 播放阶段切换音效
+    // 3. 播放阶段切换音效
     pushEvent(world, {
         type: 'PlaySound',
         name: 'boss_phase_change'
     } as PlaySoundEvent);
 
-    // 应用阶段属性修正
-    applyPhaseModifiers(comps, phaseSpec);
-}
-
-/**
- * 应用阶段属性修正
- */
-function applyPhaseModifiers(comps: Component[], phaseSpec: BossPhaseSpec): void {
+    // 4. 应用修正器
     const modifiers = phaseSpec.modifiers || {};
 
-    // 应用速度修正
+    // 速度修正（覆盖模式，使用基础值120）
     const speedStat = comps.find(SpeedStat.check);
-    if (speedStat && modifiers.moveSpeed) {
-        speedStat.maxLinear *= modifiers.moveSpeed;
+    if (speedStat && modifiers.moveSpeed !== undefined) {
+        speedStat.maxLinear = 120 * modifiers.moveSpeed; // 覆盖模式，不是累乘
     }
 
-    // 应用武器切换
+    // 武器切换
     if (phaseSpec.weaponId) {
         const weapon = comps.find(Weapon.check);
         if (weapon) {
-            // TODO: 这里需要根据 weaponId 切换武器
-            // 简化处理：更新武器配置
-            // 实际项目中可能需要从 WEAPON_TABLE 获取新武器配置
+            const newWeaponSpec = ENEMY_WEAPON_TABLE[phaseSpec.weaponId];
+            if (newWeaponSpec) {
+                // 应用新武器配置
+                Object.assign(weapon, {
+                    id: newWeaponSpec.id,
+                    ammoType: newWeaponSpec.ammoType,
+                    cooldown: newWeaponSpec.cooldown,
+                    bulletCount: newWeaponSpec.bulletCount,
+                    spread: newWeaponSpec.spread || 0,
+                    pattern: newWeaponSpec.pattern,
+                    curCD: 0, // 重置冷却时间
+                    // 应用修正器
+                    damageMultiplier: modifiers.damage || 1.0,
+                    fireRateMultiplier: modifiers.fireRate || 1.0
+                });
+            }
+        }
+    }
+
+    // 阶段颜色
+    if (phaseSpec.phaseColor) {
+        let visual = comps.find(BossVisual.check);
+        if (!visual) {
+            // 创建BossVisual组件
+            visual = new BossVisual({ color: phaseSpec.phaseColor });
+            comps.push(visual);
+        } else {
+            // 更新现有BossVisual组件
+            visual.color = phaseSpec.phaseColor;
+        }
+    }
+
+    // 特殊事件
+    if (phaseSpec.specialEvents && phaseSpec.specialEvents.length > 0) {
+        for (const eventName of phaseSpec.specialEvents) {
+            pushEvent(world, {
+                type: 'BossSpecialEvent',
+                event: eventName,
+                bossId: entityId,
+                phase: phaseIndex
+            });
         }
     }
 }

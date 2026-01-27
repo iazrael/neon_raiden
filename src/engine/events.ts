@@ -7,6 +7,7 @@ export type Event =
     | PickupEvent
     | WeaponFiredEvent
     | BossPhaseChangeEvent
+    | BossSpecialEvent
     | CamShakeEvent
     | BloodFogEvent
     | LevelUpEvent
@@ -26,6 +27,7 @@ export const EventTags = {
     Pickup: 'Pickup',
     WeaponFired: 'WeaponFired',
     BossPhaseChange: 'BossPhaseChange',
+    BossSpecialEvent: 'BossSpecialEvent',
     CamShake: 'CamShake',
     BloodFog: 'BloodFog',
     LevelUp: 'LevelUp',
@@ -81,6 +83,14 @@ export interface BossPhaseChangeEvent {
     type: 'BossPhaseChange';
     phase: number;                 // 新阶段号（1,2,3…）
     bossId: EntityId;              // Boss 实体 ID
+}
+
+// ⑤.1 Boss 特殊事件
+export interface BossSpecialEvent {
+    type: 'BossSpecialEvent';
+    event: string;                 // 事件名称（如 'spawn_minions', 'laser_sweep'）
+    bossId: EntityId;              // Boss 实体 ID
+    phase: number;                 // 触发阶段（0-based）
 }
 
 // ⑥ 相机震屏
