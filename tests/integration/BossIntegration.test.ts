@@ -84,12 +84,15 @@ describe('Boss集成测试', () => {
 
             // 执行系统触发阶段切换
             BossPhaseSystem(mockWorld, 16);
-            BossSystem(mockWorld, 16);
 
             // 应该切换到P2阶段
             expect(bossAI!.phase).toBe(1);
             expect(weapon!.id).toBe(EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED);
             expect(weapon!.curCD).toBe(0); // 冷却重置
+
+            // BossSystem执行后应该会开火并设置新的冷却
+            BossSystem(mockWorld, 16);
+            expect(weapon!.curCD).toBe(400); // 600 / 1.5 = 400
         });
 
         it('应该正确应用P2阶段的修正器', () => {
