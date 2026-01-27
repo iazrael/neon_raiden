@@ -149,7 +149,7 @@ export class Engine {
 
         // P5. 结算层 (事件处理)
         // PickupSystem(world, dt);                        // 13. 拾取系统
-        // DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
+        DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
         // LootSystem(world, dt);                          // 15. 掉落系统
         // ComboSystem(world, dt);                         // 16. 连击系统
 

@@ -13,7 +13,7 @@
  */
 
 import { World, EntityId } from '../types';
-import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue } from '../components';
+import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from '../components';
 import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent } from '../events';
 
 /**
@@ -40,11 +40,15 @@ function applyDamage(world: World, event: HitEvent): void {
     const victimComps = world.entities.get(event.victim);
     if (!victimComps) return;
 
+    // 检查是否已销毁（避免重复伤害）
+    const hasDestroyTag = victimComps.some(DestroyTag.check);
+    if (hasDestroyTag) return; // 已销毁，跳过伤害
+
     // 获取护盾组件
-    const shield = victimComps.find(Shield.check) as Shield | undefined;
+    const shield = victimComps.find(Shield.check);
 
     // 获取生命值组件
-    const health = victimComps.find(Health.check) as Health | undefined;
+    const health = victimComps.find(Health.check);
 
     if (!health) return;
 
@@ -103,7 +107,7 @@ function applyDamage(world: World, event: HitEvent): void {
  */
 function processDamageOverTime(world: World, dt: number): void {
     for (const [id, comps] of world.entities) {
-        const dots = comps.filter(DamageOverTime.check) as DamageOverTime[];
+        const dots = comps.filter(DamageOverTime.check);
 
         for (const dot of dots) {
             // 检查 DOT 是否结束
@@ -118,8 +122,8 @@ function processDamageOverTime(world: World, dt: number): void {
 
             if (shouldDamage) {
                 // 应用 DOT 伤害
-                const transform = comps.find(c => c.constructor.name === 'Transform') as { x: number; y: number } | undefined;
-                const health = comps.find(Health.check) as Health | undefined;
+                const transform = comps.find(Transform.check);
+                const health = comps.find(Health.check);
 
                 if (health && transform) {
                     health.hp -= dot.damagePerSecond * dot.interval / 1000;
@@ -149,7 +153,7 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
     if (!victimComps) return;
 
     // 获取分数值
-    const scoreValue = victimComps.find(ScoreValue.check) as ScoreValue | undefined;
+    const scoreValue = victimComps.find(ScoreValue.check);
     const score = scoreValue?.value ?? 100;
 
     // 生成 KillEvent
