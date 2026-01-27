@@ -1,4 +1,4 @@
-import { World, GameState, ComboState } from './types';
+import { World, GameState, ComboState, WeaponId } from './types';
 import { Health, Transform, Weapon, Shield, Bullet, InvulnerableState, PlayerTag, EnemyTag, BossTag } from './components';
 import { view } from './world';
 import { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
@@ -24,8 +24,8 @@ export interface GameSnapshot {
         y: number;
         bombs: number;
         shieldPercent: number;
-        weaponType: string;
-        secondaryWeapon: string | null;
+        weaponId: WeaponId;
+        secondaryWeapon: WeaponId | null;
         weaponLevel: number;
         activeSynergies: SynergyConfig[];
         invulnerable: boolean;
@@ -57,7 +57,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
                 y: 0,
                 bombs: 0,
                 shieldPercent: 0,
-                weaponType: 'VULCAN',
+                weaponId: WeaponId.VULCAN,
                 secondaryWeapon: null,
                 weaponLevel: 1,
                 activeSynergies: [],
@@ -109,7 +109,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
             y: tr.y,
             bombs: 0, // TODO: 从Bomb组件获取
             shieldPercent: shield ? (shield.value / (hl.max * 0.5)) * 100 : 0, // 假设护盾最大值为生命值的一半
-            weaponType: wp.id,
+            weaponId: wp.id as WeaponId,
             secondaryWeapon: null, // TODO: 从SecondaryWeapon组件获取
             weaponLevel: wp.level,
             activeSynergies: [], // TODO: 从WeaponSynergySystem获取

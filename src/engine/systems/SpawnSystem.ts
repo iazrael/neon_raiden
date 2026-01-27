@@ -44,7 +44,8 @@ function getRandomSpawnPos(world: World): { x: number; y: number } {
     const margin = 50;
     return {
         x: margin + Math.random() * (world.width - margin * 2),
-        y: -50 // 从屏幕上方生成
+        // y轴也随机一下，避免总是同一高度生成
+        y: -50 - Math.random() * 50 // 从屏幕上方生成
     };
 }
 

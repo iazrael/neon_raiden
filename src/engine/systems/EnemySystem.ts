@@ -70,9 +70,9 @@ function generateMoveIntent(
             break;
 
         case EnemyBehavior.SINE_WAVE:
-            // 正弦波移动：向下 + 横向正弦
+            // 正弦波移动：基于 Y 坐标计算横向偏移，phaseOffset 实现同类敌人错落
             dy = behavior.moveSpeed / 1000;
-            dx = Math.sin((enemyTag.timer + enemyTag.phaseOffset) * 0.02) * behavior.moveSpeed * 0.5 / 1000;
+            dx = Math.sin(transform.y * 0.015 + enemyTag.phaseOffset) * behavior.moveSpeed / 1000;
             break;
 
         case EnemyBehavior.CHASE:
@@ -96,9 +96,9 @@ function generateMoveIntent(
             break;
 
         case EnemyBehavior.STRAFE:
-            // 侧移：向下 + 周期性横向
+            // 侧移：向下 + 周期性横向（基于 Y 坐标）
             dy = behavior.moveSpeed * 0.5 / 1000;
-            const strafeDir = Math.sin((enemyTag.timer + enemyTag.phaseOffset) * 0.01) > 0 ? 1 : -1;
+            const strafeDir = Math.sin(transform.y * 0.04 + enemyTag.phaseOffset) > 0 ? 1 : -1;
             dx = strafeDir * behavior.moveSpeed / 1000;
             break;
 

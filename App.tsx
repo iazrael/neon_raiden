@@ -79,8 +79,8 @@ function App() {
       setShowLevelTransition(engine.showLevelTransition);
       setLevelTransitionTimer(engine.levelTransitionTimer);
       setActiveSynergies(engine.synergySys.getActiveSynergies());
-      setWeaponType(engine.weaponType);
-      setSecondaryWeapon(engine.secondaryWeapon);
+      setWeaponType(engine.weaponId as any as WeaponType);
+      setSecondaryWeapon(engine.secondaryWeapon as any as WeaponType);
       setWeaponLevel(engine.weaponLevel);
       setShieldPercent(engine.getShieldPercent());
     }, 100); // 每 100ms 同步一次 UI 状态

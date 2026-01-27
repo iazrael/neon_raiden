@@ -13,11 +13,10 @@
 
 import { Engine } from './engine';
 import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
-import { GameState, WeaponType, ClickType } from '@/types';
-import type { ComboState } from '@/game/systems/ComboSystem';
 import type { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
 import type { GameSnapshot } from './snapshot';
 import { AudioSystem as GameAudioSystem } from '@/game/systems/AudioSystem';
+import { ComboState, GameState, WeaponId } from './types';
 
 /**
  * 模拟的 WeaponSynergySystem，暂时返回空数组
@@ -50,8 +49,8 @@ export class ReactEngine {
     public bombs: number = 0;
     public shield: number = 0;
     public playerLevel: number = 1;
-    public weaponType: WeaponType = WeaponType.VULCAN;
-    public secondaryWeapon: WeaponType | null = null;
+    public weaponId: WeaponId = WeaponId.VULCAN;
+    public secondaryWeapon: WeaponId | null = null;
     public weaponLevel: number = 1;
 
     // UI 状态
@@ -242,8 +241,8 @@ export class ReactEngine {
         this.bombs = snapshot.player.bombs;
         // shieldPercent 是通过 getShieldPercent() 方法计算的，不需要存储
         this.shield = 0;  // 由 snapshot 更新
-        this.weaponType = snapshot.player.weaponType as WeaponType;
-        this.secondaryWeapon = snapshot.player.secondaryWeapon as WeaponType | null;
+        this.weaponId = snapshot.player.weaponId;
+        this.secondaryWeapon = snapshot.player.secondaryWeapon;
         this.weaponLevel = snapshot.player.weaponLevel;
         this.activeSynergies = snapshot.player.activeSynergies;
 
