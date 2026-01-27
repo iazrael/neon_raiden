@@ -27,3 +27,6 @@ dist-ssr
 .trae/documents/*
 dev-dist/*
 .playwright-mcp
+
+# Git worktrees
+.worktrees/
