@@ -72,7 +72,7 @@ function generateMoveIntent(
         case EnemyBehavior.SINE_WAVE:
             // 正弦波移动：向下 + 横向正弦
             dy = behavior.moveSpeed / 1000;
-            dx = Math.sin(transform.y * 0.02) * behavior.moveSpeed * 0.5 / 1000;
+            dx = Math.sin((enemyTag.timer + enemyTag.phaseOffset) * 0.02) * behavior.moveSpeed * 0.5 / 1000;
             break;
 
         case EnemyBehavior.CHASE:
@@ -98,7 +98,7 @@ function generateMoveIntent(
         case EnemyBehavior.STRAFE:
             // 侧移：向下 + 周期性横向
             dy = behavior.moveSpeed * 0.5 / 1000;
-            const strafeDir = Math.sin(enemyTag.timer * 0.002) > 0 ? 1 : -1;
+            const strafeDir = Math.sin((enemyTag.timer + enemyTag.phaseOffset) * 0.01) > 0 ? 1 : -1;
             dx = strafeDir * behavior.moveSpeed / 1000;
             break;
 
@@ -107,7 +107,7 @@ function generateMoveIntent(
             const circleAngle = Math.atan2(
                 transform.y - playerPos.y,
                 transform.x - playerPos.x
-            ) + 0.02; // 缓慢旋转
+            ) + 0.02; // 固定旋转速度（每帧约0.02弧度）
             const circleRadius = 150;
             const targetX = playerPos.x + Math.cos(circleAngle) * circleRadius;
             const targetY = playerPos.y + Math.sin(circleAngle) * circleRadius;

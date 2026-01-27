@@ -36,15 +36,18 @@ export class EnemyTag extends Component {
         id: EnemyId;
         state?: number;
         timer?: number;
+        phaseOffset?: number;
     }) {
         super();
         this.id = cfg.id;
         this.state = cfg.state ?? 0;
         this.timer = cfg.timer ?? 0;
+        this.phaseOffset = cfg.phaseOffset ?? 0;
     }
     public id: EnemyId;
     public state: number;
     public timer: number; // 计时器，用于行为模式切换等, 单位毫秒
+    public phaseOffset: number; // 移动相位偏移，避免同步摆动
 
     static check(c: any): c is EnemyTag { return c instanceof EnemyTag; }
 }

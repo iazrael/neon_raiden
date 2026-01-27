@@ -1,5 +1,5 @@
 import { Blueprint } from './blueprints';
-import { BossAI, BossTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon } from './components';
+import { BossAI, BossTag, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon } from './components';
 import { World, EntityId, Component } from './types';
 import { AmmoType } from './types/ids';
 import { addComponent, generateId, getFromPool } from './world';
@@ -58,6 +58,18 @@ export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number, r
 export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot, 'enemy');
     world.enemyCount++;
+
+    // 给敌人的移动添加随机相位偏移，避免同步摆动
+    const enemyComps = world.entities.get(id);
+    if (enemyComps) {
+        const enemyTag = enemyComps.find(EnemyTag.check);
+        if (enemyTag) {
+            // 随机相位偏移：0-2000ms，让同类型敌人的摆动错开
+            // 注意：这里设置的是 phaseOffset，不是 timer，避免影响攻击计时
+            enemyTag.phaseOffset = Math.random() * 2000;
+        }
+    }
+
     return id;
 }
 
