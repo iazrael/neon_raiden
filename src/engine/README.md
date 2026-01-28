@@ -16,16 +16,17 @@
 | | 10 | **WeaponSystem** | 读 `FireIntent` + `Weapon` $\to$ `new BulletEntity` (发射) |
 | **P3. 物理层**<br>(位移) | 11 | **MovementSystem** | 读 `MoveIntent` + `Velocity` $\to$ 改 `Transform` (x,y) |
 | **P4. 交互层**<br>(核心碰撞) | 12 | **CollisionSystem** | 读 `HitBox` + `Transform` $\to$ 推送 `HitEvent`, `PickupEvent` (不直接扣血) |
-| **P5. 结算层**<br>(事件处理) | 13 | **PickupSystem** | 消费 `PickupEvent` $\to$ 加武器/Buff，销毁道具 |
-| | 14 | **DamageResolutionSystem** | 消费 `HitEvent` $\to$ 扣 `Health`，闪避/无敌判断，推 `DeathEvent` |
-| | 15 | **LootSystem** | 消费 `DeathEvent` (敌人死亡) $\to$ `new PickupEntity` (掉落) |
-| | 16 | **ComboSystem** | 消费 `DeathEvent` $\to$ 加 `World.score`, 更新连击倍率 |
-| **P6. 表现层**<br>(视听反馈) | 17 | **CameraSystem** | 读 Player `Transform` / 震屏事件 $\to$ 改 Camera View |
-| | 18 | **EffectPlayer** | 消费所有事件 (Hit/Die/Shoot) $\to$ `new ParticleEntity` (视觉特效) |
-| | 19 | **AudioSystem** | 消费所有事件 $\to$ 播放音效 (AudioContext) |
-| | 20 | **RenderSystem** | 读 `Sprite`, `Transform`, `Particle` $\to$ Canvas/WebGL 绘制 |
-| **P7. 清理层**<br>(生命周期) | 21 | **LifetimeSystem** | `Timer` -= dt $\to$ 给超时的实体打 `DestroyTag` |
-| | 22 | **CleanupSystem** | 遍历 `DestroyTag` $\to$ 真正的 `delete entity`，清空本帧 `Events` |
+| | 13 | **BombSystem** | 读 `BombIntent` + `Bomb` $\to$ 推送 `BombExplodedEvent` (炸弹使用) |
+| **P5. 结算层**<br>(事件处理) | 14 | **PickupSystem** | 消费 `PickupEvent` $\to$ 加武器/Buff，销毁道具 |
+| | 15 | **DamageResolutionSystem** | 消费 `HitEvent`, `BombExplodedEvent` $\to$ 扣 `Health`，闪避/无敌判断，推 `DeathEvent` |
+| | 16 | **LootSystem** | 消费 `DeathEvent` (敌人死亡) $\to$ `new PickupEntity` (掉落) |
+| | 17 | **ComboSystem** | 消费 `DeathEvent` $\to$ 加 `World.score`, 更新连击倍率 |
+| **P6. 表现层**<br>(视听反馈) | 18 | **CameraSystem** | 读 Player `Transform` / 震屏事件 $\to$ 改 Camera View |
+| | 19 | **EffectPlayer** | 消费所有事件 (Hit/Die/Shoot/Bomb) $\to$ `new ParticleEntity` (视觉特效) |
+| | 20 | **AudioSystem** | 消费所有事件 $\to$ 播放音效 (AudioContext) |
+| | 21 | **RenderSystem** | 读 `Sprite`, `Transform`, `Particle` $\to$ Canvas/WebGL 绘制 |
+| **P7. 清理层**<br>(生命周期) | 22 | **LifetimeSystem** | `Timer` -= dt $\to$ 给超时的实体打 `DestroyTag` |
+| | 23 | **CleanupSystem** | 遍历 `DestroyTag` $\to$ 真正的 `delete entity`，清空本帧 `Events` |
 
 ---
 
