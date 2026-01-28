@@ -31,3 +31,4 @@ dev-dist/*
 # Git worktrees
 .worktrees/
 .claude/settings.local.json
+coverage
