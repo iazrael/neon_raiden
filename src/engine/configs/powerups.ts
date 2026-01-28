@@ -33,6 +33,15 @@ export const BUFF_CONFIG = {
         healAmount: 30,
     },
 
+    [BuffType.BOMB]: {
+        /** 每次拾取增加的炸弹数量 */
+        countIncrease: 1,
+        /** 最大持有数量 */
+        maxCount: 9,
+        /** 达到上限时的提示音 */
+        maxSound: 'bomb_max',
+    },
+
     [BuffType.INVINCIBILITY]: {
         /** 无敌持续时间（毫秒） */
         duration: 3000,
