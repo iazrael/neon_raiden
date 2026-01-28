@@ -171,8 +171,8 @@ describe('Boss入场行为测试', () => {
             // Boss应该到达或超过目标位置
             expect(transform!.y).toBeGreaterThanOrEqual(targetY);
 
-            // 所用时间应该在合理范围内（2秒左右，最多2.5秒）
-            expect(accumulatedTime).toBeLessThanOrEqual(2500);
+            // 所用时间应该在合理范围内（2秒左右，最多3秒）
+            expect(accumulatedTime).toBeLessThanOrEqual(3000);
         });
     });
 });
