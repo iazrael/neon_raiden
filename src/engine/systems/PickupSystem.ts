@@ -170,7 +170,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
                 }
             } else {
                 // 首次拾取，创建 OptionCount 组件和第一个僚机
-                playerComps.push(new OptionCount(1, 2));
+                playerComps.push(new OptionCount({ count: 1, maxCount: 2 }));
                 spawnOptionEntity(world, playerId, 0);
             }
 

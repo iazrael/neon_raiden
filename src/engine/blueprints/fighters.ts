@@ -3,6 +3,7 @@ import { CollisionLayer } from '../types/collision';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
 import { SpriteKey } from '../configs/sprites';
+import { OptionCount } from '../components';
 
 /**
  * 玩家战机蓝图 - Neon战机
@@ -38,4 +39,7 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
 
     /** 炸弹组件 - 初始炸弹库存（0颗，最多9颗） */
     Bomb: { count: 0, maxCount: 9 },
+
+    /** 僚机数量组件 - 初始僚机数量（0个，最多2个） */
+    OptionCount: { count: 0, maxCount: 2 },
 };
