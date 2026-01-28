@@ -1,6 +1,6 @@
 import { World } from '../types';
 import { inputManager } from '../input/InputManager';
-import { MoveIntent, FireIntent, BombIntent, Velocity } from '../components';
+import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag } from '../components';
 import { removeComponent } from '../world';
 
 export function InputSystem(w: World, dt: number) {
@@ -58,6 +58,21 @@ export function InputSystem(w: World, dt: number) {
         if (!existingFire) playerComps.push(new FireIntent());
     } else {
         if (existingFire) removeComponent(w, w.playerId, existingFire);
+    }
+
+    // === 同步僚机开火意图 ===
+    // 遍历所有实体，找到僚机并同步玩家的开火状态
+    for (const [id, comps] of w.entities) {
+        const playerTag = comps.find(PlayerTag.check);
+        if (playerTag && (playerTag as PlayerTag).isOption) {
+            // 这是一个僚机
+            const optionFire = comps.find(FireIntent.check);
+            if (isFiring) {
+                if (!optionFire) comps.push(new FireIntent());
+            } else {
+                if (optionFire) removeComponent(w, id, optionFire);
+            }
+        }
     }
 
     // === 处理炸弹 (B键) ===
