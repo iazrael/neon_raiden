@@ -42,6 +42,15 @@ export const BUFF_CONFIG = {
         maxSound: 'bomb_max',
     },
 
+    [BuffType.OPTION]: {
+        /** 每次拾取增加的僚机数量 */
+        countIncrease: 1,
+        /** 最大僚机数量 */
+        maxCount: 2,
+        /** 达到上限时的提示音 */
+        maxSound: 'bomb_max',
+    },
+
     [BuffType.INVINCIBILITY]: {
         /** 无敌持续时间（毫秒） */
         duration: 3000,
