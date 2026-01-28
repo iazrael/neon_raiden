@@ -7,6 +7,7 @@ import { SpriteManager } from './src/engine/SpriteManager';
 import ReloadPrompt from './src/views/components/ReloadPrompt';
 import { ComboState, GameState } from './src/engine';
 import { GAME_CONFIG } from './src/engine/configs';
+import { audioPlayer } from './src/engine/audio';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -96,7 +97,7 @@ function App() {
   };
 
   const playClick = (type: ClickType = ClickType.DEFAULT) => {
-    engineRef.current?.audio.playClick(type);
+    audioPlayer.playClick(type);
   };
 
   return (

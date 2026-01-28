@@ -14,7 +14,6 @@
 import { Engine } from './engine';
 import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
 import type { GameSnapshot } from './snapshot';
-import { AudioSystem as GameAudioSystem } from '@/game/systems/AudioSystem';
 import { ComboState, GameState, WeaponId } from './types';
 
 
@@ -26,8 +25,6 @@ export class ReactEngine {
     private engine: Engine;
     private canvas: HTMLCanvasElement | null = null;
 
-    // ========== 公共系统 (与旧 GameEngine 兼容) ==========
-    public audio: GameAudioSystem;
 
     // ========== 游戏状态 (与旧 GameEngine 兼容) ==========
     public state: GameState = GameState.MENU;
@@ -79,7 +76,6 @@ export class ReactEngine {
     ) {
         this.engine = new Engine();
         this.canvas = canvas ?? null;
-        this.audio = new GameAudioSystem();
 
         // 设置回调
         if (onScoreChange) this.onScoreChange = onScoreChange;

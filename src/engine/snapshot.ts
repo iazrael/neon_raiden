@@ -1,7 +1,6 @@
 import { World, GameState, ComboState, WeaponId } from './types';
 import { Health, Transform, Weapon, Shield, Bullet, InvulnerableState, PlayerTag, EnemyTag, BossTag } from './components';
 import { view } from './world';
-import { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
 
 
 
@@ -27,7 +26,6 @@ export interface GameSnapshot {
         weaponId: WeaponId;
         secondaryWeapon: WeaponId | null;
         weaponLevel: number;
-        activeSynergies: SynergyConfig[];
         invulnerable: boolean;
     };
 
@@ -60,7 +58,6 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
                 weaponId: WeaponId.VULCAN,
                 secondaryWeapon: null,
                 weaponLevel: 1,
-                activeSynergies: [],
                 invulnerable: false
             },
             bullets: [],
@@ -112,7 +109,6 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
             weaponId: wp.id as WeaponId,
             secondaryWeapon: null, // TODO: 从SecondaryWeapon组件获取
             weaponLevel: wp.level,
-            activeSynergies: [], // TODO: 从WeaponSynergySystem获取
             invulnerable: !!invuln
         },
 
