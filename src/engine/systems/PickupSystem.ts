@@ -11,10 +11,10 @@
  */
 
 import { World } from '../types';
-import { Transform, Weapon, PlayerTag, PickupItem, Buff, Health, Shield } from '../components';
+import { Transform, Weapon, PlayerTag, PickupItem, Buff, Health, Shield, Bomb } from '../components';
 import { WeaponId, BuffType } from '../types';
 import { getEvents, pushEvent } from '../world';
-import { EventTags, PickupEvent, PlaySoundEvent, ScreenClearEvent } from '../events';
+import { EventTags, PickupEvent, PlaySoundEvent } from '../events';
 import { WEAPON_TABLE } from '../blueprints/weapons';
 import { POWERUP_LIMITS, BUFF_CONFIG } from '../configs/powerups';
 
@@ -118,11 +118,32 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
             break;
 
         case BuffType.BOMB:
-            // BOMB: 增加炸弹数量（暂未实现炸弹计数）
-            // TODO: 实现炸弹系统
+            // BOMB: 增加炸弹数量
+            let bomb = playerComps.find(Bomb.check);
+            if (bomb) {
+                // 已有 Bomb 组件，增加计数
+                const oldCount = bomb.count;
+                bomb.count = Math.min(bomb.count + 1, bomb.maxCount);
+
+                // 如果达到上限，播放提示音
+                if (bomb.count === bomb.maxCount && oldCount < bomb.maxCount) {
+                    pushEvent(world, {
+                        type: 'PlaySound',
+                        name: 'bomb_max'
+                    } as PlaySoundEvent);
+                }
+            } else {
+                // 首次拾取，创建 Bomb 组件
+                playerComps.push(new Bomb(1, 9));
+            }
+
+            // 播放拾取特效
             pushEvent(world, {
-                type: 'ScreenClear'
-            } as ScreenClearEvent);
+                type: 'Pickup',
+                pos: { x: 0, y: 0 },
+                itemId: BuffType.BOMB,
+                owner: playerId
+            } as PickupEvent);
             break;
 
         case BuffType.OPTION:
