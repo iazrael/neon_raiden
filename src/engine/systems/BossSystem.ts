@@ -24,7 +24,9 @@ import {
     ZIGZAG,
     SINE,
     DASH,
-    AGGRESSIVE
+    AGGRESSIVE,
+    BOSS_ARENA,
+    SLOW_DESCENT,
 } from './bossConstants';
 
 /**
@@ -156,7 +158,7 @@ function handleBossMovement(
         case BossMovementPattern.IDLE:
             // 站桩，轻微上下浮动
             boss.velocity.vx = 0;
-            boss.velocity.vy = Math.sin(time * 2) * 5; // 轻微浮动
+            boss.velocity.vy = Math.sin(time * BOSS_ARENA.IDLE_FLOAT_FREQUENCY) * BOSS_ARENA.IDLE_FLOAT_AMPLITUDE;
             break;
 
         case BossMovementPattern.SINE:
@@ -172,9 +174,9 @@ function handleBossMovement(
             const fig8Freq = config.frequency || FIGURE_8.DEFAULT_FREQUENCY;
             const fig8YFreq = config.frequency ? config.frequency * 2 : FIGURE_8.DEFAULT_Y_FREQUENCY;
             const centerX = world.width / 2;
-            const centerY = 150; // 固定中心在y=150
-            const fig8RadiusX = 150;
-            const fig8RadiusY = 50;
+            const centerY = config.centerY ?? FIGURE_8.CENTER_Y;
+            const fig8RadiusX = config.radiusX ?? FIGURE_8.RADIUS_X;
+            const fig8RadiusY = config.radiusY ?? FIGURE_8.RADIUS_Y;
 
             // 目标位置
             const targetFig8X = centerX + Math.sin(time * fig8Freq) * fig8RadiusX;
@@ -187,11 +189,11 @@ function handleBossMovement(
         case BossMovementPattern.CIRCLE:
             // 绕圈移动
             const circleCenterX = config.centerX ?? world.width * CIRCLE_MOVE.DEFAULT_CENTER_X_RATIO;
-            const circleCenterY = config.centerY || 180;
+            const circleCenterY = config.centerY ?? CIRCLE_MOVE.DEFAULT_CENTER_Y;
             const radius = config.radius || CIRCLE_MOVE.DEFAULT_RADIUS;
             const angle = time * (config.frequency || CIRCLE_MOVE.DEFAULT_FREQUENCY);
             const targetCircleX = circleCenterX + Math.cos(angle) * radius;
-            const targetCircleY = circleCenterY + Math.sin(angle) * radius * 0.5; // 椭圆形
+            const targetCircleY = circleCenterY + Math.sin(angle) * radius * CIRCLE_MOVE.Y_RADIUS_RATIO;
             boss.velocity.vx = (targetCircleX - boss.transform.x) * 2;
             boss.velocity.vy = (targetCircleY - boss.transform.y) * 2;
             break;
@@ -201,7 +203,7 @@ function handleBossMovement(
             const zigzagInterval = config.zigzagInterval || ZIGZAG.DEFAULT_SWITCH_INTERVAL;
             const zigzagPhase = Math.floor(time / zigzagInterval) % 2;
             boss.velocity.vx = zigzagPhase === 0 ? baseSpeed : -baseSpeed;
-            boss.velocity.vy = Math.sin(time * 0.8) * 5; // 轻微波动
+            boss.velocity.vy = Math.sin(time * ZIGZAG.Y_WOBBLE_FREQUENCY) * ZIGZAG.Y_WOBBLE_AMPLITUDE;
             break;
 
         case BossMovementPattern.FOLLOW:
@@ -218,8 +220,8 @@ function handleBossMovement(
                     }
                 }
             }
-            // y在150附近轻微波动
-            boss.velocity.vy = Math.sin(time * 3) * 5;
+            // y在目标位置附近轻微波动
+            boss.velocity.vy = Math.sin(time * 3) * BOSS_ARENA.IDLE_FLOAT_AMPLITUDE;
             break;
 
         case BossMovementPattern.TRACKING:
@@ -236,8 +238,8 @@ function handleBossMovement(
                     }
                 }
             }
-            // y在150附近波动
-            boss.velocity.vy = Math.sin(time * 3) * 8;
+            // y在目标位置附近波动
+            boss.velocity.vy = Math.sin(time * 3) * (BOSS_ARENA.IDLE_FLOAT_AMPLITUDE + 3);
             break;
 
         case BossMovementPattern.DASH:
@@ -250,34 +252,34 @@ function handleBossMovement(
                 boss.velocity.vy = dashSpeed;
                 boss.velocity.vx = 0;
             } else {
-                // 准备阶段：回到y=150
-                const targetY = 150;
-                boss.velocity.vy = (targetY - boss.transform.y) * 0.5;
+                // 准备阶段：回到目标位置
+                const targetY = DASH.PREP_TARGET_Y;
+                boss.velocity.vy = (targetY - boss.transform.y) * DASH.PREP_APPROACH_FACTOR;
                 boss.velocity.vx = 0;
             }
             break;
 
         case BossMovementPattern.SLOW_DESCENT:
             // 缓慢下沉（但有上限）
-            if (boss.transform.y < 250) {
-                boss.velocity.vx = Math.cos(time * 1.2) * baseSpeed * 0.3;
+            if (boss.transform.y < SLOW_DESCENT.LOWER_BOUND_Y) {
+                boss.velocity.vx = Math.cos(time * SLOW_DESCENT.LATERAL_DRIFT_FREQUENCY) * baseSpeed * SLOW_DESCENT.LATERAL_DRIFT_AMPLITUDE;
                 boss.velocity.vy = config.verticalSpeed || VERTICAL_SPEED.SLOW;
             } else {
-                // 到达下限，保持y=250并横向移动
-                boss.velocity.vx = Math.cos(time * 1.2) * baseSpeed * 0.3;
-                boss.velocity.vy = (250 - boss.transform.y) * 0.5;
+                // 到达下限，保持位置并横向移动
+                boss.velocity.vx = Math.cos(time * SLOW_DESCENT.LATERAL_DRIFT_FREQUENCY) * baseSpeed * SLOW_DESCENT.LATERAL_DRIFT_AMPLITUDE;
+                boss.velocity.vy = (SLOW_DESCENT.LOWER_BOUND_Y - boss.transform.y) * SLOW_DESCENT.APPROACH_FACTOR;
             }
             break;
 
         case BossMovementPattern.AGGRESSIVE:
-            // 激进压制（在100-250之间移动）
+            // 激进压制（在UPPER_BOUND_Y到LOWER_BOUND_Y之间移动）
             const aggressiveFreq = config.frequency || AGGRESSIVE.DEFAULT_FREQUENCY;
             const aggressiveSpeedMult = config.speedMultiplier || AGGRESSIVE.DEFAULT_SPEED_MULTIPLIER;
             boss.velocity.vx = Math.sin(time * aggressiveFreq) * baseSpeed * aggressiveSpeedMult;
 
-            // 根据正弦波在100-250之间移动
-            const targetAggressiveY = 175 + Math.sin(time * aggressiveFreq * 0.5) * 75;
-            boss.velocity.vy = (targetAggressiveY - boss.transform.y) * 0.5;
+            // 根据正弦波在指定范围内移动
+            const targetAggressiveY = AGGRESSIVE.CENTER_Y + Math.sin(time * aggressiveFreq * 0.5) * AGGRESSIVE.Y_SPREAD;
+            boss.velocity.vy = (targetAggressiveY - boss.transform.y) * AGGRESSIVE.APPROACH_FACTOR;
             break;
 
         case BossMovementPattern.RANDOM_TELEPORT:
@@ -287,7 +289,7 @@ function handleBossMovement(
             const timeInCycle = time % teleportInterval;
 
             if (timeInCycle < teleportWindow) {
-                // 瞬移窗口：直接设置位置（限制在y=80-300之间）
+                // 瞬移窗口：直接设置位置
                 const marginX = TELEPORT.MARGIN_X;
                 const marginY = TELEPORT.MARGIN_Y;
                 boss.transform.x = marginX + Math.random() * (world.width - marginX * 2);
@@ -296,8 +298,8 @@ function handleBossMovement(
                 boss.velocity.vy = 0;
             } else {
                 // 在当前位置轻微漂浮
-                boss.velocity.vx = Math.sin(time * 2) * baseSpeed * 0.2;
-                boss.velocity.vy = Math.cos(time * 2) * baseSpeed * 0.2;
+                boss.velocity.vx = Math.sin(time * TELEPORT.IDLE_DRIFT_FREQUENCY) * baseSpeed * TELEPORT.IDLE_DRIFT_SPEED_MULTIPLIER;
+                boss.velocity.vy = Math.cos(time * TELEPORT.IDLE_DRIFT_FREQUENCY) * baseSpeed * TELEPORT.IDLE_DRIFT_SPEED_MULTIPLIER;
             }
             break;
 
@@ -323,15 +325,15 @@ function handleBossMovement(
                         const trackSpeed = baseSpeed * ADAPTIVE.TRACKING_SPEED_MULTIPLIER;
                         boss.velocity.vx = (dx / dist) * trackSpeed;
 
-                        // y不追踪玩家，保持在150-250之间
-                        const targetAdaptiveY = 200 + Math.sin(time) * 50;
+                        // y不追踪玩家，保持在指定范围内
+                        const targetAdaptiveY = ADAPTIVE.TRACKING_CENTER_Y + Math.sin(time) * ADAPTIVE.TRACKING_Y_SPREAD;
                         boss.velocity.vy = (targetAdaptiveY - boss.transform.y) * 0.3;
                     }
                 }
             } else {
-                // 无玩家时在y=200附近轻微漂浮
-                boss.velocity.vx = Math.sin(time * 2) * baseSpeed * 0.3;
-                boss.velocity.vy = Math.cos(time * 2) * baseSpeed * 0.3;
+                // 无玩家时轻微漂浮
+                boss.velocity.vx = Math.sin(time * 2) * baseSpeed * ADAPTIVE.IDLE_DRIFT_SPEED_MULTIPLIER;
+                boss.velocity.vy = Math.cos(time * 2) * baseSpeed * ADAPTIVE.IDLE_DRIFT_SPEED_MULTIPLIER;
             }
             break;
 

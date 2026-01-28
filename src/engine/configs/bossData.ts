@@ -20,6 +20,10 @@ export interface MovementConfig {
     speedMultiplier?: number;
     /** 圆形/8字移动半径 */
     radius?: number;
+    /** 8字形X轴半径（如果不指定则使用radius） */
+    radiusX?: number;
+    /** 8字形Y轴半径（如果不指定则使用radius） */
+    radiusY?: number;
     /** 振动/摆动频率 */
     frequency?: number;
     /** 振幅 */
