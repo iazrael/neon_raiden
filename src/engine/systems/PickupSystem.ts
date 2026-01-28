@@ -12,8 +12,10 @@
 
 import { World } from '../types';
 import { Transform, Weapon, PlayerTag, PickupItem, Buff, Health, Shield, Bomb } from '../components';
-import { WeaponId, BuffType } from '../types';
-import { getEvents, pushEvent } from '../world';
+import { Option, OptionCount } from '../components';
+import { Sprite } from '../components';
+import { WeaponId, BuffType, WeaponPattern, AmmoType } from '../types';
+import { getEvents, pushEvent, generateId } from '../world';
 import { EventTags, PickupEvent, PlaySoundEvent } from '../events';
 import { WEAPON_TABLE } from '../blueprints/weapons';
 import { POWERUP_LIMITS, BUFF_CONFIG } from '../configs/powerups';
@@ -147,10 +149,39 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
             break;
 
         case BuffType.OPTION:
-            // OPTION: 增加僚机（暂未实现僚机系统）
-            // TODO: 实现僚机系统
-            console.warn('OPTION 道具暂未实现，请等待后续版本');
-            return; // 不拾取此道具
+            // OPTION: 增加僚机
+            let optionCount = playerComps.find(OptionCount.check);
+            if (optionCount) {
+                // 已有 OptionCount 组件，增加计数
+                const oldCount = optionCount.count;
+                optionCount.count = Math.min(optionCount.count + 1, optionCount.maxCount);
+
+                // 如果达到上限，播放提示音
+                if (optionCount.count === optionCount.maxCount && oldCount < optionCount.maxCount) {
+                    pushEvent(world, {
+                        type: 'PlaySound',
+                        name: 'bomb_max' // 临时使用bomb_max音效
+                    } as PlaySoundEvent);
+                }
+
+                // 创建新的僚机实体（如果未达到上限）
+                if (optionCount.count < optionCount.maxCount) {
+                    spawnOptionEntity(world, playerId, optionCount.count - 1);
+                }
+            } else {
+                // 首次拾取，创建 OptionCount 组件和第一个僚机
+                playerComps.push(new OptionCount(1, 2));
+                spawnOptionEntity(world, playerId, 0);
+            }
+
+            // 播放拾取特效
+            pushEvent(world, {
+                type: 'Pickup',
+                pos: { x: 0, y: 0 },
+                itemId: BuffType.OPTION,
+                owner: playerId
+            } as PickupEvent);
+            break;
 
         case BuffType.INVINCIBILITY:
             // INVINCIBILITY: 添加短暂无敌 Buff
@@ -205,4 +236,46 @@ function getWeaponConfig(weaponId: WeaponId) {
         throw new Error(`Weapon config not found for ID: ${weaponId}`);
     }
     return weaponSpec;
+}
+
+/**
+ * 创建僚机实体
+ */
+function spawnOptionEntity(world: World, playerId: number, index: number): void {
+    const playerComps = world.entities.get(playerId);
+    if (!playerComps) return;
+
+    const playerTransform = playerComps.find(Transform.check);
+    if (!playerTransform) return;
+
+    const optionId = generateId();
+    const angle = index * Math.PI;
+
+    world.entities.set(optionId, [
+        new Transform({
+            x: playerTransform.x + Math.cos(angle) * 60,
+            y: playerTransform.y + Math.sin(angle) * 60,
+            rot: 0
+        }),
+        new Sprite({
+            spriteKey: 'option' as any, // SpriteKey.OPTION存在但类型未导出
+            color: '#00ffff',
+            scale: 0.8
+        }),
+        new Option(index),
+        new Weapon({
+            id: WeaponId.VULCAN,
+            ammoType: AmmoType.VULCAN_SPREAD,
+            cooldown: 150,
+            level: 1,
+            bulletCount: 1,
+            spread: 0,
+            pattern: WeaponPattern.AIMED,
+            fireRateMultiplier: 1.0,
+            damageMultiplier: 0.5,
+            pierce: 0,
+            bounces: 0
+        }),
+        new PlayerTag({ isOption: true })
+    ]);
 }
