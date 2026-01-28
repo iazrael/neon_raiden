@@ -12,7 +12,7 @@
 
 import { World } from '../types';
 import { Transform, Sprite, Particle, Lifetime } from '../components';
-import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent } from '../events';
+import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent } from '../events';
 import { triggerCameraShake } from './RenderSystem';
 import { generateId } from '../world';
 import { SpriteKey } from '../configs/sprites';
@@ -121,6 +121,24 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
         frames: 30,
         fps: 30,
         lifetime: 1.5
+    },
+
+    // 炸弹爆炸特效
+    bomb_explosion: {
+        scale: 5,           // 超大尺寸
+        color: '#ffaa00',   // 橙黄色爆炸
+        frames: 30,         // 30帧动画
+        fps: 30,            // 30fps播放
+        lifetime: 1.0       // 持续1秒
+    },
+
+    // 全屏闪光特效
+    screen_flash: {
+        scale: 20,          // 覆盖全屏
+        color: '#ffffff',   // 白色闪光
+        frames: 5,          // 快速闪烁
+        fps: 30,
+        lifetime: 0.2       // 0.2秒
     }
 };
 
@@ -162,6 +180,9 @@ export function EffectPlayer(world: World, dt: number): void {
                 break;
             case 'BerserkMode':
                 handleBerserkModeEvent(world, event as BerserkModeEvent);
+                break;
+            case 'BombExploded':
+                handleBombExplodedEvent(world, event as BombExplodedEvent);
                 break;
         }
     }
@@ -265,6 +286,24 @@ function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
 
     // 触发强烈震屏
     triggerCameraShake(15, 0.8);
+}
+
+/**
+ * 处理炸弹爆炸事件
+ */
+function handleBombExplodedEvent(world: World, event: BombExplodedEvent): void {
+    // 生成全屏闪光特效
+    spawnParticle(world, 'screen_flash', world.width / 2, world.height / 2);
+
+    // 在爆炸位置生成超大型爆炸粒子
+    spawnParticle(world, 'bomb_explosion', event.pos.x, event.pos.y);
+
+    // 在屏幕四周生成额外的爆炸装饰
+    const margin = 100;
+    spawnParticle(world, 'explosion_large', margin, margin);
+    spawnParticle(world, 'explosion_large', world.width - margin, margin);
+    spawnParticle(world, 'explosion_large', margin, world.height - margin);
+    spawnParticle(world, 'explosion_large', world.width - margin, world.height - margin);
 }
 
 /**
