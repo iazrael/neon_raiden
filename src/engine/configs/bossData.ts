@@ -4,6 +4,7 @@
 //
 
 import { BossId, EnemyWeaponId, WeaponId } from "../types";
+import { ENEMY_WEAPON_TABLE } from "../blueprints/weapons";
 
 
 export interface BossSpec {
@@ -282,17 +283,6 @@ export function validateBossConfigs(): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // 导入武器表用于验证
-    // 注意：这里使用动态导入以避免循环依赖
-    let weaponTable: Record<string, unknown> = {};
-    try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const weaponsModule = require('../blueprints/weapons');
-        weaponTable = weaponsModule.ENEMY_WEAPON_TABLE || {};
-    } catch (e) {
-        warnings.push('无法加载武器表进行验证');
-    }
-
     // 验证每个Boss
     for (const [bossId, bossSpec] of Object.entries(BOSS_DATA)) {
         // 检查1: 至少有一个阶段
@@ -312,7 +302,7 @@ export function validateBossConfigs(): ValidationResult {
             lastThreshold = phase.threshold;
 
             // 检查3: weaponId存在
-            if (weaponTable && !weaponTable[phase.weaponId]) {
+            if (!ENEMY_WEAPON_TABLE[phase.weaponId]) {
                 errors.push(`Boss ${bossId} Phase ${i}: 武器ID ${phase.weaponId} 在武器表中不存在`);
             }
 

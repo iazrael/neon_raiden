@@ -79,57 +79,12 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
     // 初始化Boss相关组件
     const bossComps = world.entities.get(id);
     if (bossComps) {
-        // 确保Boss有必要的组件
-        const bossTag = bossComps.find(BossTag.check);
-        if (bossTag) {
-            // 初始化Boss AI组件
-            let bossAI = bossComps.find(BossAI.check);
-            if (!bossAI) {
-                bossAI = new BossAI({ phase: 0, nextPatternTime: 0 }); // 修复：初始化为0（0-based索引）
-                bossComps.push(bossAI);
-            }
-
-            // 初始化Boss移动意图组件
-            let moveIntent = bossComps.find(MoveIntent.check);
-            if (!moveIntent) {
-                moveIntent = new MoveIntent({ dx: 0, dy: 0, type: 'velocity' });
-                bossComps.push(moveIntent);
-            }
-
-            // 初始化Boss开火意图组件
-            let fireIntent = bossComps.find(FireIntent.check);
-            if (!fireIntent) {
-                fireIntent = new FireIntent({ firing: false });
-                bossComps.push(fireIntent);
-            }
-
-            // 确保Boss有武器组件
-            let weapon = bossComps.find(Weapon.check);
-            if (!weapon) {
-                // 如果蓝图中没有武器组件，添加默认武器
-                weapon = new Weapon({
-                    id: 'boss_default' as any,
-                    ammoType: AmmoType.ENEMY_ORB_GREEN,
-                    cooldown: 1000,
-                    level: 1
-                });
-                bossComps.push(weapon);
-            }
-
-            // 确保Boss有速度状态组件
-            let speedStat = bossComps.find(SpeedStat.check);
-            if (!speedStat) {
-                speedStat = new SpeedStat({ maxLinear: 120, maxAngular: 2 });
-                bossComps.push(speedStat);
-            }
-
-            // 添加Boss入场状态组件（使Boss快速进入可视区域）
-            const entrance = new BossEntrance({
-                targetY: 150,      // 可视区域顶部
-                entranceSpeed: 150 // 快速向下移动（150像素/秒）
-            });
-            bossComps.push(entrance);
-        }
+        // 添加Boss入场状态组件（使Boss快速进入可视区域）
+        const entrance = new BossEntrance({
+            targetY: 150,      // 可视区域顶部
+            entranceSpeed: 150 // 快速向下移动（150像素/秒）
+        });
+        bossComps.push(entrance);
     }
 
     return id;

@@ -97,6 +97,7 @@ function doSpawnEnemy(
     cost: number,
     pos: { x: number; y: number }
 ): void {
+
     // 1. 获取蓝图
     const blueprint = ENEMIES_TABLE[enemyType];
     if (!blueprint) {
