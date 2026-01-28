@@ -27,6 +27,7 @@ export { MovementSystem } from './MovementSystem';
 
 // P4: 交互层
 export { CollisionSystem } from './CollisionSystem';
+export { BombSystem } from './BombSystem';
 
 // P5: 结算层
 export { DamageResolutionSystem } from './DamageResolutionSystem';
