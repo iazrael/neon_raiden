@@ -134,7 +134,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
                 }
             } else {
                 // 首次拾取，创建 Bomb 组件
-                playerComps.push(new Bomb(1, 9));
+                playerComps.push(new Bomb({ count: 1, maxCount: 9 }));
             }
 
             // 播放拾取特效

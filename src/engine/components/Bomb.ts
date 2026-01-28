@@ -12,9 +12,14 @@ export class Bomb extends Component {
     /** 最大持有数量（固定为9） */
     maxCount: number;
 
-    constructor(count: number = 0, maxCount: number = 9) {
+    constructor(cfg: {
+        /** 当前炸弹数量 */
+        count: number;
+        /** 最大持有数量 */
+        maxCount: number;
+    }) {
         super();
-        this.count = Math.min(count, maxCount);
-        this.maxCount = maxCount;
+        this.count = Math.min(cfg.count, cfg.maxCount);
+        this.maxCount = cfg.maxCount;
     }
 }
