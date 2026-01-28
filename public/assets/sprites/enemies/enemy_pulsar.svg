@@ -1,12 +1,24 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Pulsar: High Speed, High Fire Rate - Sleek, sharp, yellow/energy theme -->
-  <path d="M32 4L44 20L56 12L48 32L60 48L32 60L4 48L16 32L8 12L20 20L32 4Z" fill="#ECC94B" stroke="#D69E2E" stroke-width="2"/>
-  <!-- Energy Core with Pulsing Glow Effect -->
-  <circle cx="32" cy="32" r="11" fill="#E9D8FD" fill-opacity="0.3"/>
-  <circle cx="32" cy="32" r="9" fill="#E9D8FD" fill-opacity="0.5"/>
-  <circle cx="32" cy="32" r="7.5" fill="#E9D8FD"/>
-  <path d="M32 4L32 24" stroke="#D69E2E" stroke-width="2"/>
-  <path d="M32 60L32 40" stroke="#D69E2E" stroke-width="2"/>
-  <path d="M4 48L24 32" stroke="#D69E2E" stroke-width="2"/>
-  <path d="M60 48L40 32" stroke="#D69E2E" stroke-width="2"/>
+  <g transform="translate(32, 32)">
+    <!-- 外环机身 -->
+    <circle cx="0" cy="0" r="28" fill="#D69E2E" stroke="#B7791F" stroke-width="3"/>
+    <!-- 中环 -->
+    <circle cx="0" cy="0" r="20" fill="#ECC94B"/>
+    <!-- 内环 -->
+    <circle cx="0" cy="0" r="14" fill="#B7791F"/>
+    <!-- 能量核心 -->
+    <circle cx="0" cy="0" r="10" fill="#E9D8FD" fill-opacity="0.3"/>
+    <circle cx="0" cy="0" r="8" fill="#E9D8FD" fill-opacity="0.5"/>
+    <circle cx="0" cy="0" r="6" fill="#E9D8FD"/>
+    <!-- 4个脉冲发射口 -->
+    <circle cx="0" cy="-24" r="5" fill="#ECC94B" stroke="#B7791F" stroke-width="2"/>
+    <circle cx="0" cy="24" r="5" fill="#ECC94B" stroke="#B7791F" stroke-width="2"/>
+    <circle cx="-24" cy="0" r="5" fill="#ECC94B" stroke="#B7791F" stroke-width="2"/>
+    <circle cx="24" cy="0" r="5" fill="#ECC94B" stroke="#B7791F" stroke-width="2"/>
+    <!-- 辐条连接 -->
+    <rect x="-3" y="-24" width="6" height="6" fill="#B7791F"/>
+    <rect x="-3" y="18" width="6" height="6" fill="#B7791F"/>
+    <rect x="-24" y="-3" width="6" height="6" fill="#B7791F"/>
+    <rect x="18" y="-3" width="6" height="6" fill="#B7791F"/>
+  </g>
 </svg>

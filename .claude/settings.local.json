@@ -23,7 +23,8 @@
       "Bash(npm run:*)",
       "Bash(git rev-parse:*)",
       "Read(//Users/azrael/Code/neon_raiden/**)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)"
     ],
     "additionalDirectories": [
       "/Users/azrael/Code/neon_raiden-boss-refactor/tests/utils"

@@ -1,17 +1,24 @@
 <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(40, 40)">
-    <!-- Main Body -->
-    <path d="M-30 -20 L30 -20 L40 0 L30 20 L-30 20 L-40 0 Z" fill="#2d3748"/>
-    <!-- Armor Plates -->
-    <rect x="-20" y="-15" width="40" height="30" fill="#4a5568"/>
-    <!-- Energy Core with Glow Effect -->
+  <g transform="translate(40, 40) rotate(180)">
+    <!-- 主机身 - 扁平菱形 -->
+    <path d="M0 -25 L30 -10 L0 15 L-30 -10 Z" fill="#2D3748" stroke="#1A202C" stroke-width="2"/>
+    <!-- 装甲板 -->
+    <rect x="-22" y="-18" width="44" height="28" fill="#4A5568"/>
+    <!-- 能量核心 -->
     <circle cx="0" cy="0" r="8" fill="#68D391" fill-opacity="0.3"/>
     <circle cx="0" cy="0" r="6" fill="#68D391" fill-opacity="0.5"/>
     <circle cx="0" cy="0" r="4" fill="#68D391"/>
-    <!-- Warning Stripes -->
-    <path d="M-15 -10 L-5 10 L-10 10 L-20 -10 Z" fill="#ecc94b"/>
-    <path d="M5 -10 L15 10 L10 10 L0 -10 Z" fill="#ecc94b"/>
-    <!-- Rear Mine Port -->
-    <path d="M-8 20 A 8 8 0 0 1 8 20" fill="#1a202c"/>
+    <!-- 警示条纹 -->
+    <path d="M-15 -12 L-5 8 L-10 8 L-20 -12 Z" fill="#ECC94B"/>
+    <path d="M5 -12 L15 8 L10 8 L0 -12 Z" fill="#ECC94B"/>
+    <!-- 布雷舱门 (底部) -->
+    <rect x="-12" y="12" width="24" height="10" fill="#1A202C" stroke="#ECC94B" stroke-width="1"/>
+    <!-- 可见的地雷 -->
+    <circle cx="-6" cy="22" r="4" fill="#ECC94B"/>
+    <circle cx="0" cy="22" r="4" fill="#ECC94B"/>
+    <circle cx="6" cy="22" r="4" fill="#ECC94B"/>
+    <!-- 推进器 -->
+    <rect x="-20" y="8" width="6" height="6" fill="#48BB78" fill-opacity="0.7"/>
+    <rect x="14" y="8" width="6" height="6" fill="#48BB78" fill-opacity="0.7"/>
   </g>
 </svg>

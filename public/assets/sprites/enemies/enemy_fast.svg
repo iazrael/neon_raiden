@@ -1,17 +1,18 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(24, 24) rotate(180)">
-    <!-- Energy Core with Glow Effect -->
-    <rect x="-12" y="-3" width="24" height="6" fill="#E6FFFA" fill-opacity="0.3" rx="3"/>
-    <rect x="-10" y="-2" width="20" height="4" fill="#E6FFFA" fill-opacity="0.5" rx="2"/>
-    <rect x="-10" y="-2" width="20" height="4" fill="#E6FFFA" rx="2"/>
-    <!-- Main Body -->
-    <path d="M0 -20 C15 -10 20 10 0 20 C-20 10 -15 -10 0 -20 Z" fill="#805ad5" stroke="#d6bcfa" stroke-width="2"/>
-    <!-- Weapon Systems - Front Dual Machine Guns -->
-    <!-- Left Gun (Dual Barrel) -->
-    <circle cx="-7" cy="-15" r="1.5" fill="#81E6D9"/>
-    <circle cx="-9" cy="-15" r="1.5" fill="#81E6D9"/>
-    <!-- Right Gun (Dual Barrel) -->
-    <circle cx="7" cy="-15" r="1.5" fill="#81E6D9"/>
-    <circle cx="9" cy="-15" r="1.5" fill="#81E6D9"/>
+  <g transform="translate(24, 24)">
+    <!-- 倒三角形主体 - 尖角向下 -->
+    <path d="M-20 -18 L20 -18 L0 20 Z" fill="#805AD5" stroke="#9F7AEA" stroke-width="2"/>
+    <!-- 内层深色三角形 -->
+    <path d="M-14 -12 L14 -12 L0 14 Z" fill="#6B46C1"/>
+    <!-- 中心大眼睛 -->
+    <circle cx="0" cy="-4" r="8" fill="#E6FFFA" fill-opacity="0.3"/>
+    <circle cx="0" cy="-4" r="6" fill="#E6FFFA" fill-opacity="0.5"/>
+    <circle cx="0" cy="-4" r="4" fill="#E6FFFA"/>
+    <!-- 眼睛瞳孔 -->
+    <circle cx="0" cy="-4" r="2" fill="#51cd2b"/>
+
+    <!-- 底部推进器 -->
+    <rect x="-4" y="-24" width="3" height="5" fill="#D6BCFA" fill-opacity="0.98"/>
+    <rect x="1" y="-24" width="3" height="5" fill="#D6BCFA" fill-opacity="0.98"/>
   </g>
 </svg>
