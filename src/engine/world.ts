@@ -119,10 +119,6 @@ export function hasComponent<T extends Component>(w: World, id: EntityId, compCt
     return false;
 }
 
-// 获取指定实体
-export function getEntity(w: World, id: EntityId): Component[] | null {
-    return w.entities.get(id) || null;
-}
 
 /**
  * 一次性获取实体的多个组件（类型安全）
@@ -134,18 +130,11 @@ export function getEntity(w: World, id: EntityId): Component[] | null {
  *
  * @example
  * ```ts
- * // 旧方式：需要多次 find
- * const entrance = comps.find(BossEntrance.check);
- * const speedStat = comps.find(SpeedStat.check);
- * const moveIntent = comps.find(MoveIntent.check);
- *
- * // 新方式：一次性获取
+ * // 一次性获取
  * const [entrance, speedStat, moveIntent] = getComponents(
  *     world,
  *     bossId,
- *     BossEntrance,
- *     SpeedStat,
- *     MoveIntent
+ *     [BossEntrance, SpeedStat, MoveIntent]
  * );
  * // entrance: BossEntrance | undefined
  * // speedStat: SpeedStat | undefined
@@ -155,7 +144,7 @@ export function getEntity(w: World, id: EntityId): Component[] | null {
 export function getComponents<T extends Ctor[]>(
     w: World,
     id: EntityId,
-    ...types: T
+    types: [...T]
 ): { [K in keyof T]: T[K] extends Ctor<infer U> ? U | undefined : undefined } {
     const comps = w.entities.get(id);
     if (!comps) {
@@ -177,60 +166,53 @@ export function getComponents<T extends Ctor[]>(
  *
  * @param w World 对象
  * @param id 实体ID
- * @param compCtor 组件构造函数
- * @returns 是否成功移除（组件不存在返回false）
+ * @param types 组件构造函数数组
+ * @returns 每个组件类型是否成功移除
  *
  * @example
  * ```ts
- * // 旧方式：需要先find再remove
- * const entrance = comps.find(BossEntrance.check);
- * if (entrance) {
- *     removeComponent(world, id, entrance);
- * }
+ * // 移除单个组件
+ * const [removed] = removeTypes(world, bossId, [BossEntrance]);
  *
- * // 新方式：直接按类型移除
- * const removed = removeComponentByType(world, id, BossEntrance);
- * if (removed) {
- *     console.log('BossEntrance已移除');
- * }
+ * // 批量移除多个组件
+ * const results = removeTypes(
+ *     world,
+ *     bossId,
+ *     [BossEntrance, SpeedStat, MoveIntent]
+ * );
+ * // results: [boolean, boolean, boolean]
  * ```
  */
-export function removeComponentByType<T extends Component>(
+export function removeTypes<T extends Ctor[]>(
     w: World,
     id: EntityId,
-    compCtor: Ctor<T>
-): boolean {
+    types: [...T]
+): { [K in keyof T]: boolean } {
     const comps = w.entities.get(id);
-    if (!comps) return false;
-    
-    // 找到第一个匹配的组件
-    const index = comps.findIndex(c => c instanceof compCtor);
-    if (index === -1) return false;
+    if (!comps) {
+        // 实体不存在，返回全false数组
+        return new Array(types.length).fill(false) as any;
+    }
 
-    // 移除组件
-    comps.splice(index, 1);
-    return true;
+    const result: boolean[] = [];
+
+    for (const Ctor of types) {
+        const index = comps.findIndex(c => c instanceof Ctor);
+        if (index !== -1) {
+            comps.splice(index, 1);
+            result.push(true);
+        } else {
+            result.push(false);
+        }
+    }
+
+    return result as any;
 }
 
-/**
- * 安全移除组件（如果存在则移除，不存在也不报错）
- *
- * @param w World 对象
- * @param id 实体ID
- * @param compCtor 组件构造函数
- *
- * @example
- * ```ts
- * removeComponentIfExists(world, bossId, InvulnerableState);
- * // 不管InvulnerableState是否存在，都不会报错
- * ```
- */
-export function removeComponentIfExists<T extends Component>(
-    w: World,
-    id: EntityId,
-    compCtor: Ctor<T>
-): void {
-    removeComponentByType(w, id, compCtor);
+
+// ========== 获取指定实体 ==========
+export function getEntity(w: World, id: EntityId): Component[] | null {
+    return w.entities.get(id) || null;
 }
 
 // ========== 删除实体 ==========

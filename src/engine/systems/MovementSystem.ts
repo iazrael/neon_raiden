@@ -25,7 +25,7 @@ export function MovementSystem(world: World, dt: number): void {
     // 遍历所有有 Transform 和 Velocity 的实体
     for (const [id, [transform, velocity], comps] of view(world, [Transform, Velocity])) {
 
-        const [speedStat, moveIntent, knockback] = getComponents(world, id, SpeedStat, MoveIntent, Knockback);
+        const [speedStat, moveIntent, knockback] = getComponents(world, id, [SpeedStat, MoveIntent, Knockback]);
         // 获取速度限制组件（可选）
         // 获取移动意图组件（可选，每帧清除）
         // 获取击退组件（可选）

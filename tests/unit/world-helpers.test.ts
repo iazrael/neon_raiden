@@ -3,11 +3,11 @@
  *
  * TDD: RED → GREEN → REFACTOR
  *
- * 测试 getComponents, removeComponentByType, removeComponentIfExists
+ * 测试 getComponents, removeTypes
  */
 
 import { World } from '../../src/engine/types';
-import { createWorld, addComponent, getComponents, removeComponentByType, removeComponentIfExists } from '../../src/engine/world';
+import { createWorld, addComponent, getComponents, removeTypes } from '../../src/engine/world';
 import { Transform, Velocity, BossTag, Health, MoveIntent } from '../../src/engine/components';
 
 describe('ECS辅助函数', () => {
@@ -29,7 +29,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, velocity);
 
             // Act - 获取组件
-            const [comp1, comp2] = getComponents(world, entityId, Transform, Velocity);
+            const [comp1, comp2] = getComponents(world, entityId, [Transform, Velocity]);
 
             // Assert - 验证返回值
             expect(comp1).toBe(transform);
@@ -42,7 +42,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, transform);
 
             // Act - 获取多个组件
-            const [comp1, comp2] = getComponents(world, entityId, Transform, Velocity);
+            const [comp1, comp2] = getComponents(world, entityId, [Transform, Velocity]);
 
             // Assert
             expect(comp1).toBe(transform);
@@ -51,7 +51,7 @@ describe('ECS辅助函数', () => {
 
         it('应该返回全 undefined 对于不存在的实体', () => {
             // Act - 获取不存在的实体的组件
-            const [comp1, comp2] = getComponents(world, 999, Transform, Velocity);
+            const [comp1, comp2] = getComponents(world, 999, [Transform, Velocity]);
 
             // Assert
             expect(comp1).toBeUndefined();
@@ -64,7 +64,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, transform);
 
             // Act
-            const [comp] = getComponents(world, entityId, Transform);
+            const [comp] = getComponents(world, entityId, [Transform]);
 
             // Assert - TypeScript应该推导出 comp 是 Transform | undefined
             expect(comp).toBeDefined();
@@ -78,13 +78,13 @@ describe('ECS辅助函数', () => {
             // Arrange
             const transform = new Transform({ x: 100, y: 200, rot: 0 });
             const velocity = new Velocity({ vx: 10, vy: 20 });
-            const health = new Health({ current: 100, max: 100 });
+            const health = new Health({ hp: 100, max: 100 });
             addComponent(world, entityId, transform);
             addComponent(world, entityId, velocity);
             addComponent(world, entityId, health);
 
             // Act
-            const [comp1, comp2, comp3] = getComponents(world, entityId, Transform, Velocity, Health);
+            const [comp1, comp2, comp3] = getComponents(world, entityId, [Transform, Velocity, Health]);
 
             // Assert
             expect(comp1).toBe(transform);
@@ -95,12 +95,12 @@ describe('ECS辅助函数', () => {
         it('应该返回部分 undefined 当部分组件不存在', () => {
             // Arrange
             const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            const health = new Health({ current: 100, max: 100 });
+            const health = new Health({ hp: 100, max: 100 });
             addComponent(world, entityId, transform);
             addComponent(world, entityId, health);
 
             // Act
-            const [comp1, comp2, comp3] = getComponents(world, entityId, Transform, Velocity, Health);
+            const [comp1, comp2, comp3] = getComponents(world, entityId, [Transform, Velocity, Health]);
 
             // Assert
             expect(comp1).toBe(transform);
@@ -109,7 +109,7 @@ describe('ECS辅助函数', () => {
         });
     });
 
-    describe('removeComponentByType - 按类型移除组件', () => {
+    describe('removeTypes - 按类型移除组件', () => {
         it('应该移除指定类型的组件', () => {
             // Arrange
             const transform = new Transform({ x: 100, y: 200, rot: 0 });
@@ -118,7 +118,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, velocity);
 
             // Act - 移除 Transform
-            const removed = removeComponentByType(world, entityId, Transform);
+            const [removed] = removeTypes(world, entityId, [Transform]);
 
             // Assert
             expect(removed).toBe(true);
@@ -133,16 +133,16 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, transform);
 
             // Act - 尝试移除不存在的组件
-            const removed = removeComponentByType(world, entityId, Velocity);
+            const [removed] = removeTypes(world, entityId, [Velocity]);
 
             // Assert
             expect(removed).toBe(false);
             expect(world.entities.get(entityId)).toHaveLength(1);
         });
 
-        it('应该返回 false 当实体不存在', () => {
+        it('应该返回全 false 当实体不存在', () => {
             // Act - 尝试从不存在的实体移除组件
-            const removed = removeComponentByType(world, 999, Transform);
+            const [removed] = removeTypes(world, 999, [Transform]);
 
             // Assert
             expect(removed).toBe(false);
@@ -156,7 +156,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, transform2);
 
             // Act
-            const removed = removeComponentByType(world, entityId, Transform);
+            const [removed] = removeTypes(world, entityId, [Transform]);
 
             // Assert
             expect(removed).toBe(true);
@@ -164,62 +164,39 @@ describe('ECS辅助函数', () => {
             expect(comps).toHaveLength(1);
             expect(comps[0]).toBe(transform2); // 第二个还在
         });
-    });
 
-    describe('removeComponentIfExists - 安全移除组件', () => {
-        it('应该移除组件如果存在', () => {
-            // Arrange
-            const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            addComponent(world, entityId, transform);
-
-            // Act - 不应该抛出错误
-            expect(() => {
-                removeComponentIfExists(world, entityId, Transform);
-            }).not.toThrow();
-
-            // Assert
-            expect(world.entities.get(entityId)).toHaveLength(0);
-        });
-
-        it('应该不抛出错误当组件不存在', () => {
-            // Arrange
-            const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            addComponent(world, entityId, transform);
-
-            // Act - 尝试移除不存在的组件
-            expect(() => {
-                removeComponentIfExists(world, entityId, Velocity);
-            }).not.toThrow();
-
-            // Assert
-            expect(world.entities.get(entityId)).toHaveLength(1);
-        });
-
-        it('应该不抛出错误当实体不存在', () => {
-            // Act - 不应该抛出错误
-            expect(() => {
-                removeComponentIfExists(world, 999, Transform);
-            }).not.toThrow();
-        });
-
-        it('应该可以链式调用移除多个组件', () => {
+        it('应该支持批量移除多个组件', () => {
             // Arrange
             const transform = new Transform({ x: 100, y: 200, rot: 0 });
             const velocity = new Velocity({ vx: 10, vy: 20 });
-            const health = new Health({ current: 100, max: 100 });
+            const health = new Health({ hp: 100, max: 100 });
             addComponent(world, entityId, transform);
             addComponent(world, entityId, velocity);
             addComponent(world, entityId, health);
 
-            // Act - 链式移除
-            removeComponentIfExists(world, entityId, Transform);
-            removeComponentIfExists(world, entityId, Velocity);
-            removeComponentIfExists(world, entityId, BossTag); // 不存在
+            // Act - 批量移除 Transform 和 Velocity
+            const [removed1, removed2] = removeTypes(world, entityId, [Transform, Velocity]);
 
             // Assert
+            expect(removed1).toBe(true);
+            expect(removed2).toBe(true);
             const comps = world.entities.get(entityId)!;
             expect(comps).toHaveLength(1);
             expect(comps[0]).toBe(health);
+        });
+
+        it('应该返回部分 false 当部分组件不存在', () => {
+            // Arrange
+            const transform = new Transform({ x: 100, y: 200, rot: 0 });
+            const health = new Health({ hp: 100, max: 100 });
+            addComponent(world, entityId, transform);
+            addComponent(world, entityId, health);
+
+            // Act - 移除存在的和不存在的组件
+            const results = removeTypes(world, entityId, [Transform, Velocity]);
+
+            // Assert
+            expect(results).toEqual([true, false]);
         });
     });
 
@@ -234,7 +211,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, moveIntent);
 
             // Act - 使用新API一次性获取和移除
-            const [trans, vel, intent] = getComponents(world, entityId, Transform, Velocity, MoveIntent);
+            const [trans, vel, intent] = getComponents(world, entityId, [Transform, Velocity, MoveIntent]);
 
             // 验证获取成功
             expect(trans).toBeDefined();
@@ -242,10 +219,11 @@ describe('ECS辅助函数', () => {
             expect(intent).toBeDefined();
 
             // 移除MoveIntent
-            removeComponentByType(world, entityId, MoveIntent);
+            const [removed] = removeTypes(world, entityId, [MoveIntent]);
 
             // 验证移除成功
-            const [, , afterRemove] = getComponents(world, entityId, Transform, Velocity, MoveIntent);
+            expect(removed).toBe(true);
+            const [, , afterRemove] = getComponents(world, entityId, [Transform, Velocity, MoveIntent]);
             expect(afterRemove).toBeUndefined();
         });
 
@@ -255,7 +233,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, transform);
 
             // Act - 尝试获取多个组件，部分不存在
-            const [trans, vel, intent] = getComponents(world, entityId, Transform, Velocity, MoveIntent);
+            const [trans, vel, intent] = getComponents(world, entityId, [Transform, Velocity, MoveIntent]);
 
             // Assert - 应该不抛出错误，缺失的为undefined
             expect(trans).toBeDefined();
@@ -263,10 +241,25 @@ describe('ECS辅助函数', () => {
             expect(intent).toBeUndefined();
 
             // 移除操作也不应该报错
-            expect(() => {
-                removeComponentIfExists(world, entityId, Velocity);
-                removeComponentIfExists(world, entityId, MoveIntent);
-            }).not.toThrow();
+            const results = removeTypes(world, entityId, [Velocity, MoveIntent]);
+            expect(results).toEqual([false, false]);
+        });
+
+        it('应该演示批量移除的优势', () => {
+            // Arrange - Boss入场完成后需要清理多个组件
+            const transform = new Transform({ x: 400, y: 150, rot: 0 });
+            const moveIntent = new MoveIntent({ dx: 0, dy: 150, type: 'velocity' });
+            addComponent(world, entityId, transform);
+            addComponent(world, entityId, moveIntent);
+
+            // Act - 一次性移除多个组件
+            const results = removeTypes(world, entityId, [MoveIntent]);
+
+            // Assert
+            expect(results).toEqual([true]);
+            const [trans, intent] = getComponents(world, entityId, [Transform, MoveIntent]);
+            expect(trans).toBeDefined();
+            expect(intent).toBeUndefined();
         });
     });
 });

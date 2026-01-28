@@ -13,7 +13,7 @@ import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, Velocity, BossEn
 import { BossId, EnemyWeaponId } from '../../../src/engine/types/ids';
 import { BLUEPRINT_BOSS_GUARDIAN } from '../../../src/engine/blueprints/bosses';
 import { spawnBoss } from '../../../src/engine/factory';
-import { removeComponentByType } from '../../../src/engine/world';
+import { removeTypes } from '../../../src/engine/world';
 
 describe('BossEntranceSystem', () => {
     let world: World;
@@ -285,7 +285,7 @@ describe('BossEntranceSystem', () => {
     });
 
     describe('使用新ECS API', () => {
-        it('应该使用removeComponentByType而非直接splice', () => {
+        it('应该使用removeTypes而非直接splice', () => {
             // Arrange
             const bossComps = world.entities.get(bossId);
             const transform = bossComps?.find(Transform.check) as Transform;

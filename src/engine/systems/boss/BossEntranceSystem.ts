@@ -20,8 +20,8 @@
  */
 
 import { World } from '../../types';
-import { Transform, BossEntrance, MoveIntent, SpeedModifier } from '../../components';
-import { view, addComponent, removeComponentByType, removeComponentIfExists } from '../../world';
+import { Transform, BossEntrance, MoveIntent, SpeedModifier, InvulnerableState } from '../../components';
+import { view, addComponent, removeTypes } from '../../world';
 import { BOSS_ARENA } from '../bossConstants';
 
 /**
@@ -61,11 +61,7 @@ export function BossEntranceSystem(world: World, dt: number): void {
         } else {
             // === 入场完成 ===
 
-            // 使用新的 removeComponentByType API
-            // TODO: 要支持一次移除多个
-            removeComponentByType(world, id, BossEntrance);
-            removeComponentByType(world, id, SpeedModifier);
-            // 注意：InvulnerableState的移除是可选的，因为它可能不存在
+            removeTypes(world, id, [BossEntrance, SpeedModifier, InvulnerableState]);
         }
     }
 }
