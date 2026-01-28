@@ -11,23 +11,24 @@
  * 执行顺序：P2 - 在决策层之后
  */
 
-import { World } from '../types';
+import { Component, World } from '../types';
 import { Buff, Health, Shield, SpeedStat, Weapon, InvulnerableState } from '../components';
 import { BuffType } from '../types';
+import { removeComponent, view } from '../world';
 
 /**
  * Buff效果处理器
  */
 interface BuffHandler {
-    apply(buff: Buff, comps: unknown[], dt: number): void;
+    apply(buff: Buff, comps: Component[], dt: number): void;
 }
 
 /**
  * HP Buff - 恢复生命值
  */
 const hpHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
-        const health = comps.find(Health.check) as Health | undefined;
+    apply(buff: Buff, comps: Component[], dt: number): void {
+        const health = comps.find(Health.check);
         if (health) {
             // 持续恢复生命值
             const healAmount = buff.value * dt;
@@ -40,8 +41,8 @@ const hpHandler: BuffHandler = {
  * POWER Buff - 增加武器伤害
  */
 const powerHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
-        const weapons = comps.filter(Weapon.check) as Weapon[];
+    apply(buff: Buff, comps: Component[], dt: number): void {
+        const weapons = comps.filter(Weapon.check);
         for (const weapon of weapons) {
             // 增加伤害倍率
             weapon.damageMultiplier = 1 + buff.value * 0.1;
@@ -53,8 +54,8 @@ const powerHandler: BuffHandler = {
  * SPEED Buff - 增加移动速度
  */
 const speedHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
-        const speedStat = comps.find(SpeedStat.check) as SpeedStat | undefined;
+    apply(buff: Buff, comps: Component[], dt: number): void {
+        const speedStat = comps.find(SpeedStat.check);
         if (speedStat) {
             // 增加移动速度
             speedStat.maxLinear *= (1 + buff.value * 0.01);
@@ -66,8 +67,8 @@ const speedHandler: BuffHandler = {
  * SHIELD Buff - 增加护盾值或恢复护盾
  */
 const shieldHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
-        const shield = comps.find(Shield.check) as Shield | undefined;
+    apply(buff: Buff, comps: Component[], dt: number): void {
+        const shield = comps.find(Shield.check);
         if (shield) {
             // 持续恢复护盾
             shield.regen = buff.value;
@@ -84,9 +85,9 @@ const shieldHandler: BuffHandler = {
  * INVINCIBILITY Buff - 无敌状态
  */
 const invincibilityHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
+    apply(buff: Buff, comps: Component[], dt: number): void {
         // 检查是否已有无敌状态组件
-        let invState = comps.find(InvulnerableState.check) as InvulnerableState | undefined;
+        let invState = comps.find(InvulnerableState.check);
 
         if (!invState && buff.remaining > 0) {
             // 添加无敌状态组件
@@ -103,8 +104,8 @@ const invincibilityHandler: BuffHandler = {
  * RAPID_FIRE Buff - 增加射速
  */
 const rapidFireHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
-        const weapons = comps.filter(Weapon.check) as Weapon[];
+    apply(buff: Buff, comps: Component[], dt: number): void {
+        const weapons = comps.filter(Weapon.check);
         for (const weapon of weapons) {
             // 增加射速倍率
             weapon.fireRateMultiplier = 1 + buff.value * 0.05;
@@ -116,8 +117,8 @@ const rapidFireHandler: BuffHandler = {
  * PENETRATION Buff - 增加穿透
  */
 const penetrationHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
-        const weapons = comps.filter(Weapon.check) as Weapon[];
+    apply(buff: Buff, comps: Component[], dt: number): void {
+        const weapons = comps.filter(Weapon.check);
         for (const weapon of weapons) {
             // 增加穿透次数
             weapon.pierce += Math.floor(buff.value * 0.5);
@@ -129,7 +130,7 @@ const penetrationHandler: BuffHandler = {
  * TIME_SLOW Buff - 时间减速（影响全局）
  */
 const timeSlowHandler: BuffHandler = {
-    apply(buff: Buff, comps: unknown[], dt: number): void {
+    apply(buff: Buff, comps: Component[], dt: number): void {
         // 注意：timeSlowHandler 没有访问 world 的权限
         // 实际的 difficulty 修改将在 BuffSystem 主函数中处理
     }
@@ -156,47 +157,30 @@ const BUFF_HANDLERS: Partial<Record<BuffType, BuffHandler>> = {
  */
 export function BuffSystem(world: World, dt: number): void {
     // 遍历所有实体的 Buff 组件
-    for (const [id, comps] of world.entities) {
-        const buffs = comps.filter(Buff.check) as Buff[];
+    for (const [id, [buff], comps] of view(world, [Buff])) {
 
         // 处理每个 Buff
-        for (const buff of buffs) {
-            // 更新 Buff 剩余时间
-            buff.update(dt);
+        // 更新 Buff 剩余时间
+        buff.update(dt);
 
-            // 应用 Buff 效果
-            const handler = BUFF_HANDLERS[buff.type];
-            if (handler) {
-                handler.apply(buff, comps, dt);
-            }
+        // 应用 Buff 效果
+        const handler = BUFF_HANDLERS[buff.type];
+        if (handler) {
+            // TODO: 这里跟 pickupsystem的 applyBuffPickup 是部分重复的
+            handler.apply(buff, comps, dt);
         }
 
-        // 移除已结束的 Buff
-        const finishedBuffs = comps.filter(c => c instanceof Buff && (c as Buff).isFinished());
-        for (const buff of finishedBuffs) {
-            const idx = comps.indexOf(buff);
-            if (idx !== -1) {
-                comps.splice(idx, 1);
-            }
-
-            // 如果是无敌状态结束，移除 InvulnerableState 组件
-            if ((buff as Buff).type === BuffType.INVINCIBILITY) {
-                const invState = comps.find(InvulnerableState.check);
-                if (invState) {
-                    const invIdx = comps.indexOf(invState);
-                    if (invIdx !== -1) comps.splice(invIdx, 1);
-                }
-            }
+        // FIXME：buff 处理后会转换成对应的组件，是不是可以直接移除了？
+        if (buff.isFinished()) {
+            removeComponent(world, id, buff);
         }
     }
 
     // 如果没有时间减速 buff，恢复游戏速度
     let hasTimeSlow = false;
-    for (const comps of world.entities.values()) {
-        if (comps.some(c => c instanceof Buff && (c as Buff).type === BuffType.TIME_SLOW)) {
-            hasTimeSlow = true;
-            break;
-        }
+    for (const [id] of view(world, [Buff])) {
+        hasTimeSlow = true;
+        break;
     }
 
     if (!hasTimeSlow) {

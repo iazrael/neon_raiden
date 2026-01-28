@@ -12,9 +12,11 @@
 
 import { World } from '../types';
 import { Transform, Weapon, PlayerTag, PickupItem, Buff, Health, Shield } from '../components';
-import { WeaponId, AmmoType, BuffType, WeaponPattern } from '../types';
-import { pushEvent } from '../world';
-import { PickupEvent, PlaySoundEvent } from '../events';
+import { WeaponId, BuffType } from '../types';
+import { getEvents, pushEvent } from '../world';
+import { EventTags, PickupEvent, PlaySoundEvent, ScreenClearEvent } from '../events';
+import { WEAPON_TABLE } from '../blueprints/weapons';
+import { POWERUP_LIMITS, BUFF_CONFIG } from '../configs/powerups';
 
 /**
  * 拾取系统主函数
@@ -23,7 +25,7 @@ import { PickupEvent, PlaySoundEvent } from '../events';
  */
 export function PickupSystem(world: World, dt: number): void {
     // 收集本帧的所有拾取事件
-    const pickupEvents = world.events.filter(e => e.type === 'Pickup') as PickupEvent[];
+    const pickupEvents = getEvents<PickupEvent>(world, EventTags.Pickup);
 
     if (pickupEvents.length === 0) return;
 
@@ -65,13 +67,13 @@ function applyWeaponPickup(world: World, playerId: number, weaponId: WeaponId): 
     if (!playerComps) return;
 
     // 查找是否已有该武器
-    const existingWeapon = playerComps.find(Weapon.check) as Weapon | undefined;
+    const existingWeapon = playerComps.find(Weapon.check);
 
     if (existingWeapon && existingWeapon.id === weaponId) {
         // 已有该武器，升级武器等级
-        existingWeapon.level = Math.min(existingWeapon.level + 1, 5);
+        existingWeapon.level = Math.min(existingWeapon.level + 1, POWERUP_LIMITS.MAX_WEAPON_LEVEL);
         // 升级时可能增加子弹数量或减少冷却
-        existingWeapon.bulletCount = Math.min(existingWeapon.bulletCount + 1, 7);
+        existingWeapon.bulletCount = Math.min(existingWeapon.bulletCount + 1, POWERUP_LIMITS.MAX_BULLET_COUNT);
     } else {
         // 移除旧武器，添加新武器
         if (existingWeapon) {
@@ -101,17 +103,17 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
     switch (buffType) {
         case BuffType.POWER:
             // POWER: 武器升级
-            const weapon = playerComps.find(Weapon.check) as Weapon | undefined;
+            const weapon = playerComps.find(Weapon.check);
             if (weapon) {
-                weapon.level = Math.min(weapon.level + 1, 5);
+                weapon.level = Math.min(weapon.level + BUFF_CONFIG[BuffType.POWER].levelIncrease, BUFF_CONFIG[BuffType.POWER].maxLevel);
             }
             break;
 
         case BuffType.HP:
             // HP: 恢复生命值
-            const health = playerComps.find(Health.check) as Health | undefined;
+            const health = playerComps.find(Health.check);
             if (health) {
-                health.hp = Math.min(health.hp + 30, health.max);
+                health.hp = Math.min(health.hp + BUFF_CONFIG[BuffType.HP].healAmount, health.max);
             }
             break;
 
@@ -120,20 +122,21 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
             // TODO: 实现炸弹系统
             pushEvent(world, {
                 type: 'ScreenClear'
-            });
+            } as ScreenClearEvent);
             break;
 
         case BuffType.OPTION:
             // OPTION: 增加僚机（暂未实现僚机系统）
             // TODO: 实现僚机系统
-            break;
+            console.warn('OPTION 道具暂未实现，请等待后续版本');
+            return; // 不拾取此道具
 
         case BuffType.INVINCIBILITY:
             // INVINCIBILITY: 添加短暂无敌 Buff
             playerComps.push(new Buff({
                 type: BuffType.INVINCIBILITY,
                 value: 1,
-                remaining: 3000 // 3秒无敌
+                remaining: BUFF_CONFIG[BuffType.INVINCIBILITY].duration
             }));
             break;
 
@@ -142,7 +145,7 @@ function applyBuffPickup(world: World, playerId: number, buffType: BuffType): vo
             playerComps.push(new Buff({
                 type: BuffType.TIME_SLOW,
                 value: 1,
-                remaining: 5000 // 5秒减速
+                remaining: BUFF_CONFIG[BuffType.TIME_SLOW].duration
             }));
             break;
 
@@ -175,34 +178,10 @@ function isBuffType(id: string): id is BuffType {
 /**
  * 获取武器配置
  */
-function getWeaponConfig(weaponId: WeaponId): {
-    id: WeaponId;
-    ammoType: AmmoType;
-    cooldown: number;
-    bulletCount: number;
-    spread?: number;
-    pattern?: WeaponPattern;
-} {
-    const CONFIG_MAP: Record<WeaponId, {
-        ammoType: AmmoType;
-        cooldown: number;
-        bulletCount: number;
-        spread?: number;
-        pattern?: WeaponPattern;
-    }> = {
-        [WeaponId.VULCAN]: { ammoType: AmmoType.VULCAN_SPREAD, cooldown: 150, bulletCount: 3, spread: 20, pattern: WeaponPattern.SPREAD },
-        [WeaponId.LASER]: { ammoType: AmmoType.LASER_BEAM, cooldown: 200, bulletCount: 1 },
-        [WeaponId.MISSILE]: { ammoType: AmmoType.MISSILE_HOMING, cooldown: 400, bulletCount: 2, spread: 10 },
-        [WeaponId.WAVE]: { ammoType: AmmoType.WAVE_PULSE, cooldown: 500, bulletCount: 1 },
-        [WeaponId.PLASMA]: { ammoType: AmmoType.PLASMA_ORB, cooldown: 600, bulletCount: 1 },
-        [WeaponId.TESLA]: { ammoType: AmmoType.TESLA_CHAIN, cooldown: 250, bulletCount: 1 },
-        [WeaponId.MAGMA]: { ammoType: AmmoType.MAGMA_POOL, cooldown: 350, bulletCount: 1 },
-        [WeaponId.SHURIKEN]: { ammoType: AmmoType.SHURIKEN_BOUNCE, cooldown: 180, bulletCount: 3, spread: 30, pattern: WeaponPattern.SPREAD },
-    };
-
-    const config = CONFIG_MAP[weaponId];
-    return {
-        id: weaponId,
-        ...config
-    };
+function getWeaponConfig(weaponId: WeaponId) {
+    const weaponSpec = WEAPON_TABLE[weaponId];
+    if (!weaponSpec) {
+        throw new Error(`Weapon config not found for ID: ${weaponId}`);
+    }
+    return weaponSpec;
 }

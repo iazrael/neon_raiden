@@ -136,7 +136,7 @@ export class Engine {
         // AISteerSystem(world, dt);                       // 7. AI转向系统
 
         // P2. 状态层 (数值更新)
-        // BuffSystem(world, dt);                          // 8. 增益系统
+        BuffSystem(world, dt);                          // 8. 增益系统
         // WeaponSynergySystem(world, dt);                 // 9. 武器协同系统
         WeaponSystem(world, dt);                        // 10. 武器系统
         // SpecialWeaponSystem(world, dt);                 // 11. 特殊武器效果 (追踪、链式等)
@@ -148,13 +148,10 @@ export class Engine {
         CollisionSystem(world, dt);                     // 12. 碰撞系统
 
         // P5. 结算层 (事件处理)
-        // PickupSystem(world, dt);                        // 13. 拾取系统
+        PickupSystem(world, dt);                        // 13. 拾取系统
         DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
-        // LootSystem(world, dt);                          // 15. 掉落系统
+        LootSystem(world, dt);                          // 15. 掉落系统
         // ComboSystem(world, dt);                         // 16. 连击系统
-
-        // P6. 刷怪层 (生成与AI)
-        // (已在 P1 中处理)
 
         // P7. 表现层 (视听反馈)
         // CameraSystem(world, dt);                        // 17. 相机系统

@@ -3,7 +3,7 @@
 // 包含游戏中所有敌人类型的蓝图定义
 //
 
-import { DROPTABLE_COMMON } from '../configs/droptables';
+import { DROPTABLE_COMMON, DROPTABLE_ELITE } from '../configs/droptables';
 import { EnemyId, EnemyWeaponId } from '../types';
 import { CollisionLayer } from '../types/collision';
 import { Blueprint } from './base';
@@ -156,8 +156,8 @@ export const BLUEPRINT_ENEMY_ELITE_GUNBOAT: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35, layer: CollisionLayer.Enemy },
-    // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON },
+    // 精英敌人使用精英掉落表
+    DropTable: { table: DROPTABLE_ELITE },
 
     // 挂载敌人武器组件 - 使用精英敌人武器
     Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_ELITE]
@@ -276,8 +276,8 @@ export const BLUEPRINT_ENEMY_FORTRESS: Blueprint = {
 
     /** 碰撞盒组件 - 设置敌人的碰撞检测区域 */
     HitBox: { shape: 'circle', radius: 35, layer: CollisionLayer.Enemy },
-    // 挂载掉落表组件，直接引用配置数组
-    DropTable: { table: DROPTABLE_COMMON },
+    // 堡垒敌人（高血量）使用精英掉落表
+    DropTable: { table: DROPTABLE_ELITE },
 
     // 挂载敌人武器组件 - 使用堡垒敌人武器
     Weapon: ENEMY_WEAPON_TABLE[EnemyWeaponId.ENEMY_BARRAGE]
