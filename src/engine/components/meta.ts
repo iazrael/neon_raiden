@@ -150,6 +150,40 @@ export class BossEntrance extends Component {
     static check(c: any): c is BossEntrance { return c instanceof BossEntrance; }
 }
 
+/**
+ * 速度修正器组件
+ *
+ * 用于临时覆盖实体的速度限制，比如Boss入场时需要更高的速度
+ * 也可以用于Buff系统添加临时速度加成
+ */
+export class SpeedModifier extends Component {
+    constructor(cfg: {
+        /** 临时覆盖的最大线性速度（像素/秒） */
+        maxLinearOverride?: number;
+        /** 临时覆盖的最大角速度（弧度/秒） */
+        maxAngularOverride?: number;
+        /** 持续时间（毫秒），-1表示持续到手动移除 */
+        duration?: number;
+    }) {
+        super();
+        this.maxLinearOverride = cfg.maxLinearOverride;
+        this.maxAngularOverride = cfg.maxAngularOverride;
+        this.duration = cfg.duration ?? -1;
+        this.elapsed = 0;
+    }
+
+    /** 临时覆盖的最大线性速度 */
+    public maxLinearOverride?: number;
+    /** 临时覆盖的最大角速度 */
+    public maxAngularOverride?: number;
+    /** 持续时间（毫秒） */
+    public duration: number;
+    /** 已过时间（毫秒） */
+    public elapsed: number;
+
+    static check(c: any): c is SpeedModifier { return c instanceof SpeedModifier; }
+}
+
 /** 分数值组件 - 击杀该实体可获得的分数 */
 export class ScoreValue extends Component {
     constructor(cfg: { value: number }) {
