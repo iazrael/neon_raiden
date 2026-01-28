@@ -1,23 +1,8 @@
-<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <filter id="glow-option" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#a0aec0" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 40 40" width="40" height="40">
+  <!-- Background -->
+  <rect x="-15" y="-15" width="30" height="30" rx="5" ry="5" fill="rgba(20, 20, 30, 0.8)" stroke="#00ffff" stroke-width="3"/>
   
-  <!-- Option Icon -->
-  <g filter="url(#glow-option)">
-    <!-- Central Unit -->
-    <circle cx="20" cy="20" r="5" fill="#a0aec0" />
-    <!-- Orbit Ring -->
-    <ellipse cx="20" cy="20" rx="10" ry="6" stroke="#a0aec0" stroke-width="1.5" fill="none" opacity="0.7"/>
-    <!-- Satellite Units -->
-    <circle cx="10" cy="20" r="3" fill="#a0aec0" />
-    <circle cx="30" cy="20" r="3" fill="#a0aec0" />
-  </g>
+  <!-- Option unit symbol (based on the fighter option.svg) -->
+  <circle cx="0" cy="0" r="6" fill="#111" stroke="#00ffff" stroke-width="1.5"/>
+  <path d="M0,-4 L0,4 M-4,0 L4,0" stroke="#00ffff" stroke-width="1.5"/>
 </svg>
