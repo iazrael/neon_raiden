@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 40 40" width="40" height="40">
+  <!-- Background -->
+  <rect x="-15" y="-15" width="30" height="30" rx="5" ry="5" fill="rgba(20, 40, 30, 0.85)" stroke="#00ff66" stroke-width="3"/>
+  
+  <!-- Heart symbol -->
+  <path d="M0,-2 C4,-6 8,-2 0,6 C-8,-2 -4,-6 0,-2 Z" 
+        fill="#ff2244"/>
+  <!-- Plus symbol -->
+  <path d="M-2.5,0.5 L2.5,0.5 M0,-2 L0,3" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

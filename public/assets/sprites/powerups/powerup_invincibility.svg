@@ -1,0 +1,8 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#00ff00" stroke-width="3"/>
+  <!-- Shield Icon -->
+  <g transform="translate(20, 20)">
+    <path d="M0 -10 C10 -10 10 -5 10 0 C10 10 0 12 0 12 C0 12 -10 10 -10 0 C-10 -5 -10 -10 0 -10 Z" fill="none" stroke="#00ff00" stroke-width="2"/>
+    <path d="M0 -6 L0 6 M-6 0 L6 0" stroke="#00ff00" stroke-width="2"/>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-hp" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#48bb78" stroke-width="2"/>
+  
+  <!-- Cross Icon -->
+  <g filter="url(#glow-hp)">
+    <rect x="17" y="10" width="6" height="20" fill="#48bb78" rx="1" />
+    <rect x="10" y="17" width="20" height="6" fill="#48bb78" rx="1" />
+  </g>
+</svg>

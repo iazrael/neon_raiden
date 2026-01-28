@@ -1,0 +1,8 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#22d3ee" stroke-width="3"/>
+  <!-- Hourglass Icon -->
+  <g transform="translate(20, 20)">
+    <path d="M-8 -10 L8 -10 L0 0 L8 10 L-8 10 L0 0 Z" fill="none" stroke="#22d3ee" stroke-width="2"/>
+    <path d="M0 0 L4 5 L-4 5 Z" fill="#22d3ee"/>
+  </g>
+</svg>

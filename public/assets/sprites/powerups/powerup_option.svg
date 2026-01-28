@@ -1,0 +1,23 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-option" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#a0aec0" stroke-width="2"/>
+  
+  <!-- Option Icon -->
+  <g filter="url(#glow-option)">
+    <!-- Central Unit -->
+    <circle cx="20" cy="20" r="5" fill="#a0aec0" />
+    <!-- Orbit Ring -->
+    <ellipse cx="20" cy="20" rx="10" ry="6" stroke="#a0aec0" stroke-width="1.5" fill="none" opacity="0.7"/>
+    <!-- Satellite Units -->
+    <circle cx="10" cy="20" r="3" fill="#a0aec0" />
+    <circle cx="30" cy="20" r="3" fill="#a0aec0" />
+  </g>
+</svg>

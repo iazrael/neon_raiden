@@ -1,0 +1,15 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-power" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#ecc94b" stroke-width="2"/>
+  
+  <!-- Lightning Icon -->
+  <path d="M22 8 L14 19 L20 19 L16 32 L28 17 L22 17 Z" fill="#ecc94b" filter="url(#glow-power)" stroke="#ecc94b" stroke-width="1" stroke-linejoin="round"/>
+</svg>
