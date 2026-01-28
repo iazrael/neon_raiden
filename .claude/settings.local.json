@@ -25,7 +25,9 @@
       "Read(//Users/azrael/Code/neon_raiden/**)",
       "Bash(git reset:*)",
       "Bash(git checkout:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(GIT_SEQUENCE_EDITOR=\"sed -i '' 's/pick 582a8aa/pick 582a8aa/; s/pick 3a5f977/squash 3a5f977/'\" git rebase:*)",
+      "Bash(git stash:*)"
     ],
     "additionalDirectories": [
       "/Users/azrael/Code/neon_raiden-boss-refactor/tests/utils"

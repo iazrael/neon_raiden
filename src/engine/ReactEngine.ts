@@ -13,19 +13,11 @@
 
 import { Engine } from './engine';
 import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
-import type { SynergyConfig } from '@/game/systems/WeaponSynergySystem';
 import type { GameSnapshot } from './snapshot';
 import { AudioSystem as GameAudioSystem } from '@/game/systems/AudioSystem';
 import { ComboState, GameState, WeaponId } from './types';
 
-/**
- * 模拟的 WeaponSynergySystem，暂时返回空数组
- */
-class MockWeaponSynergySystem {
-    getActiveSynergies(): SynergyConfig[] {
-        return [];
-    }
-}
+
 
 /**
  * ReactEngine - 适配新 ECS 引擎供 React 使用
@@ -36,7 +28,6 @@ export class ReactEngine {
 
     // ========== 公共系统 (与旧 GameEngine 兼容) ==========
     public audio: GameAudioSystem;
-    public synergySys: MockWeaponSynergySystem;
 
     // ========== 游戏状态 (与旧 GameEngine 兼容) ==========
     public state: GameState = GameState.MENU;
@@ -61,7 +52,6 @@ export class ReactEngine {
 
     // P2 Combo & Synergy
     public comboState: ComboState = { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false };
-    public activeSynergies: SynergyConfig[] = [];
 
     // ========== 订阅 cleanup ==========
     private snapshotSubscription: any = null;
@@ -90,7 +80,6 @@ export class ReactEngine {
         this.engine = new Engine();
         this.canvas = canvas ?? null;
         this.audio = new GameAudioSystem();
-        this.synergySys = new MockWeaponSynergySystem();
 
         // 设置回调
         if (onScoreChange) this.onScoreChange = onScoreChange;
@@ -244,7 +233,6 @@ export class ReactEngine {
         this.weaponId = snapshot.player.weaponId;
         this.secondaryWeapon = snapshot.player.secondaryWeapon;
         this.weaponLevel = snapshot.player.weaponLevel;
-        this.activeSynergies = snapshot.player.activeSynergies;
 
         // 同步 HP 变化
         this.onHpChange(this.hp);

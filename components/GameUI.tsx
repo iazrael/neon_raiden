@@ -6,7 +6,7 @@ import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
 import type { ComboState } from "@/game/systems/ComboSystem";
 import type { SynergyConfig } from "@/game/systems/WeaponSynergySystem";
-import { intToRoman } from "@/game/utils/numbers";
+import { intToRoman } from "@/src/views/utils/numbers";
 
 
 

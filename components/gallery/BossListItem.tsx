@@ -1,6 +1,6 @@
 import React from 'react';
 import { BossItem } from './types';
-import { intToRoman } from '@/game/utils/numbers';
+import { intToRoman } from '@/src/views/utils/numbers';
 
 interface BossListItemProps {
   boss: BossItem;

@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ReactEngine } from './src/engine/ReactEngine';
 import { GameUI } from './components/GameUI';
-import { GameState, WeaponType, ClickType } from './types';
-import type { ComboState } from './game/systems/ComboSystem';
-import type { SynergyConfig } from './game/systems/WeaponSynergySystem';
+import { WeaponType, ClickType } from './types';
 
 import { SpriteManager } from './src/engine/SpriteManager';
-import { GameConfig } from './game/config/game';
-import ReloadPrompt from './components/ReloadPrompt';
+import ReloadPrompt from './src/views/components/ReloadPrompt';
+import { ComboState, GameState } from './src/engine';
+import { GAME_CONFIG } from './src/engine/configs';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,7 +25,6 @@ function App() {
   const [stateBeforeGallery, setStateBeforeGallery] = useState<GameState>(GameState.MENU);
   const [showBossWarning, setShowBossWarning] = useState(false);
   const [comboState, setComboState] = useState<ComboState>({ count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false }); // P2 Combo
-  const [activeSynergies, setActiveSynergies] = useState<SynergyConfig[]>([]); // P2 Weapon Synergy
   const [weaponType, setWeaponType] = useState<WeaponType>(WeaponType.VULCAN); // P2 Current weapon
   const [secondaryWeapon, setSecondaryWeapon] = useState<WeaponType | null>(null); // P2 Secondary weapon
   const [weaponLevel, setWeaponLevel] = useState<number>(1);
@@ -53,8 +51,8 @@ function App() {
 
     // 如果是master模式且debug=1，则启用调试模式
     if (isMaster && debugMode) {
-      GameConfig.debug = true;
-      GameConfig.debugBossDivisor = Math.max(1, bossDivisor);
+      GAME_CONFIG.debug = true;
+      GAME_CONFIG.debugBossDivisor = Math.max(1, bossDivisor);
     }
 
     if (!canvasRef.current) return;
@@ -78,7 +76,6 @@ function App() {
     const syncInterval = setInterval(() => {
       setShowLevelTransition(engine.showLevelTransition);
       setLevelTransitionTimer(engine.levelTransitionTimer);
-      setActiveSynergies(engine.synergySys.getActiveSynergies());
       setWeaponType(engine.weaponId as any as WeaponType);
       setSecondaryWeapon(engine.secondaryWeapon as any as WeaponType);
       setWeaponLevel(engine.weaponLevel);
@@ -122,7 +119,6 @@ function App() {
         maxLevelReached={maxLevelReached}
         showBossWarning={showBossWarning}
         comboState={comboState}
-        activeSynergies={activeSynergies}
         weaponType={weaponType}
         secondaryWeapon={secondaryWeapon}
         weaponLevel={weaponLevel}
