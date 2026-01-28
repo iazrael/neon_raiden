@@ -31,7 +31,7 @@ import { BulletSpriteSpec } from '../configs/sprites/bullets';
  */
 export function WeaponSystem(world: World, dt: number): void {
 
-    for (const [id, [transform, weapon]] of view(world, [Transform, Weapon])) {
+    for (const [id, [transform, weapon], comps] of view(world, [Transform, Weapon])) {
         // 第一步：更新所有武器的冷却时间
         if (weapon.curCD > 0) {
             weapon.curCD -= dt;
@@ -41,8 +41,7 @@ export function WeaponSystem(world: World, dt: number): void {
             continue;
         }
         // 第二步：获取有开火意图且冷却完成的武器
-        const entity = world.entities.get(id) || [];
-        const intent = entity.find(FireIntent.check);
+        const intent = comps.find(FireIntent.check);
         if (!intent || !intent.firing) {
             continue; // 没有开火意图，跳过
         }
@@ -50,7 +49,7 @@ export function WeaponSystem(world: World, dt: number): void {
         removeComponent(world, id, intent);
 
         // 第三步：发射武器
-        const isPlayer = !!entity.find(PlayerTag.check);
+        const isPlayer = !!comps.find(PlayerTag.check);
         // console.log(`Entity ${id} firing weapon ${weapon.id}`);
         fireWeapon(world, {
             id,

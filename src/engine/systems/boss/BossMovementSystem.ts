@@ -52,14 +52,9 @@ function isTransform(c: any): c is Transform {
  */
 export function BossMovementSystem(world: World, dt: number): void {
     // 查询所有Boss，但排除正在入场的
-    for (const [id, comps] of view(world, [BossTag, BossAI, Transform, Velocity])) {
+    for (const [id, [bossTag, bossAI, transform, velocity], comps] of view(world, [BossTag, BossAI, Transform, Velocity])) {
         // 排除正在入场的Boss
         if (comps.some(BossEntrance.check)) continue;
-
-        const transform = comps.find(Transform.check)!;
-        const velocity = comps.find(Velocity.check)!;
-        const bossAI = comps.find(BossAI.check)!;
-        const bossTag = comps.find(BossTag.check)!;
 
         // 获取Boss配置
         const bossSpec = BOSS_DATA[bossTag.id];

@@ -65,8 +65,8 @@ type InstanceTuple<T extends Ctor[]> = {
 export function* view<T extends Ctor[]>(
     w: World,
     types: [...T]
-): Iterable<[EntityId, InstanceTuple<T>]> {
-
+): Iterable<[EntityId, InstanceTuple<T>, Component[]]> {
+    
     // 缓存长度，减少循环内的访问
     const len = types.length;
 
@@ -89,7 +89,7 @@ export function* view<T extends Ctor[]>(
 
         if (hasAll) {
             // 强制类型断言：我们确信 bucket 里按顺序装好了对应的组件实例
-            yield [id, bucket as unknown as InstanceTuple<T>];
+            yield [id, bucket as unknown as InstanceTuple<T>, comps];
         }
     }
 }
@@ -202,7 +202,7 @@ export function removeComponentByType<T extends Component>(
 ): boolean {
     const comps = w.entities.get(id);
     if (!comps) return false;
-
+    
     // 找到第一个匹配的组件
     const index = comps.findIndex(c => c instanceof compCtor);
     if (index === -1) return false;

@@ -107,11 +107,10 @@ function applyDamage(world: World, event: HitEvent): void {
  * 处理持续伤害 (DOT)
  */
 function processDamageOverTime(world: World, dt: number): void {
-    for (const [id, [dot]] of view(world, [DamageOverTime])) {
+    for (const [id, [dot], comps] of view(world, [DamageOverTime])) {
         // 更新 DOT
         const shouldDamage = dot.tick(dt);
         if (shouldDamage) {
-            const comps = world.entities.get(id);
             // 应用 DOT 伤害
             const transform = comps.find(Transform.check);
             const health = comps.find(Health.check);

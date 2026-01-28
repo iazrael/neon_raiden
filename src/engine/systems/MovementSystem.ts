@@ -11,9 +11,9 @@
  * 执行顺序：P3 - 在所有决策系统之后
  */
 
-import { World } from '../types';
+import { Component, World } from '../types';
 import { Transform, Velocity, SpeedStat, MoveIntent, Knockback, PlayerTag, BossTag, DestroyTag, BossEntrance } from '../components';
-import { removeComponent, view } from '../world';
+import { getComponents, removeComponent, view } from '../world';
 import { destroyEntity } from './CleanupSystem';
 
 /**
@@ -23,19 +23,12 @@ import { destroyEntity } from './CleanupSystem';
  */
 export function MovementSystem(world: World, dt: number): void {
     // 遍历所有有 Transform 和 Velocity 的实体
-    for (const [id, [transform, velocity]] of view(world, [Transform, Velocity])) {
+    for (const [id, [transform, velocity], comps] of view(world, [Transform, Velocity])) {
 
-        const comps = world.entities.get(id);
-        if (!comps) continue;
-
+        const [speedStat, moveIntent, knockback] = getComponents(world, id, SpeedStat, MoveIntent, Knockback);
         // 获取速度限制组件（可选）
-        const speedStat = comps.find(SpeedStat.check);
-
         // 获取移动意图组件（可选，每帧清除）
-        const moveIntent = comps.find(MoveIntent.check);
-
         // 获取击退组件（可选）
-        const knockback = comps.find(Knockback.check);
 
         // 计算实际速度
         let vx = velocity.vx;
@@ -99,7 +92,7 @@ export function MovementSystem(world: World, dt: number): void {
         // 边界限制（Boss入场期间跳过）
         const entrance = comps.find(BossEntrance.check);
         if (!entrance) {
-            applyBounds(world, transform, id);
+            applyBounds(world, comps, transform, id);
         }
     }
 }
@@ -107,9 +100,7 @@ export function MovementSystem(world: World, dt: number): void {
 /**
  * 应用边界限制
  */
-function applyBounds(world: World, transform: Transform, entityId: number): void {
-    const comps = world.entities.get(entityId);
-    if (!comps) return;
+function applyBounds(world: World, comps: Component[], transform: Transform, entityId: number): void {
 
     // 检查是否是玩家或 Boss（需要限制在屏幕内）
     const isPlayer = comps.find(PlayerTag.check);

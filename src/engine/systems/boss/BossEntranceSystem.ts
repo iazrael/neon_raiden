@@ -31,29 +31,20 @@ import { BOSS_ARENA } from '../bossConstants';
  */
 export function BossEntranceSystem(world: World, dt: number): void {
     // 只查询有 BossEntrance 组件的Boss
-    for (const [id,] of view(world, [BossEntrance])) {
-        // 获取实体的所有组件（不只是查询的组件）
-        const allComps = world.entities.get(id);
-        if (!allComps) continue;
-
-        const transform = allComps.find(Transform.check);
-        if (!transform) continue;
-
-        const entrance = allComps.find(BossEntrance.check) as BossEntrance;
-
+    for (const [id,[entrance, transform], comps] of view(world, [BossEntrance, Transform])) {
+        
         // 使用浮点数安全比较
         if (transform.y < entrance.targetY - BOSS_ARENA.POSITION_EPSILON) {
             // === 入场阶段：产生向下移动意图 ===
-
             // 确保有速度修正器（临时提高速度上限）
-            if (!allComps.some(SpeedModifier.check)) {
+            if (!comps.some(SpeedModifier.check)) {
                 addComponent(world, id, new SpeedModifier({
                     maxLinearOverride: entrance.entranceSpeed
                 }));
             }
 
             // 查找或创建 MoveIntent
-            let moveIntent = allComps.find(MoveIntent.check) as MoveIntent | undefined;
+            let moveIntent = comps.find(MoveIntent.check);
             if (moveIntent) {
                 // 更新现有MoveIntent
                 moveIntent.dx = 0;
@@ -71,6 +62,7 @@ export function BossEntranceSystem(world: World, dt: number): void {
             // === 入场完成 ===
 
             // 使用新的 removeComponentByType API
+            // TODO: 要支持一次移除多个
             removeComponentByType(world, id, BossEntrance);
             removeComponentByType(world, id, SpeedModifier);
             // 注意：InvulnerableState的移除是可选的，因为它可能不存在

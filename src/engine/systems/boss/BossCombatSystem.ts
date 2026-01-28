@@ -20,7 +20,7 @@
  * - WeaponSystem: 消费FireIntent，发射子弹
  */
 
-import { World, EntityId } from '../../types';
+import { World, EntityId, Component } from '../../types';
 import { BossTag, BossAI, Weapon, FireIntent, BossEntrance } from '../../components';
 import { pushEvent, view, addComponent } from '../../world';
 import { BOSS_DATA, BossPhaseSpec } from '../../configs/bossData';
@@ -32,10 +32,7 @@ import { BOSS_DATA, BossPhaseSpec } from '../../configs/bossData';
  */
 export function BossCombatSystem(world: World, dt: number): void {
     // 查询所有有BossTag、BossAI、Weapon的Boss
-    for (const [id, comps] of view(world, [BossTag, BossAI, Weapon])) {
-        const weapon = comps.find(Weapon.check)!;
-        const bossAI = comps.find(BossAI.check)!;
-        const bossTag = comps.find(BossTag.check)!;
+    for (const [id, [bossTag, bossAI, weapon], comps] of view(world, [BossTag, BossAI, Weapon])) {
 
         // 获取Boss配置
         const bossSpec = BOSS_DATA[bossTag.id];
@@ -51,7 +48,7 @@ export function BossCombatSystem(world: World, dt: number): void {
         }
 
         // 处理开火
-        handleBossFiring(world, { id, weapon }, phaseSpec, dt);
+        handleBossFiring(world, comps, { id, weapon }, phaseSpec, dt);
     }
 }
 
@@ -65,6 +62,7 @@ export function BossCombatSystem(world: World, dt: number): void {
  */
 function handleBossFiring(
     world: World,
+    comps: Component[],
     boss: { id: EntityId; weapon?: Weapon },
     phaseSpec: BossPhaseSpec,
     dt: number
@@ -78,13 +76,10 @@ function handleBossFiring(
     }
 
     // 开火
-    const comps = world.entities.get(boss.id);
-    if (comps) {
-        // 检查是否已有开火意图
-        const hasFireIntent = comps.some(FireIntent.check);
-        if (!hasFireIntent) {
-            addComponent(world, boss.id, new FireIntent({ firing: true }));
-        }
+    // 检查是否已有开火意图
+    const hasFireIntent = comps.some(FireIntent.check);
+    if (!hasFireIntent) {
+        addComponent(world, boss.id, new FireIntent({ firing: true }));
     }
 
     // 重置冷却

@@ -30,8 +30,7 @@ const bossPreviousPhases = new Map<number, number>();
  */
 export function BossPhaseSystem(world: World, dt: number): void {
     // 收集所有 Boss 实体
-    for (const [id, [bossTag, health, bossAI]] of view(world, [BossTag, Health, BossAI])) {
-        const comps = world.entities.get(id);
+    for (const [id, [bossTag, health, bossAI], comps] of view(world, [BossTag, Health, BossAI])) {
         // 检查是否需要切换阶段
         checkPhaseTransition(world, id, bossTag.id, health, bossAI, comps);
     }
