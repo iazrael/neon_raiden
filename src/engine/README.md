@@ -6,7 +6,9 @@
 | | 2 | **DifficultySystem** | 读全局时间/击杀 $\to$ 改 `World.difficulty` (影响刷怪/掉率) |
 | | 3 | **SpawnSystem** | 读 `World.time` $\to$ `new EnemyEntity` (刷怪) |
 | | 4 | **BossPhaseSystem** | 读 `Health` $\to$ 改 `BossState.phase` (转阶段逻辑) |
-| | 5 | **BossSystem** | 读 `BossState` $\to$ 写 `MoveIntent`, `FireIntent` (Boss行为) |
+| | 5.1 | **BossEntranceSystem** | 读 `BossEntrance` $\to$ 写 `MoveIntent`, `SpeedModifier` (Boss入场) |
+| | 5.2 | **BossMovementSystem** | 读 `BossAI`, `Transform`, `Velocity` $\to$ 更新 `Velocity.vx/vy` (Boss移动) |
+| | 5.3 | **BossCombatSystem** | 读 `BossAI`, `Weapon` $\to$ 写 `FireIntent` (Boss战斗) |
 | | 6 | **EnemySystem**<br>*(含 EliteAI)* | 读 `EnemyTag` $\to$ 写 `MoveIntent`, `FireIntent` (敌人决策) |
 | | 7 | **AISteerSystem** | 读 `MoveIntent` (寻路/避障算法) $\to$ 修正 `MoveIntent` |
 | **P2. 状态层**<br>(数值更新) | 8 | **BuffSystem** | 读 `Buff` (计时/过期) $\to$ 改 `Speed`, `Weapon.cooldown` |
