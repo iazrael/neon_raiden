@@ -14,8 +14,8 @@
 
 import { World, EntityId } from '../types';
 import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from '../components';
-import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, EventTags } from '../events';
-import { removeComponent, view, getEvents } from '../world';
+import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, BombExplodedEvent, EventTags } from '../events';
+import { removeComponent, view, getEvents, pushEvent } from '../world';
 
 /**
  * 伤害结算系统主函数
@@ -32,6 +32,12 @@ export function DamageResolutionSystem(world: World, dt: number): void {
 
     // 处理持续伤害 (DOT)
     processDamageOverTime(world, dt);
+
+    // 处理炸弹爆炸事件
+    const bombEvents = getEvents<BombExplodedEvent>(world, EventTags.BombExploded);
+    for (const event of bombEvents) {
+        handleBombExplosion(world, event);
+    }
 }
 
 /**
@@ -163,5 +169,37 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
     const hasDestroyTag = victimComps.some(DestroyTag.check);
     if (!hasDestroyTag) {
         victimComps.push(new DestroyTag({ reason: 'killed' }));
+    }
+}
+
+/**
+ * 处理炸弹爆炸 - 对所有敌人造成致命伤害
+ */
+function handleBombExplosion(world: World, event: BombExplodedEvent): void {
+    // 遍历所有实体，找到敌人
+    for (const [enemyId, comps] of world.entities) {
+        // 检查是否是敌人（有 EnemyTag 组件）
+        const hasEnemyTag = comps.some(c =>
+            c.constructor.name === 'EnemyTag' ||
+            (c as any).id?.startsWith?.('ENEMY_')
+        );
+
+        if (!hasEnemyTag) continue;
+
+        // 获取敌人的生命值组件
+        const health = comps.find(Health.check);
+        if (!health) continue;
+
+        // 造成致命伤害（直接扣完所有血量）
+        const maxHp = health.max || 100;
+        const hitEvent: HitEvent = {
+            type: 'Hit',
+            pos: { x: 0, y: 0 },
+            damage: maxHp * 2,  // 造成200%最大生命值的伤害，确保击杀
+            owner: event.playerId,
+            victim: enemyId,
+            bloodLevel: 3  // 最大飙血等级
+        };
+        world.events.push(hitEvent);
     }
 }
