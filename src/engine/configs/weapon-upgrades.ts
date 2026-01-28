@@ -8,6 +8,7 @@ import { WeaponUpgradeSpec } from '../blueprints/base';
 
 /**
  * 武器升级配置表
+ * TODO：旧版本还有提升武器子弹数量，大小等等的，game/config/weapons/upgrades.ts
  * damageMultiplier: 伤害倍率，子弹实际伤害 = 弹药基础伤害 × 此倍率
  * fireRateMultiplier: 射速倍率，实际冷却时间 = 武器基础冷却 / 此倍率
  */
