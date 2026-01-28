@@ -2,16 +2,16 @@ import { Component } from '../types';
 
 // 「意图 & 击飞」
 
-/** 击退组件 - 存储击退效果的速度 */
+/** 击退组件 - 存储击退效果的速度（单位：像素/秒） */
 export class Knockback extends Component {
     /**
      * 构造函数
      * @param cfg 击退配置
      */
     constructor(cfg: {
-        /** X轴击退速度 */
+        /** X轴击退速度（像素/秒） */
         vx: number;
-        /** Y轴击退速度 */
+        /** Y轴击退速度（像素/秒） */
         vy: number;
     }) {
         super();
@@ -32,9 +32,9 @@ export class MoveIntent extends Component {
      * @param cfg 移动意图配置
      */
     constructor(cfg: {
-        /** X轴移动方向 */
+        /** X轴移动方向/速度（当type='velocity'时单位为像素/秒） */
         dx: number;
-        /** Y轴移动方向 */
+        /** Y轴移动方向/速度（当type='velocity'时单位为像素/秒） */
         dy: number;
         /** 意图类型 */
         type: 'velocity' | 'offset'; // 区分是 速度方向 还是 绝对位移

@@ -92,13 +92,13 @@ function processBoss(
                 if (moveIntent) {
                     // 更新现有意图
                     moveIntent.dx = 0;
-                    moveIntent.dy = entrance.entranceSpeed / 1000; // 转换为像素/毫秒
+                    moveIntent.dy = entrance.entranceSpeed; // 直接使用像素/秒
                     moveIntent.type = 'velocity';
                 } else {
                     // 创建新的移动意图
                     comps.push(new MoveIntent({
                         dx: 0,
-                        dy: entrance.entranceSpeed / 1000, // 转换为像素/毫秒
+                        dy: entrance.entranceSpeed, // 直接使用像素/秒
                         type: 'velocity'
                     }));
                 }

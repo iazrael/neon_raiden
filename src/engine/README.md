@@ -24,3 +24,70 @@
 | | 20 | **RenderSystem** | 读 `Sprite`, `Transform`, `Particle` $\to$ Canvas/WebGL 绘制 |
 | **P7. 清理层**<br>(生命周期) | 21 | **LifetimeSystem** | `Timer` -= dt $\to$ 给超时的实体打 `DestroyTag` |
 | | 22 | **CleanupSystem** | 遍历 `DestroyTag` $\to$ 真正的 `delete entity`，清空本帧 `Events` |
+
+---
+
+## Velocity 单位标准
+
+**重要**：所有 velocity 相关组件统一使用**像素/秒**作为单位。
+
+### 组件单位规范
+
+1. **Velocity** 组件 (`src/engine/components/base.ts`)
+   - `vx`: X轴速度（像素/秒）
+   - `vy`: Y轴速度（像素/秒）
+   - `vrot`: 旋转速度（弧度/秒）
+
+2. **MoveIntent** 组件 (`src/engine/components/movement.ts`)
+   - 当 `type='velocity'` 时：
+     - `dx`: X轴速度（像素/秒）
+     - `dy`: Y轴速度（像素/秒）
+   - 当 `type='offset'` 时：
+     - `dx`: X轴位移（像素，绝对值）
+     - `dy`: Y轴位移（像素，绝对值）
+
+3. **Knockback** 组件 (`src/engine/components/movement.ts`)
+   - `vx`: X轴击退速度（像素/秒）
+   - `vy`: Y轴击退速度（像素/秒）
+
+4. **SpeedStat** 组件 (`src/engine/components/base.ts`)
+   - `maxLinear`: 最大线性速度（像素/秒）
+   - `maxAngular`: 最大角速度（弧度/秒）
+
+### 时间单位
+
+- 所有系统的 `dt` 参数使用**毫秒**
+- 在 MovementSystem 中，dt 会被转换为秒进行位置更新：`dtInSeconds = dt / 1000`
+
+### 参考速度值
+
+| 实体类型 | 最大速度 | 说明 |
+|---------|---------|------|
+| 玩家 | 400 像素/秒 | SpeedStat 默认值 |
+| Boss | 120 像素/秒 | Boss 工厂配置 |
+| Boss 入场 | 150 像素/秒 | BossEntrance 组件 |
+| 子弹 | 600-800 像素/秒 | 弹药配置 |
+| 敌人 | 100-200 像素/秒 | 敌人行为配置 |
+
+### 注释规范
+
+在代码中定义 velocity 相关字段时，请遵循以下注释格式：
+
+```typescript
+/** X轴速度（像素/秒） */
+vx: number;
+
+/** Y轴速度（像素/秒） */
+vy: number;
+
+/** 旋转速度（弧度/秒） */
+vrot: number;
+```
+
+### 常见错误
+
+❌ **错误**：在 MoveIntent 中使用 `dx: 0.5`（以为是像素/毫秒）
+✅ **正确**：使用 `dx: 500`（直接使用像素/秒）
+
+❌ **错误**：在 MovementSystem 中转换 `vx = moveIntent.dx * 1000`
+✅ **正确**：直接使用 `vx = moveIntent.dx`

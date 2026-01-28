@@ -44,9 +44,9 @@ export function MovementSystem(world: World, dt: number): void {
         // 如果有移动意图，应用意图速度
         if (moveIntent) {
             if (moveIntent.type === 'velocity') {
-                // 意图是设置速度方向（dx/dy是像素/毫秒，需要转换为像素/秒）
-                vx = moveIntent.dx * 1000;
-                vy = moveIntent.dy * 1000;
+                // 意图是设置速度方向（dx/dy是像素/秒，直接使用）
+                vx = moveIntent.dx;
+                vy = moveIntent.dy;
             } else {
                 // 意图是绝对位移，直接应用到位置
                 transform.x += moveIntent.dx;
@@ -66,8 +66,8 @@ export function MovementSystem(world: World, dt: number): void {
             knockback.vx *= 0.9;
             knockback.vy *= 0.9;
 
-            // 击退效果很小时移除组件
-            if (Math.abs(knockback.vx) < 1 && Math.abs(knockback.vy) < 1) {
+            // 击退效果很小时移除组件（阈值10像素/秒）
+            if (Math.abs(knockback.vx) < 10 && Math.abs(knockback.vy) < 10) {
                 removeComponent(world, id, knockback);
             }
         }

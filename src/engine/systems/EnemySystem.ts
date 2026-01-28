@@ -66,13 +66,13 @@ function generateMoveIntent(
     switch (behavior.behavior) {
         case EnemyBehavior.MOVE_DOWN:
             // 直线向下
-            dy = behavior.moveSpeed / 1000; // 转换为像素/毫秒
+            dy = behavior.moveSpeed;
             break;
 
         case EnemyBehavior.SINE_WAVE:
             // 正弦波移动：基于 Y 坐标计算横向偏移，phaseOffset 实现同类敌人错落
-            dy = behavior.moveSpeed / 1000;
-            dx = Math.sin(transform.y * 0.015 + enemyTag.phaseOffset) * behavior.moveSpeed / 1000;
+            dy = behavior.moveSpeed;
+            dx = Math.sin(transform.y * 0.015 + enemyTag.phaseOffset) * behavior.moveSpeed;
             break;
 
         case EnemyBehavior.CHASE:
@@ -81,8 +81,8 @@ function generateMoveIntent(
                 playerPos.y - transform.y,
                 playerPos.x - transform.x
             );
-            dx = Math.cos(angleToPlayer) * behavior.moveSpeed / 1000;
-            dy = Math.sin(angleToPlayer) * behavior.moveSpeed / 1000;
+            dx = Math.cos(angleToPlayer) * behavior.moveSpeed;
+            dy = Math.sin(angleToPlayer) * behavior.moveSpeed;
             break;
 
         case EnemyBehavior.RAM:
@@ -91,15 +91,15 @@ function generateMoveIntent(
                 playerPos.y - transform.y,
                 playerPos.x - transform.x
             );
-            dx = Math.cos(ramAngle) * behavior.moveSpeed * 1.5 / 1000;
-            dy = Math.sin(ramAngle) * behavior.moveSpeed * 1.5 / 1000;
+            dx = Math.cos(ramAngle) * behavior.moveSpeed * 1.5;
+            dy = Math.sin(ramAngle) * behavior.moveSpeed * 1.5;
             break;
 
         case EnemyBehavior.STRAFE:
             // 侧移：向下 + 周期性横向（基于 Y 坐标）
-            dy = behavior.moveSpeed * 0.5 / 1000;
+            dy = behavior.moveSpeed * 0.5;
             const strafeDir = Math.sin(transform.y * 0.04 + enemyTag.phaseOffset) > 0 ? 1 : -1;
-            dx = strafeDir * behavior.moveSpeed / 1000;
+            dx = strafeDir * behavior.moveSpeed;
             break;
 
         case EnemyBehavior.CIRCLE:
@@ -111,12 +111,18 @@ function generateMoveIntent(
             const circleRadius = 150;
             const targetX = playerPos.x + Math.cos(circleAngle) * circleRadius;
             const targetY = playerPos.y + Math.sin(circleAngle) * circleRadius;
-            dx = (targetX - transform.x) * 2 / 1000;
-            dy = (targetY - transform.y) * 2 / 1000;
+            // 使用 moveSpeed 控制速度，与其他行为保持一致
+            const dirX = targetX - transform.x;
+            const dirY = targetY - transform.y;
+            const dist = Math.sqrt(dirX * dirX + dirY * dirY);
+            if (dist > 0) {
+                dx = (dirX / dist) * behavior.moveSpeed;
+                dy = (dirY / dist) * behavior.moveSpeed;
+            }
             break;
 
         default:
-            dy = behavior.moveSpeed / 1000;
+            dy = behavior.moveSpeed;
     }
 
     // 添加移动意图

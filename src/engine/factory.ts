@@ -126,7 +126,7 @@ export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot
             // 添加Boss入场状态组件（使Boss快速进入可视区域）
             const entrance = new BossEntrance({
                 targetY: 150,      // 可视区域顶部
-                entranceSpeed: 50 // 快速向下移动（150像素/秒）
+                entranceSpeed: 150 // 快速向下移动（150像素/秒）
             });
             bossComps.push(entrance);
         }

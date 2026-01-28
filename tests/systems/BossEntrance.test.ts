@@ -51,7 +51,7 @@ describe('Boss入场行为测试', () => {
 
             expect(entrance).toBeDefined();
             expect(entrance?.targetY).toBe(150);
-            expect(entrance?.entranceSpeed).toBe(50);
+            expect(entrance?.entranceSpeed).toBe(150);
         });
 
         it('应该设置正确的入场参数', () => {
