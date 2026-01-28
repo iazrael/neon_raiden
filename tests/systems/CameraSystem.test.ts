@@ -3,6 +3,7 @@
  */
 
 import { CameraSystem, setCameraConfig, resetCameraConfig, setCameraPosition, getCameraPosition, worldToScreen, screenToWorld } from '../../src/engine/systems/CameraSystem';
+import { resetCamera } from '../../src/engine/systems/RenderSystem';
 import { World } from '../../src/engine/types';
 import { Transform, PlayerTag } from '../../src/engine/components';
 
@@ -10,8 +11,9 @@ describe('CameraSystem', () => {
     let mockWorld: World;
 
     beforeEach(() => {
-        // 重置相机配置
+        // 重置相机配置和状态
         resetCameraConfig();
+        resetCamera();
 
         // 创建模拟世界对象
         mockWorld = {
@@ -37,17 +39,17 @@ describe('CameraSystem', () => {
         ]);
     });
 
-    describe('相机跟随', () => {
-        it('应该跟随玩家移动', () => {
+    describe('相机固定', () => {
+        it('相机应该固定在原点，不跟随玩家', () => {
             CameraSystem(mockWorld, 0.016);
 
-            // 相机应该移动到玩家位置附近
+            // 相机应该保持在原点（纵向卷轴射击游戏特性）
             const pos = getCameraPosition();
-            expect(pos.x).toBe(0); // 初始位置为 0,0
+            expect(pos.x).toBe(0);
             expect(pos.y).toBe(0);
         });
 
-        it('应该平滑移动相机', () => {
+        it('即使玩家移动，相机仍然保持固定', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
             const transform = playerComps?.find(Transform.check) as Transform;
             transform!.x = 500;
@@ -55,26 +57,25 @@ describe('CameraSystem', () => {
 
             CameraSystem(mockWorld, 0.016);
 
-            // 相机应该向目标位置移动
+            // 相机应该仍然在原点
             const pos = getCameraPosition();
-            expect(pos.x).toBeGreaterThan(0);
-            expect(pos.y).toBeGreaterThan(0);
+            expect(pos.x).toBe(0);
+            expect(pos.y).toBe(0);
         });
 
-        it('应该正确计算目标位置', () => {
-            const playerComps = mockWorld.entities.get(mockWorld.playerId);
-            const transform = playerComps?.find(Transform.check) as Transform;
-            transform!.x = 600;
-            transform!.y = 500;
+        it('可以手动设置相机位置用于测试', () => {
+            // 使用 setCameraPosition 手动设置
+            setCameraPosition(100, 200);
 
-            CameraSystem(mockWorld, 0.016);
-
-            // 目标位置应该是玩家位置减去画布中心
-            // (600 - 400 = 200, 500 - 300 = 200)
             const pos = getCameraPosition();
-            // 由于平滑移动，位置会逐渐接近目标
-            expect(pos.x).toBeGreaterThan(0);
-            expect(pos.y).toBeGreaterThan(0);
+            expect(pos.x).toBe(100);
+            expect(pos.y).toBe(200);
+
+            // 重置后应该回到原点
+            resetCamera();
+            const pos2 = getCameraPosition();
+            expect(pos2.x).toBe(0);
+            expect(pos2.y).toBe(0);
         });
     });
 

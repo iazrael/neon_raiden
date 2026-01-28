@@ -4,7 +4,8 @@
 
 import { RenderSystem, setRenderContext, getRenderContext, camera, setCameraPosition, resetCamera } from '../../src/engine/systems/RenderSystem';
 import { World } from '../../src/engine/types';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag } from '../../src/engine/components';
+import { Transform, Sprite, PlayerTag, EnemyTag } from '../../src/engine/components';
+import { SpriteKey } from '../../src/engine/configs/sprites';
 
 // Mock Canvas context
 const mockCanvas = {
@@ -19,7 +20,17 @@ const mockContext = {
     translate: jest.fn(),
     rotate: jest.fn(),
     fillRect: jest.fn(),
-    fillStyle: ''
+    fillStyle: '',
+    beginPath: jest.fn(),
+    arc: jest.fn(),
+    fill: jest.fn(),
+    strokeRect: jest.fn(),
+    stroke: jest.fn(),
+    lineWidth: 0,
+    strokeStyle: '',
+    shadowBlur: 0,
+    shadowColor: '',
+    drawImage: jest.fn()
 } as any as CanvasRenderingContext2D;
 
 const mockRenderContext = {
@@ -62,7 +73,7 @@ describe('RenderSystem', () => {
 
     describe('基础渲染', () => {
         it('没有渲染上下文时不应该崩溃', () => {
-            setRenderContext(null);
+            setRenderContext(null as any);
 
             expect(() => RenderSystem(mockWorld, 0.016)).not.toThrow();
         });
@@ -70,13 +81,15 @@ describe('RenderSystem', () => {
         it('应该清空画布', () => {
             RenderSystem(mockWorld, 0.016);
 
-            expect(mockContext.clearRect).toHaveBeenCalledWith(0, 0, 800, 600);
+            // RenderSystem 使用 fillRect 绘制黑色背景，而不是 clearRect
+            expect(mockContext.fillRect).toHaveBeenCalledWith(0, 0, 800, 600);
         });
 
         it('没有实体时不应该崩溃', () => {
             RenderSystem(mockWorld, 0.016);
 
-            expect(mockContext.clearRect).toHaveBeenCalled();
+            // 至少应该绘制背景
+            expect(mockContext.fillRect).toHaveBeenCalled();
         });
     });
 
@@ -85,7 +98,7 @@ describe('RenderSystem', () => {
             const entityId = 100;
             mockWorld.entities.set(entityId, [
                 new Transform({ x: 400, y: 300, rot: 0 }),
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 })
+                new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
             RenderSystem(mockWorld, 0.016);
@@ -99,7 +112,7 @@ describe('RenderSystem', () => {
             // 添加玩家实体
             mockWorld.entities.set(mockWorld.playerId, [
                 new Transform({ x: 400, y: 300, rot: 0 }),
-                new Sprite({ color: '#00ff00', srcX: 0, srcY: 0, srcW: 32, srcH: 32 }),
+                new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#00ff00' }),
                 new PlayerTag()
             ]);
 
@@ -107,7 +120,7 @@ describe('RenderSystem', () => {
             const enemyId = 100;
             mockWorld.entities.set(enemyId, [
                 new Transform({ x: 200, y: 100, rot: 0 }),
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 }),
+                new Sprite({ spriteKey: SpriteKey.ENEMY_NORMAL, color: '#ff0000' }),
                 new EnemyTag({ id: 'NORMAL' as any })
             ]);
 
@@ -119,14 +132,15 @@ describe('RenderSystem', () => {
 
         it('应该跳过没有 Transform 的实体', () => {
             mockWorld.entities.set(100, [
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 })
+                new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
             RenderSystem(mockWorld, 0.016);
 
-            // 只调用 clearRect，没有实际绘制
-            expect(mockContext.clearRect).toHaveBeenCalled();
-            expect(mockContext.fillRect).not.toHaveBeenCalled();
+            // 只绘制背景，不绘制实体
+            expect(mockContext.fillRect).toHaveBeenCalled();
+            expect(mockContext.save).not.toHaveBeenCalled();
+            expect(mockContext.restore).not.toHaveBeenCalled();
         });
 
         it('应该跳过没有 Sprite 的实体', () => {
@@ -136,8 +150,8 @@ describe('RenderSystem', () => {
 
             RenderSystem(mockWorld, 0.016);
 
-            // 只调用 clearRect，没有实际绘制
-            expect(mockContext.clearRect).toHaveBeenCalled();
+            // 只绘制背景，不绘制实体
+            expect(mockContext.fillRect).toHaveBeenCalled();
         });
     });
 
@@ -147,7 +161,7 @@ describe('RenderSystem', () => {
 
             mockWorld.entities.set(100, [
                 new Transform({ x: 400, y: 300, rot: 0 }),
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 })
+                new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
             RenderSystem(mockWorld, 0.016);
@@ -164,7 +178,7 @@ describe('RenderSystem', () => {
 
             mockWorld.entities.set(100, [
                 new Transform({ x: 400, y: 300, rot: 0 }),
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 })
+                new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
             RenderSystem(mockWorld, 0.016);
@@ -192,7 +206,8 @@ describe('RenderSystem', () => {
 
             RenderSystem(mockWorld, 0.016, tempContext);
 
-            expect(mockContext.clearRect).toHaveBeenCalledWith(0, 0, 1024, 768);
+            // 应该使用传入的上下文尺寸绘制背景
+            expect(mockContext.fillRect).toHaveBeenCalledWith(0, 0, 1024, 768);
         });
     });
 
@@ -202,7 +217,8 @@ describe('RenderSystem', () => {
 
             RenderSystem(mockWorld, 0.016);
 
-            expect(mockContext.clearRect).toHaveBeenCalled();
+            // 至少应该绘制背景
+            expect(mockContext.fillRect).toHaveBeenCalled();
         });
 
         it('缺少必要组件的实体应该被跳过', () => {
@@ -211,13 +227,13 @@ describe('RenderSystem', () => {
                 new Transform({ x: 400, y: 300, rot: 0 })
             ]);
             mockWorld.entities.set(102, [
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 })
+                new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
             RenderSystem(mockWorld, 0.016);
 
-            // 只调用 clearRect
-            expect(mockContext.clearRect).toHaveBeenCalled();
+            // 只绘制背景
+            expect(mockContext.fillRect).toHaveBeenCalled();
         });
     });
 });
