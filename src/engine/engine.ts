@@ -9,6 +9,7 @@ import { inputManager } from './input/InputManager';
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
 // import { AudioSystem } from './systems/AudioSystem'; // 暂时禁用 - 使用旧 GameAudioSystem
+import { BombSystem } from './systems/BombSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
 import { BossPhaseSystem } from './systems/BossPhaseSystem';
@@ -146,6 +147,7 @@ export class Engine {
 
         // P4. 交互层 (核心碰撞)
         CollisionSystem(world, dt);                     // 12. 碰撞系统
+        BombSystem(world, dt);                          // 13. 炸弹系统
 
         // P5. 结算层 (事件处理)
         PickupSystem(world, dt);                        // 13. 拾取系统
