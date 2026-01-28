@@ -115,7 +115,7 @@ function doSpawnEnemy(
     world.spawnCredits -= cost;
 
     // 5. 日志
-    console.log(`Spawned enemy '${enemyType}' costing ${cost} credits, remaining: ${world.spawnCredits.toFixed(2)} born at (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})`);
+    // console.log(`Spawned enemy '${enemyType}' costing ${cost} credits, remaining: ${world.spawnCredits.toFixed(2)} born at (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})`);
 }
 
 /**
@@ -151,7 +151,7 @@ export function SpawnSystem(world: World, dt: number): void {
     if (!world.spawnInitialized) {
         world.spawnCredits = config.startingCredits;
         world.spawnInitialized = true;
-        console.log(`SpawnSystem: Initial bonus - ${config.startingCredits} credits`);
+        // console.log(`SpawnSystem: Initial bonus - ${config.startingCredits} credits`);
     }
 
     // ==============================
