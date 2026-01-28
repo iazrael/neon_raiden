@@ -15,7 +15,8 @@ export type Event =
     | ScreenClearEvent
     | PlaySoundEvent
     | BerserkModeEvent
-    | ComboUpgradeEvent;
+    | ComboUpgradeEvent
+    | BombExplodedEvent;
 
 
 /**
@@ -36,6 +37,7 @@ export const EventTags = {
     PlaySound: 'PlaySound',
     BerserkMode: 'BerserkMode',
     ComboUpgrade: 'ComboUpgrade',
+    BombExploded: 'BombExploded',
 } as const;
 
 
@@ -147,4 +149,11 @@ export interface ComboUpgradeEvent {
     level: number;                 // 新连击等级
     name: string;                  // 连击等级名称
     color: string;                 // 视觉颜色
+}
+
+// ⑭ 炸弹爆炸
+export interface BombExplodedEvent {
+    type: 'BombExploded';
+    pos: { x: number; y: number }; // 爆炸中心位置（玩家位置）
+    playerId: number;              // 使用炸弹的玩家ID
 }
