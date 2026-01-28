@@ -27,6 +27,14 @@ export class DestroyTag extends Component {
 // ========== 标签组件（空对象即可） ==========
 /** 玩家标签组件 */
 export class PlayerTag extends Component {
+    /** 是否为僚机（默认为false表示玩家） */
+    isOption: boolean;
+
+    constructor(options?: { isOption?: boolean }) {
+        super();
+        this.isOption = options?.isOption ?? false;
+    }
+
     static check(c: any): c is PlayerTag { return c instanceof PlayerTag; }
 }
 
