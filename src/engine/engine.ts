@@ -30,6 +30,7 @@ import { PickupSystem } from './systems/PickupSystem';
 import { RenderSystem, setRenderContext, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
+import { TimeSlowSystem } from './systems/TimeSlowSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 // ==============
@@ -87,6 +88,10 @@ export class Engine {
         inputManager.init(canvas);
 
         spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80, 0);
+
+        // 初始化 timeScale
+        this.world.timeScale = 1.0;
+
         this.loop();
     }
 
@@ -126,7 +131,10 @@ export class Engine {
         }
         // ==========================================
 
-        // 按顺序执行所有系统（P1-P8）
+        // 按顺序执行所有系统（P0-P8）
+
+        // P0. 时间减速层 (最先执行,设置全局 timeScale)
+        TimeSlowSystem(world);
 
         // P1. 决策层 (输入与AI)
         InputSystem(world, dt);                         // 1. 输入系统

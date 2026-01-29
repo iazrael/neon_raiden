@@ -1,5 +1,6 @@
 // src/configs/effects.ts
-import { EffectSpec } from './base';
+import { EffectSpec, Blueprint } from './base';
+import { BUFF_CONFIG } from '../configs/powerups';
 
 export const EFFECT_TABLE: Record<string, EffectSpec> = {
     // 基础伤害
@@ -96,4 +97,21 @@ export const EFFECT_TABLE: Record<string, EffectSpec> = {
         radius: 0,
         duration: 5.0,
     },
+};
+
+/**
+ * TimeSlow 实体蓝图
+ * 拾取 TIME_SLOW 道具时创建此实体
+ */
+export const BLUEPRINT_TIME_SLOW: Blueprint = {
+    /** 时间减速组件 */
+    TimeSlow: {
+        scale: 0.5,           // 50% 速度
+        scope: 'global'
+    },
+
+    /** 生命周期组件 */
+    Lifetime: {
+        timer: 5.0  // 5秒 (与 BUFF_CONFIG[BuffType.TIME_SLOW].duration 一致)
+    }
 };

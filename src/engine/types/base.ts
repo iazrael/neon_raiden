@@ -38,6 +38,9 @@ export interface World {
     // 刷怪系统是否已初始化（用于赠送初始点数）
     spawnInitialized: boolean;
 
+    // 时间缩放（用于 TIME_SLOW 等效果，1.0 = 正常速度）
+    timeScale: number;
+
     // UI状态字段
     state?: GameState;
     maxLevelReached?: number;

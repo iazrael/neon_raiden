@@ -5,8 +5,8 @@
 
 import { createWorld, generateId, addComponent } from '../../src/engine/world';
 import { BuffSystem } from '../../src/engine/systems/BuffSystem';
-import { Transform, Buff, Shield, PlayerTag, InvulnerableState, EnemyTag, SpeedStat } from '../../src/engine/components';
-import { BuffType, EnemyId } from '../../src/engine/types';
+import { Transform, Buff, Shield, PlayerTag, InvulnerableState } from '../../src/engine/components';
+import { BuffType } from '../../src/engine/types';
 
 describe('BuffSystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -127,71 +127,6 @@ describe('BuffSystem', () => {
     });
 
 
-
-    describe('TIME_SLOW Buff - 持续效果', () => {
-        it('应该给所有敌人添加 SpeedModifier 组件', () => {
-            const playerId = generateId();
-            const enemyId = generateId();
-
-            // 创建玩家（持有 Buff）
-            world.entities.set(playerId, []);
-            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            addComponent(world, playerId, new Buff({
-                type: BuffType.TIME_SLOW,
-                value: 1,
-                remaining: 5000
-            }));
-
-            // 创建敌人
-            world.entities.set(enemyId, []);
-            addComponent(world, enemyId, new Transform({ x: 400, y: 300 }));
-            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
-            addComponent(world, enemyId, new SpeedStat({ maxLinear: 420, maxAngular: 5 }));
-
-            // 执行 BuffSystem
-            BuffSystem(world, 16);
-
-            // 检查敌人是否有 SpeedModifier 组件
-            const enemyComps = world.entities.get(enemyId);
-            const speedModifier = enemyComps?.find(c => c.constructor.name === 'SpeedModifier');
-            expect(speedModifier).toBeDefined();
-            expect((speedModifier as any)?.maxLinearOverride).toBe(210); // 420 * 0.5
-        });
-
-        it('Buff结束后应该移除敌人的 SpeedModifier 组件', () => {
-            const playerId = generateId();
-            const enemyId = generateId();
-
-            // 创建玩家（持有 Buff）
-            world.entities.set(playerId, []);
-            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const buff = new Buff({
-                type: BuffType.TIME_SLOW,
-                value: 1,
-                remaining: 100
-            });
-            addComponent(world, playerId, buff);
-
-            // 创建敌人
-            world.entities.set(enemyId, []);
-            addComponent(world, enemyId, new Transform({ x: 400, y: 300 }));
-            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
-            addComponent(world, enemyId, new SpeedStat({ maxLinear: 420, maxAngular: 5 }));
-
-            // 第一次执行，添加 SpeedModifier
-            BuffSystem(world, 50);
-            let enemyComps = world.entities.get(enemyId);
-            let speedModifier = enemyComps?.find(c => c.constructor.name === 'SpeedModifier');
-            expect(speedModifier).toBeDefined();
-
-            // Buff 结束后，移除 SpeedModifier
-            BuffSystem(world, 100);
-            enemyComps = world.entities.get(enemyId);
-            speedModifier = enemyComps?.find(c => c.constructor.name === 'SpeedModifier');
-            expect(speedModifier).toBeUndefined();
-        });
-
-    });
 
     describe('Buff 生命周期', () => {
         it('Buff 时间应该随时间递减', () => {

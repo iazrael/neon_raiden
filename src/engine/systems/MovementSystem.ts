@@ -15,6 +15,7 @@ import { Component, World } from '../types';
 import { Transform, Velocity, SpeedStat, MoveIntent, Knockback, PlayerTag, BossTag, DestroyTag, BossEntrance } from '../components';
 import { getComponents, removeComponent, view } from '../world';
 import { destroyEntity } from './CleanupSystem';
+import { getEffectiveTimeScale } from '../utils/timeUtils';
 
 /**
  * 移动系统主函数
@@ -79,14 +80,17 @@ export function MovementSystem(world: World, dt: number): void {
         velocity.vx = vx;
         velocity.vy = vy;
 
+        // 获取有效时间缩放（玩家免疫）
+        const timeScale = getEffectiveTimeScale(world, id);
+
         // 更新位置（dt是毫秒，velocity是像素/秒，需要转换）
         const dtInSeconds = dt / 1000;
-        transform.x += vx * dtInSeconds;
-        transform.y += vy * dtInSeconds;
+        transform.x += vx * dtInSeconds * timeScale;
+        transform.y += vy * dtInSeconds * timeScale;
 
         // 更新旋转（vrot是弧度/秒）
         if (velocity.vrot !== 0) {
-            transform.rot += velocity.vrot * dtInSeconds;
+            transform.rot += velocity.vrot * dtInSeconds * timeScale;
         }
 
         // 边界限制（Boss入场期间跳过）

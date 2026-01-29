@@ -15,7 +15,7 @@
  */
 
 import { World } from '../types';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag } from '../components';
+import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow } from '../components';
 import { SpriteManager } from '../SpriteManager';
 import { view } from '../world';
 
@@ -51,6 +51,20 @@ export interface CameraState {
     shakeY: number;
     zoom: number;
 }
+
+/**
+ * 时间减速线条状态
+ */
+interface TimeSlowLine {
+    x: number;
+    y: number;
+    length: number;
+    speed: number;
+    alpha: number;
+}
+
+// 全局状态存储
+let timeSlowLines: TimeSlowLine[] = [];
 
 /**
  * 全局相机状态
@@ -143,8 +157,13 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
     }
     // ===========================
 
+    // ========== 查询时间减速状态 ==========
+    const timeSlowEntities = [...view(world, [TimeSlow])];
+    const timeSlowActive = timeSlowEntities.length > 0;
+    // ======================================
+
     // 绘制背景
-    drawBackground(context, width, height);
+    drawBackground(context, width, height, timeSlowActive);
 
     // 计算相机偏移（只有震屏，相机固定在 0,0）
     const camX = camera.shakeX;
@@ -301,31 +320,82 @@ function drawSprite(
 /**
  * 绘制背景星空效果
  */
-function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number, timeSlowActive: boolean = false): void {
     // 黑色背景
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, width, height);
 
     const t = Date.now() / 1000;
+    const timeScale = timeSlowActive ? 0.5 : 1.0;
 
-    // 远处的星星（慢速）
+    // 远处的星星（慢速）- 应用 timeScale
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     for (let i = 0; i < 50; i++) {
         const sx = (i * 137) % width;
-        const sy = (i * 97 + t * 20) % height;
+        const sy = (i * 97 + t * 20 * timeScale) % height;
         ctx.fillRect(sx, sy, 1, 1);
     }
 
-    // 近处的星星（快速，更大）
+    // 近处的星星（快速）- 应用 timeScale
     ctx.fillStyle = 'rgba(200, 230, 255, 0.8)';
     for (let i = 0; i < 30; i++) {
         const speed = (i % 3) + 2;
         const sx = (i * 57) % width;
-        const sy = (i * 31 + t * 60 * speed) % height;
+        const sy = (i * 31 + t * 60 * speed * timeScale) % height;
         ctx.beginPath();
         ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
         ctx.fill();
     }
+
+    // 时间减速视觉效果
+    if (timeSlowActive) {
+        drawTimeSlowEffect(ctx, width, height);
+    } else {
+        timeSlowLines = []; // 清空线条数组
+    }
+}
+
+/**
+ * 绘制时间减速特效
+ * 复用旧版 RenderSystem 的 falling lines 效果
+ */
+function drawTimeSlowEffect(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+): void {
+    ctx.save();
+
+    // 蓝色色调覆盖
+    ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
+    ctx.fillRect(0, 0, width, height);
+
+    // 生成新的线条(最多 20 条)
+    if (timeSlowLines.length < 20) {
+        timeSlowLines.push({
+            x: Math.random() * width,
+            y: -50,
+            length: Math.random() * 100 + 50,
+            speed: Math.random() * 5 + 2,
+            alpha: Math.random() * 0.5 + 0.2
+        });
+    }
+
+    // 绘制线条
+    timeSlowLines.forEach(line => {
+        line.y += line.speed;
+        ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(line.x, line.y);
+        ctx.lineTo(line.x, line.y + line.length);
+        ctx.stroke();
+    });
+
+    // 清理超出屏幕的线条
+    timeSlowLines = timeSlowLines.filter(line => line.y < height + 100);
+
+    ctx.restore();
 }
 
 /**

@@ -11,7 +11,7 @@
  */
 
 import { World, Component } from '../types';
-import { Transform, Weapon, Buff, Health, Bomb, OptionCount } from '../components';
+import { Transform, Weapon, Buff, Health, Bomb, OptionCount, Lifetime } from '../components';
 import { WeaponId, BuffType } from '../types';
 import { getEvents, pushEvent } from '../world';
 import { EventTags, PickupEvent, PlaySoundEvent } from '../events';
@@ -24,7 +24,9 @@ import {
     BUFF_CATEGORY_CONFIG,
     BuffCategory
 } from '../configs/powerups';
-import { spawnOption } from '../factory';
+import { spawnOption, spawnFromBlueprint } from '../factory';
+import { BLUEPRINT_TIME_SLOW } from '../blueprints/effects';
+import { findTimeSlowEntity } from '../utils/timeUtils';
 
 /**
  * 拾取处理器接口
@@ -85,7 +87,7 @@ const buffPickupHandler: PickupHandler = {
             applyInstantBuff(world, playerComps, type);
         } else {
             // 持续效果添加 Buff 组件
-            addDurationBuff(world, playerComps, type);
+            addDurationBuff(world, playerComps, type, playerId);
         }
 
         // 播放音效
@@ -212,7 +214,7 @@ function applyInstantBuff(world: World, playerComps: Component[], buffType: Buff
 /**
  * 添加持续 Buff 效果
  */
-function addDurationBuff(world: World, playerComps: Component[], buffType: BuffType): void {
+function addDurationBuff(world: World, playerComps: Component[], buffType: BuffType, playerId: number): void {
     switch (buffType) {
         case BuffType.INVINCIBILITY:
             // INVINCIBILITY: 添加短暂无敌 Buff
@@ -224,17 +226,8 @@ function addDurationBuff(world: World, playerComps: Component[], buffType: BuffT
             break;
 
         case BuffType.TIME_SLOW:
-            // TIME_SLOW: 时间减速 Buff（只能存在一个）
-            // 检查是否已有 TIME_SLOW Buff
-            const existingBuffs = playerComps.filter(Buff.check);
-            const hasTimeSlow = existingBuffs.some(b => b.type === BuffType.TIME_SLOW);
-            if (!hasTimeSlow) {
-                playerComps.push(new Buff({
-                    type: BuffType.TIME_SLOW,
-                    value: 1,
-                    remaining: BUFF_CONFIG[BuffType.TIME_SLOW].duration
-                }));
-            }
+            // TIME_SLOW: 时间减速 - 创建/刷新 TimeSlow 实体
+            handleTimeSlowPickup(world, playerId);
             break;
 
         case BuffType.SHIELD:
@@ -296,4 +289,28 @@ function isWeaponId(id: string): id is WeaponId {
  */
 function isBuffType(id: string): id is BuffType {
     return Object.values(BuffType).includes(id as BuffType);
+}
+
+/**
+ * 处理 TIME_SLOW 道具拾取
+ * 创建或刷新 TimeSlow 实体
+ */
+function handleTimeSlowPickup(world: World, playerId: number): void {
+    const existingTimeSlow = findTimeSlowEntity(world);
+
+    if (existingTimeSlow) {
+        // 已存在: 刷新 Lifetime
+        const timeSlowComps = world.entities.get(existingTimeSlow);
+        if (timeSlowComps) {
+            const lifetime = timeSlowComps.find(Lifetime.check);
+            if (lifetime) {
+                lifetime.timer = BUFF_CONFIG[BuffType.TIME_SLOW].duration / 1000;
+            }
+            // 注意: TimeSlow 实体必须有 Lifetime 组件(由 BLUEPRINT_TIME_SLOW 定义)
+            // 如果缺少 Lifetime,说明蓝图配置错误,应视为严重错误
+        }
+    } else {
+        // 不存在: 创建新的 TimeSlow 实体
+        spawnFromBlueprint(world, BLUEPRINT_TIME_SLOW);
+    }
 }

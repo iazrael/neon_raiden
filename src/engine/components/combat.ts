@@ -164,13 +164,10 @@ export class Buff extends Component {
         this.type = cfg.type;
         this.value = cfg.value;
         this.remaining = cfg.remaining;
-        this.originalValues = {}; // 初始化原始值存储
     }
     public type: BuffType;
     public value: number;
     public remaining: number;
-    /** 保存被修改组件的原始值，用于 Buff 过期时恢复 */
-    public originalValues: Record<string, any>;
     static check(c: any): c is Buff { return c instanceof Buff; }
     /** 每帧由 BuffSystem 调用 */
     update(dt: number): void {
@@ -277,4 +274,25 @@ export class InvulnerableState extends Component {
     }
 
     static check(c: any): c is InvulnerableState { return c instanceof InvulnerableState; }
+}
+
+/**
+ * TimeSlow 时间减速组件
+ * 用法：TIME_SLOW 道具拾取时创建独立实体，TimeSlowSystem 设置全局 timeScale
+ */
+export class TimeSlow extends Component {
+    constructor(cfg: {
+        /** 时间缩放比例 (0.5 = 50% 速度) */
+        scale: number;
+        /** 影响范围 (预留未来扩展区域限制) */
+        scope?: 'global' | 'area';
+    }) {
+        super();
+        this.scale = cfg.scale;
+        this.scope = cfg.scope ?? 'global';
+    }
+    public scale: number;
+    public scope: 'global' | 'area';
+
+    static check(c: any): c is TimeSlow { return c instanceof TimeSlow; }
 }

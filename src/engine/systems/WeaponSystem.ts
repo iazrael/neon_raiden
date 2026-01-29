@@ -25,6 +25,7 @@ import { WeaponFiredEvent } from '../events';
 import { BULLET_SPRITE_CONFIG } from '../configs/sprites/bullets';
 import { getWeaponUpgrade } from '../configs/weapon-upgrades';
 import { BulletSpriteSpec } from '../configs/sprites/bullets';
+import { getEffectiveTimeScale } from '../utils/timeUtils';
 
 /**
  * 武器系统主函数
@@ -34,7 +35,9 @@ export function WeaponSystem(world: World, dt: number): void {
     for (const [id, [transform, weapon], comps] of view(world, [Transform, Weapon])) {
         // 第一步：更新所有武器的冷却时间
         if (weapon.curCD > 0) {
-            weapon.curCD -= dt;
+            // 获取有效时间缩放（玩家武器不受影响）
+            const timeScale = getEffectiveTimeScale(world, id);
+            weapon.curCD -= dt * timeScale;
         }
         // 检查冷却是否完成
         if (weapon.curCD > 0) {

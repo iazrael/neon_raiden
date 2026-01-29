@@ -18,6 +18,7 @@ export function createWorld(): World {
         spawnCredits: 0,
         spawnTimer: 0,
         enemyCount: 0,
+        timeScale: 1,
         width: 0,
         height: 0,
         spawnInitialized: false,

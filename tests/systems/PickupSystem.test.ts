@@ -4,7 +4,7 @@
 
 import { createWorld, generateId, addComponent } from '../../src/engine/world';
 import { PickupSystem } from '../../src/engine/systems/PickupSystem';
-import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff } from '../../src/engine/components';
+import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff, TimeSlow } from '../../src/engine/components';
 import { WeaponId, BuffType, AmmoType } from '../../src/engine/types';
 import { PickupEvent } from '../../src/engine/events';
 import { pushEvent } from '../../src/engine/world';
@@ -198,7 +198,7 @@ describe('PickupSystem', () => {
             expect((buff as Buff).type).toBe(BuffType.INVINCIBILITY);
         });
 
-        it('TIME_SLOW Buff 应该添加时间减速', () => {
+        it('TIME_SLOW Buff 应该创建 TimeSlow 实体', () => {
             const playerId = generateId();
 
             world.entities.set(playerId, []);
@@ -214,10 +214,20 @@ describe('PickupSystem', () => {
 
             PickupSystem(world, 0.016);
 
-            const comps = world.entities.get(playerId);
-            const buff = comps?.find(Buff.check);
-            expect(buff).toBeDefined();
-            expect((buff as Buff).type).toBe(BuffType.TIME_SLOW);
+            // 应该创建 TimeSlow 实体，而不是添加 Buff
+            let timeSlowFound = false;
+            for (const [, comps] of world.entities) {
+                if (comps.find(TimeSlow.check)) {
+                    timeSlowFound = true;
+                    break;
+                }
+            }
+            expect(timeSlowFound).toBe(true);
+
+            // 玩家不应该有 TIME_SLOW Buff
+            const playerComps = world.entities.get(playerId);
+            const buff = playerComps?.find(Buff.check);
+            expect(buff).toBeUndefined();
         });
     });
 
