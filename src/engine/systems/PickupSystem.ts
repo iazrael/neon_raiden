@@ -224,21 +224,23 @@ function addDurationBuff(world: World, playerComps: Component[], buffType: BuffT
             break;
 
         case BuffType.TIME_SLOW:
-            // TIME_SLOW: 时间减速 Buff
-            playerComps.push(new Buff({
-                type: BuffType.TIME_SLOW,
-                value: 1,
-                remaining: BUFF_CONFIG[BuffType.TIME_SLOW].duration
-            }));
+            // TIME_SLOW: 时间减速 Buff（只能存在一个）
+            // 检查是否已有 TIME_SLOW Buff
+            const existingBuffs = playerComps.filter(Buff.check);
+            const hasTimeSlow = existingBuffs.some(b => b.type === BuffType.TIME_SLOW);
+            if (!hasTimeSlow) {
+                playerComps.push(new Buff({
+                    type: BuffType.TIME_SLOW,
+                    value: 1,
+                    remaining: BUFF_CONFIG[BuffType.TIME_SLOW].duration
+                }));
+            }
             break;
 
         case BuffType.SHIELD:
-        case BuffType.RAPID_FIRE:
-        case BuffType.PENETRATION:
-        case BuffType.SPEED:
-            // 其他持续效果 Buff
+            // SHIELD: 护盾 Buff
             playerComps.push(new Buff({
-                type: buffType,
+                type: BuffType.SHIELD,
                 value: 1,
                 remaining: 5000 // 默认 5 秒持续时间
             }));

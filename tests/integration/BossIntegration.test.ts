@@ -7,6 +7,7 @@
 
 import { BossPhaseSystem } from '../../src/engine/systems/BossPhaseSystem';
 import { BossSystem } from '../../src/engine/systems/BossSystem';
+import { WeaponSystem } from '../../src/engine/systems/WeaponSystem';
 import { World } from '../../src/engine/types';
 import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, Velocity } from '../../src/engine/components';
 import { BossId, EnemyWeaponId } from '../../src/engine/types/ids';
@@ -90,8 +91,9 @@ describe('Boss集成测试', () => {
             expect(weapon!.id).toBe(EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED);
             expect(weapon!.curCD).toBe(0); // 冷却重置
 
-            // BossSystem执行后应该会开火并设置新的冷却
+            // BossSystem创建开火意图，WeaponSystem处理冷却和开火
             BossSystem(mockWorld, 16);
+            WeaponSystem(mockWorld, 16);
             expect(weapon!.curCD).toBe(400); // 600 / 1.5 = 400
         });
 

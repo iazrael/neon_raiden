@@ -12,9 +12,9 @@
  */
 
 import { Component, World } from '../types';
-import { Buff, Health, Shield, InvulnerableState } from '../components';
+import { Buff, Health, Shield, InvulnerableState, SpeedModifier, EnemyTag } from '../components';
 import { BuffType } from '../types';
-import { removeComponent, view } from '../world';
+import { removeComponent, view, addComponent } from '../world';
 
 /**
  * 持续效果 Buff 处理器
@@ -74,30 +74,59 @@ const invincibilityHandler: DurationBuffHandler = {
 };
 
 /**
- * TIME_SLOW Buff - 时间减速（影响全局）
+ * TIME_SLOW Buff - 时间减速（影响敌人）
+ *
+ * 玩家拾取后，所有敌人移动速度降低 50%
  */
 const timeSlowHandler: DurationBuffHandler = {
     update(buff: Buff, world: World, comps: Component[], dt: number): void {
-        // 降低游戏速度
-        world.difficulty = 0.5;
+        // 首次应用时，给所有敌人添加减速效果
+        if (buff.originalValues.affectedEnemies === undefined) {
+            buff.originalValues.affectedEnemies = [];
+
+            // 遍历所有实体，找到敌人
+            for (const [enemyId, enemyComps] of world.entities.entries()) {
+                const enemyTag = enemyComps.find(EnemyTag.check);
+                if (enemyTag) {
+                    // 保存敌人的原始速度
+                    const speedStat = enemyComps.find(c => c.constructor.name === 'SpeedStat');
+                    if (speedStat && (speedStat as any).maxLinear) {
+                        const originalSpeed = (speedStat as any).maxLinear;
+
+                        // 添加 SpeedModifier 组件，降低敌人速度到 50%
+                        addComponent(world, enemyId, new SpeedModifier({
+                            maxLinearOverride: originalSpeed * 0.5,
+                            duration: -1 // 持续到手动移除
+                        }));
+
+                        // 保存受影响的敌人 ID 和原始速度
+                        buff.originalValues.affectedEnemies.push({
+                            id: enemyId,
+                            originalSpeed: originalSpeed
+                        });
+                    }
+                }
+            }
+        }
     },
 
     onExpired(buff: Buff, world: World, comps: Component[]): void {
-        // 检查是否还有其他 TIME_SLOW Buff
-        let hasTimeSlow = false;
-        for (const [id, otherComps] of world.entities.entries()) {
-            const otherBuffs = otherComps.filter(Buff.check);
-            for (const otherBuff of otherBuffs) {
-                if (otherBuff.type === BuffType.TIME_SLOW && otherBuff !== buff && !otherBuff.isFinished()) {
-                    hasTimeSlow = true;
-                    break;
+        // 移除所有敌人的减速效果
+        if (buff.originalValues.affectedEnemies) {
+            for (const { id } of buff.originalValues.affectedEnemies) {
+                const enemyComps = world.entities.get(id);
+                if (enemyComps) {
+                    // 移除 SpeedModifier 组件
+                    const speedModifier = enemyComps.find(SpeedModifier.check);
+                    if (speedModifier) {
+                        const idx = enemyComps.indexOf(speedModifier);
+                        if (idx !== -1) {
+                            enemyComps.splice(idx, 1);
+                        }
+                    }
                 }
             }
-            if (hasTimeSlow) break;
-        }
-        // 如果没有其他时间减速 Buff，恢复游戏速度
-        if (!hasTimeSlow) {
-            world.difficulty = 1;
+            delete buff.originalValues.affectedEnemies;
         }
     }
 };

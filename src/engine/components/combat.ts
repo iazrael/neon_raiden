@@ -164,10 +164,13 @@ export class Buff extends Component {
         this.type = cfg.type;
         this.value = cfg.value;
         this.remaining = cfg.remaining;
+        this.originalValues = {}; // 初始化原始值存储
     }
     public type: BuffType;
     public value: number;
     public remaining: number;
+    /** 保存被修改组件的原始值，用于 Buff 过期时恢复 */
+    public originalValues: Record<string, any>;
     static check(c: any): c is Buff { return c instanceof Buff; }
     /** 每帧由 BuffSystem 调用 */
     update(dt: number): void {

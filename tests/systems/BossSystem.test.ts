@@ -3,6 +3,7 @@
  */
 
 import { BossSystem } from '../../src/engine/systems/BossSystem';
+import { WeaponSystem } from '../../src/engine/systems/WeaponSystem';
 import { World } from '../../src/engine/types';
 import { Transform, Velocity, BossTag, BossAI, Weapon, SpeedStat, FireIntent } from '../../src/engine/components';
 import { BossId } from '../../src/engine/types/ids';
@@ -49,7 +50,7 @@ describe('BossSystem', () => {
     describe('Boss 移动模式', () => {
         it('应该处理 Boss 移动', () => {
             mockWorld.time = 1;
-            BossSystem(mockWorld, 0.1);
+            BossSystem(mockWorld, 100);
 
             const bossComps = mockWorld.entities.get(bossId);
             const velocity = bossComps?.find(Velocity.check) as Velocity;
@@ -60,14 +61,14 @@ describe('BossSystem', () => {
 
         it('应该根据时间改变移动', () => {
             mockWorld.time = 1;
-            BossSystem(mockWorld, 0.1);
+            BossSystem(mockWorld, 100);
 
             const bossComps = mockWorld.entities.get(bossId);
             const velocity1 = bossComps?.find(Velocity.check) as Velocity;
             const vx1 = velocity1!.vx;
 
             mockWorld.time = 2;
-            BossSystem(mockWorld, 0.1);
+            BossSystem(mockWorld, 100);
 
             const velocity2 = bossComps?.find(Velocity.check) as Velocity;
             const vx2 = velocity2!.vx;
@@ -78,7 +79,7 @@ describe('BossSystem', () => {
 
         it('应该正确设置速度值', () => {
             mockWorld.time = 2;
-            BossSystem(mockWorld, 0.1);
+            BossSystem(mockWorld, 100);
 
             const bossComps = mockWorld.entities.get(bossId);
             const velocity = bossComps?.find(Velocity.check) as Velocity;
@@ -96,7 +97,8 @@ describe('BossSystem', () => {
             const weapon = bossComps?.find(Weapon.check) as Weapon;
             weapon!.curCD = 500;
 
-            BossSystem(mockWorld, 0.1);
+            // BossSystem 只创建开火意图，冷却由 WeaponSystem 处理
+            WeaponSystem(mockWorld, 100);
 
             // 冷却应该减少
             expect(weapon!.curCD).toBeLessThan(500);
@@ -114,7 +116,7 @@ describe('BossSystem', () => {
                 if (idx > -1) bossComps!.splice(idx, 1);
             });
 
-            BossSystem(mockWorld, 0.1);
+            BossSystem(mockWorld, 100);
 
             // 应该添加开火意图
             const newFireIntent = bossComps!.find(FireIntent.check);
@@ -128,7 +130,7 @@ describe('BossSystem', () => {
             const bossAI = bossComps?.find(BossAI.check) as BossAI;
 
             bossAI!.phase = 1;
-            BossSystem(mockWorld, 0.1);
+            BossSystem(mockWorld, 100);
 
             // 不同阶段应该有不同的行为
             expect(bossAI!.phase).toBe(1);
@@ -139,7 +141,7 @@ describe('BossSystem', () => {
         it('没有 Boss 实体时不应该崩溃', () => {
             mockWorld.entities.delete(bossId);
 
-            expect(() => BossSystem(mockWorld, 0.1)).not.toThrow();
+            expect(() => BossSystem(mockWorld, 100)).not.toThrow();
         });
 
         it('Boss 缺少必要组件时应该跳过', () => {
@@ -149,13 +151,13 @@ describe('BossSystem', () => {
                 new BossTag({ id: BossId.GUARDIAN }),
             ]);
 
-            expect(() => BossSystem(mockWorld, 0.1)).not.toThrow();
+            expect(() => BossSystem(mockWorld, 100)).not.toThrow();
         });
 
         it('没有玩家时不应该崩溃', () => {
             mockWorld.entities.delete(mockWorld.playerId);
 
-            expect(() => BossSystem(mockWorld, 0.1)).not.toThrow();
+            expect(() => BossSystem(mockWorld, 100)).not.toThrow();
         });
     });
 
@@ -166,7 +168,7 @@ describe('BossSystem', () => {
 
             for (let t = 0; t < 5; t += 0.5) {
                 mockWorld.time = t;
-                BossSystem(mockWorld, 0.1);
+                BossSystem(mockWorld, 100);
 
                 const bossComps = mockWorld.entities.get(bossId);
                 const velocity = bossComps?.find(Velocity.check) as Velocity;
@@ -175,7 +177,7 @@ describe('BossSystem', () => {
 
             for (let t = 10; t < 15; t += 0.5) {
                 mockWorld.time = t;
-                BossSystem(mockWorld, 0.1);
+                BossSystem(mockWorld, 100);
 
                 const bossComps = mockWorld.entities.get(bossId);
                 const velocity = bossComps?.find(Velocity.check) as Velocity;
