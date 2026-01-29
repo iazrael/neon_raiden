@@ -12,67 +12,29 @@
  */
 
 import { Component, World } from '../types';
-import { Buff, Health, Shield, SpeedStat, Weapon, InvulnerableState } from '../components';
+import { Buff, Health, Shield, InvulnerableState } from '../components';
 import { BuffType } from '../types';
 import { removeComponent, view } from '../world';
 
 /**
- * Buff效果处理器
+ * 持续效果 Buff 处理器
+ * 只处理需要在 Buff 持续期间更新效果的情况
  */
-interface BuffHandler {
-    apply(buff: Buff, comps: Component[], dt: number): void;
+interface DurationBuffHandler {
+    update(buff: Buff, world: World, comps: Component[], dt: number): void;
+    onExpired?(buff: Buff, world: World, comps: Component[]): void;
 }
-
-/**
- * HP Buff - 恢复生命值
- */
-const hpHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
-        const health = comps.find(Health.check);
-        if (health) {
-            // 持续恢复生命值
-            const healAmount = buff.value * dt;
-            health.hp = Math.min(health.hp + healAmount, health.max);
-        }
-    }
-};
-
-/**
- * POWER Buff - 增加武器伤害
- */
-const powerHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
-        const weapons = comps.filter(Weapon.check);
-        for (const weapon of weapons) {
-            // 增加伤害倍率
-            weapon.damageMultiplier = 1 + buff.value * 0.1;
-        }
-    }
-};
-
-/**
- * SPEED Buff - 增加移动速度
- */
-const speedHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
-        const speedStat = comps.find(SpeedStat.check);
-        if (speedStat) {
-            // 增加移动速度
-            speedStat.maxLinear *= (1 + buff.value * 0.01);
-        }
-    }
-};
 
 /**
  * SHIELD Buff - 增加护盾值或恢复护盾
  */
-const shieldHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
+const shieldHandler: DurationBuffHandler = {
+    update(buff: Buff, world: World, comps: Component[], dt: number): void {
         const shield = comps.find(Shield.check);
         if (shield) {
-            // 持续恢复护盾
+            // 持续恢复护盾（dt 是毫秒，需要转换为秒）
             shield.regen = buff.value;
-            shield.value = Math.min(shield.value + buff.value * dt, 100);
+            shield.value = Math.min(shield.value + buff.value * (dt / 1000), 100);
         } else if (buff.value > 0) {
             // 如果没有护盾组件，添加一个
             const Shield = require('../components/combat').Shield;
@@ -84,8 +46,8 @@ const shieldHandler: BuffHandler = {
 /**
  * INVINCIBILITY Buff - 无敌状态
  */
-const invincibilityHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
+const invincibilityHandler: DurationBuffHandler = {
+    update(buff: Buff, world: World, comps: Component[], dt: number): void {
         // 检查是否已有无敌状态组件
         let invState = comps.find(InvulnerableState.check);
 
@@ -97,31 +59,16 @@ const invincibilityHandler: BuffHandler = {
             });
             comps.push(invState);
         }
-    }
-};
+    },
 
-/**
- * RAPID_FIRE Buff - 增加射速
- */
-const rapidFireHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
-        const weapons = comps.filter(Weapon.check);
-        for (const weapon of weapons) {
-            // 增加射速倍率
-            weapon.fireRateMultiplier = 1 + buff.value * 0.05;
-        }
-    }
-};
-
-/**
- * PENETRATION Buff - 增加穿透
- */
-const penetrationHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
-        const weapons = comps.filter(Weapon.check);
-        for (const weapon of weapons) {
-            // 增加穿透次数
-            weapon.pierce += Math.floor(buff.value * 0.5);
+    onExpired(buff: Buff, world: World, comps: Component[]): void {
+        // 移除无敌状态组件
+        const invState = comps.find(InvulnerableState.check);
+        if (invState) {
+            const idx = comps.indexOf(invState);
+            if (idx !== -1) {
+                comps.splice(idx, 1);
+            }
         }
     }
 };
@@ -129,24 +76,39 @@ const penetrationHandler: BuffHandler = {
 /**
  * TIME_SLOW Buff - 时间减速（影响全局）
  */
-const timeSlowHandler: BuffHandler = {
-    apply(buff: Buff, comps: Component[], dt: number): void {
-        // 注意：timeSlowHandler 没有访问 world 的权限
-        // 实际的 difficulty 修改将在 BuffSystem 主函数中处理
+const timeSlowHandler: DurationBuffHandler = {
+    update(buff: Buff, world: World, comps: Component[], dt: number): void {
+        // 降低游戏速度
+        world.difficulty = 0.5;
+    },
+
+    onExpired(buff: Buff, world: World, comps: Component[]): void {
+        // 检查是否还有其他 TIME_SLOW Buff
+        let hasTimeSlow = false;
+        for (const [id, otherComps] of world.entities.entries()) {
+            const otherBuffs = otherComps.filter(Buff.check);
+            for (const otherBuff of otherBuffs) {
+                if (otherBuff.type === BuffType.TIME_SLOW && otherBuff !== buff && !otherBuff.isFinished()) {
+                    hasTimeSlow = true;
+                    break;
+                }
+            }
+            if (hasTimeSlow) break;
+        }
+        // 如果没有其他时间减速 Buff，恢复游戏速度
+        if (!hasTimeSlow) {
+            world.difficulty = 1;
+        }
     }
 };
 
 /**
- * Buff处理器映射
+ * 持续效果 Buff 处理器映射表
+ * 只包含需要持续更新的 Buff 类型
  */
-const BUFF_HANDLERS: Partial<Record<BuffType, BuffHandler>> = {
-    [BuffType.HP]: hpHandler,
-    [BuffType.POWER]: powerHandler,
-    [BuffType.SPEED]: speedHandler,
+const DURATION_BUFF_HANDLERS: Partial<Record<BuffType, DurationBuffHandler>> = {
     [BuffType.SHIELD]: shieldHandler,
     [BuffType.INVINCIBILITY]: invincibilityHandler,
-    [BuffType.RAPID_FIRE]: rapidFireHandler,
-    [BuffType.PENETRATION]: penetrationHandler,
     [BuffType.TIME_SLOW]: timeSlowHandler
 };
 
@@ -158,34 +120,21 @@ const BUFF_HANDLERS: Partial<Record<BuffType, BuffHandler>> = {
 export function BuffSystem(world: World, dt: number): void {
     // 遍历所有实体的 Buff 组件
     for (const [id, [buff], comps] of view(world, [Buff])) {
-
-        // 处理每个 Buff
         // 更新 Buff 剩余时间
         buff.update(dt);
 
         // 应用 Buff 效果
-        const handler = BUFF_HANDLERS[buff.type];
+        const handler = DURATION_BUFF_HANDLERS[buff.type];
         if (handler) {
-            // TODO: 这里跟 pickupsystem的 applyBuffPickup 是部分重复的
-            handler.apply(buff, comps, dt);
+            handler.update(buff, world, comps, dt);
         }
 
-        // FIXME：buff 处理后会转换成对应的组件，是不是可以直接移除了？
+        // 如果 Buff 过期，移除并调用 onExpired 钩子
         if (buff.isFinished()) {
+            if (handler?.onExpired) {
+                handler.onExpired(buff, world, comps);
+            }
             removeComponent(world, id, buff);
         }
-    }
-
-    // 如果没有时间减速 buff，恢复游戏速度
-    let hasTimeSlow = false;
-    for (const [id] of view(world, [Buff])) {
-        hasTimeSlow = true;
-        break;
-    }
-
-    if (!hasTimeSlow) {
-        world.difficulty = 1;
-    } else {
-        world.difficulty = 0.5; // 有时间减速buff，降低游戏速度
     }
 }

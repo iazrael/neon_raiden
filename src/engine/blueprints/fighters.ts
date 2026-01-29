@@ -1,4 +1,4 @@
-import { WeaponId } from '../types';
+import { WeaponId, WeaponPattern } from '../types';
 import { CollisionLayer } from '../types/collision';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
@@ -42,4 +42,35 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
 
     /** 僚机数量组件 - 初始僚机数量（0个，最多2个） */
     OptionCount: { count: 0, maxCount: 2 },
+};
+
+/**
+ * 僚机蓝图 - Vulcan机炮型
+ * 定义僚机的基础属性和初始配置
+ */
+export const BLUEPRINT_OPTION_VULCAN: Blueprint = {
+    /** 变换组件 - 初始位置（会被覆盖） */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 初始速度 */
+    Velocity: { vx: 0, vy: 0, vrot: 0 },
+
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.OPTION, scale: 0.8, color: '#00ffff' },
+
+    /** 碰撞盒组件 - 碰撞检测区域 */
+    HitBox: { shape: 'circle', radius: 16, layer: CollisionLayer.Player },
+
+    /** 武器组件 - 使用 Vulcan 武器（伤害减半，瞄准模式） */
+    Weapon: {
+        ...WEAPON_TABLE[WeaponId.VULCAN],
+        damageMultiplier: 0.5,
+        pattern: WeaponPattern.AIMED
+    },
+
+    /** 僚机组件 - 索引（会被覆盖） */
+    Option: 0,
+
+    /** 玩家标签组件 - 标识为僚机 */
+    PlayerTag: { isOption: true }
 };

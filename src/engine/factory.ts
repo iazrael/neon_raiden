@@ -1,5 +1,5 @@
 import { Blueprint } from './blueprints';
-import { BossAI, BossTag, BossEntrance, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon } from './components';
+import { BossAI, BossTag, BossEntrance, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon, Option } from './components';
 import { World, EntityId, Component } from './types';
 import { AmmoType } from './types/ids';
 import { addComponent, generateId, getFromPool } from './world';
@@ -97,5 +97,27 @@ export function spawnBullet(world: World, bp: Blueprint, x: number = 0, y: numbe
 
 export function spawnPickup(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot, 'pickup');
+    return id;
+}
+
+/**
+ * 生成僚机实体
+ * @param world World 实例
+ * @param bp 僚机蓝图
+ * @param index 僚机索引（0 或 1）
+ * @param x 初始 X 坐标
+ * @param y 初始 Y 坐标
+ * @returns 僚机实体 ID
+ */
+export function spawnOption(world: World, bp: Blueprint, index: number, x: number, y: number): EntityId {
+    const id = spawnFromBlueprint(world, bp, x, y, 0);
+
+    // 设置僚机的索引
+    const optionComps = world.entities.get(id);
+    const option = optionComps?.find(Option.check);
+    if (option) {
+        option.index = index;
+    }
+
     return id;
 }

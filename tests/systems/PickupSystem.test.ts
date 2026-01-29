@@ -243,4 +243,85 @@ describe('PickupSystem', () => {
             expect(afterSoundEvents).toBeGreaterThan(beforeSoundEvents);
         });
     });
+
+    describe('僚机拾取 (OPTION)', () => {
+        it('应该添加第一个僚机', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
+            addComponent(world, playerId, new PlayerTag());
+
+            pushEvent(world, {
+                type: 'Pickup',
+                pos: { x: 400, y: 500 },
+                itemId: BuffType.OPTION,
+                owner: playerId
+            } as PickupEvent);
+
+            PickupSystem(world, 0.016);
+
+            // 检查 OptionCount 组件
+            const comps = world.entities.get(playerId);
+            const optionCount = comps?.find((c: any) => c.constructor.name === 'OptionCount');
+            expect(optionCount).toBeDefined();
+
+            // 检查僚机实体是否被创建
+            let optionEntityCount = 0;
+            for (const [id, entityComps] of world.entities) {
+                const playerTag = entityComps.find(PlayerTag.check);
+                if (playerTag && (playerTag as any).isOption) {
+                    optionEntityCount++;
+                }
+            }
+
+            expect(optionEntityCount).toBe(1);
+        });
+
+        it('应该添加第二个僚机', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
+            addComponent(world, playerId, new PlayerTag());
+
+            // 先添加第一个僚机和 OptionCount 组件
+            const { OptionCount } = require('../../src/engine/components');
+            addComponent(world, playerId, new OptionCount({ count: 1, maxCount: 2 }));
+
+            // 手动创建第一个僚机实体
+            const { Option } = require('../../src/engine/components');
+            const option1Id = generateId();
+            world.entities.set(option1Id, [
+                new Transform({ x: 400, y: 500, rot: 0 }),
+                new Option(0),
+                new PlayerTag({ isOption: true })
+            ]);
+
+            pushEvent(world, {
+                type: 'Pickup',
+                pos: { x: 400, y: 500 },
+                itemId: BuffType.OPTION,
+                owner: playerId
+            } as PickupEvent);
+
+            PickupSystem(world, 0.016);
+
+            const comps = world.entities.get(playerId);
+            const optionCount = comps?.find((c: any) => c.constructor.name === 'OptionCount');
+
+            expect(optionCount).toBeDefined();
+
+            // 检查僚机实体数量（应该有 2 个）
+            let optionEntityCount = 0;
+            for (const [id, entityComps] of world.entities) {
+                const playerTag = entityComps.find(PlayerTag.check);
+                if (playerTag && (playerTag as any).isOption) {
+                    optionEntityCount++;
+                }
+            }
+
+            expect(optionEntityCount).toBe(2);
+        });
+    });
 });

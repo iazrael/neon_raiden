@@ -12,10 +12,8 @@
 
 import { World } from '../types';
 import { Transform, Option, OptionCount, PlayerTag } from '../components';
-import { generateId } from '../world';
-import { Sprite } from '../components';
-import { Weapon } from '../components';
-import { WeaponId, AmmoType, WeaponPattern } from '../types';
+import { spawnOption } from '../factory';
+import { BLUEPRINT_OPTION_VULCAN } from '../blueprints/fighters';
 
 /**
  * 环绕半径（像素）
@@ -79,7 +77,11 @@ export function OptionSystem(world: World, dt: number): void {
         if (currentCount > optionEntities.length) {
             // 需要创建新僚机
             for (let i = optionEntities.length; i < currentCount; i++) {
-                spawnOptionEntity(world, world.playerId, i);
+                const angle = i * Math.PI;
+                const x = playerTransform.x + Math.cos(angle) * OPTION_RADIUS;
+                const y = playerTransform.y + Math.sin(angle) * OPTION_RADIUS;
+
+                spawnOption(world, BLUEPRINT_OPTION_VULCAN, i, x, y);
             }
         } else if (currentCount < optionEntities.length) {
             // 需要删除多余的僚机（从末尾开始）
@@ -89,46 +91,4 @@ export function OptionSystem(world: World, dt: number): void {
             }
         }
     }
-}
-
-/**
- * 辅助函数：创建僚机实体
- */
-function spawnOptionEntity(world: World, playerId: number, index: number): void {
-    const playerComps = world.entities.get(playerId);
-    if (!playerComps) return;
-
-    const playerTransform = playerComps.find(Transform.check);
-    if (!playerTransform) return;
-
-    const optionId = generateId();
-    const angle = index * Math.PI;
-
-    world.entities.set(optionId, [
-        new Transform({
-            x: playerTransform.x + Math.cos(angle) * OPTION_RADIUS,
-            y: playerTransform.y + Math.sin(angle) * OPTION_RADIUS,
-            rot: 0
-        }),
-        new Sprite({
-            spriteKey: 'option' as any,
-            color: '#00ffff',
-            scale: 0.8
-        }),
-        new Option(index),
-        new Weapon({
-            id: WeaponId.VULCAN,
-            ammoType: AmmoType.VULCAN_SPREAD,
-            cooldown: 150,
-            level: 1,
-            bulletCount: 1,
-            spread: 0,
-            pattern: WeaponPattern.AIMED,
-            fireRateMultiplier: 1.0,
-            damageMultiplier: 0.5,
-            pierce: 0,
-            bounces: 0
-        }),
-        new PlayerTag({ isOption: true })
-    ]);
 }
