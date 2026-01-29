@@ -2,9 +2,9 @@
  * PickupSystem 单元测试
  */
 
-import { createWorld, generateId, addComponent } from '../../src/engine/world';
+import { createWorld, generateId, addComponent, view } from '../../src/engine/world';
 import { PickupSystem } from '../../src/engine/systems/PickupSystem';
-import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff, TimeSlow } from '../../src/engine/components';
+import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff, TimeSlow, Option } from '../../src/engine/components';
 import { WeaponId, BuffType, AmmoType } from '../../src/engine/types';
 import { PickupEvent } from '../../src/engine/events';
 import { pushEvent } from '../../src/engine/world';
@@ -277,15 +277,8 @@ describe('PickupSystem', () => {
             expect(optionCount).toBeDefined();
 
             // 检查僚机实体是否被创建
-            let optionEntityCount = 0;
-            for (const [id, entityComps] of world.entities) {
-                const playerTag = entityComps.find(PlayerTag.check);
-                if (playerTag && (playerTag as any).isOption) {
-                    optionEntityCount++;
-                }
-            }
-
-            expect(optionEntityCount).toBe(1);
+            const entityComps = [...view(world, [Option])]
+            expect(entityComps.length).toBe(1);
         });
 
         it('应该添加第二个僚机', () => {
@@ -322,15 +315,9 @@ describe('PickupSystem', () => {
             expect(optionCount).toBeDefined();
 
             // 检查僚机实体数量（应该有 2 个）
-            let optionEntityCount = 0;
-            for (const [id, entityComps] of world.entities) {
-                const playerTag = entityComps.find(PlayerTag.check);
-                if (playerTag && (playerTag as any).isOption) {
-                    optionEntityCount++;
-                }
-            }
+            const entityComps = [...view(world, [Option])]
+            expect(entityComps.length).toBe(2);
 
-            expect(optionEntityCount).toBe(2);
         });
     });
 });

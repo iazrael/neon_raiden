@@ -25,7 +25,6 @@ import { InputSystem } from './systems/InputSystem';
 import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
 import { MovementSystem } from './systems/MovementSystem';
-import { OptionSystem } from './systems/OptionSystem';
 import { PickupSystem } from './systems/PickupSystem';
 import { RenderSystem, setRenderContext, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
@@ -153,7 +152,6 @@ export class Engine {
 
         // P3. 物理层 (位移)
         MovementSystem(world, dt);                      // 11. 移动系统
-        OptionSystem(world, dt);                        // 11.5. 僚机系统
 
         // P4. 交互层 (核心碰撞)
         CollisionSystem(world, dt);                     // 12. 碰撞系统

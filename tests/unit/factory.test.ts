@@ -7,7 +7,7 @@ import { World } from '../../src/engine/types';
 import { createWorld } from '../../src/engine/world';
 import { spawnOption } from '../../src/engine/factory';
 import { BLUEPRINT_OPTION_VULCAN } from '../../src/engine/blueprints/fighters';
-import { Option, PlayerTag } from '../../src/engine/components';
+import { Option, PlayerTag, Transform } from '../../src/engine/components';
 
 describe('factory - spawnOption', () => {
     let world: World;
@@ -33,10 +33,6 @@ describe('factory - spawnOption', () => {
         expect(option).toBeDefined();
         expect(option?.index).toBe(index);
 
-        // 验证 PlayerTag 组件存在且标记为僚机
-        const playerTag = comps?.find(PlayerTag.check);
-        expect(playerTag).toBeDefined();
-        expect(playerTag?.isOption).toBe(true);
     });
 
     it('应该创建索引为1的僚机', () => {
@@ -60,7 +56,7 @@ describe('factory - spawnOption', () => {
         const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, index, x, y);
 
         const comps = world.entities.get(entityId);
-        const transform = comps?.find((c: any) => c.constructor.name === 'Transform');
+        const transform = comps?.find(Transform.check);
 
         expect(transform).toBeDefined();
         expect(transform?.x).toBe(x);

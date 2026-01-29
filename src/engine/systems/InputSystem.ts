@@ -1,6 +1,6 @@
 import { World } from '../types';
 import { inputManager } from '../input/InputManager';
-import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag, Option } from '../components';
+import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag, Option, Transform } from '../components';
 import { removeComponent, view } from '../world';
 
 export function InputSystem(world: World, dt: number) {
@@ -60,15 +60,39 @@ export function InputSystem(world: World, dt: number) {
         if (existingFire) removeComponent(world, world.playerId, existingFire);
     }
 
+
+    // === 同步僚机移动意图 ===
+    // 僚机环绕配置
+    const OPTION_RADIUS = 60;
+    const ROTATION_SPEED = 2;
+    const LERP_FACTOR = 0.2;
+
+    // 获取玩家 Transform（用于计算僚机目标位置）
+    const playerTransform = playerComps.find(Transform.check);
+
+
     // === 同步僚机开火意图 ===
     // 遍历所有实体，找到僚机并同步玩家的开火状态
-    for (const [id, [option], comps] of view(world, [Option])) {
+    for (const [id, [option, optionTransform], comps] of view(world, [Option, Transform])) {
         // 这是一个僚机
         const optionFire = comps.find(FireIntent.check);
         if (isFiring) {
             if (!optionFire) comps.push(new FireIntent());
         } else {
             if (optionFire) removeComponent(world, id, optionFire);
+        }
+        if (playerTransform) {
+            // 计算目标位置（环绕玩家旋转）
+            const angle = (world.time / 1000) * ROTATION_SPEED + option.angle;
+            const targetX = playerTransform.x + Math.cos(angle) * OPTION_RADIUS;
+            const targetY = playerTransform.y + Math.sin(angle) * OPTION_RADIUS;
+
+            // 生成移动意图（平滑移动）
+            comps.push(new MoveIntent({
+                dx: (targetX - optionTransform.x) * LERP_FACTOR,
+                dy: (targetY - optionTransform.y) * LERP_FACTOR,
+                type: 'offset'
+            }));
         }
     }
 

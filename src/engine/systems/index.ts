@@ -26,7 +26,6 @@ export { WeaponSystem } from './WeaponSystem';
 
 // P3: 物理层
 export { MovementSystem } from './MovementSystem';
-export { OptionSystem } from './OptionSystem';
 
 // P4: 交互层
 export { CollisionSystem } from './CollisionSystem';
