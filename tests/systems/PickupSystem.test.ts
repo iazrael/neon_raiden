@@ -304,8 +304,7 @@ describe('PickupSystem', () => {
             const option1Id = generateId();
             world.entities.set(option1Id, [
                 new Transform({ x: 400, y: 500, rot: 0 }),
-                new Option(0),
-                new PlayerTag({ isOption: true })
+                new Option({ index: 0 }),
             ]);
 
             pushEvent(world, {

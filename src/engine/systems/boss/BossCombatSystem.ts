@@ -47,10 +47,10 @@ export function BossCombatSystem(world: World, dt: number): void {
             continue;
         }
 
-        // 诊断日志：检查Boss武器状态
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`[BossCombatSystem] Boss ${bossTag.id} (entity ${id}): phase=${bossAI.phase}, curCD=${weapon.curCD}, cooldown=${weapon.cooldown}, firing=${comps.some(FireIntent.check)}`);
-        }
+        // // 诊断日志：检查Boss武器状态
+        // if (process.env.NODE_ENV !== 'production') {
+        //     console.log(`[BossCombatSystem] Boss ${bossTag.id} (entity ${id}): phase=${bossAI.phase}, curCD=${weapon.curCD}, cooldown=${weapon.cooldown}, firing=${comps.some(FireIntent.check)}`);
+        // }
 
         // 处理开火
         handleBossFiring(world, comps, { id, weapon });

@@ -1,9 +1,9 @@
 import { World } from '../types';
 import { inputManager } from '../input/InputManager';
-import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag } from '../components';
-import { removeComponent } from '../world';
+import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag, Option } from '../components';
+import { removeComponent, view } from '../world';
 
-export function InputSystem(w: World, dt: number) {
+export function InputSystem(world: World, dt: number) {
     // 1. 获取输入源数据
     const kbVec = inputManager.getKeyboardVector();
     const pointerDelta = inputManager.consumePointerDelta(); // 注意：这会清空 Manager 里的积攒值
@@ -11,7 +11,7 @@ export function InputSystem(w: World, dt: number) {
     const isBombing = inputManager.isBombing();
 
     // 2. 查找玩家
-    const playerComps = w.entities.get(w.playerId);
+    const playerComps = world.entities.get(world.playerId);
     if (!playerComps) return;
 
     // === 处理移动 (优先处理触摸/鼠标拖拽，其次键盘) ===
@@ -57,21 +57,18 @@ export function InputSystem(w: World, dt: number) {
     if (isFiring) {
         if (!existingFire) playerComps.push(new FireIntent());
     } else {
-        if (existingFire) removeComponent(w, w.playerId, existingFire);
+        if (existingFire) removeComponent(world, world.playerId, existingFire);
     }
 
     // === 同步僚机开火意图 ===
     // 遍历所有实体，找到僚机并同步玩家的开火状态
-    for (const [id, comps] of w.entities) {
-        const playerTag = comps.find(PlayerTag.check);
-        if (playerTag && (playerTag as PlayerTag).isOption) {
-            // 这是一个僚机
-            const optionFire = comps.find(FireIntent.check);
-            if (isFiring) {
-                if (!optionFire) comps.push(new FireIntent());
-            } else {
-                if (optionFire) removeComponent(w, id, optionFire);
-            }
+    for (const [id, [option], comps] of view(world, [Option])) {
+        // 这是一个僚机
+        const optionFire = comps.find(FireIntent.check);
+        if (isFiring) {
+            if (!optionFire) comps.push(new FireIntent());
+        } else {
+            if (optionFire) removeComponent(world, id, optionFire);
         }
     }
 
@@ -82,7 +79,7 @@ export function InputSystem(w: World, dt: number) {
         // 后续 SkillSystem 需要处理冷却或消耗
         if (!existingBomb) playerComps.push(new BombIntent());
     } else {
-        if (existingBomb) removeComponent(w, w.playerId, existingBomb);
+        if (existingBomb) removeComponent(world, world.playerId, existingBomb);
     }
 
 }

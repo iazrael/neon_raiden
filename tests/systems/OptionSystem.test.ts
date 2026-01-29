@@ -1,12 +1,16 @@
 /**
  * OptionSystem 单元测试
- * 测试僚机系统的位置更新、数量同步等功能
+ * 测试僚机系统的位置更新功能
+ *
+ * 架构说明：
+ * - OptionSystem 只负责更新现有僚机的位置（环绕玩家旋转）
+ * - 僚机的创建和删除由 PickupSystem 负责（拾取 OPTION 道具时）
  */
 
 import { World } from '../../src/engine/types';
-import { createWorld, addComponent } from '../../src/engine/world';
+import { createWorld } from '../../src/engine/world';
 import { OptionSystem } from '../../src/engine/systems/OptionSystem';
-import { Transform, Option, PlayerTag, OptionCount } from '../../src/engine/components';
+import { Transform, Option, PlayerTag } from '../../src/engine/components';
 import { BLUEPRINT_FIGHTER_NEON } from '../../src/engine/blueprints/fighters';
 import { spawnPlayer } from '../../src/engine/factory';
 
@@ -24,7 +28,7 @@ describe('OptionSystem', () => {
         const optionId = 1;
         world.entities.set(optionId, [
             new Transform({ x: 400, y: 500, rot: 0 }),
-            new Option(0),
+            new Option({ index: 0 }),
             new PlayerTag({ isOption: true })
         ]);
 
@@ -43,76 +47,45 @@ describe('OptionSystem', () => {
         expect(optionTransform?.y).not.toBe(initialY);
     });
 
-    it('应该根据 OptionCount 同步僚机数量', () => {
-        // 设置玩家有 2 个僚机
-        const playerComps = world.entities.get(playerId);
-        if (playerComps) {
-            const optionCount = playerComps.find(OptionCount.check);
-            if (optionCount) {
-                optionCount.count = 2;
-            } else {
-                playerComps.push(new OptionCount({ count: 2, maxCount: 2 }));
-            }
-        }
+    it('应该更新多个僚机的位置', () => {
+        // 手动添加两个僚机实体
+        const option1Id = 1;
+        const option2Id = 2;
 
-        // 执行系统
-        OptionSystem(world, 16);
-
-        // 应该创建 2 个僚机
-        let optionCount = 0;
-        for (const [id, comps] of world.entities) {
-            const playerTag = comps.find(PlayerTag.check);
-            if (playerTag && playerTag.isOption) {
-                optionCount++;
-            }
-        }
-
-        expect(optionCount).toBe(2);
-    });
-
-    it('应该删除多余的僚机', () => {
-        // 手动添加 2 个僚机实体
-        world.entities.set(1, [
+        world.entities.set(option1Id, [
             new Transform({ x: 400, y: 500, rot: 0 }),
-            new Option(0),
-            new PlayerTag({ isOption: true })
-        ]);
-        world.entities.set(2, [
-            new Transform({ x: 400, y: 500, rot: 0 }),
-            new Option(1),
+            new Option({ index: 0 }),
             new PlayerTag({ isOption: true })
         ]);
 
-        // 设置玩家只有 1 个僚机
-        const playerComps = world.entities.get(playerId);
-        if (playerComps) {
-            const optionCount = playerComps.find(OptionCount.check);
-            if (optionCount) {
-                optionCount.count = 1;
-            } else {
-                playerComps.push(new OptionCount({ count: 1, maxCount: 2 }));
-            }
-        }
+        world.entities.set(option2Id, [
+            new Transform({ x: 400, y: 500, rot: 0 }),
+            new Option({ index: 1 }),
+            new PlayerTag({ isOption: true })
+        ]);
 
         // 执行系统
-        OptionSystem(world, 16);
+        world.time = 100;
+        OptionSystem(world, 100);
 
-        // 应该只剩下 1 个僚机
-        let optionCount = 0;
-        for (const [id, comps] of world.entities) {
-            const playerTag = comps.find(PlayerTag.check);
-            if (playerTag && playerTag.isOption) {
-                optionCount++;
-            }
-        }
+        // 两个僚机都应该在移动
+        const option1Transform = world.entities.get(option1Id)?.find(Transform.check);
+        const option2Transform = world.entities.get(option2Id)?.find(Transform.check);
 
-        expect(optionCount).toBe(1);
+        // 两个僚机的位置应该不同（因为它们的初始角度不同：0 和 π）
+        expect(option1Transform?.x).not.toBe(option2Transform?.x);
+        expect(option1Transform?.y).not.toBe(option2Transform?.y);
     });
 
     it('应该在没有玩家时正常返回', () => {
         world.playerId = 999;
 
         // 不应该抛出错误
+        expect(() => OptionSystem(world, 16)).not.toThrow();
+    });
+
+    it('应该在没有僚机时正常返回', () => {
+        // 不添加任何僚机实体，只执行系统
         expect(() => OptionSystem(world, 16)).not.toThrow();
     });
 });

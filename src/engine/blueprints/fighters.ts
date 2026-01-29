@@ -67,16 +67,7 @@ export const BLUEPRINT_OPTION_VULCAN: Blueprint = {
         pattern: WeaponPattern.AIMED
     },
 
-    // 炸弹组件，记录炸弹数量， 初始 3 个
-    Bomb: {
-        count: 3, maxCount: 9
-    },
+    /** 僚机组件 - 索引（会被 spawnOption 覆盖） */
+    Option: { index: 0 },
 
-    // 记录僚机数量和最大数量
-    OptionCount: {
-        count: 0, maxCount: 2,
-    },
-
-    /** 玩家标签组件 - 标识为僚机 */
-    PlayerTag: { isOption: true }
 };

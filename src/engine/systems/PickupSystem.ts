@@ -110,18 +110,27 @@ const optionPickupHandler: PickupHandler = {
         if (!playerTransform) return;
 
         let optionCount = playerComps.find(OptionCount.check);
-        if (optionCount) {
-            optionCount.count = Math.min(optionCount.count + 1, optionCount.maxCount);
-        } else {
-            optionCount = new OptionCount({ count: 1, maxCount: 2 });
+
+        // 如果还没有 OptionCount 组件，创建一个（count 从 0 开始）
+        if (!optionCount) {
+            optionCount = new OptionCount({ count: 0, maxCount: 2 });
             playerComps.push(optionCount);
         }
 
-        if (optionCount.count >= optionCount.maxCount){
-            // 超过了
+        // 检查是否已达到最大数量
+        if (optionCount.count >= optionCount.maxCount) {
+            // 已经满了，只播放音效，不创建新僚机
+            pushEvent(world, {
+                type: 'PlaySound',
+                name: 'buff_pickup'
+            } as PlaySoundEvent);
             return;
         }
 
+        // 增加数量
+        optionCount.count++;
+
+        // 使用增加后的索引（0 或 1）
         const index = optionCount.count - 1;
         const angle = index * Math.PI;
         const x = playerTransform.x + Math.cos(angle) * 60;

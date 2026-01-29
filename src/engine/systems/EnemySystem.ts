@@ -12,7 +12,7 @@
 
 import { World, EntityId, EnemyId } from '../types';
 import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon } from '../components';
-import { addComponent, view } from '../world';
+import { addComponent, getComponents, view } from '../world';
 import { getEnemyBehavior, EnemyBehavior } from '../configs/enemyGrowth';
 
 /**
@@ -22,15 +22,12 @@ import { getEnemyBehavior, EnemyBehavior } from '../configs/enemyGrowth';
  */
 export function EnemySystem(world: World, dt: number): void {
     // 获取玩家位置
-    let playerPos: { x: number; y: number } | null = null;
-    const player = world.entities.get(world.playerId);
-
-    const transform = player.find(Transform.check);
-    if (transform) {
-        playerPos = { x: transform.x, y: transform.y };
+    const [transform] = getComponents(world, world.playerId, [Transform])
+    if (!transform) {
+        return;
+        
     }
-
-    if (!playerPos) return; // 没有玩家，不处理
+    const playerPos = { x: transform.x, y: transform.y };
 
     // 处理每个敌人
     for (const [enemyId, [enemyTag, transform]] of view(world, [EnemyTag, Transform])) {
