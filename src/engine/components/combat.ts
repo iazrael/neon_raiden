@@ -120,6 +120,30 @@ export class Bullet extends Component {
     static check(c: any): c is Bullet { return c instanceof Bullet; }
 }
 
+/**
+ * Bomb 组件 - 追踪玩家的炸弹库存
+ */
+export class Bomb extends Component {
+    static check = (comp: Component): comp is Bomb => comp instanceof Bomb;
+
+    /** 当前炸弹数量 */
+    count: number;
+
+    /** 最大持有数量（固定为9） */
+    maxCount: number;
+
+    constructor(cfg: {
+        /** 当前炸弹数量 */
+        count: number;
+        /** 最大持有数量 */
+        maxCount: number;
+    }) {
+        super();
+        this.count = Math.min(cfg.count, cfg.maxCount);
+        this.maxCount = cfg.maxCount;
+    }
+}
+
 
 /** 拾取物品组件 - 定义可拾取物品的属性 */
 export class PickupItem extends Component {
@@ -296,3 +320,62 @@ export class TimeSlow extends Component {
 
     static check(c: any): c is TimeSlow { return c instanceof TimeSlow; }
 }
+
+
+/**
+ * Option 组件 - 僚机实体专用组件
+ * 存储僚机的索引和环绕参数
+ */
+export class Option extends Component {
+    static check = (comp: Component): comp is Option => comp instanceof Option;
+
+    /** 僚机索引（0或1） */
+    index: number;
+
+    /** 环绕半径（固定60像素） */
+    radius: number;
+
+    /** 当前角度（弧度） */
+    angle: number;
+
+    /** 旋转速度（弧度/秒，固定2） */
+    rotationSpeed: number;
+
+    /** 缓动系数（0-1，越小越平滑） */
+    lerpFactor: number;
+
+    constructor(cfg: { index: number }) {
+        super();
+        this.index = cfg.index;
+        this.radius = 60;
+        this.angle = cfg.index * Math.PI; // 0 和 π（180度）
+        this.rotationSpeed = 2;
+        this.lerpFactor = 0.2;
+    }
+}
+
+/**
+ * OptionCount 组件 - 追踪玩家的僚机数量
+ * 挂载在玩家实体上
+ */
+export class OptionCount extends Component {
+    static check = (comp: Component): comp is OptionCount => comp instanceof OptionCount;
+
+    /** 当前僚机数量 */
+    count: number;
+
+    /** 最大僚机数量（固定2） */
+    maxCount: number;
+
+    constructor(cfg: {
+        /** 当前僚机数量 */
+        count: number;
+        /** 最大僚机数量 */
+        maxCount: number;
+    }) {
+        super();
+        this.count = Math.min(cfg.count, cfg.maxCount);
+        this.maxCount = cfg.maxCount;
+    }
+}
+

@@ -117,6 +117,11 @@ const optionPickupHandler: PickupHandler = {
             playerComps.push(optionCount);
         }
 
+        if (optionCount.count >= optionCount.maxCount){
+            // 超过了
+            return;
+        }
+
         const index = optionCount.count - 1;
         const angle = index * Math.PI;
         const x = playerTransform.x + Math.cos(angle) * 60;
@@ -126,14 +131,6 @@ const optionPickupHandler: PickupHandler = {
         if (bp) {
             spawnOption(world, bp, index, x, y);
         }
-
-        // 播放拾取特效
-        pushEvent(world, {
-            type: 'Pickup',
-            pos: { x: 0, y: 0 },
-            itemId: BuffType.OPTION,
-            owner: playerId
-        } as PickupEvent);
 
         // 播放音效
         pushEvent(world, {

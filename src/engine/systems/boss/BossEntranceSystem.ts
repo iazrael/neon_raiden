@@ -22,7 +22,7 @@
 import { World } from '../../types';
 import { Transform, BossEntrance, MoveIntent, SpeedModifier, InvulnerableState } from '../../components';
 import { view, addComponent, removeTypes } from '../../world';
-import { BOSS_ARENA } from '../bossConstants';
+import { BOSS_ARENA } from '../../configs/bossConstants';
 
 /**
  * Boss入场系统主函数

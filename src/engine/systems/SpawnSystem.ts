@@ -230,7 +230,7 @@ const bossSpawnState: BossSpawnState = {
 /**
  * Boss 出现时间（毫秒）
  */
-const BOSS_SPAWN_TIME = 1 * 1000; // 60秒后Boss出现
+const BOSS_SPAWN_TIME = 60 * 1000; // 60秒后Boss出现
 
 /**
  * 检查是否需要刷 Boss

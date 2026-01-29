@@ -36,7 +36,7 @@ import {
     DASH,
     AGGRESSIVE,
     SLOW_DESCENT
-} from '../bossConstants';
+} from '../../configs/bossConstants';
 
 /**
  * 检查组件是否为 Transform

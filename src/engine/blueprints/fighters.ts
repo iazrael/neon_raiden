@@ -3,7 +3,6 @@ import { CollisionLayer } from '../types/collision';
 import { Blueprint } from './base';
 import { WEAPON_TABLE } from './weapons';
 import { SpriteKey } from '../configs/sprites';
-import { OptionCount } from '../components';
 
 /**
  * 玩家战机蓝图 - Neon战机
@@ -68,8 +67,15 @@ export const BLUEPRINT_OPTION_VULCAN: Blueprint = {
         pattern: WeaponPattern.AIMED
     },
 
-    /** 僚机组件 - 索引（会被覆盖） */
-    Option: 0,
+    // 炸弹组件，记录炸弹数量， 初始 3 个
+    Bomb: {
+        count: 3, maxCount: 9
+    },
+
+    // 记录僚机数量和最大数量
+    OptionCount: {
+        count: 0, maxCount: 2,
+    },
 
     /** 玩家标签组件 - 标识为僚机 */
     PlayerTag: { isOption: true }
