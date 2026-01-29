@@ -1,172 +1,301 @@
 /**
  * EffectPlayer 单元测试
+ *
+ * 测试特效播放器的各种功能：
+ * - HitEvent 生成爆炸和飙血粒子
+ * - KillEvent 生成大型爆炸和冲击波
+ * - 粒子动画更新
+ * - 冲击波生成和动画
  */
 
-import { EffectPlayer, updateParticles } from '../../src/engine/systems/EffectPlayer';
-import { World } from '../../src/engine/types';
-import { Transform, Sprite, Particle, Lifetime } from '../../src/engine/components';
-import { HitEvent, KillEvent, PickupEvent, ComboUpgradeEvent } from '../../src/engine/events';
+import { describe, it, expect, beforeEach } from '@jest/globals';
+import { createWorld, generateId, World } from '../../src/engine/world';
+import { EffectPlayer, updateParticles, spawnShockwave } from '../../src/engine/systems/EffectPlayer';
+import { Transform, Particle, Lifetime, Sprite, Shockwave } from '../../src/engine/components';
+import { HitEvent, KillEvent, ComboUpgradeEvent } from '../../src/engine/events';
 
 describe('EffectPlayer', () => {
-    let mockWorld: World;
+    let world: World;
 
     beforeEach(() => {
-        // 创建模拟世界对象
-        mockWorld = {
-            entities: new Map(),
-            playerId: 1,
-            width: 800,
-            height: 600,
-            time: 0,
-            score: 0,
-            level: 0,
-            difficulty: 1.0,
-            spawnCredits: 100,
-            spawnTimer: 0,
-            enemyCount: 0,
-            events: [],
-            comboState: { count: 0, timer: 0, multiplier: 1 },
-        } as unknown as World;
+        world = createWorld();
+        world.width = 800;
+        world.height = 600;
     });
 
-    describe('Hit 事件处理', () => {
-        it('应该处理 Hit 事件并生成粒子', () => {
-            mockWorld.events = [
-                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 20, owner: 1, victim: 2, bloodLevel: 1 }
-            ];
+    describe('HitEvent 处理', () => {
+        it('应该在 HitEvent 时生成爆炸和飙血粒子', () => {
+            const hitEvent: HitEvent = {
+                type: 'Hit',
+                pos: { x: 100, y: 200 },
+                damage: 20,
+                owner: 1,
+                victim: 2,
+                bloodLevel: 2
+            };
 
-            const initialEntityCount = mockWorld.entities.size;
+            world.events.push(hitEvent);
+            EffectPlayer(world, 16);
 
-            EffectPlayer(mockWorld, 0.016);
+            // 验证粒子实体被创建
+            let particleCount = 0;
+            for (const [id, comps] of world.entities) {
+                if (comps.some(Particle.check)) {
+                    particleCount++;
+                }
+            }
 
-            // 应该生成粒子实体
-            expect(mockWorld.entities.size).toBeGreaterThan(initialEntityCount);
+            expect(particleCount).toBeGreaterThan(0);
         });
 
-        it('应该根据血量等级生成不同的粒子', () => {
-            mockWorld.events = [
-                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 50, owner: 1, victim: 2, bloodLevel: 2 }
-            ];
+        it('应该根据伤害值选择爆炸大小', () => {
+            // 测试小型爆炸
+            const smallHit: HitEvent = {
+                type: 'Hit',
+                pos: { x: 100, y: 200 },
+                damage: 10,
+                owner: 1,
+                victim: 2,
+                bloodLevel: 1
+            };
 
-            EffectPlayer(mockWorld, 0.016);
-
-            // 应该生成粒子
-            expect(mockWorld.entities.size).toBeGreaterThan(0);
-        });
-
-        it('应该根据伤害值选择粒子大小', () => {
-            mockWorld.events = [
-                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 100, owner: 1, victim: 2, bloodLevel: 3 }
-            ];
-
-            EffectPlayer(mockWorld, 0.016);
-
-            // 系统应该正常运行
-            expect(true).toBe(true);
-        });
-    });
-
-    describe('Kill 事件处理', () => {
-        it('应该处理 Kill 事件并生成爆炸特效', () => {
-            mockWorld.events = [
-                { type: 'Kill', pos: { x: 400, y: 300 }, victim: 2, killer: 1, score: 100 }
-            ];
-
-            EffectPlayer(mockWorld, 0.016);
+            world.events.push(smallHit);
+            EffectPlayer(world, 16);
 
             // 应该生成爆炸粒子
-            expect(mockWorld.entities.size).toBeGreaterThan(0);
+            let hasExplosion = false;
+            for (const [id, comps] of world.entities) {
+                const sprite = comps.find(Sprite.check);
+                if (sprite && sprite.color === '#ff6600') { // explosion_small 的颜色
+                    hasExplosion = true;
+                }
+            }
+
+            expect(hasExplosion).toBe(true);
         });
 
-        it('应该根据得分选择爆炸大小', () => {
-            mockWorld.events = [
-                { type: 'Kill', pos: { x: 400, y: 300 }, victim: 2, killer: 1, score: 1000 }
-            ];
+        it('应该生成飙血特效', () => {
+            const hitEvent: HitEvent = {
+                type: 'Hit',
+                pos: { x: 100, y: 200 },
+                damage: 20,
+                owner: 1,
+                victim: 2,
+                bloodLevel: 2
+            };
 
-            EffectPlayer(mockWorld, 0.016);
+            world.events.push(hitEvent);
+            EffectPlayer(world, 16);
 
-            // 系统应该正常运行
-            expect(true).toBe(true);
-        });
-    });
+            // 应该生成飙血粒子
+            let hasBlood = false;
+            for (const [id, comps] of world.entities) {
+                const sprite = comps.find(Sprite.check);
+                if (sprite && sprite.color === '#ff0000') { // blood_medium 的颜色
+                    hasBlood = true;
+                }
+            }
 
-    describe('Pickup 事件处理', () => {
-        it('应该处理 Pickup 事件并生成拾取特效', () => {
-            mockWorld.events = [
-                { type: 'Pickup', pos: { x: 400, y: 300 }, itemId: 'POWER', owner: 1 }
-            ];
-
-            EffectPlayer(mockWorld, 0.016);
-
-            // 应该生成拾取粒子
-            expect(mockWorld.entities.size).toBeGreaterThan(0);
-        });
-    });
-
-    describe('ComboUpgrade 事件处理', () => {
-        it('应该处理 ComboUpgrade 事件', () => {
-            mockWorld.events = [
-                { type: 'ComboUpgrade', pos: { x: 400, y: 100 }, level: 2, name: 'GOOD', color: '#00ff00' }
-            ];
-
-            EffectPlayer(mockWorld, 0.016);
-
-            // 应该生成连击升级粒子
-            expect(mockWorld.entities.size).toBeGreaterThan(0);
+            expect(hasBlood).toBe(true);
         });
     });
 
-    describe('粒子更新', () => {
-        it('应该更新粒子动画帧', () => {
-            // 添加一个粒子实体
-            const id = 100;
-            mockWorld.entities.set(id, [
-                new Transform({ x: 400, y: 300, rot: 0 }),
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 }),
-                new Particle({ frame: 0, maxFrame: 8, fps: 16 }),
-                new Lifetime({ timer: 1000 })
-            ]);
+    describe('KillEvent 处理', () => {
+        it('应该在 KillEvent 时生成大型爆炸', () => {
+            const killEvent: KillEvent = {
+                type: 'Kill',
+                pos: { x: 100, y: 200 },
+                victim: 2,
+                killer: 1,
+                score: 100
+            };
 
-            updateParticles(mockWorld, 0.1);
+            world.events.push(killEvent);
+            EffectPlayer(world, 16);
+
+            // 验证大型爆炸粒子被创建
+            let largeExplosionCount = 0;
+            for (const [id, comps] of world.entities) {
+                const particle = comps.find(Particle.check);
+                if (particle && particle.maxFrame >= 16) { // 大型爆炸的帧数
+                    largeExplosionCount++;
+                }
+            }
+
+            expect(largeExplosionCount).toBeGreaterThan(0);
+        });
+
+        it('应该在 KillEvent 时生成冲击波', () => {
+            const killEvent: KillEvent = {
+                type: 'Kill',
+                pos: { x: 100, y: 200 },
+                victim: 2,
+                killer: 1,
+                score: 100
+            };
+
+            world.events.push(killEvent);
+            EffectPlayer(world, 16);
+
+            // 验证冲击波被创建
+            let shockwaveCount = 0;
+            for (const [id, comps] of world.entities) {
+                if (comps.some(Shockwave.check)) {
+                    shockwaveCount++;
+                }
+            }
+
+            expect(shockwaveCount).toBeGreaterThan(0);
+        });
+    });
+
+    describe('粒子动画', () => {
+        it('应该正确更新粒子帧', () => {
+            const id = generateId();
+            const transform = new Transform({ x: 100, y: 200, rot: 0 });
+            const particle = new Particle({ frame: 0, maxFrame: 10, fps: 10 });
+            const sprite = new Sprite({ spriteKey: 'particle' as any, color: '#ff0000' });
+            const lifetime = new Lifetime({ timer: 1000 });
+
+            world.entities.set(id, [transform, sprite, particle, lifetime]);
+
+            updateParticles(world, 100); // 100ms
 
             // 帧应该增加
-            const comps = mockWorld.entities.get(id);
-            const particle = comps?.find(Particle.check) as Particle;
-            expect(particle!.frame).toBeGreaterThan(0);
+            expect(particle.frame).toBeGreaterThan(0);
         });
 
-        it('应该在粒子播放完毕后标记销毁', () => {
-            // 添加一个粒子实体
-            const id = 100;
-            mockWorld.entities.set(id, [
-                new Transform({ x: 400, y: 300, rot: 0 }),
-                new Sprite({ color: '#ff0000', srcX: 0, srcY: 0, srcW: 32, srcH: 32 }),
-                new Particle({ frame: 7, maxFrame: 8, fps: 16 }),
-                new Lifetime({ timer: 1000 })
-            ]);
+        it('应该在动画结束时标记粒子为销毁', () => {
+            const id = generateId();
+            const transform = new Transform({ x: 100, y: 200, rot: 0 });
+            const particle = new Particle({ frame: 9, maxFrame: 10, fps: 10 });
+            const sprite = new Sprite({ spriteKey: 'particle' as any, color: '#ff0000' });
+            const lifetime = new Lifetime({ timer: 1000 });
 
-            updateParticles(mockWorld, 0.1);
+            world.entities.set(id, [transform, sprite, particle, lifetime]);
 
-            // Lifetime 应该被设置为 0
-            const comps = mockWorld.entities.get(id);
-            const lifetime = comps?.find(Lifetime.check) as Lifetime;
-            expect(lifetime!.timer).toBe(0);
+            updateParticles(world, 200); // 超过动画结束时间
+
+            // lifetime.timer 应该被设置为 0
+            expect(lifetime.timer).toBe(0);
+        });
+
+        it('应该在动画播放完成后不增加帧', () => {
+            const id = generateId();
+            const transform = new Transform({ x: 100, y: 200, rot: 0 });
+            const particle = new Particle({ frame: 15, maxFrame: 10, fps: 10 });
+            const sprite = new Sprite({ spriteKey: 'particle' as any, color: '#ff0000' });
+            const lifetime = new Lifetime({ timer: 1000 });
+
+            world.entities.set(id, [transform, sprite, particle, lifetime]);
+
+            updateParticles(world, 100);
+
+            // lifetime 应该被标记为过期
+            expect(lifetime.timer).toBe(0);
         });
     });
 
-    describe('边界情况', () => {
-        it('空事件列表应该正常处理', () => {
-            mockWorld.events = [];
+    describe('冲击波', () => {
+        it('应该生成正确的冲击波实体', () => {
+            const id = spawnShockwave(world, 100, 200, '#ff0000', 150, 5);
 
-            expect(() => EffectPlayer(mockWorld, 0.016)).not.toThrow();
+            const comps = world.entities.get(id);
+            expect(comps).toBeDefined();
+
+            const transform = comps?.find(Transform.check);
+            const shockwave = comps?.find(Shockwave.check);
+
+            expect(transform?.x).toBe(100);
+            expect(transform?.y).toBe(200);
+            expect(shockwave?.color).toBe('#ff0000');
+            expect(shockwave?.maxRadius).toBe(150);
+            expect(shockwave?.width).toBe(5);
+            expect(shockwave?.radius).toBe(10); // 初始半径
+            expect(shockwave?.life).toBe(1.0); // 初始生命周期
         });
 
-        it('无效的特效配置应该跳过', () => {
-            mockWorld.events = [
-                { type: 'PlaySound', name: 'invalid_sound' } as any
-            ];
+        it('应该在连击升级时生成冲击波', () => {
+            const comboEvent: ComboUpgradeEvent = {
+                type: 'ComboUpgrade',
+                pos: { x: 100, y: 200 },
+                level: 2,
+                name: 'Double',
+                color: '#00ffff'
+            };
 
-            expect(() => EffectPlayer(mockWorld, 0.016)).not.toThrow();
+            world.events.push(comboEvent);
+            EffectPlayer(world, 16);
+
+            // 验证冲击波被创建
+            let shockwaveCount = 0;
+            for (const [id, comps] of world.entities) {
+                if (comps.some(Shockwave.check)) {
+                    shockwaveCount++;
+                }
+            }
+
+            expect(shockwaveCount).toBeGreaterThan(0);
+        });
+
+        it('应该生成带默认参数的冲击波', () => {
+            const id = spawnShockwave(world, 100, 200);
+
+            const comps = world.entities.get(id);
+            const shockwave = comps?.find(Shockwave.check);
+
+            expect(shockwave?.color).toBe('#ffffff'); // 默认白色
+            expect(shockwave?.maxRadius).toBe(150); // 默认最大半径
+            expect(shockwave?.width).toBe(5); // 默认线宽
+        });
+    });
+
+    describe('ComboUpgradeEvent 处理', () => {
+        it('应该在连击升级时生成特效', () => {
+            const comboEvent: ComboUpgradeEvent = {
+                type: 'ComboUpgrade',
+                pos: { x: 100, y: 200 },
+                level: 2,
+                name: 'Double',
+                color: '#00ffff'
+            };
+
+            world.events.push(comboEvent);
+            EffectPlayer(world, 16);
+
+            // 应该生成连击升级粒子
+            let hasComboParticle = false;
+            for (const [id, comps] of world.entities) {
+                const sprite = comps.find(Sprite.check);
+                if (sprite && sprite.color === '#00ffff') { // combo_upgrade 的颜色
+                    hasComboParticle = true;
+                }
+            }
+
+            expect(hasComboParticle).toBe(true);
+        });
+
+        it('应该在连击升级时生成冲击波', () => {
+            const comboEvent: ComboUpgradeEvent = {
+                type: 'ComboUpgrade',
+                pos: { x: 100, y: 200 },
+                level: 2,
+                name: 'Double',
+                color: '#00ffff'
+            };
+
+            world.events.push(comboEvent);
+            EffectPlayer(world, 16);
+
+            // 应该生成冲击波
+            let shockwaveCount = 0;
+            for (const [id, comps] of world.entities) {
+                if (comps.some(Shockwave.check)) {
+                    shockwaveCount++;
+                }
+            }
+
+            expect(shockwaveCount).toBeGreaterThan(0);
         });
     });
 });

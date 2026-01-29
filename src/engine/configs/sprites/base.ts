@@ -41,7 +41,7 @@ export enum SpriteKey {
   OPTION = 'option',
 
   // Particles (纯颜色绘制)
-  // PARTICLE = 'particle',
+  PARTICLE = 'particle',
 
   // Bullets (玩家)
   BULLET_VULCAN = 'bullet.vulcan',
@@ -159,14 +159,14 @@ export const SPRITE_REGISTRY: Record<SpriteKey, SpriteEntry> = {
   },
 
   // ==================== Particles ====================
-  // [SpriteKey.PARTICLE]: {
-  //   key: SpriteKey.PARTICLE,
-  //   file: '', // 纯颜色绘制，无文件
-  //   width: 32,
-  //   height: 32,
-  //   pivotX: 0.5,
-  //   pivotY: 0.5,
-  // },
+  [SpriteKey.PARTICLE]: {
+    key: SpriteKey.PARTICLE,
+    file: '', // 纯颜色绘制，无文件
+    width: 32,
+    height: 32,
+    pivotX: 0.5,
+    pivotY: 0.5,
+  },
 
   // ==================== Bullets (玩家) ====================
   [SpriteKey.BULLET_VULCAN]: {

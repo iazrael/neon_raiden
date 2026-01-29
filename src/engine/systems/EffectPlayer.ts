@@ -11,11 +11,12 @@
  */
 
 import { World } from '../types';
-import { Transform, Sprite, Particle, Lifetime } from '../components';
-import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent } from '../events';
+import { Transform, Particle, Lifetime, Shockwave, Velocity } from '../components';
+import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
 import { triggerCameraShake } from './RenderSystem';
-import { generateId } from '../world';
-import { SpriteKey } from '../configs/sprites';
+import { generateId, getComponents, view } from '../world';
+import { Blueprint } from '../blueprints';
+import { spawnFromBlueprint } from '../factory';
 
 /**
  * 粒子类型配置
@@ -139,6 +140,82 @@ const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
         frames: 5,          // 快速闪烁
         fps: 30,
         lifetime: 0.2       // 0.2秒
+    },
+
+    // 武器特效
+    plasma_explosion: {
+        scale: 2,
+        color: '#ed64a6',   // 粉色
+        frames: 16,
+        fps: 16,
+        lifetime: 1.0
+    },
+    tesla_chain: {
+        scale: 1.5,
+        color: '#a855f7',   // 紫色
+        frames: 8,
+        fps: 24,
+        lifetime: 0.3
+    },
+    magma_burn: {
+        scale: 1.2,
+        color: '#ef4444',   // 红色
+        frames: 12,
+        fps: 12,
+        lifetime: 0.6
+    },
+    shuriken_bounce: {
+        scale: 1,
+        color: '#fbbf24',   // 黄色
+        frames: 6,
+        fps: 20,
+        lifetime: 0.3
+    }
+};
+
+/**
+ * 爆炸粒子配置 - 模仿旧版本的物理粒子系统
+ */
+interface ExplosionConfig {
+    count: number;           // 粒子数量
+    speedMin: number;        // 最小速度
+    speedMax: number;        // 最大速度
+    sizeMin: number;         // 最小大小
+    sizeMax: number;         // 最大大小
+    life: number;            // 生命周期 (ms)
+    color: string;           // 颜色
+}
+
+/**
+ * 爆炸效果配置表
+ */
+const EXPLOSION_CONFIGS: Record<string, ExplosionConfig> = {
+    small: {
+        count: 8,
+        speedMin: 1,
+        speedMax: 4,
+        sizeMin: 2,
+        sizeMax: 4,
+        life: 300,
+        color: '#ffe066'  // 黄色火花
+    },
+    large: {
+        count: 30,
+        speedMin: 3,
+        speedMax: 10,
+        sizeMin: 2,
+        sizeMax: 6,
+        life: 800,
+        color: '#ff6600'  // 橙红色爆炸
+    },
+    hit: {
+        count: 5,
+        speedMin: 2,
+        speedMax: 5,
+        sizeMin: 2,
+        sizeMax: 4,
+        life: 200,
+        color: '#ffffff'  // 白色击中闪光
     }
 };
 
@@ -184,37 +261,71 @@ export function EffectPlayer(world: World, dt: number): void {
             case 'BombExploded':
                 handleBombExplodedEvent(world, event as BombExplodedEvent);
                 break;
+            case 'WeaponEffect':
+                handleWeaponEffectEvent(world, event as WeaponEffectEvent);
+                break;
         }
     }
+
+    // 更新所有粒子动画帧
+    updateParticles(world, dt);
 }
 
 /**
  * 处理命中事件
+ * 采用旧版本的"多粒子飞散"爆炸效果
  */
 function handleHitEvent(world: World, event: HitEvent): void {
-    // 根据伤害值选择爆炸大小
-    let effectKey = 'explosion_small';
-    if (event.damage > 30) {
-        effectKey = 'explosion_medium';
-    }
-    if (event.damage > 60) {
-        effectKey = 'explosion_large';
-    }
-
-    // 生成爆炸粒子
-    spawnParticle(world, effectKey, event.pos.x, event.pos.y);
-
-    // 根据血量等级生成飙血特效
-    const bloodKey = `blood_${event.bloodLevel === 1 ? 'light' : event.bloodLevel === 2 ? 'medium' : 'heavy'}`;
-    spawnParticle(world, bloodKey, event.pos.x, event.pos.y);
+    // 生成爆炸粒子 - 使用新的物理粒子系统
+    const config = EXPLOSION_CONFIGS.hit;
+    spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
 }
 
 /**
  * 处理击杀事件
+ * 采用旧版本的"多粒子飞散"爆炸效果
  */
 function handleKillEvent(world: World, event: KillEvent): void {
-    // 生成大型爆炸特效
-    spawnParticle(world, 'explosion_large', event.pos.x, event.pos.y);
+    // 生成大型爆炸粒子 - 使用新的物理粒子系统
+    const config = EXPLOSION_CONFIGS.large;
+    spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
+
+    // 添加冲击波 - 缩小最大半径，避免圈太大
+    spawnShockwave(world, event.pos.x, event.pos.y, '#ffffff', 120, 6);
+}
+
+/**
+ * 生成爆炸粒子 - 模仿旧版本的物理粒子系统
+ * 生成多个粒子，每个有随机速度向四周飞散
+ */
+function spawnExplosionParticles(world: World, x: number, y: number, config: ExplosionConfig): void {
+    for (let i = 0; i < config.count; i++) {
+        // 随机角度和速度
+        const angle = Math.random() * Math.PI * 2;
+        const speed = config.speedMin + Math.random() * (config.speedMax - config.speedMin);
+
+        // 粒子蓝图 - 包含 Velocity 组件
+        const particleBlueprint: Blueprint = {
+            Transform: { x: 0, y: 0, rot: 0 },
+            Velocity: {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed
+            },
+            Particle: {
+                frame: 0,
+                maxFrame: 60,  // 帧动画相关（物理粒子不使用）
+                fps: 60,
+                color: config.color,
+                scale: config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin),
+                maxLife: config.life  // 明确的生命周期（毫秒）
+            },
+            Lifetime: {
+                timer: config.life
+            }
+        };
+
+        spawnFromBlueprint(world, particleBlueprint, x, y, 0);
+    }
 }
 
 /**
@@ -256,8 +367,7 @@ function handleBloodFogEvent(world: World, event: BloodFogEvent): void {
  */
 function handleLevelUpEvent(world: World, event: LevelUpEvent): void {
     // 获取玩家位置
-    const playerComps = world.entities.get(world.playerId);
-    const transform = playerComps?.find(Transform.check) as Transform | undefined;
+    const [transform] = getComponents(world, world.playerId, [Transform])
 
     if (transform) {
         spawnParticle(world, 'levelup', transform.x, transform.y);
@@ -275,6 +385,9 @@ function handleLevelUpEvent(world: World, event: LevelUpEvent): void {
 function handleComboUpgradeEvent(world: World, event: ComboUpgradeEvent): void {
     // 生成连击升级特效
     spawnParticle(world, 'combo_upgrade', event.pos.x, event.pos.y);
+
+    // 添加冲击波
+    spawnShockwave(world, event.pos.x, event.pos.y, event.color, 200, 8);
 }
 
 /**
@@ -316,27 +429,23 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
         return 0;
     }
 
-    // 创建粒子组件
-    const transform = new Transform({ x, y, rot: 0 });
-    // TODO: 粒子效果不需要精灵图吧？
-    // const sprite = new Sprite({
-    //     spriteKey: SpriteKey.PARTICLE,
-    //     color: config.color,
-    //     scale: config.scale
-    // });
-    const particle = new Particle({
-        frame: 0,
-        maxFrame: config.frames,
-        fps: config.fps
-    });
-    // Lifetime 使用 timer (秒 * 1000 = 毫秒)
-    const lifetime = new Lifetime({ timer: config.lifetime * 1000 });
+    // 创建粒子动画蓝图
+    const particleBlueprint: Blueprint = {
+        Transform: { x: 0, y: 0, rot: 0 },  // 位置通过参数传入
+        Particle: {
+            frame: 0,
+            maxFrame: config.frames,
+            fps: config.fps,
+            color: config.color,  // 存储颜色用于渲染
+            scale: config.scale   // 存储缩放用于大小
+        },
+        Lifetime: {
+            timer: config.lifetime * 1000
+        }
+    };
 
-    // 生成实体 ID
-    const id = generateId();
-
-    // 存储组件
-    world.entities.set(id, [transform, particle, lifetime]);
+    // 关键修复：x, y 必须作为参数传入
+    const id = spawnFromBlueprint(world, particleBlueprint, x, y, 0);
 
     return id;
 }
@@ -345,9 +454,7 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
  * 更新粒子动画帧
  */
 export function updateParticles(world: World, dt: number): void {
-    for (const [id, comps] of world.entities) {
-        const particle = comps.find(Particle.check) as Particle | undefined;
-        if (!particle) continue;
+    for (const [id, [particle, lifetime], comps] of view(world, [Particle, Lifetime])) {
 
         // 累加帧时间
         particle.frame += dt * particle.fps;
@@ -355,10 +462,65 @@ export function updateParticles(world: World, dt: number): void {
         // 检查是否播放完毕
         if (particle.frame >= particle.maxFrame) {
             // 标记为销毁
-            const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
-            if (lifetime) {
-                lifetime.timer = 0; // 强制过期
-            }
+            lifetime.timer = 0; // 强制过期
         }
     }
+}
+
+/**
+ * 生成冲击波特效
+ * @param world 世界对象
+ * @param x X 坐标
+ * @param y Y 坐标
+ * @param color 颜色
+ * @param maxRadius 最大半径
+ * @param width 线宽
+ * @returns 实体 ID
+ */
+export function spawnShockwave(
+    world: World,
+    x: number,
+    y: number,
+    color: string = '#ffffff',
+    maxRadius: number = 150,
+    width: number = 5
+): number {
+    const shockwaveBlueprint: Blueprint = {
+        Transform: { x: 0, y: 0, rot: 0 },  // 位置通过参数传入，不放在蓝图里
+        Shockwave: { maxRadius, color, width },
+        Lifetime: {
+            timer: 1000 // 1秒生命周期
+        }
+    };
+
+    // 关键修复：x, y 必须作为参数传入，否则 factory 会用默认值 0,0
+    const id = spawnFromBlueprint(world, shockwaveBlueprint, x, y, 0);
+
+    return id;
+}
+
+/**
+ * 处理武器特效事件
+ */
+function handleWeaponEffectEvent(world: World, event: WeaponEffectEvent): void {
+    let effectKey: string;
+
+    switch (event.effectType) {
+        case 'explosion':
+            effectKey = 'plasma_explosion';
+            break;
+        case 'chain':
+            effectKey = 'tesla_chain';
+            break;
+        case 'burn':
+            effectKey = 'magma_burn';
+            break;
+        case 'bounce':
+            effectKey = 'shuriken_bounce';
+            break;
+        default:
+            return;
+    }
+
+    spawnParticle(world, effectKey, event.pos.x, event.pos.y);
 }

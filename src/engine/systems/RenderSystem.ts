@@ -15,7 +15,7 @@
  */
 
 import { World } from '../types';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow } from '../components';
+import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow, Shockwave, Lifetime } from '../components';
 import { SpriteManager } from '../SpriteManager';
 import { view } from '../world';
 
@@ -239,6 +239,12 @@ export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext
     if (playerInfo) {
         drawPlayerEffects(context, playerInfo, camX, camY);
     }
+
+    // 绘制粒子特效
+    drawParticles(context, world, camX, camY);
+
+    // 绘制冲击波
+    drawShockwaves(context, world, camX, camY, dt);
 
     // 绘制 Boss 血条
     if (bossInfo) {
@@ -586,4 +592,94 @@ export function resetCamera(): void {
     camera.shakeX = 0;
     camera.shakeY = 0;
     camera.zoom = 1.0;
+}
+
+/**
+ * 绘制冲击波特效
+ * 采用旧版本的非线性扩张 + 发光边缘效果
+ */
+function drawShockwaves(
+    ctx: CanvasRenderingContext2D,
+    world: World,
+    camX: number,
+    camY: number,
+    dt: number
+): void {
+    for (const [id, comps] of world.entities) {
+        const transform = comps.find(Transform.check) as Transform | undefined;
+        const shockwave = comps.find(Shockwave.check) as Shockwave | undefined;
+
+        if (!transform || !shockwave) continue;
+
+        // 更新冲击波动画 - 采用旧版本的非线性扩张（越接近 maxRadius 越慢）
+        const timeScale = dt / 16.66;
+        shockwave.radius += (shockwave.maxRadius - shockwave.radius) * 0.1 * timeScale;
+        shockwave.life -= 0.02 * timeScale;
+
+        // 绘制
+        ctx.save();
+
+        // 透明度随 life 衰减
+        ctx.globalAlpha = Math.max(0, shockwave.life);
+
+        // 添加发光效果 - 让边缘更柔和
+        ctx.shadowColor = shockwave.color;
+        ctx.shadowBlur = 15;
+        ctx.lineWidth = shockwave.width;
+        ctx.strokeStyle = shockwave.color;
+
+        // 绘制光圈
+        ctx.beginPath();
+        ctx.arc(transform.x - camX, transform.y - camY, shockwave.radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+}
+
+/**
+ * 绘制粒子特效
+ * 采用旧版本的渲染方式：lighter 混合模式 + 基于 Lifetime 的渐隐
+ */
+function drawParticles(
+    ctx: CanvasRenderingContext2D,
+    world: World,
+    camX: number,
+    camY: number
+): void {
+    // 使用 lighter 混合模式让重叠粒子更亮（旧版本效果）
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (const [id, comps] of world.entities) {
+        const transform = comps.find(Transform.check) as Transform | undefined;
+        const particle = comps.find(Particle.check) as Particle | undefined;
+        const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
+
+        if (!transform || !particle) continue;
+
+        // 计算透明度 - 基于 Lifetime 衰减（旧版本：life / maxLife）
+        let alpha = 1;
+        if (lifetime) {
+            // 优先使用 maxLife（物理粒子），否则用 maxFrame * 16.66（帧动画粒子）
+            const maxLife = particle.maxLife > 0
+                ? particle.maxLife
+                : particle.maxFrame * 16.66;  // 假设 60fps，每帧 16.66ms
+            alpha = Math.max(0, Math.min(1, lifetime.timer / maxLife));
+        }
+
+        // 粒子大小
+        const size = particle.scale;
+
+        // 绘制粒子为小圆点
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // 恢复默认混合模式
+    ctx.globalCompositeOperation = 'source-over';
 }

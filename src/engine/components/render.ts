@@ -18,16 +18,63 @@ export class Particle extends Component {
         maxFrame?: number;
         /** 帧率 */
         fps?: number;
+        /** 粒子颜色 */
+        color?: string;
+        /** 粒子缩放 */
+        scale?: number;
+        /** 粒子生命周期（毫秒）- 用于物理粒子（爆炸火花等） */
+        maxLife?: number;
     }) {
         super();
         this.frame = cfg.frame ?? 0;
         this.maxFrame = cfg.maxFrame ?? 1;
         this.fps = cfg.fps ?? 12;
+        this.color = cfg.color ?? '#ffffff';
+        this.scale = cfg.scale ?? 1;
+        this.maxLife = cfg.maxLife ?? 0;
     }
     public frame = 0;
     public maxFrame = 1;
     public fps = 12;
+    public color = '#ffffff';
+    public scale = 1;
+    /** 粒子生命周期（毫秒）- 用于物理粒子，优先级高于 maxFrame 计算透明度 */
+    public maxLife = 0;
     static check(c: any): c is Particle { return c instanceof Particle; }
+}
+
+
+/** 冲击波组件 - 控制冲击波动画 */
+export class Shockwave extends Component {
+    /**
+     * 构造函数
+     * @param cfg 冲击波配置
+     */
+    constructor(cfg: {
+        maxRadius?: number;
+        color?: string;
+        width?: number;
+    }) {
+        super();
+        this.radius = 10;
+        this.maxRadius = cfg.maxRadius ?? 150;
+        this.color = cfg.color ?? '#ffffff';
+        this.width = cfg.width ?? 5;
+        this.life = 1.0;
+    }
+
+    /** 当前半径 */
+    public radius: number;
+    /** 最大半径 */
+    public maxRadius: number;
+    /** 颜色 */
+    public color: string;
+    /** 线宽 */
+    public width: number;
+    /** 生命周期 (0-1) */
+    public life: number;
+
+    static check(c: any): c is Shockwave { return c instanceof Shockwave; }
 }
 
 

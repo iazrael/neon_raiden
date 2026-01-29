@@ -16,7 +16,8 @@ export type Event =
     | PlaySoundEvent
     | BerserkModeEvent
     | ComboUpgradeEvent
-    | BombExplodedEvent;
+    | BombExplodedEvent
+    | WeaponEffectEvent;
 
 
 /**
@@ -38,6 +39,7 @@ export const EventTags = {
     BerserkMode: 'BerserkMode',
     ComboUpgrade: 'ComboUpgrade',
     BombExploded: 'BombExploded',
+    WeaponEffect: 'WeaponEffect',
 } as const;
 
 
@@ -156,4 +158,12 @@ export interface BombExplodedEvent {
     type: 'BombExploded';
     pos: { x: number; y: number }; // 爆炸中心位置（玩家位置）
     playerId: number;              // 使用炸弹的玩家ID
+}
+
+// ⑮ 武器特效事件
+export interface WeaponEffectEvent {
+    type: 'WeaponEffect';
+    pos: { x: number; y: number }; // 特效位置
+    weaponType: string;            // 武器类型
+    effectType: 'explosion' | 'chain' | 'burn' | 'bounce'; // 特效类型
 }
