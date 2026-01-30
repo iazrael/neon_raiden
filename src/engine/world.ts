@@ -2,15 +2,6 @@ import { EntityId, Component, GameStatus, ComboState } from './types';
 import { Event as GameEvent } from './events';
 
 
-/** 时间减速线条状态 */
-export interface TimeSlowLine {
-    x: number;
-    y: number;
-    length: number;
-    speed: number;
-    alpha: number;
-}
-
 /** 相机状态 */
 export interface CameraState {
     x: number;
@@ -27,7 +18,6 @@ export interface CameraState {
 /** 渲染状态 */
 export interface RenderState {
     camera: CameraState;
-    timeSlowLines: TimeSlowLine[];
 }
 
 // 世界接口
@@ -106,7 +96,6 @@ export function createWorld(): World {
                 shakeTimer: 0,
                 shakeIntensity: 0,
             },
-            timeSlowLines: [],
         },
     };
 }

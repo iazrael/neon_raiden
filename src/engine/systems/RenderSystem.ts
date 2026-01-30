@@ -15,8 +15,8 @@
  */
 
 import { Component } from '../types/base';
-import { World } from '../world';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow, Shockwave, Lifetime } from '../components';
+import { World, view } from '../world';
+import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow, Shockwave, Lifetime, VisualEffect, VisualLine } from '../components';
 import { DebugConfig } from '../config/DebugConfig';
 
 /**
@@ -177,40 +177,15 @@ function collectRenderItems(world: World): RenderQueue {
 }
 
 /**
- * 更新并绘制时间减速特效线条
- */
-function updateTimeSlowLines(world: World, width: number, height: number): void {
-    const { timeSlowLines } = world.renderState;
-
-    // 生成新的线条（最多 20 条）
-    if (timeSlowLines.length < 20) {
-        timeSlowLines.push({
-            x: Math.random() * width,
-            y: -50,
-            length: Math.random() * 100 + 50,
-            speed: Math.random() * 5 + 2,
-            alpha: Math.random() * 0.5 + 0.2,
-        });
-    }
-
-    // 更新线条位置
-    for (const line of timeSlowLines) {
-        line.y += line.speed;
-    }
-
-    // 清理超出屏幕的线条
-    for (let i = timeSlowLines.length - 1; i >= 0; i--) {
-        if (timeSlowLines[i].y > height + 100) {
-            timeSlowLines.splice(i, 1);
-        }
-    }
-}
-
-/**
  * 绘制时间减速特效
  */
 function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, world: World, width: number, height: number): void {
-    const { timeSlowLines } = world.renderState;
+    // 从 VisualEffect 组件获取线条
+    let lines: VisualLine[] = [];
+    for (const [_id, [effect]] of view(world, [VisualEffect])) {
+        lines = effect.lines;
+        break;
+    }
 
     ctx.save();
 
@@ -219,7 +194,7 @@ function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, world: World, width: 
     ctx.fillRect(0, 0, width, height);
 
     // 绘制线条
-    for (const line of timeSlowLines) {
+    for (const line of lines) {
         ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -492,7 +467,7 @@ export function RenderSystem(
     dt: number
 ): void {
     const { canvas, context } = renderCtx;
-    const { camera, timeSlowLines } = world.renderState;
+    const { camera } = world.renderState;
 
     // 调试日志
     if (DebugConfig.render.enabled && DebugConfig.render.logEntities) {
@@ -502,14 +477,7 @@ export function RenderSystem(
     // 1. 单次收集所有渲染项
     const queue = collectRenderItems(world);
 
-    // 2. 清空或更新时间减速线条
-    if (!queue.timeSlowActive) {
-        timeSlowLines.length = 0;
-    } else {
-        updateTimeSlowLines(world, canvas.width, canvas.height);
-    }
-
-    // 3. 绘制背景
+    // 2. 绘制背景
     drawBackground(context, canvas.width, canvas.height, queue.timeSlowActive);
 
     // 绘制时间减速特效
