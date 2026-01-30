@@ -14,210 +14,10 @@ import { World } from '../types';
 import { Transform, Particle, Lifetime, Shockwave, Velocity } from '../components';
 import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
 import { triggerCameraShake } from './RenderSystem';
-import { generateId, getComponents, view } from '../world';
+import { getComponents, view } from '../world';
 import { Blueprint } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
-
-/**
- * 粒子类型配置
- */
-interface ParticleConfig {
-    scale: number;
-    color: string;
-    frames: number;
-    fps: number;
-    lifetime: number;
-}
-
-/**
- * 特效配置表
- */
-const EFFECT_CONFIGS: Record<string, ParticleConfig> = {
-    // 爆炸特效
-    explosion_small: {
-        scale: 1,
-        color: '#ff6600',
-        frames: 8,
-        fps: 16,
-        lifetime: 0.5
-    },
-    explosion_medium: {
-        scale: 1.5,
-        color: '#ff4400',
-        frames: 12,
-        fps: 16,
-        lifetime: 0.75
-    },
-    explosion_large: {
-        scale: 2,
-        color: '#ff2200',
-        frames: 16,
-        fps: 16,
-        lifetime: 1.0
-    },
-
-    // 飙血特效
-    blood_light: {
-        scale: 0.5,
-        color: '#ff3333',
-        frames: 4,
-        fps: 12,
-        lifetime: 0.3
-    },
-    blood_medium: {
-        scale: 0.8,
-        color: '#ff0000',
-        frames: 6,
-        fps: 12,
-        lifetime: 0.4
-    },
-    blood_heavy: {
-        scale: 1.2,
-        color: '#cc0000',
-        frames: 8,
-        fps: 12,
-        lifetime: 0.5
-    },
-
-    // 拾取特效
-    pickup: {
-        scale: 1,
-        color: '#00ff88',
-        frames: 10,
-        fps: 20,
-        lifetime: 0.5
-    },
-
-    // 升级特效
-    levelup: {
-        scale: 2,
-        color: '#ffff00',
-        frames: 20,
-        fps: 20,
-        lifetime: 1.0
-    },
-
-    // 连击升级特效
-    combo_upgrade: {
-        scale: 1.5,
-        color: '#00ffff',
-        frames: 15,
-        fps: 20,
-        lifetime: 0.75
-    },
-
-    // Boss 阶段切换特效
-    boss_phase: {
-        scale: 3,
-        color: '#ff00ff',
-        frames: 24,
-        fps: 24,
-        lifetime: 1.0
-    },
-
-    // 狂暴模式特效
-    berserk: {
-        scale: 4,
-        color: '#ff0000',
-        frames: 30,
-        fps: 30,
-        lifetime: 1.5
-    },
-
-    // 炸弹爆炸特效
-    bomb_explosion: {
-        scale: 5,           // 超大尺寸
-        color: '#ffaa00',   // 橙黄色爆炸
-        frames: 30,         // 30帧动画
-        fps: 30,            // 30fps播放
-        lifetime: 1.0       // 持续1秒
-    },
-
-    // 全屏闪光特效
-    screen_flash: {
-        scale: 20,          // 覆盖全屏
-        color: '#ffffff',   // 白色闪光
-        frames: 5,          // 快速闪烁
-        fps: 30,
-        lifetime: 0.2       // 0.2秒
-    },
-
-    // 武器特效
-    plasma_explosion: {
-        scale: 2,
-        color: '#ed64a6',   // 粉色
-        frames: 16,
-        fps: 16,
-        lifetime: 1.0
-    },
-    tesla_chain: {
-        scale: 1.5,
-        color: '#a855f7',   // 紫色
-        frames: 8,
-        fps: 24,
-        lifetime: 0.3
-    },
-    magma_burn: {
-        scale: 1.2,
-        color: '#ef4444',   // 红色
-        frames: 12,
-        fps: 12,
-        lifetime: 0.6
-    },
-    shuriken_bounce: {
-        scale: 1,
-        color: '#fbbf24',   // 黄色
-        frames: 6,
-        fps: 20,
-        lifetime: 0.3
-    }
-};
-
-/**
- * 爆炸粒子配置 - 模仿旧版本的物理粒子系统
- */
-interface ExplosionConfig {
-    count: number;           // 粒子数量
-    speedMin: number;        // 最小速度
-    speedMax: number;        // 最大速度
-    sizeMin: number;         // 最小大小
-    sizeMax: number;         // 最大大小
-    life: number;            // 生命周期 (ms)
-    color: string;           // 颜色
-}
-
-/**
- * 爆炸效果配置表
- */
-const EXPLOSION_CONFIGS: Record<string, ExplosionConfig> = {
-    small: {
-        count: 8,
-        speedMin: 1,
-        speedMax: 4,
-        sizeMin: 2,
-        sizeMax: 4,
-        life: 300,
-        color: '#ffe066'  // 黄色火花
-    },
-    large: {
-        count: 30,
-        speedMin: 3,
-        speedMax: 10,
-        sizeMin: 2,
-        sizeMax: 6,
-        life: 800,
-        color: '#ff6600'  // 橙红色爆炸
-    },
-    hit: {
-        count: 5,
-        speedMin: 2,
-        speedMax: 5,
-        sizeMin: 2,
-        sizeMax: 4,
-        life: 200,
-        color: '#ffffff'  // 白色击中闪光
-    }
-};
+import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES } from '../blueprints/effects';
 
 /**
  * 特效播放器主函数
@@ -277,7 +77,7 @@ export function EffectPlayer(world: World, dt: number): void {
  */
 function handleHitEvent(world: World, event: HitEvent): void {
     // 生成爆炸粒子 - 使用新的物理粒子系统
-    const config = EXPLOSION_CONFIGS.hit;
+    const config = EXPLOSION_PARTICLES.hit;
     spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
 }
 
@@ -287,7 +87,7 @@ function handleHitEvent(world: World, event: HitEvent): void {
  */
 function handleKillEvent(world: World, event: KillEvent): void {
     // 生成大型爆炸粒子 - 使用新的物理粒子系统
-    const config = EXPLOSION_CONFIGS.large;
+    const config = EXPLOSION_PARTICLES.large;
     spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
 
     // 添加冲击波 - 缩小最大半径，避免圈太大
@@ -298,7 +98,7 @@ function handleKillEvent(world: World, event: KillEvent): void {
  * 生成爆炸粒子 - 模仿旧版本的物理粒子系统
  * 生成多个粒子，每个有随机速度向四周飞散
  */
-function spawnExplosionParticles(world: World, x: number, y: number, config: ExplosionConfig): void {
+function spawnExplosionParticles(world: World, x: number, y: number, config: typeof EXPLOSION_PARTICLES[keyof typeof EXPLOSION_PARTICLES]): void {
     for (let i = 0; i < config.count; i++) {
         // 随机角度和速度
         const angle = Math.random() * Math.PI * 2;
@@ -424,7 +224,7 @@ function handleBombExplodedEvent(world: World, event: BombExplodedEvent): void {
  * 生成粒子实体
  */
 function spawnParticle(world: World, effectKey: string, x: number, y: number): number {
-    const config = EFFECT_CONFIGS[effectKey];
+    const config = PARTICLE_EFFECTS[effectKey];
     if (!config) {
         console.warn(`EffectPlayer: No config found for effect '${effectKey}'`);
         return 0;
@@ -441,7 +241,7 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
             scale: config.scale   // 存储缩放用于大小
         },
         Lifetime: {
-            timer: config.lifetime * 1000
+            timer: config.lifetime  // lifetime 已经是毫秒，直接使用
         }
     };
 
@@ -455,7 +255,7 @@ function spawnParticle(world: World, effectKey: string, x: number, y: number): n
  * 更新粒子动画帧
  */
 export function updateParticles(world: World, dt: number): void {
-    for (const [id, [particle, lifetime], comps] of view(world, [Particle, Lifetime])) {
+    for (const [_id, [particle, lifetime]] of view(world, [Particle, Lifetime])) {
 
         // 累加帧时间
         particle.frame += dt * particle.fps;
