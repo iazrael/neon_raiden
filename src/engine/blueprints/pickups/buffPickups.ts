@@ -12,7 +12,7 @@ import { CollisionLayer } from '../../types/collision';
  * 道具下降速度（像素/秒）
  * 道具会以这个速度缓慢向下移动，移出屏幕后自动销毁
  */
-const PICKUP_FALL_SPEED = 50;
+const PICKUP_FALL_SPEED = 100;
 
 /**
  * 能量提升道具蓝图

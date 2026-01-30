@@ -40,7 +40,7 @@ export { ComboSystem, getComboScoreMultiplier, getComboDamageMultiplier, resetWo
 // P6: 刷怪层
 export { SpawnSystem, resetBossSpawnState, setBossSpawnTime } from './SpawnSystem';
 export { BossSystem } from './BossSystem';
-export { BossPhaseSystem, resetBossPhases, removeBossPhase } from './BossPhaseSystem';
+// export { BossPhaseSystem, resetBossPhases, removeBossPhase } from './BossPhaseSystem';
 export { DifficultySystem, resetDifficulty, getDifficultyConfig, getEliteChance, getEnemyMultipliers } from './DifficultySystem';
 
 // P7: 表现层

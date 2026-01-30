@@ -74,7 +74,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         curCD: 0,
         maxLevel: 3,
         pattern: WeaponPattern.SPREAD,
-        bulletCount: 3,
+        bulletCount: 1,
         spread: 30,
         pierceBonus: 0,
         bouncesBonus: 0
@@ -217,7 +217,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, WeaponSpec> = {
         id: EnemyWeaponId.GUARDIAN_RADIAL,
         ammoType: AmmoType.ENEMY_ORB_BLUE,
         cooldown: 1000,
-        bulletCount: 6,
+        bulletCount: 8,
         spread: 360,
         pattern: WeaponPattern.RADIAL
     },

@@ -16,6 +16,7 @@ import { World } from '../types';
 import { BossEntranceSystem } from './boss/BossEntranceSystem';
 import { BossMovementSystem } from './boss/BossMovementSystem';
 import { BossCombatSystem } from './boss/BossCombatSystem';
+import { BossPhaseSystem } from './boss/BossPhaseSystem';
 
 /**
  * Boss 系统主函数（包装器）
@@ -29,6 +30,9 @@ import { BossCombatSystem } from './boss/BossCombatSystem';
  * @param dt 时间增量（毫秒）
  */
 export function BossSystem(world: World, dt: number): void {
+    // 0. 阶段切换
+    BossPhaseSystem(world, dt);
+
     // 1. 入场系统
     BossEntranceSystem(world, dt);
 

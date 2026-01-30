@@ -18,7 +18,7 @@ export function InputSystem(world: World, dt: number) {
     const playerVel = playerComps.find(Velocity.check);
 
     // 键盘速度配置（像素/秒）
-    const KEYBOARD_SPEED = 400;
+    const KEYBOARD_SPEED = 500;
 
     // 先移除旧的 MoveIntent，确保只有一个
     const oldMoveIndex = playerComps.findIndex(MoveIntent.check);
