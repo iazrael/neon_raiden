@@ -67,7 +67,7 @@ export function CameraSystem(world: World, dt: number): void {
     updateCameraShake(dt);
 
     // 3. 处理 CameraShake 组件（实体上的震屏请求）
-    processCameraShakeComponents(world);
+    processCameraShakeComponents(world, dt);
 }
 
 /**
@@ -124,16 +124,16 @@ function clampCameraBounds(minX = -100, minY = -100, maxX = 100, maxY = 100): vo
 /**
  * 处理 CameraShake 组件
  */
-function processCameraShakeComponents(world: World): void {
+function processCameraShakeComponents(world: World, dt: number): void {
     for (const [id, comps] of world.entities) {
         const shake = comps.find(CameraShake.check) as CameraShake | undefined;
         if (!shake) continue;
 
-        // 应用震屏
+        // 应用震屏（timer 是毫秒，转换为秒）
         triggerShake(shake.intensity, shake.timer / 1000);
 
-        // 更新计时器
-        shake.timer -= 16.67; // 假设 60fps
+        // 更新计时器（dt 是毫秒）
+        shake.timer -= dt;
 
         // 移除组件
         if (shake.timer <= 0) {

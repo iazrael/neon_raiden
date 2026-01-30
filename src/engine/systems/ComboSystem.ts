@@ -20,8 +20,8 @@ import { pushEvent } from '../world';
  * 连击配置
  */
 const COMBO_CONFIG = {
-    /** 连击超时时间（秒） */
-    timeout: 5,
+    /** 连击超时时间（毫秒） */
+    timeout: 5000,  // 5秒 = 5000毫秒
     /** 连击等级阈值 */
     levels: [
         { count: 10, multiplier: 1.2, scoreMult: 1.5, name: 'GOOD', color: '#00ff00' },

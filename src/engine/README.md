@@ -59,8 +59,47 @@
 
 ### 时间单位
 
+**重要**：引擎统一使用**毫秒**作为时间单位。
+
+#### dt 参数
 - 所有系统的 `dt` 参数使用**毫秒**
-- 在 MovementSystem 中，dt 会被转换为秒进行位置更新：`dtInSeconds = dt / 1000`
+- 示例：60fps 时，dt ≈ 16.67ms
+
+#### 组件时间字段（单位：毫秒）
+
+| 组件 | 字段 | 说明 |
+|-----|------|-----|
+| `Lifetime` | `timer` | 剩余生命周期 |
+| `Buff` | `remaining` | 剩余持续时间 |
+| `DamageOverTime` | `remaining` | 剩余持续时间 |
+| `DamageOverTime` | `interval` | 扣血间隔 |
+| `InvulnerableState` | `duration` | 无敌持续时间 |
+| `Weapon` | `cooldown` / `curCD` | 冷却时间 |
+| `CameraShake` | `timer` | 震动持续时间 |
+| `BossAI` | `timer` | 行为计时器 |
+| `TeleportState` | `timer` | 瞬移持续时间 |
+| `SpeedModifier` | `duration` / `elapsed` | 持续时间/已过时间 |
+
+#### 速率单位（每秒）
+
+以下值使用"每秒"单位，与 dt（毫秒）配合使用时需转换：
+
+| 组件/配置 | 字段 | 单位 | 转换方式 |
+|----------|------|------|----------|
+| `Velocity` | `vx`, `vy` | 像素/秒 | `dt / 1000` |
+| `Velocity` | `vrot` | 弧度/秒 | `dt / 1000` |
+| `Buff` | `value` (护盾) | 护盾/秒 | `dt / 1000` |
+| `DamageOverTime` | `damagePerSecond` | 伤害/秒 | `interval / 1000` |
+| `ComboState` | 配置 `timeout` | 秒 | 配置中用 `* 1000` 转毫秒 |
+
+#### 事件时间字段（单位：秒）
+
+事件系统使用**秒**作为时间单位（与组件不同）：
+
+| 事件 | 字段 | 单位 |
+|-----|------|-----|
+| `CamShakeEvent` | `duration` | 秒 |
+| `BloodFogEvent` | `duration` | 秒 |
 
 ### 参考速度值
 

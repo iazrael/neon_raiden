@@ -81,8 +81,5 @@ function handleBossFiring(
     }
 
     // 创建开火意图（WeaponSystem会在武器冷却完成后发射子弹）
-    if (process.env.NODE_ENV !== 'production') {
-        console.log(`[BossCombatSystem] Boss ${boss.id}: 创建FireIntent`);
-    }
     addComponent(world, boss.id, new FireIntent({ firing: true }));
 }

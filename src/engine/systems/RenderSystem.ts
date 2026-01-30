@@ -647,31 +647,12 @@ function drawParticles(
     camX: number,
     camY: number
 ): void {
-    // 调试：检查所有有 Particle 组件的实体
-    const particleEntities = [];
-    for (const [id, comps] of world.entities) {
-        if (comps.some(Particle.check)) {
-            const hasTransform = comps.some(Transform.check);
-            const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
-            particleEntities.push({
-                id,
-                hasTransform,
-                lifetime: lifetime?.timer,
-                compCount: comps.length,
-                compNames: comps.map(c => c.constructor.name)
-            });
-        }
-    }
-    if (particleEntities.length > 0) {
-        console.log('[RenderSystem] Particle entities in world:', particleEntities);
-    }
-
-    // 使用 lighter 混合模式让重叠粒子更亮（旧版本效果）
+    // 使用 lighter 混合模式让重叠粒子更亮
     ctx.globalCompositeOperation = 'lighter';
 
     let particleCount = 0;
 
-    for (const [id, comps] of world.entities) {
+    for (const [_id, comps] of world.entities) {
         const transform = comps.find(Transform.check) as Transform | undefined;
         const particle = comps.find(Particle.check) as Particle | undefined;
         const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
@@ -679,19 +660,6 @@ function drawParticles(
         if (!transform || !particle) continue;
 
         particleCount++;
-
-        // 调试：输出第一个粒子的信息
-        if (particleCount === 1) {
-            console.log('[RenderSystem] Drawing particle:', {
-                id,
-                pos: { x: transform.x, y: transform.y },
-                screenPos: { x: transform.x - camX, y: transform.y - camY },
-                color: particle.color,
-                size: particle.scale,
-                lifetime: lifetime?.timer,
-                maxLife: particle.maxLife
-            });
-        }
 
         // 计算透明度 - 基于 Lifetime 衰减（旧版本：life / maxLife）
         let alpha = 1;
@@ -714,11 +682,6 @@ function drawParticles(
         ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
-    }
-
-    // 调试：输出粒子总数
-    if (particleCount > 0) {
-        console.log(`[RenderSystem] Drew ${particleCount} particles`);
     }
 
     // 恢复默认混合模式

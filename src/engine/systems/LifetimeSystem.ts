@@ -11,7 +11,7 @@
  */
 
 import { World } from '../types';
-import { Lifetime, Transform, DestroyTag, PlayerTag } from '../components';
+import { Lifetime, DestroyTag } from '../components';
 import { addComponent, view } from '../world';
 
 /**
@@ -21,24 +21,11 @@ import { addComponent, view } from '../world';
  */
 export function LifetimeSystem(world: World, dt: number): void {
     for (const [id, [lifetime]] of view(world, [Lifetime])) {
-
-        // 调试：检查是否有粒子实体被更新
-        const comps = world.entities.get(id);
-        const isParticle = comps?.some((c: any) => c.constructor.name === 'Particle');
-
-        // 更新倒计时
-        lifetime.timer -= dt / 1000; // 转换为秒
-
-        // 调试：输出粒子的生命周期变化
-        if (isParticle) {
-            console.log('[LifetimeSystem] Particle lifetime:', { id, timer: lifetime.timer, dt });
-        }
+        // 更新倒计时（timer 单位现在是毫秒，dt 也是毫秒，直接相减）
+        lifetime.timer -= dt;
 
         // 倒计时结束，标记为销毁
         if (lifetime.timer <= 0) {
-            if (isParticle) {
-                console.log('[LifetimeSystem] Particle timeout, marking for destruction:', id);
-            }
             // 添加销毁标记
             addComponent(world, id, new DestroyTag({ reason: 'timeout' }));
         }

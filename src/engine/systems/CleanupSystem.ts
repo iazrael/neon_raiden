@@ -38,23 +38,10 @@ const stats: CleanupStats = {
 export function CleanupSystem(world: World, dt: number): void {
     let removedCount = 0;
 
-    // 调试：检查被清理的实体是否包含粒子
-    const removedParticleIds = [];
-
     // 查找所有带有DestroyTag的实体并删除它们
     for (const [id, [destroyTag]] of view(world, [DestroyTag])) {
-        const comps = world.entities.get(id);
-        const isParticle = comps?.some((c: any) => c.constructor.name === 'Particle');
-        if (isParticle) {
-            removedParticleIds.push(id);
-        }
         removeEntity(world, id);
         removedCount++;
-    }
-
-    // 调试：如果清理了粒子实体，输出日志
-    if (removedParticleIds.length > 0) {
-        console.log('[CleanupSystem] Removed particle entities:', removedParticleIds);
     }
 
     // 更新统计

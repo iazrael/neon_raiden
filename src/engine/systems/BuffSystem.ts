@@ -32,7 +32,7 @@ const shieldHandler: DurationBuffHandler = {
     update(buff: Buff, world: World, comps: Component[], dt: number): void {
         const shield = comps.find(Shield.check);
         if (shield) {
-            // 持续恢复护盾（dt 是毫秒，需要转换为秒）
+            // 持续恢复护盾（buff.value 是每秒恢复量，dt 是毫秒）
             shield.regen = buff.value;
             shield.value = Math.min(shield.value + buff.value * (dt / 1000), 100);
         } else if (buff.value > 0) {
@@ -52,9 +52,9 @@ const invincibilityHandler: DurationBuffHandler = {
         let invState = comps.find(InvulnerableState.check);
 
         if (!invState && buff.remaining > 0) {
-            // 添加无敌状态组件
+            // 添加无敌状态组件（buff.remaining 单位是毫秒）
             invState = new InvulnerableState({
-                duration: buff.remaining * 1000,
+                duration: buff.remaining,
                 flashColor: '#ffff00' // 金色闪烁
             });
             comps.push(invState);

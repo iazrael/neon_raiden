@@ -310,7 +310,8 @@ function handleTimeSlowPickup(world: World, playerId: number): void {
         if (timeSlowComps) {
             const lifetime = timeSlowComps.find(Lifetime.check);
             if (lifetime) {
-                lifetime.timer = BUFF_CONFIG[BuffType.TIME_SLOW].duration / 1000;
+                // duration 已经是毫秒，lifetime.timer 也是毫秒，直接赋值
+                lifetime.timer = BUFF_CONFIG[BuffType.TIME_SLOW].duration;
             }
             // 注意: TimeSlow 实体必须有 Lifetime 组件(由 BLUEPRINT_TIME_SLOW 定义)
             // 如果缺少 Lifetime,说明蓝图配置错误,应视为严重错误

@@ -76,16 +76,18 @@ export class CameraShake extends Component {
      * @param cfg 震动配置
      */
     constructor(cfg: {
-        /** 震动强度 */
+        /** 震动强度（像素） */
         intensity: number;
-        /** 震动持续时间 */
+        /** 震动持续时间（毫秒） */
         timer: number;
     }) {
         super();
         this.intensity = cfg.intensity;
         this.timer = cfg.timer;
     }
+    /** 震动强度（像素） */
     public intensity: number;
+    /** 震动持续时间（毫秒） */
     public timer: number;
     static check(c: any): c is CameraShake { return c instanceof CameraShake; }
 }
@@ -204,17 +206,23 @@ export class ScoreValue extends Component {
 /** 瞬移状态组件 - 挂载此组件表示实体正在瞬移（隐形/无敌/不可控） */
 export class TeleportState extends Component {
     constructor(cfg: {
-        timer: number;       // 瞬移持续时间（隐形时间）
-        targetX: number;     // 目标 X
-        targetY: number;     // 目标 Y
+        /** 瞬移持续时间（隐形时间，毫秒） */
+        timer: number;
+        /** 目标 X */
+        targetX: number;
+        /** 目标 Y */
+        targetY: number;
     }) {
         super();
         this.timer = cfg.timer;
         this.targetX = cfg.targetX;
         this.targetY = cfg.targetY;
     }
+    /** 瞬移持续时间（毫秒） */
     public timer: number;
+    /** 目标 X */
     public targetX: number;
+    /** 目标 Y */
     public targetY: number;
 
     static check(c: any): c is TeleportState { return c instanceof TeleportState; }

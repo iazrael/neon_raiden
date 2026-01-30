@@ -276,9 +276,6 @@ export function EffectPlayer(world: World, dt: number): void {
  * 采用旧版本的"多粒子飞散"爆炸效果
  */
 function handleHitEvent(world: World, event: HitEvent): void {
-    // 调试：确认 HitEvent 到达
-    console.log('[EffectPlayer] HitEvent received:', { pos: event.pos, damage: event.damage, bloodLevel: event.bloodLevel });
-
     // 生成爆炸粒子 - 使用新的物理粒子系统
     const config = EXPLOSION_CONFIGS.hit;
     spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
@@ -302,8 +299,6 @@ function handleKillEvent(world: World, event: KillEvent): void {
  * 生成多个粒子，每个有随机速度向四周飞散
  */
 function spawnExplosionParticles(world: World, x: number, y: number, config: ExplosionConfig): void {
-    console.log('[EffectPlayer] Spawning explosion particles:', { x, y, count: config.count, color: config.color });
-
     for (let i = 0; i < config.count; i++) {
         // 随机角度和速度
         const angle = Math.random() * Math.PI * 2;
@@ -325,24 +320,11 @@ function spawnExplosionParticles(world: World, x: number, y: number, config: Exp
                 maxLife: config.life  // 明确的生命周期（毫秒）
             },
             Lifetime: {
-                timer: config.life / 1000  // 转换为秒（Lifetime 组件期望秒）
+                timer: config.life  // config.life 已经是毫秒，Lifetime.timer 也是毫秒
             }
         };
 
-        const id = spawnFromBlueprint(world, particleBlueprint, x, y, 0);
-
-        // 调试：确认粒子被创建，验证位置是否正确
-        const createdComps = world.entities.get(id);
-        if (createdComps) {
-            const transform = createdComps.find(c => c.constructor.name === 'Transform');
-            const lifetime = createdComps.find((c: any) => c.constructor.name === 'Lifetime');
-            console.log('[EffectPlayer] Particle created:', {
-                id,
-                transformPos: transform ? { x: (transform as any).x, y: (transform as any).y } : 'NO_TRANSFORM',
-                lifetimeTimer: lifetime ? (lifetime as any).timer : 'NO_LIFETIME',
-                configLife: config.life
-            });
-        }
+        spawnFromBlueprint(world, particleBlueprint, x, y, 0);
     }
 }
 

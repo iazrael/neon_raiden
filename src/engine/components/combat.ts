@@ -33,7 +33,7 @@ export class Weapon extends Component {
         id: WeaponId | EnemyWeaponId
         /** 弹药类型 */
         ammoType: AmmoType;
-        /** 基础冷却时间 */
+        /** 基础冷却时间（毫秒） */
         cooldown: number;
         /** 当前冷却时间 */
         curCD?: number;
@@ -70,7 +70,9 @@ export class Weapon extends Component {
     }
     public id: WeaponId | EnemyWeaponId;
     public ammoType: AmmoType;
+    /** 基础冷却时间（毫秒） */
     public cooldown: number;
+    /** 当前冷却时间（毫秒） */
     public curCD = 0;
     public level = 1;
     public bulletCount = 1;
@@ -243,9 +245,12 @@ export class DamageOverTime extends Component {
         this.interval = cfg.interval ?? 200; // 默认 200 毫秒一跳
         this.timer = 0;             // 内部间隔计时器
     }
-    public damagePerSecond: number;  // 每秒扣血量
-    public remaining: number;        // 剩余秒数
-    public interval = 200;           // 扣血间隔（秒），默认 0.2 秒一跳
+    /** 每秒扣血量 */
+    public damagePerSecond: number;
+    /** 剩余持续时间（毫秒） */
+    public remaining: number;
+    /** 扣血间隔（毫秒），默认 200 毫秒一跳 */
+    public interval = 200;
     private timer = 0;               // 内部间隔计时器
 
     /** 每帧由 DamageResolutionSystem 调用，返回本帧是否应扣血 */

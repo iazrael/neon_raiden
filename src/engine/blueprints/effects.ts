@@ -112,6 +112,6 @@ export const BLUEPRINT_TIME_SLOW: Blueprint = {
 
     /** 生命周期组件 */
     Lifetime: {
-        timer: 5.0  // 5秒 (与 BUFF_CONFIG[BuffType.TIME_SLOW].duration 一致)
+        timer: 5000  // 5000毫秒 = 5秒 (与 BUFF_CONFIG[BuffType.TIME_SLOW].duration 一致)
     }
 };
