@@ -12,7 +12,6 @@ import { AISteerSystem } from './systems/AISteerSystem';
 import { BombSystem } from './systems/BombSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
-import { BossPhaseSystem } from './systems/BossPhaseSystem';
 import { BuffSystem } from './systems/BuffSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { CleanupSystem } from './systems/CleanupSystem';
@@ -40,6 +39,14 @@ export class Engine {
     private ctx: CanvasRenderingContext2D;
     private resizeObserver: ResizeObserver;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
+
+    /**
+     * 最大时间增量（毫秒）
+     *
+     * 防止页面失焦后重新聚焦时的巨大时间增量导致实体位置跳跃。
+     * 正常情况下每帧约 16.67ms，设置为 100ms 约等于 6 帧，足够处理偶发卡顿。
+     */
+    private static readonly MAX_DT = 100;
 
     // ========== 调试模式：只测试渲染 ==========
     // 设为 true 时只运行渲染系统，用于调试渲染问题
@@ -113,7 +120,9 @@ export class Engine {
 
     private loop() {
         const step = (t: number) => {
-            const dt = t - (this.world.time || t);
+            // 限制 dt 最大值，防止页面失焦后重新聚焦时的巨大时间增量
+            const rawDt = t - (this.world.time || t);
+            const dt = Math.min(rawDt, Engine.MAX_DT);
             this.world.time = t;
             this.framePipeline(this.world, dt);
             this.raf = requestAnimationFrame(step);
@@ -139,8 +148,8 @@ export class Engine {
         InputSystem(world, dt);                         // 1. 输入系统
         // DifficultySystem(world, dt);                    // 2. 难度系统
         SpawnSystem(world, dt);                         // 3. 生成系统
-        BossPhaseSystem(world, dt);                     // 4. Boss阶段系统
-        BossSystem(world, dt);                          // 5. Boss系统
+
+        BossSystem(world, dt);                          // 5. Boss阶段系统 / Boss系统
         EnemySystem(world, dt);                         // 6. 敌人系统
         // AISteerSystem(world, dt);                       // 7. AI转向系统
 

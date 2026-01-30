@@ -9,12 +9,21 @@ import { SpriteKey } from '../../configs/sprites';
 import { CollisionLayer } from '../../types/collision';
 
 /**
+ * 道具下降速度（像素/秒）
+ * 道具会以这个速度缓慢向下移动，移出屏幕后自动销毁
+ */
+const PICKUP_FALL_SPEED = 50;
+
+/**
  * 能量提升道具蓝图
  * 提升玩家武器能量等级
  */
 export const BLUEPRINT_POWERUP_POWER: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.POWERUP_POWER, scale: 1 },
@@ -34,6 +43,9 @@ export const BLUEPRINT_POWERUP_HP: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.POWERUP_HP, scale: 1 },
 
@@ -51,6 +63,9 @@ export const BLUEPRINT_POWERUP_HP: Blueprint = {
 export const BLUEPRINT_POWERUP_BOMB: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.POWERUP_BOMB, scale: 1 },
@@ -70,6 +85,9 @@ export const BLUEPRINT_POWERUP_OPTION: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.POWERUP_OPTION, scale: 1 },
 
@@ -88,6 +106,9 @@ export const BLUEPRINT_POWERUP_INVINCIBILITY: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.POWERUP_INVINCIBILITY, scale: 1 },
 
@@ -105,6 +126,9 @@ export const BLUEPRINT_POWERUP_INVINCIBILITY: Blueprint = {
 export const BLUEPRINT_POWERUP_TIME_SLOW: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 SpriteKey */
     Sprite: { spriteKey: SpriteKey.POWERUP_TIME_SLOW, scale: 1 },

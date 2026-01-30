@@ -4,12 +4,21 @@ import { BULLET_SPRITE_CONFIG } from "../../configs/sprites/bullets";
 import { CollisionLayer } from "../../types/collision";
 
 /**
+ * 道具下降速度（像素/秒）
+ * 道具会以这个速度缓慢向下移动，移出屏幕后自动销毁
+ */
+const PICKUP_FALL_SPEED = 50;
+
+/**
  * 离子机炮道具蓝图
  * 获得离子机炮武器
  */
 export const BLUEPRINT_POWERUP_VULCAN: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
@@ -33,6 +42,9 @@ export const BLUEPRINT_POWERUP_LASER: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.LASER_BEAM].spriteKey,
@@ -54,6 +66,9 @@ export const BLUEPRINT_POWERUP_LASER: Blueprint = {
 export const BLUEPRINT_POWERUP_MISSILE: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
@@ -77,6 +92,9 @@ export const BLUEPRINT_POWERUP_SHURIKEN: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.SHURIKEN_BOUNCE].spriteKey,
@@ -98,6 +116,9 @@ export const BLUEPRINT_POWERUP_SHURIKEN: Blueprint = {
 export const BLUEPRINT_POWERUP_TESLA: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
@@ -121,6 +142,9 @@ export const BLUEPRINT_POWERUP_MAGMA: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.MAGMA_POOL].spriteKey,
@@ -143,6 +167,9 @@ export const BLUEPRINT_POWERUP_WAVE: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
 
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.WAVE_PULSE].spriteKey,
@@ -164,6 +191,9 @@ export const BLUEPRINT_POWERUP_WAVE: Blueprint = {
 export const BLUEPRINT_POWERUP_PLASMA: Blueprint = {
     /** 变换组件 - 设置道具的初始位置和旋转角度 */
     Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
 
     /** 精灵组件 - 使用 BULLET_SPRITE_CONFIG 获取 SpriteKey 和颜色 */
     Sprite: {

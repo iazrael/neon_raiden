@@ -11,12 +11,12 @@
  * 执行顺序：P6 - 在 BossSystem 之前
  */
 
-import { BossId, Component, World } from '../types';
-import { Health, BossTag, BossAI, Weapon, SpeedStat, BossVisual } from '../components';
-import { BOSS_DATA, BossPhaseSpec } from '../configs/bossData';
-import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../events';
-import { pushEvent, view } from '../world';
-import { ENEMY_WEAPON_TABLE } from '../blueprints/weapons';
+import { BossId, Component, World } from '../../types';
+import { Health, BossTag, BossAI, Weapon, SpeedStat, BossVisual } from '../../components';
+import { BOSS_DATA, BossPhaseSpec } from '../../configs/bossData';
+import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../../events';
+import { pushEvent, view } from '../../world';
+import { ENEMY_WEAPON_TABLE } from '../../blueprints/weapons';
 
 /**
  * 记录每个 Boss 的上一阶段
