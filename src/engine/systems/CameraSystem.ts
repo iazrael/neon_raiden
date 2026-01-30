@@ -80,7 +80,8 @@ function handleShakeEvents(world: World): void {
         if (event.type === 'CamShake') {
             const shakeEvent = event as CamShakeEvent;
             const intensity = Math.min(shakeEvent.intensity, cameraConfig.maxShakeIntensity);
-            triggerShake(intensity, shakeEvent.duration);
+            // CamShakeEvent.duration 是秒，转换为毫秒
+            triggerShake(intensity, shakeEvent.duration * 1000);
         }
     }
 }
@@ -129,8 +130,8 @@ function processCameraShakeComponents(world: World, dt: number): void {
         const shake = comps.find(CameraShake.check) as CameraShake | undefined;
         if (!shake) continue;
 
-        // 应用震屏（timer 是毫秒，转换为秒）
-        triggerShake(shake.intensity, shake.timer / 1000);
+        // 应用震屏（timer 和 triggerShake 都是毫秒）
+        triggerShake(shake.intensity, shake.timer);
 
         // 更新计时器（dt 是毫秒）
         shake.timer -= dt;

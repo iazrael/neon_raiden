@@ -343,15 +343,16 @@ function handleBossPhaseChangeEvent(world: World, event: BossPhaseChangeEvent): 
     // 生成 Boss 阶段切换特效
     spawnParticle(world, 'boss_phase', world.width / 2, world.height / 2);
 
-    // 触发震屏
-    triggerCameraShake(10, 0.5);
+    // 触发震屏（500毫秒）
+    triggerCameraShake(10, 500);
 }
 
 /**
  * 处理震屏事件
  */
 function handleCamShakeEvent(world: World, event: CamShakeEvent): void {
-    triggerCameraShake(event.intensity, event.duration);
+    // CamShakeEvent.duration 是秒，转换为毫秒
+    triggerCameraShake(event.intensity, event.duration * 1000);
 }
 
 /**
@@ -375,8 +376,8 @@ function handleLevelUpEvent(world: World, event: LevelUpEvent): void {
         spawnParticle(world, 'levelup', world.width / 2, world.height - 100);
     }
 
-    // 触发震屏
-    triggerCameraShake(5, 0.3);
+    // 触发震屏（300毫秒）
+    triggerCameraShake(5, 300);
 }
 
 /**
@@ -397,8 +398,8 @@ function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
     // 生成狂暴模式特效
     spawnParticle(world, 'berserk', event.pos.x, event.pos.y);
 
-    // 触发强烈震屏
-    triggerCameraShake(15, 0.8);
+    // 触发强烈震屏（800毫秒）
+    triggerCameraShake(15, 800);
 }
 
 /**

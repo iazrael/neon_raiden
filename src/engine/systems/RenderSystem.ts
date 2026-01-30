@@ -50,6 +50,10 @@ export interface CameraState {
     shakeX: number;
     shakeY: number;
     zoom: number;
+    /** 震屏剩余时间（毫秒） */
+    shakeTimer: number;
+    /** 震屏强度 */
+    shakeIntensity: number;
 }
 
 /**
@@ -74,7 +78,9 @@ export const camera: CameraState = {
     y: 0,
     shakeX: 0,
     shakeY: 0,
-    zoom: 1.0
+    zoom: 1.0,
+    shakeTimer: 0,
+    shakeIntensity: 0
 };
 
 /**
@@ -553,17 +559,30 @@ function drawBossHealthBar(
 
 /**
  * 更新相机震屏
+ * @param dt 帧间隔时间（毫秒）
  */
 export function updateCameraShake(dt: number): void {
-    // 震屏衰减
-    if (Math.abs(camera.shakeX) > 0.1 || Math.abs(camera.shakeY) > 0.1) {
-        const decay = 0.9;
-        camera.shakeX *= decay;
-        camera.shakeY *= decay;
+    if (camera.shakeTimer <= 0) {
+        // 震屏结束，清零
+        camera.shakeX = 0;
+        camera.shakeY = 0;
+        camera.shakeIntensity = 0;
+        return;
+    }
 
-        // 阈值以下归零
-        if (Math.abs(camera.shakeX) < 0.1) camera.shakeX = 0;
-        if (Math.abs(camera.shakeY) < 0.1) camera.shakeY = 0;
+    // 更新剩余时间
+    camera.shakeTimer -= dt;
+
+    // 每帧产生新的随机震屏偏移
+    camera.shakeX = (Math.random() - 0.5) * 2 * camera.shakeIntensity;
+    camera.shakeY = (Math.random() - 0.5) * 2 * camera.shakeIntensity;
+
+    // 时间结束时清零
+    if (camera.shakeTimer <= 0) {
+        camera.shakeTimer = 0;
+        camera.shakeX = 0;
+        camera.shakeY = 0;
+        camera.shakeIntensity = 0;
     }
 }
 
@@ -577,8 +596,13 @@ export function setCameraPosition(x: number, y: number): void {
 
 /**
  * 触发相机震屏
+ * @param intensity 震屏强度（像素）
+ * @param duration 震屏持续时间（毫秒）
  */
 export function triggerCameraShake(intensity: number, duration: number): void {
+    camera.shakeIntensity = intensity;
+    camera.shakeTimer = duration;
+    // 初始震屏偏移
     camera.shakeX = (Math.random() - 0.5) * 2 * intensity;
     camera.shakeY = (Math.random() - 0.5) * 2 * intensity;
 }
