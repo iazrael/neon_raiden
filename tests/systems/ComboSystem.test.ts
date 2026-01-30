@@ -63,7 +63,7 @@ describe('ComboSystem', () => {
 
             ComboSystem(world, 0.016);
 
-            expect(world.comboState?.timer).toBe(5); // 应该重置为5秒
+            expect(world.comboState?.timer).toBe(5000); // 应该重置为5000毫秒（5秒）
         });
 
         it('没有击杀时计时器应该递减', () => {
@@ -102,8 +102,8 @@ describe('ComboSystem', () => {
             // 清空 events，模拟没有新击杀
             world.events = [];
 
-            // 模拟超时
-            ComboSystem(world, 6);
+            // 模拟超时（5000 + 1000 毫秒，确保超时）
+            ComboSystem(world, 6000);
 
             expect(world.comboState?.count).toBe(0);
             expect(world.comboState?.timer).toBe(0);
@@ -124,8 +124,8 @@ describe('ComboSystem', () => {
             // 清空 events，模拟没有新击杀
             world.events = [];
 
-            // 模拟超时
-            ComboSystem(world, 6);
+            // 模拟超时（5000 + 1000 毫秒，确保超时）
+            ComboSystem(world, 6000);
 
             const breakEvents = world.events.filter(e => e.type === 'ComboBreak');
             expect(breakEvents.length).toBeGreaterThan(0);

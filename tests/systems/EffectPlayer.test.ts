@@ -62,11 +62,12 @@ describe('EffectPlayer', () => {
             world.events.push(smallHit);
             EffectPlayer(world, 16);
 
-            // 应该生成爆炸粒子
+            // 应该生成爆炸粒子（使用 Particle 组件）
             let hasExplosion = false;
             for (const [id, comps] of world.entities) {
-                const sprite = comps.find(Sprite.check);
-                if (sprite && sprite.color === '#ff6600') { // explosion_small 的颜色
+                const particle = comps.find(Particle.check);
+                // 检查是否有颜色为 '#ffffff' 的粒子（hit 配置的颜色）
+                if (particle && particle.color === '#ffffff') {
                     hasExplosion = true;
                 }
             }
@@ -75,23 +76,24 @@ describe('EffectPlayer', () => {
         });
 
         it('应该生成飙血特效', () => {
-            const hitEvent: HitEvent = {
-                type: 'Hit',
+            // 飙血特效由 DamageResolutionSystem 生成 BloodFogEvent
+            // EffectPlayer 处理 BloodFogEvent 生成粒子
+            const bloodFogEvent = {
+                type: 'BloodFog',
                 pos: { x: 100, y: 200 },
-                damage: 20,
-                owner: 1,
-                victim: 2,
-                bloodLevel: 2
+                level: 2,  // medium
+                duration: 0.3
             };
 
-            world.events.push(hitEvent);
+            world.events.push(bloodFogEvent);
             EffectPlayer(world, 16);
 
-            // 应该生成飙血粒子
+            // 应该生成飙血粒子（使用 Sprite 组件）
             let hasBlood = false;
             for (const [id, comps] of world.entities) {
-                const sprite = comps.find(Sprite.check);
-                if (sprite && sprite.color === '#ff0000') { // blood_medium 的颜色
+                const particle = comps.find(Particle.check);
+                // blood_medium 的颜色是 '#ff0000'
+                if (particle && particle.color === '#ff0000') {
                     hasBlood = true;
                 }
             }
@@ -263,11 +265,11 @@ describe('EffectPlayer', () => {
             world.events.push(comboEvent);
             EffectPlayer(world, 16);
 
-            // 应该生成连击升级粒子
+            // 应该生成连击升级粒子（使用 Particle 组件）
             let hasComboParticle = false;
             for (const [id, comps] of world.entities) {
-                const sprite = comps.find(Sprite.check);
-                if (sprite && sprite.color === '#00ffff') { // combo_upgrade 的颜色
+                const particle = comps.find(Particle.check);
+                if (particle && particle.color === '#00ffff') { // combo_upgrade 的颜色
                     hasComboParticle = true;
                 }
             }

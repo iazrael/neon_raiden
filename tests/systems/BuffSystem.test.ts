@@ -95,7 +95,7 @@ describe('BuffSystem', () => {
             const comps = world.entities.get(playerId);
             const invState = comps?.find(InvulnerableState.check);
             expect(invState).toBeDefined();
-            expect(invState?.duration).toBe(2984000); // (3000 - 16) * 1000 微秒
+            expect(invState?.duration).toBe(2984); // (3000 - 16) 毫秒
         });
 
         it('Buff结束后应该移除 InvulnerableState', () => {

@@ -17,7 +17,7 @@ import { triggerCameraShake } from './RenderSystem';
 import { getComponents, view } from '../world';
 import { Blueprint } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
-import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES } from '../blueprints/effects';
+import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES, PARTICLE_DEBUG } from '../blueprints/effects';
 
 /**
  * 特效播放器主函数
@@ -99,6 +99,11 @@ function handleKillEvent(world: World, event: KillEvent): void {
  * 生成多个粒子，每个有随机速度向四周飞散
  */
 function spawnExplosionParticles(world: World, x: number, y: number, config: typeof EXPLOSION_PARTICLES[keyof typeof EXPLOSION_PARTICLES]): void {
+    // 调试日志
+    if (PARTICLE_DEBUG.enabled && PARTICLE_DEBUG.logSpawns) {
+        console.log(`[EffectPlayer] 生成爆炸粒子: ${config.count}个, 位置(${x.toFixed(1)}, ${y.toFixed(1)}), 颜色=${config.color}`);
+    }
+
     for (let i = 0; i < config.count; i++) {
         // 随机角度和速度
         const angle = Math.random() * Math.PI * 2;
