@@ -484,6 +484,30 @@ function drawVisualEffectCircles(
 }
 
 /**
+ * 绘制 VisualEffect 粒子（爆炸火花等）
+ */
+function drawVisualEffectParticles(
+    ctx: CanvasRenderingContext2D,
+    world: World,
+    camX: number,
+    camY: number
+): void {
+    for (const [_id, [effect]] of view(world, [VisualEffect])) {
+        for (const p of effect.particles) {
+            const alpha = Math.max(0, p.life / p.maxLife);
+
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x - camX, p.y - camY, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+}
+
+/**
  * 渲染系统主函数
  */
 export function RenderSystem(
@@ -527,6 +551,9 @@ export function RenderSystem(
 
     // 6. 绘制粒子
     context.globalCompositeOperation = 'lighter';
+    // 6.1 绘制 VisualEffect 粒子（爆炸火花等）
+    drawVisualEffectParticles(context, world, camX, camY);
+    // 6.2 绘制旧版粒子（帧动画粒子，保留兼容性）
     for (const item of queue.particles) {
         drawParticle(context, item, camX, camY);
     }

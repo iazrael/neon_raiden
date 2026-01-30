@@ -28,7 +28,7 @@ describe('EffectPlayer', () => {
     });
 
     describe('HitEvent 处理', () => {
-        it('应该在 HitEvent 时生成爆炸和飙血粒子', () => {
+        it('应该在 HitEvent 时生成爆炸粒子', () => {
             const hitEvent: HitEvent = {
                 type: 'Hit',
                 pos: { x: 100, y: 200 },
@@ -41,11 +41,12 @@ describe('EffectPlayer', () => {
             world.events.push(hitEvent);
             EffectPlayer(world, 16);
 
-            // 验证粒子实体被创建
+            // 验证爆炸粒子被创建（现在使用 VisualEffect 组件）
             let particleCount = 0;
             for (const [id, comps] of world.entities) {
-                if (comps.some(Particle.check)) {
-                    particleCount++;
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.particles.length > 0) {
+                    particleCount += effect.particles.length;
                 }
             }
 
@@ -66,13 +67,14 @@ describe('EffectPlayer', () => {
             world.events.push(smallHit);
             EffectPlayer(world, 16);
 
-            // 应该生成爆炸粒子（使用 Particle 组件）
+            // 应该生成爆炸粒子（现在使用 VisualEffect 组件）
             let hasExplosion = false;
             for (const [id, comps] of world.entities) {
-                const particle = comps.find(Particle.check);
+                const effect = comps.find(VisualEffect.check);
                 // 检查是否有颜色为 '#ffffff' 的粒子（hit 配置的颜色）
-                if (particle && particle.color === '#ffffff') {
+                if (effect && effect.particles.some(p => p.color === '#ffffff')) {
                     hasExplosion = true;
+                    break;
                 }
             }
 
@@ -119,16 +121,16 @@ describe('EffectPlayer', () => {
             world.events.push(killEvent);
             EffectPlayer(world, 16);
 
-            // 验证大型爆炸粒子被创建
-            let largeExplosionCount = 0;
+            // 验证大型爆炸粒子被创建（现在使用 VisualEffect 组件）
+            let particleCount = 0;
             for (const [id, comps] of world.entities) {
-                const particle = comps.find(Particle.check);
-                if (particle && particle.maxFrame >= 16) { // 大型爆炸的帧数
-                    largeExplosionCount++;
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.particles.length > 0) {
+                    particleCount += effect.particles.length;
                 }
             }
 
-            expect(largeExplosionCount).toBeGreaterThan(0);
+            expect(particleCount).toBeGreaterThan(0);
         });
 
         it('应该在 KillEvent 时生成冲击波', () => {

@@ -18,7 +18,7 @@ import { getComponents, view } from '../world';
 import { Blueprint } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
 import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES, PARTICLE_DEBUG } from '../blueprints/effects';
-import { spawnCircle } from './VisualEffectSystem';
+import { spawnCircle, spawnParticles } from './VisualEffectSystem';
 
 /**
  * 特效播放器主函数
@@ -96,7 +96,7 @@ function handleKillEvent(world: World, event: KillEvent): void {
 }
 
 /**
- * 生成爆炸粒子 - 模仿旧版本的物理粒子系统
+ * 生成爆炸粒子 - 使用 VisualEffectSystem
  * 生成多个粒子，每个有随机速度向四周飞散
  */
 function spawnExplosionParticles(world: World, x: number, y: number, config: typeof EXPLOSION_PARTICLES[keyof typeof EXPLOSION_PARTICLES]): void {
@@ -105,33 +105,15 @@ function spawnExplosionParticles(world: World, x: number, y: number, config: typ
         console.log(`[EffectPlayer] 生成爆炸粒子: ${config.count}个, 位置(${x.toFixed(1)}, ${y.toFixed(1)}), 颜色=${config.color}`);
     }
 
-    for (let i = 0; i < config.count; i++) {
-        // 随机角度和速度
-        const angle = Math.random() * Math.PI * 2;
-        const speed = config.speedMin + Math.random() * (config.speedMax - config.speedMin);
-
-        // 粒子蓝图 - 包含 Velocity 组件
-        const particleBlueprint: Blueprint = {
-            Transform: { x: 0, y: 0, rot: 0 },
-            Velocity: {
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed
-            },
-            Particle: {
-                frame: 0,
-                maxFrame: 60,  // 帧动画相关（物理粒子不使用）
-                fps: 60,
-                color: config.color,
-                scale: config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin),
-                maxLife: config.life  // 明确的生命周期（毫秒）
-            },
-            Lifetime: {
-                timer: config.life  // config.life 已经是毫秒，Lifetime.timer 也是毫秒
-            }
-        };
-
-        spawnFromBlueprint(world, particleBlueprint, x, y, 0);
-    }
+    // 使用 VisualEffectSystem 的 spawnParticles API
+    spawnParticles(world, x, y, config.count, {
+        speedMin: config.speedMin,
+        speedMax: config.speedMax,
+        life: config.life,
+        color: config.color,
+        sizeMin: config.sizeMin,
+        sizeMax: config.sizeMax,
+    });
 }
 
 /**
