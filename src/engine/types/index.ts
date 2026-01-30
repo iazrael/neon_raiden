@@ -3,7 +3,7 @@ export * from './base'
 export * from './collision'
 
 
-export enum GameState {
+export enum GameStatus {
     MENU,
     PLAYING,
     PAUSED,

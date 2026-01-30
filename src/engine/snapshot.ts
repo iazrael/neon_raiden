@@ -1,13 +1,13 @@
-import { World, GameState, ComboState, WeaponId } from './types';
+import { GameStatus, ComboState, WeaponId } from './types';
 import { Health, Transform, Weapon, Shield, Bullet, InvulnerableState, PlayerTag, EnemyTag, BossTag } from './components';
-import { view } from './world';
+import { World, view } from './world';
 
 
 
 // ========== 游戏快照接口 ==========
 export interface GameSnapshot {
     t: number;
-    state: GameState;
+    state: GameStatus;
     score: number;
     level: number;
     showLevelTransition: boolean;
@@ -40,7 +40,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
     if (!player) {
         return {
             t,
-            state: GameState.MENU,
+            state: GameStatus.MENU,
             score: 0,
             level: 1,
             showLevelTransition: false,
@@ -90,7 +90,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
 
     return {
         t,
-        state: world.state || GameState.PLAYING,
+        state: world.status || GameStatus.PLAYING,
         score: world.score || 0,
         level: world.level || 1,
         showLevelTransition: false, // TODO: 从LevelingSystem获取

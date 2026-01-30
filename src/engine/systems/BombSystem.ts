@@ -11,7 +11,7 @@
  * 执行顺序：P4 - 在 CollisionSystem 之后
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Bomb, BombIntent, PlayerTag, Transform } from '../components';
 import { removeComponent, view } from '../world';
 import { pushEvent } from '../world';

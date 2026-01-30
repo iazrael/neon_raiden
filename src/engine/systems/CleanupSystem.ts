@@ -10,7 +10,7 @@
  * 执行顺序：P8 - 最后执行
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { DestroyTag } from '../components';
 import { freeId, removeEntity, view } from '../world';
 

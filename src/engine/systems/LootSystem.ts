@@ -11,7 +11,7 @@
  * 执行顺序：P5 - 在交互层之后
  */
 
-import { World, EntityId } from '../types';
+import { World } from '../world';
 import { DropTable, Transform } from '../components';
 import { spawnPickup } from '../factory';
 import { PickupId } from '../types/ids';

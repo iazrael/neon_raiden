@@ -20,9 +20,9 @@
  * - WeaponSystem: 消费FireIntent，发射子弹并管理冷却
  */
 
-import { World, EntityId, Component } from '../../types';
+import { EntityId, Component } from '../../types';
 import { BossTag, BossAI, Weapon, FireIntent, BossEntrance } from '../../components';
-import { pushEvent, view, addComponent } from '../../world';
+import { pushEvent, view, addComponent, World } from '../../world';
 import { BOSS_DATA } from '../../configs/bossData';
 
 /**

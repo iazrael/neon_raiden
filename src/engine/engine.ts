@@ -1,6 +1,5 @@
 import { BehaviorSubject } from 'rxjs';
-import { createWorld } from './world';
-import { World } from './types';
+import { createWorld, World } from './world';
 import { Blueprint } from './blueprints';
 import { spawnPlayer } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
@@ -25,7 +24,7 @@ import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
 import { MovementSystem } from './systems/MovementSystem';
 import { PickupSystem } from './systems/PickupSystem';
-import { RenderSystem, setRenderContext, type RenderContext } from './systems/RenderSystem';
+import { RenderSystem, setRenderContext, setRenderDebug, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { TimeSlowSystem } from './systems/TimeSlowSystem';
@@ -64,6 +63,11 @@ export class Engine {
             width: canvas.clientWidth,
             height: canvas.clientHeight
         });
+        setRenderDebug({
+            enabled: true,
+            // logEntities: true,
+            logTextures: true,
+        })
 
         // 监听尺寸变化
         this.resizeObserver = new ResizeObserver(entries => {

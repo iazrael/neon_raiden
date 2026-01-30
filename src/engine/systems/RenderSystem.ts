@@ -14,10 +14,9 @@
  * 执行顺序：P7 - 在 CameraSystem 之后
  */
 
-import { World } from '../types';
 import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow, Shockwave, Lifetime } from '../components';
 import { SpriteManager } from '../SpriteManager';
-import { view } from '../world';
+import { view, World } from '../world';
 
 /**
  * 渲染层级

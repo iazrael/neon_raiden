@@ -2,9 +2,9 @@
  * 时间相关工具函数
  */
 
-import { World, EntityId } from '../types';
+import { EntityId } from '../types';
 import { PlayerTag, TimeSlow } from '../components';
-import { getEntity, view } from '../world';
+import { getEntity, view, World } from '../world';
 
 /**
  * 获取实体的有效时间缩放比例

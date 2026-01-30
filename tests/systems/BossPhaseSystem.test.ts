@@ -2,11 +2,11 @@
  * BossPhaseSystem 单元测试
  */
 
-import { BossPhaseSystem, resetBossPhases, removeBossPhase } from '../../src/engine/systems/BossPhaseSystem';
-import { World } from '../../src/engine/types';
-import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon } from '../../src/engine/components';
+import { BossPhaseSystem, resetBossPhases, removeBossPhase } from '../../src/engine/systems/boss/BossPhaseSystem';
+import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, BossVisual } from '../../src/engine/components';
 import { BossId } from '../../src/engine/types/ids';
 import { EnemyWeaponId } from '../../src/engine/types/ids';
+import { World } from '../../src/engine/world';
 
 describe('BossPhaseSystem', () => {
     let mockWorld: World;
@@ -346,9 +346,8 @@ describe('BossPhaseSystem', () => {
         it('应该更新现有BossVisual组件的颜色', () => {
             // 添加BossVisual组件
             const bossComps = mockWorld.entities.get(bossId);
-            const { BossVisual } = require('../../src/engine/components/meta');
 
-            let visual = bossComps?.find((c: any) => c instanceof BossVisual);
+            let visual = bossComps?.find(BossVisual.check);
             if (!visual) {
                 visual = new BossVisual({ color: '#ffffff' });
                 bossComps?.push(visual);

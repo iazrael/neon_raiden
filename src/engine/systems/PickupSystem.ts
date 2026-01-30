@@ -10,10 +10,10 @@
  * 执行顺序：P5 - 在交互层之后
  */
 
-import { World, Component } from '../types';
+import {  Component } from '../types';
 import { Transform, Weapon, Buff, Health, Bomb, OptionCount, Lifetime } from '../components';
 import { WeaponId, BuffType } from '../types';
-import { getEvents, pushEvent } from '../world';
+import { getEvents, pushEvent,World } from '../world';
 import { EventTags, PickupEvent, PlaySoundEvent } from '../events';
 import { WEAPON_TABLE } from '../blueprints/weapons';
 import {

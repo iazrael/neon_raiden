@@ -11,9 +11,9 @@
  * 执行顺序：P3 - 在所有决策系统之后
  */
 
-import { Component, World } from '../types';
+import { Component } from '../types';
 import { Transform, Velocity, SpeedStat, MoveIntent, Knockback, PlayerTag, BossTag, DestroyTag, BossEntrance } from '../components';
-import { getComponents, removeComponent, view } from '../world';
+import { getComponents, removeComponent, view, World } from '../world';
 import { destroyEntity } from './CleanupSystem';
 import { getEffectiveTimeScale } from '../utils/timeUtils';
 

@@ -10,7 +10,7 @@
  * 执行顺序：P7 - 在 EffectPlayer 之后
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { HitEvent, KillEvent, PickupEvent, WeaponFiredEvent, BossPhaseChangeEvent, PlaySoundEvent, ComboBreakEvent, ComboUpgradeEvent } from '../events';
 
 /**

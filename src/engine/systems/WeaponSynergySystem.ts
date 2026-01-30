@@ -10,7 +10,7 @@
  * 执行顺序：P2 - 在 WeaponSystem 之前
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Weapon, PlayerTag } from '../components';
 import { WeaponId, EnemyWeaponId } from '../types';
 import { AMMO_TABLE } from '../blueprints/ammo';

@@ -10,9 +10,9 @@
  * 执行顺序：P1 - 在 InputSystem 之后
  */
 
-import { World, EntityId, EnemyId } from '../types';
+import { EntityId, EnemyId } from '../types';
 import { Transform, EnemyTag, MoveIntent, FireIntent, Weapon } from '../components';
-import { addComponent, getComponents, view } from '../world';
+import { addComponent, getComponents, view, World } from '../world';
 import { getEnemyBehavior, EnemyBehavior } from '../configs/enemyGrowth';
 
 /**
@@ -25,7 +25,7 @@ export function EnemySystem(world: World, dt: number): void {
     const [transform] = getComponents(world, world.playerId, [Transform])
     if (!transform) {
         return;
-        
+
     }
     const playerPos = { x: transform.x, y: transform.y };
 

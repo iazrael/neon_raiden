@@ -11,14 +11,14 @@
  * 执行顺序：P6 - 在结算层之后
  */
 
-import { BossId, World, EntityId } from '../types';
+import { BossId, EntityId } from '../types';
 import { EnemyPoolItem, LEVEL_CONFIGS } from '../configs/levels';
 import { spawnEnemy, spawnBoss } from '../factory';
 import { BossTag, Health, ScoreValue, Weapon } from '../components';
 import { EnemyId } from '../types';
 import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
-import { view } from '../world';
+import { view, World } from '../world';
 import { getEnemyStats } from '../configs/enemyGrowth';
 
 
@@ -81,7 +81,7 @@ function applyEnemyGrowth(world: World, enemyId: EntityId, enemyType: EnemyId): 
     }
 
     // 3. 添加击杀分数组件
-    comps.push(new ScoreValue({value: stats.score}));
+    comps.push(new ScoreValue({ value: stats.score }));
 }
 
 /**
@@ -239,7 +239,7 @@ function shouldSpawnBoss(world: World): boolean {
     if (bossSpawnState.spawned) return false;
 
     // 检查场上是否已有 Boss
-    for (const [id, [_]] of view(world, [ BossTag ])) {
+    for (const [id, [_]] of view(world, [BossTag])) {
         return false; // 已有 Boss，不刷新的
     }
 

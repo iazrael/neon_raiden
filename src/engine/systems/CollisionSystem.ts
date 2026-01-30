@@ -18,10 +18,10 @@
  * - 组件缓存：减少重复的 find 操作
  */
 
-import { World, EntityId, Component } from '../types';
+import { EntityId, Component } from '../types';
 import { Transform, HitBox, Bullet, PlayerTag, EnemyTag, PickupItem, InvulnerableState, DestroyTag } from '../components';
 import { CollisionLayer, shouldCheckCollision } from '../types/collision';
-import { pushEvent } from '../world';
+import { pushEvent, World } from '../world';
 import { HitEvent, PickupEvent } from '../events';
 
 // ==================== 空间哈希网格 ====================

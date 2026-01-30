@@ -10,7 +10,7 @@
  * 执行顺序：P6 - 刷怪层最先执行
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Health, Weapon } from '../components';
 
 /**

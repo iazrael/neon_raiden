@@ -10,7 +10,7 @@
  * 执行顺序：P7 - 在 CleanupSystem 之前
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Lifetime, DestroyTag } from '../components';
 import { addComponent, view } from '../world';
 

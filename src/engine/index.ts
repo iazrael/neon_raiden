@@ -10,8 +10,7 @@ export { ReactEngine } from './ReactEngine';
 
 // ========== 世界与组件 ==========
 export * from './world';
-export { Component } from './types/base';
-export type { World, EntityId } from './types/base';
+export * from './types/base';
 export * from './types/ids';
 export * from './types/index';
 export * from './components';

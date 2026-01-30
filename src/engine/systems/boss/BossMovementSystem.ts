@@ -19,9 +19,8 @@
  * - BossCombatSystem: 并行执行，各司其职
  */
 
-import { World } from '../../types';
 import { Transform, Velocity, BossTag, BossAI, BossEntrance } from '../../components';
-import { view } from '../../world';
+import { view, World } from '../../world';
 import { BOSS_DATA, BossMovementPattern, MovementConfig } from '../../configs/bossData';
 import {
     BASE_MOVE_SPEED,

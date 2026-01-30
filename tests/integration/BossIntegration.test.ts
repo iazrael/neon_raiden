@@ -5,10 +5,10 @@
  * - 生成 -> 阶段切换 -> 死亡
  */
 
-import { BossPhaseSystem } from '../../src/engine/systems/BossPhaseSystem';
+import { BossPhaseSystem } from '../../src/engine/systems/boss/BossPhaseSystem';
 import { BossSystem } from '../../src/engine/systems/BossSystem';
 import { WeaponSystem } from '../../src/engine/systems/WeaponSystem';
-import { World } from '../../src/engine/types';
+import { World } from '../../src/engine/world';
 import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, Velocity } from '../../src/engine/components';
 import { BossId, EnemyWeaponId } from '../../src/engine/types/ids';
 

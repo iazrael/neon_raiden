@@ -13,7 +13,7 @@
  * 执行顺序：P2 - 在决策层之后，物理层之前
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Transform, Weapon, FireIntent, PlayerTag } from '../components';
 import { spawnBullet } from '../factory';
 import { CollisionLayer } from '../types/collision';

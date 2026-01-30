@@ -12,10 +12,10 @@
  * 执行顺序：P5 - 在 CollisionSystem 之后
  */
 
-import { World, EntityId } from '../types';
+import { EntityId } from '../types';
 import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from '../components';
 import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, BombExplodedEvent, EventTags } from '../events';
-import { removeComponent, view, getEvents, pushEvent } from '../world';
+import { removeComponent, view, getEvents, World } from '../world';
 
 /**
  * 伤害结算系统主函数

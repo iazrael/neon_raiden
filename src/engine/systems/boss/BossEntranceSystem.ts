@@ -19,9 +19,8 @@
  * - MovementSystem: 消费MoveIntent，应用实际位移
  */
 
-import { World } from '../../types';
 import { Transform, BossEntrance, MoveIntent, SpeedModifier, InvulnerableState } from '../../components';
-import { view, addComponent, removeTypes } from '../../world';
+import { view, addComponent, removeTypes, World } from '../../world';
 import { BOSS_ARENA } from '../../configs/bossConstants';
 
 /**
@@ -31,8 +30,8 @@ import { BOSS_ARENA } from '../../configs/bossConstants';
  */
 export function BossEntranceSystem(world: World, dt: number): void {
     // 只查询有 BossEntrance 组件的Boss
-    for (const [id,[entrance, transform], comps] of view(world, [BossEntrance, Transform])) {
-        
+    for (const [id, [entrance, transform], comps] of view(world, [BossEntrance, Transform])) {
+
         // 使用浮点数安全比较
         if (transform.y < entrance.targetY - BOSS_ARENA.POSITION_EPSILON) {
             // === 入场阶段：产生向下移动意图 ===

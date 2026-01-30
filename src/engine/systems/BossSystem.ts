@@ -12,7 +12,7 @@
  * 执行顺序：P1.5-7 - Boss系统组
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { BossEntranceSystem } from './boss/BossEntranceSystem';
 import { BossMovementSystem } from './boss/BossMovementSystem';
 import { BossCombatSystem } from './boss/BossCombatSystem';

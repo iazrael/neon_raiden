@@ -5,7 +5,7 @@ import { WeaponType, ClickType } from './types';
 
 import { SpriteManager } from './src/engine/SpriteManager';
 // import ReloadPrompt from './src/views/components/ReloadPrompt';
-import { ComboState, GameState } from './src/engine';
+import { ComboState, GameStatus } from './src/engine';
 import { GAME_CONFIG } from './src/engine/configs';
 import { audioPlayer } from './src/engine/audio';
 
@@ -16,14 +16,14 @@ function App() {
     // React State for UI Sync
     const [score, setScore] = useState(0);
     const [level, setLevel] = useState(1);
-    const [gameState, setGameState] = useState<GameState>(GameState.MENU);
+    const [gameState, setGameState] = useState<GameStatus>(GameStatus.MENU);
     const [hp, setHp] = useState(100);
     const [bombs, setBombs] = useState(0);
     const [shieldPercent, setShieldPercent] = useState(0);
     const [showLevelTransition, setShowLevelTransition] = useState(false);
     const [levelTransitionTimer, setLevelTransitionTimer] = useState(0);
     const [maxLevelReached, setMaxLevelReached] = useState(1);
-    const [stateBeforeGallery, setStateBeforeGallery] = useState<GameState>(GameState.MENU);
+    const [stateBeforeGallery, setStateBeforeGallery] = useState<GameStatus>(GameStatus.MENU);
     const [showBossWarning, setShowBossWarning] = useState(false);
     const [comboState, setComboState] = useState<ComboState>({ count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false }); // P2 Combo
     const [weaponType, setWeaponType] = useState<WeaponType>(WeaponType.VULCAN); // P2 Current weapon
@@ -126,13 +126,13 @@ function App() {
                 shieldPercent={shieldPercent}
                 onOpenGallery={() => {
                     setStateBeforeGallery(gameState);
-                    if (gameState === GameState.PLAYING) {
+                    if (gameState === GameStatus.PLAYING) {
                         engineRef.current?.pause();
                     }
-                    setGameState(GameState.GALLERY);
+                    setGameState(GameStatus.GALLERY);
                 }}
                 onCloseGallery={() => {
-                    if (stateBeforeGallery === GameState.PLAYING) {
+                    if (stateBeforeGallery === GameStatus.PLAYING) {
                         engineRef.current?.resume();
                     }
                     setGameState(stateBeforeGallery);
@@ -140,7 +140,7 @@ function App() {
                 playClick={playClick}
                 onBackToMenu={() => {
                     engineRef.current?.stop();
-                    setGameState(GameState.MENU);
+                    setGameState(GameStatus.MENU);
                 }}
                 onPause={() => engineRef.current?.pause()}
                 onResume={() => engineRef.current?.resume()}

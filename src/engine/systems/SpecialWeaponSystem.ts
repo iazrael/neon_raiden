@@ -10,9 +10,10 @@
  * 执行顺序：P2 - 在 MovementSystem 之前执行
  */
 
-import { World, EntityId } from '../types';
+import { EntityId } from '../types';
 import { Transform, Velocity, Bullet, EnemyTag, PlayerTag, Health } from '../components';
 import { AmmoType } from '../types';
+import { World } from '../world';
 
 // 追踪配置
 const HOMING_CONFIG = {

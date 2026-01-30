@@ -10,9 +10,9 @@
  * 执行顺序：P1 - 在 EnemySystem 之后
  */
 
-import { World, EntityId } from '../types';
+import { EntityId } from '../types';
 import { Transform, Velocity, EnemyTag, MoveIntent } from '../components';
-
+import { World } from '../world';
 /**
  * 转向力配置
  */

@@ -9,9 +9,8 @@
  * 执行顺序: P0 - 在所有系统之前执行
  */
 
-import { World} from '../types';
 import { TimeSlow } from '../components';
-import { view } from '../world';
+import { view, World } from '../world';
 
 export function TimeSlowSystem(world: World): void {
     // 使用 view 查询 TimeSlow 实体

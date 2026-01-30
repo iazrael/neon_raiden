@@ -11,7 +11,7 @@
  * 执行顺序：P7 - 最先执行的表现层系统
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Transform, PlayerTag, CameraShake } from '../components';
 import { CamShakeEvent } from '../events';
 import { camera, triggerCameraShake as triggerShake, updateCameraShake } from './RenderSystem';

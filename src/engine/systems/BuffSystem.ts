@@ -11,7 +11,8 @@
  * 执行顺序：P2 - 在决策层之后
  */
 
-import { Component, World } from '../types';
+import { World } from '../world';
+import { Component } from '../types';
 import { Buff, Health, Shield, InvulnerableState } from '../components';
 import { BuffType } from '../types';
 import { removeComponent, removeTypes, view } from '../world';

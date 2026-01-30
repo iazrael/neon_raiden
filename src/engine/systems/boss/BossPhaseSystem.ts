@@ -11,11 +11,11 @@
  * 执行顺序：P6 - 在 BossSystem 之前
  */
 
-import { BossId, Component, World } from '../../types';
+import { BossId, Component } from '../../types';
 import { Health, BossTag, BossAI, Weapon, SpeedStat, BossVisual } from '../../components';
 import { BOSS_DATA, BossPhaseSpec } from '../../configs/bossData';
 import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../../events';
-import { pushEvent, view } from '../../world';
+import { pushEvent, view, World } from '../../world';
 import { ENEMY_WEAPON_TABLE } from '../../blueprints/weapons';
 
 /**

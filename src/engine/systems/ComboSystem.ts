@@ -11,10 +11,9 @@
  * 执行顺序：P5 - 在交互层之后
  */
 
-import { World } from '../types';
 import { ComboState } from '../types';
 import { KillEvent, ComboUpgradeEvent, ComboBreakEvent, BerserkModeEvent } from '../events';
-import { pushEvent } from '../world';
+import { pushEvent, World } from '../world';
 
 /**
  * 连击配置

@@ -10,7 +10,7 @@
  * 执行顺序：P7 - 在 DamageResolutionSystem 之后
  */
 
-import { World } from '../types';
+import { World } from '../world';
 import { Transform, Particle, Lifetime, Shockwave, Velocity } from '../components';
 import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
 import { triggerCameraShake } from './RenderSystem';

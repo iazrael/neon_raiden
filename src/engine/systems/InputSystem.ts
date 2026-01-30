@@ -1,4 +1,4 @@
-import { World } from '../types';
+import { World } from '../world';
 import { inputManager } from '../input/InputManager';
 import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag, Option, Transform } from '../components';
 import { removeComponent, view } from '../world';

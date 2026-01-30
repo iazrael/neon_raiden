@@ -7,6 +7,8 @@
  * - BossCombatSystem: 处理Boss战斗
  */
 
+
+export { BossPhaseSystem } from './BossPhaseSystem';
 export { BossEntranceSystem } from './BossEntranceSystem';
 export { BossMovementSystem } from './BossMovementSystem';
 export { BossCombatSystem } from './BossCombatSystem';
