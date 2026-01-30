@@ -14,7 +14,7 @@ export const WeaponGrowthData: Record<WeaponId, WeaponGrowthSpec> = {
     /** 散弹武器成长数据 */
     [WeaponId.VULCAN]: {
         /** 基础伤害 */
-        baseDamage: 12,
+        baseDamage: 2,
         /** 每级增加的伤害 */
         damagePerLevel: 3,
         /** 子弹速度 */
