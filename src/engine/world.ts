@@ -36,6 +36,8 @@ export interface World {
     entities: Map<EntityId, Component[]>;
     // 玩家ID
     playerId: EntityId;
+    // 视觉特效实体 ID
+    visualEffectId: EntityId;
     // 事件队列
     events: GameEvent[];
     // 游戏时间
@@ -84,6 +86,7 @@ export function createWorld(): World {
         score: 0,
         level: 1,
         playerId: 0,
+        visualEffectId: 0,
         playerLevel: 1,
         difficulty: 1,
         spawnCredits: 0,

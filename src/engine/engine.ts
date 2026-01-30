@@ -1,9 +1,10 @@
 import { BehaviorSubject } from 'rxjs';
-import { createWorld, World } from './world';
+import { createWorld, World, generateId, addComponent } from './world';
 import { Blueprint } from './blueprints';
 import { spawnPlayer } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
 import { inputManager } from './input/InputManager';
+import { VisualEffect } from './components/visual';
 
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
@@ -76,6 +77,10 @@ export class Engine {
 
         // 初始化输入管理器
         inputManager.init(canvas);
+
+        // 创建视觉特效实体
+        this.world.visualEffectId = generateId();
+        addComponent(this.world, this.world.visualEffectId, new VisualEffect());
 
         spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80, 0);
 
