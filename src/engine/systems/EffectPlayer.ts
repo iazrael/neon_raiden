@@ -13,7 +13,7 @@
 import { World } from '../world';
 import { Transform, Particle, Lifetime, Shockwave, Velocity } from '../components';
 import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
-import { triggerCameraShake } from './RenderSystem';
+import { triggerShake } from './CameraSystem';
 import { getComponents, view } from '../world';
 import { Blueprint } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
@@ -149,14 +149,14 @@ function handleBossPhaseChangeEvent(world: World, event: BossPhaseChangeEvent): 
     spawnParticle(world, 'boss_phase', world.width / 2, world.height / 2);
 
     // 触发震屏（500毫秒）
-    triggerCameraShake(10, 500);
+    triggerShake(world, 10, 500);
 }
 
 /**
  * 处理震屏事件
  */
 function handleCamShakeEvent(world: World, event: CamShakeEvent): void {
-    triggerCameraShake(event.intensity, event.duration);
+    triggerShake(world, event.intensity, event.duration);
 }
 
 /**
@@ -181,7 +181,7 @@ function handleLevelUpEvent(world: World, event: LevelUpEvent): void {
     }
 
     // 触发震屏（300毫秒）
-    triggerCameraShake(5, 300);
+    triggerShake(world, 5, 300);
 }
 
 /**
@@ -203,7 +203,7 @@ function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
     spawnParticle(world, 'berserk', event.pos.x, event.pos.y);
 
     // 触发强烈震屏（800毫秒）
-    triggerCameraShake(15, 800);
+    triggerShake(world, 15, 800);
 }
 
 /**

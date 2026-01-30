@@ -24,7 +24,7 @@ import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
 import { MovementSystem } from './systems/MovementSystem';
 import { PickupSystem } from './systems/PickupSystem';
-import { RenderSystem, setRenderContext, setRenderDebug, type RenderContext } from './systems/RenderSystem';
+import { RenderSystem, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { TimeSlowSystem } from './systems/TimeSlowSystem';
@@ -35,7 +35,7 @@ import { WeaponSystem } from './systems/WeaponSystem';
 export class Engine {
     private raf = 0;
     private world: World;
-    private ctx: CanvasRenderingContext2D;
+    private canvas: HTMLCanvasElement;
     private resizeObserver: ResizeObserver;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
 
@@ -53,21 +53,8 @@ export class Engine {
     // ==========================================
 
     start(canvas: HTMLCanvasElement, bp: Blueprint) {
-        this.ctx = canvas.getContext('2d')!;
+        this.canvas = canvas;
         this.world = createWorld();
-
-        // 设置渲染上下文
-        setRenderContext({
-            canvas,
-            context: this.ctx,
-            width: canvas.clientWidth,
-            height: canvas.clientHeight
-        });
-        setRenderDebug({
-            enabled: true,
-            // logEntities: true,
-            logTextures: true,
-        })
 
         // 监听尺寸变化
         this.resizeObserver = new ResizeObserver(entries => {
@@ -77,13 +64,6 @@ export class Engine {
                 canvas.height = height;
                 this.world.width = width;
                 this.world.height = height;
-                // 更新渲染上下文尺寸
-                setRenderContext({
-                    canvas,
-                    context: this.ctx,
-                    width,
-                    height
-                });
             }
         });
         this.resizeObserver.observe(canvas);
@@ -138,7 +118,7 @@ export class Engine {
         // ========== 调试模式：只测试渲染 ==========
         if (Engine.DEBUG_RENDER_ONLY) {
             // 只运行渲染相关的系统
-            RenderSystem(world, dt);
+            RenderSystem(world, this.getRenderContext(), dt);
             return;
         }
         // ==========================================
@@ -177,7 +157,7 @@ export class Engine {
         // ComboSystem(world, dt);                         // 16. 连击系统
 
         // P7. 表现层 (视听反馈)
-        // CameraSystem(world, dt);                        // 17. 相机系统
+        CameraSystem(world, dt);                        // 17. 相机系统
         EffectPlayer(world, dt);                        // 18. 效果播放系统
         // AudioSystem(world, dt);                     // 19. 音频系统 (暂时禁用 - 使用旧 GameAudioSystem)
 
@@ -189,7 +169,19 @@ export class Engine {
         CleanupSystem(world, dt);                       // 21. 清理系统
 
         // 渲染系统（最后执行）
-        RenderSystem(world, dt);                        // 22. 渲染系统
+        RenderSystem(world, this.getRenderContext(), dt);  // 22. 渲染系统
+    }
+
+    /**
+     * 获取渲染上下文
+     */
+    private getRenderContext(): RenderContext {
+        return {
+            canvas: this.canvas,
+            context: this.canvas.getContext('2d')!,
+            width: this.canvas.width,
+            height: this.canvas.height,
+        };
     }
 
     /**

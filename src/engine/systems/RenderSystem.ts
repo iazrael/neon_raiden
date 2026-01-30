@@ -8,83 +8,19 @@
  * - 绘制护盾、无敌状态等特效
  * - 绘制 Boss 血条
  * - 根据 Camera 偏移调整绘制位置（仅震屏，相机固定）
- * - 按层级排序（背景 < 敌人 < 玩家 < UI < 特效）
+ * - 按固定顺序渲染（背景 < 精灵 < 玩家特效 < 粒子 < 冲击波 < UI）
  *
  * 系统类型：表现层
  * 执行顺序：P7 - 在 CameraSystem 之后
  */
 
+import { Component } from '../types/base';
+import { World } from '../world';
 import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow, Shockwave, Lifetime } from '../components';
-import { SpriteManager } from '../SpriteManager';
-import { view, World } from '../world';
+import { DebugConfig } from '../config/DebugConfig';
 
 /**
- * 渲染层级
- */
-enum RenderLayer {
-    BACKGROUND = 0,
-    ENEMY = 1,
-    PLAYER = 2,
-    PICKUP = 3,
-    PARTICLE = 4,
-    UI = 5
-}
-
-/**
- * 渲染项
- */
-interface RenderItem {
-    transform: Transform;
-    sprite: Sprite;
-    layer: RenderLayer;
-    particle?: Particle;
-}
-
-/**
- * 相机状态
- */
-export interface CameraState {
-    x: number;
-    y: number;
-    shakeX: number;
-    shakeY: number;
-    zoom: number;
-    /** 震屏剩余时间（毫秒） */
-    shakeTimer: number;
-    /** 震屏强度 */
-    shakeIntensity: number;
-}
-
-/**
- * 时间减速线条状态
- */
-interface TimeSlowLine {
-    x: number;
-    y: number;
-    length: number;
-    speed: number;
-    alpha: number;
-}
-
-// 全局状态存储
-let timeSlowLines: TimeSlowLine[] = [];
-
-/**
- * 全局相机状态
- */
-export const camera: CameraState = {
-    x: 0,
-    y: 0,
-    shakeX: 0,
-    shakeY: 0,
-    zoom: 1.0,
-    shakeTimer: 0,
-    shakeIntensity: 0
-};
-
-/**
- * 渲染上下文接口
- * 实际渲染时由外部提供 Canvas 2D 或 WebGL 上下文
+ * 渲染上下文
  */
 export interface RenderContext {
     canvas: HTMLCanvasElement;
@@ -94,176 +30,66 @@ export interface RenderContext {
 }
 
 /**
- * 当前渲染上下文（由外部设置）
+ * 渲染层级
  */
-let currentContext: RenderContext | null = null;
-
-/**
- * 调试模式开关
- */
-export const RenderDebug = {
-    enabled: false,
-    logEntities: false,
-    logTextures: false,
-    logPlayer: false
-};
-
-/**
- * 设置渲染调试模式
- */
-export function setRenderDebug(options: {
-    enabled?: boolean;
-    logEntities?: boolean;
-    logTextures?: boolean;
-    logPlayer?: boolean;
-}): void {
-    if (options.enabled !== undefined) RenderDebug.enabled = options.enabled;
-    if (options.logEntities !== undefined) RenderDebug.logEntities = options.logEntities;
-    if (options.logTextures !== undefined) RenderDebug.logTextures = options.logTextures;
-    if (options.logPlayer !== undefined) RenderDebug.logPlayer = options.logPlayer;
-    console.log('[RenderSystem] Debug mode:', RenderDebug);
+enum RenderLayer {
+    ENEMY = 0,
+    PLAYER = 1,
+    PICKUP = 2,
 }
 
 /**
- * 设置渲染上下文
+ * 渲染项类型
  */
-export function setRenderContext(ctx: RenderContext): void {
-    currentContext = ctx;
+type RenderItemType = 'sprite' | 'particle' | 'shockwave';
+
+/**
+ * 渲染项
+ */
+interface RenderItem {
+    type: RenderItemType;
+    layer: number;
+    transform: Transform;
+    sprite?: Sprite;
+    particle?: Particle;
+    shockwave?: Shockwave;
+    lifetime?: Lifetime;
 }
 
 /**
- * 获取渲染上下文
+ * 玩家特效数据
  */
-export function getRenderContext(): RenderContext | null {
-    return currentContext;
+interface PlayerEffectData {
+    transform: Transform;
+    shield?: Shield;
+    invulnerable?: InvulnerableState;
+    health?: Health;
 }
 
 /**
- * 渲染系统主函数
- * @param world 世界对象
- * @param dt 时间增量（毫秒）
- * @param renderCtx 可选的渲染上下文
+ * Boss 信息
  */
-export function RenderSystem(world: World, dt: number, renderCtx?: RenderContext): void {
-    const ctx = renderCtx || currentContext;
-    if (!ctx) {
-        // 没有渲染上下文，跳过渲染
-        return;
-    }
+interface BossInfo {
+    transform: Transform;
+    health: Health;
+}
 
-    const { canvas, context, width, height } = ctx;
-
-    // ========== 调试日志 ==========
-    if (RenderDebug.enabled) {
-        console.log('[RenderSystem] === Frame Start ===');
-        console.log('[RenderSystem] Canvas size:', width, 'x', height);
-        console.log('[RenderSystem] World entities:', world.entities.size);
-        console.log('[RenderSystem] Player ID:', world.playerId);
-    }
-    // ===========================
-
-    // ========== 查询时间减速状态 ==========
-    const timeSlowEntities = [...view(world, [TimeSlow])];
-    const timeSlowActive = timeSlowEntities.length > 0;
-    // ======================================
-
-    // 绘制背景
-    drawBackground(context, width, height, timeSlowActive);
-
-    // 计算相机偏移（只有震屏，相机固定在 0,0）
-    const camX = camera.shakeX;
-    const camY = camera.shakeY;
-
-    // 收集玩家信息（用于护盾、无敌状态渲染）
-    const playerInfo = collectPlayerInfo(world);
-
-    // 收集 Boss 信息（用于血条渲染）
-    const bossInfo = collectBossInfo(world);
-
-    // ========== 调试：玩家信息 ==========
-    if (RenderDebug.enabled && RenderDebug.logPlayer) {
-        console.log('[RenderSystem] Player info:', playerInfo ? {
-            hasTransform: !!playerInfo.transform,
-            position: { x: playerInfo.transform.x, y: playerInfo.transform.y },
-            hasShield: !!playerInfo.shield,
-            shieldValue: playerInfo.shield?.value,
-            hasInvulnerable: !!playerInfo.invulnerable,
-            invulnerableDuration: playerInfo.invulnerable?.duration
-        } : 'NO PLAYER');
-    }
-    // ==================================
-
-    // 收集所有需要渲染的实体
-    const renderItems: RenderItem[] = [];
-
-    for (const [, comps] of world.entities) {
-        const transform = comps.find(Transform.check) as Transform | undefined;
-        const sprite = comps.find(Sprite.check) as Sprite | undefined;
-
-        if (!transform || !sprite) continue;
-
-        // 确定渲染层级
-        const layer = determineLayer(comps);
-        const particle = comps.find(Particle.check) as Particle | undefined;
-
-        renderItems.push({
-            transform,
-            sprite,
-            layer,
-            particle
-        });
-    }
-
-    // ========== 调试：渲染项统计 ==========
-    if (RenderDebug.enabled && RenderDebug.logEntities) {
-        console.log('[RenderSystem] Render items:', renderItems.length);
-        const byLayer: Record<number, number> = {};
-        for (const item of renderItems) {
-            byLayer[item.layer] = (byLayer[item.layer] || 0) + 1;
-        }
-        console.log('[RenderSystem] By layer:', byLayer);
-    }
-    // ====================================
-
-    // 按层级排序
-    renderItems.sort((a, b) => a.layer - b.layer);
-
-    // 绘制所有实体
-    for (const item of renderItems) {
-        if (RenderDebug.enabled && RenderDebug.logTextures) {
-            console.log('[RenderSystem] Drawing:', {
-                position: { x: item.transform.x, y: item.transform.y },
-                spriteKey: item.sprite.spriteKey,
-                color: item.sprite.color
-            });
-        }
-        drawSprite(context, item, camX, camY, camera.zoom);
-    }
-
-    // 绘制玩家护盾
-    if (playerInfo) {
-        drawPlayerEffects(context, playerInfo, camX, camY);
-    }
-
-    // 绘制粒子特效
-    drawParticles(context, world, camX, camY);
-
-    // 绘制冲击波
-    drawShockwaves(context, world, camX, camY, dt);
-
-    // 绘制 Boss 血条
-    if (bossInfo) {
-        drawBossHealthBar(context, bossInfo, width, height);
-    }
+/**
+ * 收集结果
+ */
+interface RenderQueue {
+    sprites: RenderItem[];
+    particles: RenderItem[];
+    shockwaves: RenderItem[];
+    playerEffect: PlayerEffectData | null;
+    bossInfo: BossInfo | null;
+    timeSlowActive: boolean;
 }
 
 /**
  * 确定实体的渲染层级
  */
-function determineLayer(comps: any[]): RenderLayer {
-    if (comps.some(Particle.check)) {
-        return RenderLayer.PARTICLE;
-    }
+function determineLayer(comps: Component[]): number {
     if (comps.some(PlayerTag.check)) {
         return RenderLayer.PLAYER;
     }
@@ -271,6 +97,169 @@ function determineLayer(comps: any[]): RenderLayer {
         return RenderLayer.ENEMY;
     }
     return RenderLayer.PICKUP;
+}
+
+/**
+ * 单次遍历收集所有渲染项
+ */
+function collectRenderItems(world: World): RenderQueue {
+    const queue: RenderQueue = {
+        sprites: [],
+        particles: [],
+        shockwaves: [],
+        playerEffect: null,
+        bossInfo: null,
+        timeSlowActive: false,
+    };
+
+    for (const [id, comps] of world.entities) {
+        const transform = comps.find(Transform.check) as Transform | undefined;
+        if (!transform) continue;
+
+        // 精灵
+        const sprite = comps.find(Sprite.check) as Sprite | undefined;
+        if (sprite) {
+            queue.sprites.push({
+                type: 'sprite',
+                layer: determineLayer(comps),
+                transform,
+                sprite,
+            });
+        }
+
+        // 粒子
+        const particle = comps.find(Particle.check) as Particle | undefined;
+        if (particle) {
+            queue.particles.push({
+                type: 'particle',
+                layer: 0,
+                transform,
+                particle,
+                lifetime: comps.find(Lifetime.check) as Lifetime | undefined,
+            });
+        }
+
+        // 冲击波
+        const shockwave = comps.find(Shockwave.check) as Shockwave | undefined;
+        if (shockwave) {
+            queue.shockwaves.push({
+                type: 'shockwave',
+                layer: 0,
+                transform,
+                shockwave,
+            });
+        }
+
+        // 玩家特效
+        if (id === world.playerId) {
+            const shield = comps.find(Shield.check) as Shield | undefined;
+            const invulnerable = comps.find(InvulnerableState.check) as InvulnerableState | undefined;
+            const health = comps.find(Health.check) as Health | undefined;
+            if (shield || invulnerable) {
+                queue.playerEffect = { transform, shield, invulnerable, health };
+            }
+        }
+
+        // Boss 信息
+        const bossTag = comps.find(BossTag.check) as BossTag | undefined;
+        const health = comps.find(Health.check) as Health | undefined;
+        if (bossTag && health) {
+            queue.bossInfo = { transform, health };
+        }
+
+        // 时间减速状态
+        if (comps.some(TimeSlow.check)) {
+            queue.timeSlowActive = true;
+        }
+    }
+
+    return queue;
+}
+
+/**
+ * 更新并绘制时间减速特效线条
+ */
+function updateTimeSlowLines(world: World, width: number, height: number): void {
+    const { timeSlowLines } = world.renderState;
+
+    // 生成新的线条（最多 20 条）
+    if (timeSlowLines.length < 20) {
+        timeSlowLines.push({
+            x: Math.random() * width,
+            y: -50,
+            length: Math.random() * 100 + 50,
+            speed: Math.random() * 5 + 2,
+            alpha: Math.random() * 0.5 + 0.2,
+        });
+    }
+
+    // 更新线条位置
+    for (const line of timeSlowLines) {
+        line.y += line.speed;
+    }
+
+    // 清理超出屏幕的线条
+    for (let i = timeSlowLines.length - 1; i >= 0; i--) {
+        if (timeSlowLines[i].y > height + 100) {
+            timeSlowLines.splice(i, 1);
+        }
+    }
+}
+
+/**
+ * 绘制时间减速特效
+ */
+function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, world: World, width: number, height: number): void {
+    const { timeSlowLines } = world.renderState;
+
+    ctx.save();
+
+    // 蓝色色调覆盖
+    ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
+    ctx.fillRect(0, 0, width, height);
+
+    // 绘制线条
+    for (const line of timeSlowLines) {
+        ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(line.x, line.y);
+        ctx.lineTo(line.x, line.y + line.length);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/**
+ * 绘制背景星空效果
+ */
+function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number, timeSlowActive: boolean): void {
+    // 黑色背景
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, width, height);
+
+    const t = Date.now() / 1000;
+    const timeScale = timeSlowActive ? 0.5 : 1.0;
+
+    // 远处的星星（慢速）
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    for (let i = 0; i < 50; i++) {
+        const sx = (i * 137) % width;
+        const sy = (i * 97 + t * 20 * timeScale) % height;
+        ctx.fillRect(sx, sy, 1, 1);
+    }
+
+    // 近处的星星（快速）
+    ctx.fillStyle = 'rgba(200, 230, 255, 0.8)';
+    for (let i = 0; i < 30; i++) {
+        const speed = (i % 3) + 2;
+        const sx = (i * 57) % width;
+        const sy = (i * 31 + t * 60 * speed * timeScale) % height;
+        ctx.beginPath();
+        ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 /**
@@ -284,22 +273,22 @@ function drawSprite(
     zoom: number
 ): void {
     const { transform, sprite } = item;
+    if (!sprite) return;
 
     // 计算屏幕坐标
     const screenX = transform.x - camX;
     const screenY = transform.y - camY;
 
-    // 从 SpriteManager 获取配置
+    // 从 Sprite 获取配置
     const config = sprite.config;
     const image = sprite.image;
 
     // 计算绘制参数
-    const width = config.width * sprite.scale * zoom;
-    const height = config.height * sprite.scale * zoom;
-    const pivotX = width * (config.pivotX ?? 0.5);
-    const pivotY = height * (config.pivotY ?? 0.5);
+    const itemWidth = config.width * sprite.scale * zoom;
+    const itemHeight = config.height * sprite.scale * zoom;
+    const pivotX = itemWidth * (config.pivotX ?? 0.5);
+    const pivotY = itemHeight * (config.pivotY ?? 0.5);
 
-    // 保存上下文状态
     ctx.save();
 
     // 移动到绘制位置
@@ -311,154 +300,94 @@ function drawSprite(
 
     // 绘制图片
     if (image && image.complete) {
-        ctx.drawImage(image, -pivotX, -pivotY, width, height);
+        ctx.drawImage(image, -pivotX, -pivotY, itemWidth, itemHeight);
     } else {
         // 图片未加载，使用颜色占位
         ctx.fillStyle = sprite.color || '#fff';
-        ctx.fillRect(-pivotX, -pivotY, width, height);
+        ctx.fillRect(-pivotX, -pivotY, itemWidth, itemHeight);
     }
 
     // 受伤闪烁效果
     if (sprite.hitFlashUntil && Date.now() < sprite.hitFlashUntil) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.fillRect(-pivotX, -pivotY, width, height);
+        ctx.fillRect(-pivotX, -pivotY, itemWidth, itemHeight);
     }
 
-    // 恢复上下文状态
     ctx.restore();
 }
 
 /**
- * 绘制背景星空效果
+ * 绘制粒子
  */
-function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number, timeSlowActive: boolean = false): void {
-    // 黑色背景
-    ctx.fillStyle = '#050505';
-    ctx.fillRect(0, 0, width, height);
-
-    const t = Date.now() / 1000;
-    const timeScale = timeSlowActive ? 0.5 : 1.0;
-
-    // 远处的星星（慢速）- 应用 timeScale
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    for (let i = 0; i < 50; i++) {
-        const sx = (i * 137) % width;
-        const sy = (i * 97 + t * 20 * timeScale) % height;
-        ctx.fillRect(sx, sy, 1, 1);
-    }
-
-    // 近处的星星（快速）- 应用 timeScale
-    ctx.fillStyle = 'rgba(200, 230, 255, 0.8)';
-    for (let i = 0; i < 30; i++) {
-        const speed = (i % 3) + 2;
-        const sx = (i * 57) % width;
-        const sy = (i * 31 + t * 60 * speed * timeScale) % height;
-        ctx.beginPath();
-        ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    // 时间减速视觉效果
-    if (timeSlowActive) {
-        drawTimeSlowEffect(ctx, width, height);
-    } else {
-        timeSlowLines = []; // 清空线条数组
-    }
-}
-
-/**
- * 绘制时间减速特效
- * 复用旧版 RenderSystem 的 falling lines 效果
- */
-function drawTimeSlowEffect(
+function drawParticle(
     ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
+    item: RenderItem,
+    camX: number,
+    camY: number
 ): void {
-    ctx.save();
+    const { transform, particle, lifetime } = item;
+    if (!particle) return;
 
-    // 蓝色色调覆盖
-    ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
-    ctx.fillRect(0, 0, width, height);
-
-    // 生成新的线条(最多 20 条)
-    if (timeSlowLines.length < 20) {
-        timeSlowLines.push({
-            x: Math.random() * width,
-            y: -50,
-            length: Math.random() * 100 + 50,
-            speed: Math.random() * 5 + 2,
-            alpha: Math.random() * 0.5 + 0.2
-        });
+    // 计算透明度 - 基于 Lifetime 衰减
+    let alpha = 1;
+    if (lifetime) {
+        const maxLife = particle.maxLife > 0
+            ? particle.maxLife
+            : particle.maxFrame * 16.66;
+        alpha = Math.max(0, Math.min(1, lifetime.timer / maxLife));
     }
 
-    // 绘制线条
-    timeSlowLines.forEach(line => {
-        line.y += line.speed;
-        ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(line.x, line.y);
-        ctx.lineTo(line.x, line.y + line.length);
-        ctx.stroke();
-    });
+    const size = particle.scale;
 
-    // 清理超出屏幕的线条
-    timeSlowLines = timeSlowLines.filter(line => line.y < height + 100);
-
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = particle.color;
+    ctx.beginPath();
+    ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
 }
 
 /**
- * 收集玩家信息
+ * 绘制冲击波
  */
-interface PlayerInfo {
-    transform: Transform;
-    shield?: Shield;
-    invulnerable?: InvulnerableState;
-    health?: Health;
-}
+function drawShockwave(
+    ctx: CanvasRenderingContext2D,
+    item: RenderItem,
+    camX: number,
+    camY: number,
+    dt: number
+): void {
+    const { transform, shockwave } = item;
+    if (!shockwave) return;
 
-function collectPlayerInfo(world: World): PlayerInfo | null {
-    const playerComps = world.entities.get(world.playerId);
-    if (!playerComps) return null;
+    // 更新冲击波动画
+    const timeScale = dt / 16.66;
+    shockwave.radius += (shockwave.maxRadius - shockwave.radius) * 0.1 * timeScale;
+    shockwave.life -= 0.02 * timeScale;
 
-    const transform = playerComps.find(Transform.check);
-    const shield = playerComps.find(Shield.check);
-    const invulnerable = playerComps.find(InvulnerableState.check);
-    const health = playerComps.find(Health.check);
-
-    if (!transform) return null;
-
-    return { transform, shield, invulnerable, health };
-}
-
-/**
- * 收集 Boss 信息
- */
-interface BossInfo {
-    transform: Transform;
-    health: Health;
-    bossTag: BossTag;
-}
-
-function collectBossInfo(world: World): BossInfo | null {
-    for (const [id, [bossTag, transform, health]] of view(world, [BossTag, Transform, Health])) {
-        return { transform, health, bossTag };
-    }
-    return null;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, shockwave.life);
+    ctx.shadowColor = shockwave.color;
+    ctx.shadowBlur = 15;
+    ctx.lineWidth = shockwave.width;
+    ctx.strokeStyle = shockwave.color;
+    ctx.beginPath();
+    ctx.arc(transform.x - camX, transform.y - camY, shockwave.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
 }
 
 /**
  * 绘制玩家特效（护盾、无敌状态）
  */
-function drawPlayerEffects(
+function drawPlayerEffect(
     ctx: CanvasRenderingContext2D,
-    playerInfo: PlayerInfo,
+    data: PlayerEffectData,
     camX: number,
     camY: number
 ): void {
-    const { transform, shield, invulnerable, health } = playerInfo;
+    const { transform, shield, invulnerable, health } = data;
     const x = transform.x - camX;
     const y = transform.y - camY;
 
@@ -467,7 +396,6 @@ function drawPlayerEffects(
         ctx.save();
         ctx.translate(x, y);
 
-        // 护盾最大值基于生命值的一半
         const maxShield = health ? health.max * 0.5 : 50;
         const alpha = Math.min(1, shield.value / maxShield);
 
@@ -482,7 +410,7 @@ function drawPlayerEffects(
         ctx.restore();
     }
 
-    // 绘制无敌状态（金色光环）
+    // 绘制无敌状态
     if (invulnerable && invulnerable.duration > 0) {
         ctx.save();
         ctx.translate(x, y);
@@ -527,7 +455,6 @@ function drawBossHealthBar(
     const { health } = bossInfo;
     const hpPercent = health.hp / health.max;
 
-    // 血条位置在屏幕顶部中央
     const barWidth = Math.min(400, screenWidth * 0.8);
     const barHeight = 12;
     const barX = (screenWidth - barWidth) / 2;
@@ -557,156 +484,68 @@ function drawBossHealthBar(
 }
 
 /**
- * 更新相机震屏
- * @param dt 帧间隔时间（毫秒）
+ * 渲染系统主函数
  */
-export function updateCameraShake(dt: number): void {
-    if (camera.shakeTimer <= 0) {
-        // 震屏结束，清零
-        camera.shakeX = 0;
-        camera.shakeY = 0;
-        camera.shakeIntensity = 0;
-        return;
-    }
-
-    // 更新剩余时间
-    camera.shakeTimer -= dt;
-
-    // 每帧产生新的随机震屏偏移
-    camera.shakeX = (Math.random() - 0.5) * 2 * camera.shakeIntensity;
-    camera.shakeY = (Math.random() - 0.5) * 2 * camera.shakeIntensity;
-
-    // 时间结束时清零
-    if (camera.shakeTimer <= 0) {
-        camera.shakeTimer = 0;
-        camera.shakeX = 0;
-        camera.shakeY = 0;
-        camera.shakeIntensity = 0;
-    }
-}
-
-/**
- * 设置相机位置
- */
-export function setCameraPosition(x: number, y: number): void {
-    camera.x = x;
-    camera.y = y;
-}
-
-/**
- * 触发相机震屏
- * @param intensity 震屏强度（像素）
- * @param duration 震屏持续时间（毫秒）
- */
-export function triggerCameraShake(intensity: number, duration: number): void {
-    camera.shakeIntensity = intensity;
-    camera.shakeTimer = duration;
-    // 初始震屏偏移
-    camera.shakeX = (Math.random() - 0.5) * 2 * intensity;
-    camera.shakeY = (Math.random() - 0.5) * 2 * intensity;
-}
-
-/**
- * 重置相机状态
- */
-export function resetCamera(): void {
-    camera.x = 0;
-    camera.y = 0;
-    camera.shakeX = 0;
-    camera.shakeY = 0;
-    camera.zoom = 1.0;
-}
-
-/**
- * 绘制冲击波特效
- * 采用旧版本的非线性扩张 + 发光边缘效果
- */
-function drawShockwaves(
-    ctx: CanvasRenderingContext2D,
+export function RenderSystem(
     world: World,
-    camX: number,
-    camY: number,
+    renderCtx: RenderContext,
     dt: number
 ): void {
-    for (const [id, comps] of world.entities) {
-        const transform = comps.find(Transform.check) as Transform | undefined;
-        const shockwave = comps.find(Shockwave.check) as Shockwave | undefined;
+    const { canvas, context } = renderCtx;
+    const { camera, timeSlowLines } = world.renderState;
 
-        if (!transform || !shockwave) continue;
-
-        // 更新冲击波动画 - 采用旧版本的非线性扩张（越接近 maxRadius 越慢）
-        const timeScale = dt / 16.66;
-        shockwave.radius += (shockwave.maxRadius - shockwave.radius) * 0.1 * timeScale;
-        shockwave.life -= 0.02 * timeScale;
-
-        // 绘制
-        ctx.save();
-
-        // 透明度随 life 衰减
-        ctx.globalAlpha = Math.max(0, shockwave.life);
-
-        // 添加发光效果 - 让边缘更柔和
-        ctx.shadowColor = shockwave.color;
-        ctx.shadowBlur = 15;
-        ctx.lineWidth = shockwave.width;
-        ctx.strokeStyle = shockwave.color;
-
-        // 绘制光圈
-        ctx.beginPath();
-        ctx.arc(transform.x - camX, transform.y - camY, shockwave.radius, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.restore();
-    }
-}
-
-/**
- * 绘制粒子特效
- * 采用旧版本的渲染方式：lighter 混合模式 + 基于 Lifetime 的渐隐
- */
-function drawParticles(
-    ctx: CanvasRenderingContext2D,
-    world: World,
-    camX: number,
-    camY: number
-): void {
-    // 使用 lighter 混合模式让重叠粒子更亮
-    ctx.globalCompositeOperation = 'lighter';
-
-    let particleCount = 0;
-
-    for (const [_id, comps] of world.entities) {
-        const transform = comps.find(Transform.check) as Transform | undefined;
-        const particle = comps.find(Particle.check) as Particle | undefined;
-        const lifetime = comps.find(Lifetime.check) as Lifetime | undefined;
-
-        if (!transform || !particle) continue;
-
-        particleCount++;
-
-        // 计算透明度 - 基于 Lifetime 衰减（旧版本：life / maxLife）
-        let alpha = 1;
-        if (lifetime) {
-            // 优先使用 maxLife（物理粒子），否则用 maxFrame * 16.66（帧动画粒子）
-            const maxLife = particle.maxLife > 0
-                ? particle.maxLife
-                : particle.maxFrame * 16.66;  // 假设 60fps，每帧 16.66ms
-            alpha = Math.max(0, Math.min(1, lifetime.timer / maxLife));
-        }
-
-        // 粒子大小
-        const size = particle.scale;
-
-        // 绘制粒子为小圆点
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = particle.color;
-        ctx.beginPath();
-        ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+    // 调试日志
+    if (DebugConfig.render.enabled && DebugConfig.render.logEntities) {
+        console.log('[RenderSystem] Entities:', world.entities.size);
     }
 
-    // 恢复默认混合模式
-    ctx.globalCompositeOperation = 'source-over';
+    // 1. 单次收集所有渲染项
+    const queue = collectRenderItems(world);
+
+    // 2. 清空或更新时间减速线条
+    if (!queue.timeSlowActive) {
+        timeSlowLines.length = 0;
+    } else {
+        updateTimeSlowLines(world, canvas.width, canvas.height);
+    }
+
+    // 3. 绘制背景
+    drawBackground(context, canvas.width, canvas.height, queue.timeSlowActive);
+
+    // 绘制时间减速特效
+    if (queue.timeSlowActive) {
+        drawTimeSlowEffect(context, world, canvas.width, canvas.height);
+    }
+
+    // 计算相机偏移
+    const camX = camera.shakeX;
+    const camY = camera.shakeY;
+
+    // 4. 绘制精灵（按 layer 排序）
+    queue.sprites.sort((a, b) => a.layer - b.layer);
+    for (const item of queue.sprites) {
+        drawSprite(context, item, camX, camY, camera.zoom);
+    }
+
+    // 5. 绘制玩家特效
+    if (queue.playerEffect) {
+        drawPlayerEffect(context, queue.playerEffect, camX, camY);
+    }
+
+    // 6. 绘制粒子
+    context.globalCompositeOperation = 'lighter';
+    for (const item of queue.particles) {
+        drawParticle(context, item, camX, camY);
+    }
+    context.globalCompositeOperation = 'source-over';
+
+    // 7. 绘制冲击波
+    for (const item of queue.shockwaves) {
+        drawShockwave(context, item, camX, camY, dt);
+    }
+
+    // 8. 绘制 Boss 血条
+    if (queue.bossInfo) {
+        drawBossHealthBar(context, queue.bossInfo, canvas.width, canvas.height);
+    }
 }

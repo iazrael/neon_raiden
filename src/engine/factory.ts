@@ -1,8 +1,7 @@
 import { Blueprint } from './blueprints';
 import { BossAI, BossTag, BossEntrance, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon, Option } from './components';
-import { World, EntityId, Component } from './types';
-import { AmmoType } from './types/ids';
-import { addComponent, generateId, getFromPool } from './world';
+import { EntityId, Component } from './types';
+import { World, generateId, getFromPool } from './world';
 import * as Components from './components';
 
 /** 根据蓝图生成实体，支持对象池 */

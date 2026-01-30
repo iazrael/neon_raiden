@@ -12,9 +12,8 @@
  */
 
 import { World } from '../world';
-import { Transform, PlayerTag, CameraShake } from '../components';
+import { CameraShake } from '../components';
 import { CamShakeEvent } from '../events';
-import { camera, triggerCameraShake as triggerShake, updateCameraShake } from './RenderSystem';
 
 /**
  * 相机配置
@@ -43,12 +42,6 @@ const DEFAULT_CONFIG: CameraConfig = {
 let cameraConfig: CameraConfig = { ...DEFAULT_CONFIG };
 
 /**
- * 目标相机位置
- */
-let targetX = 0;
-let targetY = 0;
-
-/**
  * 相机系统主函数
  * @param world 世界对象
  * @param dt 时间增量（毫秒）
@@ -57,23 +50,22 @@ let targetY = 0;
  * 世界坐标就是屏幕坐标，不跟随玩家移动
  */
 export function CameraSystem(world: World, dt: number): void {
-    // 1. 处理震屏事件
-    handleShakeEvents(world);
+    const camera = world.renderState.camera;
 
-    // 相机固定在 (0, 0)，不跟随玩家
-    // 世界坐标 = 屏幕坐标
+    // 1. 处理震屏事件
+    handleShakeEvents(world, camera);
 
     // 2. 更新震屏衰减
-    updateCameraShake(dt);
+    updateCameraShake(camera, dt);
 
     // 3. 处理 CameraShake 组件（实体上的震屏请求）
-    processCameraShakeComponents(world, dt);
+    processCameraShakeComponents(world, camera, dt);
 }
 
 /**
  * 处理震屏事件
  */
-function handleShakeEvents(world: World): void {
+function handleShakeEvents(world: World, camera: World['renderState']['camera']): void {
     const events = world.events;
 
     for (const event of events) {
@@ -81,57 +73,58 @@ function handleShakeEvents(world: World): void {
             const shakeEvent = event as CamShakeEvent;
             const intensity = Math.min(shakeEvent.intensity, cameraConfig.maxShakeIntensity);
             // CamShakeEvent.duration 是秒，转换为毫秒
-            triggerShake(intensity, shakeEvent.duration * 1000);
+            triggerCameraShake(camera, intensity, shakeEvent.duration * 1000);
         }
     }
 }
 
 /**
- * 更新跟随目标
+ * 更新相机震屏
  */
-function updateFollowTarget(world: World): void {
-    const playerComps = world.entities.get(world.playerId);
-    if (!playerComps) return;
+function updateCameraShake(camera: World['renderState']['camera'], dt: number): void {
+    if (camera.shakeTimer <= 0) {
+        camera.shakeX = 0;
+        camera.shakeY = 0;
+        camera.shakeIntensity = 0;
+        return;
+    }
 
-    const transform = playerComps.find(Transform.check) as Transform | undefined;
-    if (!transform) return;
+    camera.shakeTimer -= dt;
+    camera.shakeX = (Math.random() - 0.5) * 2 * camera.shakeIntensity;
+    camera.shakeY = (Math.random() - 0.5) * 2 * camera.shakeIntensity;
 
-    // 设置目标为玩家位置（居中）
-    // 假设世界坐标系原点在左上角，相机位置为左上角位置
-    targetX = transform.x - world.width / 2;
-    targetY = transform.y - world.height / 2;
+    if (camera.shakeTimer <= 0) {
+        camera.shakeTimer = 0;
+        camera.shakeX = 0;
+        camera.shakeY = 0;
+        camera.shakeIntensity = 0;
+    }
 }
 
 /**
- * 平滑移动相机
+ * 触发相机震屏
  */
-function smoothMoveCamera(): void {
-    // 使用 Lerp 平滑移动
-    camera.x += (targetX - camera.x) * cameraConfig.followSmooth;
-    camera.y += (targetY - camera.y) * cameraConfig.followSmooth;
-
-    // 限制相机范围（可选）
-    // clampCameraBounds();
-}
-
-/**
- * 限制相机边界
- */
-function clampCameraBounds(minX = -100, minY = -100, maxX = 100, maxY = 100): void {
-    camera.x = Math.max(minX, Math.min(maxX, camera.x));
-    camera.y = Math.max(minY, Math.min(maxY, camera.y));
+function triggerCameraShake(
+    camera: World['renderState']['camera'],
+    intensity: number,
+    duration: number
+): void {
+    camera.shakeIntensity = intensity;
+    camera.shakeTimer = duration;
+    camera.shakeX = (Math.random() - 0.5) * 2 * intensity;
+    camera.shakeY = (Math.random() - 0.5) * 2 * intensity;
 }
 
 /**
  * 处理 CameraShake 组件
  */
-function processCameraShakeComponents(world: World, dt: number): void {
-    for (const [id, comps] of world.entities) {
+function processCameraShakeComponents(world: World, camera: World['renderState']['camera'], dt: number): void {
+    for (const [, comps] of world.entities) {
         const shake = comps.find(CameraShake.check) as CameraShake | undefined;
         if (!shake) continue;
 
         // 应用震屏（timer 和 triggerShake 都是毫秒）
-        triggerShake(shake.intensity, shake.timer);
+        triggerCameraShake(camera, shake.intensity, shake.timer);
 
         // 更新计时器（dt 是毫秒）
         shake.timer -= dt;
@@ -170,37 +163,38 @@ export function resetCameraConfig(): void {
 /**
  * 设置相机位置（直接设置，不平滑）
  */
-export function setCameraPosition(x: number, y: number): void {
-    camera.x = x;
-    camera.y = y;
-    targetX = x;
-    targetY = y;
+export function setCameraPosition(world: World, x: number, y: number): void {
+    world.renderState.camera.x = x;
+    world.renderState.camera.y = y;
 }
 
 /**
  * 获取相机位置
  */
-export function getCameraPosition(): { x: number; y: number } {
-    return { x: camera.x, y: camera.y };
+export function getCameraPosition(world: World): { x: number; y: number } {
+    const { x, y } = world.renderState.camera;
+    return { x, y };
 }
 
 /**
  * 世界坐标转屏幕坐标
  */
-export function worldToScreen(worldX: number, worldY: number): { x: number; y: number } {
+export function worldToScreen(world: World, worldX: number, worldY: number): { x: number; y: number } {
+    const { x: camX, y: camY } = world.renderState.camera;
     return {
-        x: worldX - camera.x,
-        y: worldY - camera.y
+        x: worldX - camX,
+        y: worldY - camY
     };
 }
 
 /**
  * 屏幕坐标转世界坐标
  */
-export function screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
+export function screenToWorld(world: World, screenX: number, screenY: number): { x: number; y: number } {
+    const { x: camX, y: camY } = world.renderState.camera;
     return {
-        x: screenX + camera.x,
-        y: screenY + camera.y
+        x: screenX + camX,
+        y: screenY + camY
     };
 }
 
@@ -221,4 +215,11 @@ export function addCameraShake(world: World, entityId: number, intensity: number
         // 添加新组件
         comps.push(new CameraShake({ intensity, timer: duration }));
     }
+}
+
+/**
+ * 触发震屏（直接设置相机状态）
+ */
+export function triggerShake(world: World, intensity: number, duration: number): void {
+    triggerCameraShake(world.renderState.camera, intensity, duration);
 }

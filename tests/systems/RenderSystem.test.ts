@@ -2,8 +2,8 @@
  * RenderSystem 单元测试
  */
 
-import { RenderSystem, setRenderContext, getRenderContext, camera, setCameraPosition, resetCamera } from '../../src/engine/systems/RenderSystem';
-import { World } from '../../src/engine/types';
+import { RenderSystem } from '../../src/engine/systems/RenderSystem';
+import { World, RenderState } from '../../src/engine/world';
 import { Transform, Sprite, PlayerTag, EnemyTag } from '../../src/engine/components';
 import { SpriteKey } from '../../src/engine/configs/sprites';
 
@@ -30,7 +30,9 @@ const mockContext = {
     strokeStyle: '',
     shadowBlur: 0,
     shadowColor: '',
-    drawImage: jest.fn()
+    drawImage: jest.fn(),
+    globalAlpha: 1,
+    globalCompositeOperation: 'source-over',
 } as any as CanvasRenderingContext2D;
 
 const mockRenderContext = {
@@ -40,56 +42,54 @@ const mockRenderContext = {
     height: 600
 };
 
+const createMockWorld = (): World => ({
+    entities: new Map(),
+    playerId: 1,
+    width: 800,
+    height: 600,
+    time: 0,
+    score: 0,
+    level: 0,
+    difficulty: 1.0,
+    spawnCredits: 100,
+    spawnTimer: 0,
+    enemyCount: 0,
+    events: [],
+    timeScale: 1,
+    spawnInitialized: false,
+    playerLevel: 1,
+    renderState: {
+        camera: {
+            x: 0,
+            y: 0,
+            shakeX: 0,
+            shakeY: 0,
+            zoom: 1,
+            shakeTimer: 0,
+            shakeIntensity: 0,
+        },
+        timeSlowLines: [],
+    },
+});
+
 describe('RenderSystem', () => {
     let mockWorld: World;
 
     beforeEach(() => {
-        // 重置相机
-        resetCamera();
-
-        // 清空 mock 调用
         jest.clearAllMocks();
-
-        // 设置渲染上下文
-        setRenderContext(mockRenderContext);
-
-        // 创建模拟世界对象
-        mockWorld = {
-            entities: new Map(),
-            playerId: 1,
-            width: 800,
-            height: 600,
-            time: 0,
-            score: 0,
-            level: 0,
-            difficulty: 1.0,
-            spawnCredits: 100,
-            spawnTimer: 0,
-            enemyCount: 0,
-            events: [],
-            comboState: { count: 0, timer: 0, multiplier: 1 },
-        } as unknown as World;
+        mockWorld = createMockWorld();
     });
 
     describe('基础渲染', () => {
-        it('没有渲染上下文时不应该崩溃', () => {
-            setRenderContext(null as any);
-
-            expect(() => RenderSystem(mockWorld, 0.016)).not.toThrow();
-        });
-
-        it('应该清空画布', () => {
-            RenderSystem(mockWorld, 0.016);
-
-            // RenderSystem 使用 fillRect 绘制黑色背景，而不是 clearRect
-            expect(mockContext.fillRect).toHaveBeenCalledWith(0, 0, 800, 600);
-        });
-
         it('没有实体时不应该崩溃', () => {
-            RenderSystem(mockWorld, 0.016);
+            expect(() => RenderSystem(mockWorld, mockRenderContext, 16)).not.toThrow();
+        });
 
-            // 至少应该绘制背景
-            expect(mockContext.fillRect).toHaveBeenCalled();
+        it('应该绘制背景', () => {
+            RenderSystem(mockWorld, mockRenderContext, 16);
+
+            // RenderSystem 使用 fillRect 绘制黑色背景
+            expect(mockContext.fillRect).toHaveBeenCalledWith(0, 0, 800, 600);
         });
     });
 
@@ -101,7 +101,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
             // 应该调用 save/restore 和绘制方法
             expect(mockContext.save).toHaveBeenCalled();
@@ -124,9 +124,9 @@ describe('RenderSystem', () => {
                 new EnemyTag({ id: 'NORMAL' as any })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
-            // 应该渲染两个实体（save/restore 被调用 2 次）
+            // 应该渲染两个实体（save/restore 被调用至少 2 次：背景 + 2 个实体）
             expect(mockContext.save).toHaveBeenCalled();
         });
 
@@ -135,7 +135,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
             // 只绘制背景，不绘制实体
             expect(mockContext.fillRect).toHaveBeenCalled();
@@ -148,23 +148,24 @@ describe('RenderSystem', () => {
                 new Transform({ x: 400, y: 300, rot: 0 })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
-            // 只绘制背景，不绘制实体
+            // 只绘制背景
             expect(mockContext.fillRect).toHaveBeenCalled();
         });
     });
 
     describe('相机偏移', () => {
         it('应该应用相机偏移', () => {
-            setCameraPosition(100, 50);
+            mockWorld.renderState.camera.x = 100;
+            mockWorld.renderState.camera.y = 50;
 
             mockWorld.entities.set(100, [
                 new Transform({ x: 400, y: 300, rot: 0 }),
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
             // 应该调用 translate 应用相机偏移
             expect(mockContext.translate).toHaveBeenCalled();
@@ -173,41 +174,18 @@ describe('RenderSystem', () => {
 
     describe('震屏', () => {
         it('应该应用震屏偏移', () => {
-            camera.shakeX = 10;
-            camera.shakeY = 5;
+            mockWorld.renderState.camera.shakeX = 10;
+            mockWorld.renderState.camera.shakeY = 5;
 
             mockWorld.entities.set(100, [
                 new Transform({ x: 400, y: 300, rot: 0 }),
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
             // 应该调用 translate
             expect(mockContext.translate).toHaveBeenCalled();
-        });
-    });
-
-    describe('渲染上下文管理', () => {
-        it('应该设置和获取渲染上下文', () => {
-            setRenderContext(mockRenderContext);
-            const ctx = getRenderContext();
-
-            expect(ctx).toBe(mockRenderContext);
-        });
-
-        it('应该支持传入临时渲染上下文', () => {
-            const tempContext = {
-                canvas: mockCanvas,
-                context: mockContext,
-                width: 1024,
-                height: 768
-            };
-
-            RenderSystem(mockWorld, 0.016, tempContext);
-
-            // 应该使用传入的上下文尺寸绘制背景
-            expect(mockContext.fillRect).toHaveBeenCalledWith(0, 0, 1024, 768);
         });
     });
 
@@ -215,7 +193,7 @@ describe('RenderSystem', () => {
         it('空实体列表不应该崩溃', () => {
             mockWorld.entities.clear();
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
             // 至少应该绘制背景
             expect(mockContext.fillRect).toHaveBeenCalled();
@@ -230,7 +208,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, 0.016);
+            RenderSystem(mockWorld, mockRenderContext, 16);
 
             // 只绘制背景
             expect(mockContext.fillRect).toHaveBeenCalled();

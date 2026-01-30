@@ -30,8 +30,7 @@
       "Bash(git stash:*)"
     ],
     "additionalDirectories": [
-      "/Users/azrael/Code/neon_raiden-boss-refactor/tests/utils",
-      "/Users/azraellong/workspaces/neon_raiden/docs/plans"
+      "/Users/azraellong/workspaces/neon_raiden/"
     ]
   }
 }

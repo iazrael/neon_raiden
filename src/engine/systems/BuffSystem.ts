@@ -77,7 +77,6 @@ const invincibilityHandler: DurationBuffHandler = {
 /**
  * 持续效果 Buff 处理器映射表
  * 只包含需要持续更新的 Buff 类型
- * TIME_SLOW 已移除，改用 TimeSlowSystem + TimeSlow 实体
  */
 const DURATION_BUFF_HANDLERS: Partial<Record<BuffType, DurationBuffHandler>> = {
     [BuffType.SHIELD]: shieldHandler,

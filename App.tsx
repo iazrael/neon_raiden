@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ReactEngine } from './src/engine/ReactEngine';
 import { GameUI } from './components/GameUI';
-import { WeaponType, ClickType } from './types';
+import { WeaponType, ClickType, GameState } from './types';
 
 import { SpriteManager } from './src/engine/SpriteManager';
 // import ReloadPrompt from './src/views/components/ReloadPrompt';
@@ -107,7 +107,7 @@ function App() {
                 className="block w-full h-full"
             />
             <GameUI
-                state={gameState}
+                state={gameState as any as GameState}
                 score={score}
                 level={level}
                 hp={hp}

@@ -2,6 +2,34 @@ import { EntityId, Component, GameStatus, ComboState } from './types';
 import { Event as GameEvent } from './events';
 
 
+/** 时间减速线条状态 */
+export interface TimeSlowLine {
+    x: number;
+    y: number;
+    length: number;
+    speed: number;
+    alpha: number;
+}
+
+/** 相机状态 */
+export interface CameraState {
+    x: number;
+    y: number;
+    shakeX: number;
+    shakeY: number;
+    zoom: number;
+    /** 震屏剩余时间（毫秒） */
+    shakeTimer: number;
+    /** 震屏强度 */
+    shakeIntensity: number;
+}
+
+/** 渲染状态 */
+export interface RenderState {
+    camera: CameraState;
+    timeSlowLines: TimeSlowLine[];
+}
+
 // 世界接口
 export interface World {
     // 实体集合
@@ -40,6 +68,9 @@ export interface World {
     status?: GameStatus;
     maxLevelReached?: number;
     comboState?: ComboState;
+
+    // 渲染状态（由 CameraSystem/RenderSystem 共享）
+    renderState: RenderState;
 }
 
 
@@ -62,6 +93,18 @@ export function createWorld(): World {
         width: 0,
         height: 0,
         spawnInitialized: false,
+        renderState: {
+            camera: {
+                x: 0,
+                y: 0,
+                shakeX: 0,
+                shakeY: 0,
+                zoom: 1.0,
+                shakeTimer: 0,
+                shakeIntensity: 0,
+            },
+            timeSlowLines: [],
+        },
     };
 }
 

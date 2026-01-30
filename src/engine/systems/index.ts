@@ -44,19 +44,10 @@ export { BossSystem } from './BossSystem';
 export { DifficultySystem, resetDifficulty, getDifficultyConfig, getEliteChance, getEnemyMultipliers } from './DifficultySystem';
 
 // P7: 表现层
-export { CameraSystem } from './CameraSystem';
+export * from './CameraSystem';
 export { EffectPlayer, updateParticles } from './EffectPlayer';
 export { AudioSystem, playSound, playBgm, stopBgm, setMasterVolume, setSfxVolume, setBgmVolume, toggleMute, resetAudio } from './AudioSystem';
-export {
-    RenderSystem,
-    setRenderContext,
-    getRenderContext,
-    camera,
-    updateCameraShake,
-    setCameraPosition,
-    triggerCameraShake,
-    resetCamera
-} from './RenderSystem';
+export * from './RenderSystem';
 
 // P8: 清理层
 export { LifetimeSystem } from './LifetimeSystem';
