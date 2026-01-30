@@ -163,12 +163,12 @@ export class Engine {
         MovementSystem(world, dt);                      // 11. 移动系统
 
         // P4. 交互层 (核心碰撞)
-        CollisionSystem(world, dt);                     // 12. 碰撞系统
-        BombSystem(world, dt);                          // 13. 炸弹系统
+        BombSystem(world, dt);                          // 12. 炸弹系统（救命神器，先生效）
+        CollisionSystem(world, dt);                     // 13. 碰撞系统
 
         // P5. 结算层 (事件处理)
         PickupSystem(world, dt);                        // 13. 拾取系统
-        DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
+        // DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
         LootSystem(world, dt);                          // 15. 掉落系统
         // ComboSystem(world, dt);                         // 16. 连击系统
 
