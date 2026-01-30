@@ -208,8 +208,8 @@ export interface ExplosionParticleConfig {
 export const EXPLOSION_PARTICLES: Record<string, ExplosionParticleConfig> = {
     small: {
         count: 8,
-        speedMin: 1,
-        speedMax: 4,
+        speedMin: 60,       // 老版本 1 像素/帧 × 60fps = 60 像素/秒
+        speedMax: 240,      // 老版本 4 像素/帧 × 60fps = 240 像素/秒
         sizeMin: 2,
         sizeMax: 4,
         life: 300,          // 0.3秒 = 300毫秒
@@ -217,8 +217,8 @@ export const EXPLOSION_PARTICLES: Record<string, ExplosionParticleConfig> = {
     },
     large: {
         count: 30,
-        speedMin: 3,
-        speedMax: 10,
+        speedMin: 180,      // 老版本 3 像素/帧 × 60fps = 180 像素/秒
+        speedMax: 600,      // 老版本 10 像素/帧 × 60fps = 600 像素/秒
         sizeMin: 2,
         sizeMax: 6,
         life: 800,          // 0.8秒 = 800毫秒
@@ -226,8 +226,8 @@ export const EXPLOSION_PARTICLES: Record<string, ExplosionParticleConfig> = {
     },
     hit: {
         count: 5,
-        speedMin: 2,
-        speedMax: 5,
+        speedMin: 120,      // 老版本 2 像素/帧 × 60fps = 120 像素/秒
+        speedMax: 300,      // 老版本 5 像素/帧 × 60fps = 300 像素/秒
         sizeMin: 2,
         sizeMax: 4,
         life: 200,          // 0.2秒 = 200毫秒
