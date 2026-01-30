@@ -1,21 +1,23 @@
 import { Component } from '../types';
 
-/** 视觉粒子 - 单个粒子效果 */
+/** 视觉粒子 - 单个粒子效果（爆炸火花等） */
 export interface VisualParticle {
+    /** X坐标 */
+    x: number;
+    /** Y坐标 */
+    y: number;
     /** X轴速度（像素/秒） */
     vx: number;
     /** Y轴速度（像素/秒） */
     vy: number;
+    /** 剩余生命周期（毫秒） */
+    life: number;
+    /** 总生命周期（毫秒） */
+    maxLife: number;
     /** 颜色 */
     color: string;
-    /** 当前帧 */
-    frame: number;
-    /** 最大帧数 */
-    maxFrame: number;
-    /** 帧率 */
-    fps: number;
-    /** 累积时间（毫秒） */
-    accumulatedTime: number;
+    /** 粒子大小 */
+    size: number;
 }
 
 /** 视觉线条 - 时间减速效果 */
@@ -34,16 +36,20 @@ export interface VisualLine {
 
 /** 视觉圆环 - 冲击波效果 */
 export interface VisualCircle {
+    /** X坐标（圆心） */
+    x: number;
+    /** Y坐标（圆心） */
+    y: number;
     /** 当前半径 */
     radius: number;
     /** 最大半径 */
     maxRadius: number;
-    /** 线宽 */
-    width: number;
-    /** 颜色 */
-    color: string;
     /** 生命周期（0-1） */
     life: number;
+    /** 颜色 */
+    color: string;
+    /** 线宽 */
+    width: number;
 }
 
 /** 视觉特效组件 - 容器，保存各种视觉特效数据 */

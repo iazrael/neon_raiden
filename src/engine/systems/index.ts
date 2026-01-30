@@ -45,6 +45,13 @@ export { DifficultySystem, resetDifficulty, getDifficultyConfig, getEliteChance,
 
 // P7: 表现层
 export * from './CameraSystem';
+export {
+    VisualEffectSystem,
+    spawnParticles,
+    spawnTimeSlowLines,
+    clearTimeSlowLines,
+    spawnCircle
+} from './VisualEffectSystem';
 export { EffectPlayer, updateParticles } from './EffectPlayer';
 export { AudioSystem, playSound, playBgm, stopBgm, setMasterVolume, setSfxVolume, setBgmVolume, toggleMute, resetAudio } from './AudioSystem';
 export * from './RenderSystem';
