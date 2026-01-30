@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createWorld, generateId, World } from '../../src/engine/world';
+import { createWorld, generateId, World, addComponent } from '../../src/engine/world';
 import { EffectPlayer, updateParticles, spawnShockwave } from '../../src/engine/systems/EffectPlayer';
-import { Transform, Particle, Lifetime, Sprite, Shockwave } from '../../src/engine/components';
+import { Transform, Particle, Lifetime, Sprite, Shockwave, VisualEffect } from '../../src/engine/components';
 import { HitEvent, KillEvent, ComboUpgradeEvent } from '../../src/engine/events';
 
 describe('EffectPlayer', () => {
@@ -21,6 +21,10 @@ describe('EffectPlayer', () => {
         world = createWorld();
         world.width = 800;
         world.height = 600;
+        // 创建 VisualEffect 实体（测试需要）
+        const visualEffectId = generateId();
+        world.visualEffectId = visualEffectId;
+        addComponent(world, visualEffectId, new VisualEffect());
     });
 
     describe('HitEvent 处理', () => {
@@ -139,15 +143,16 @@ describe('EffectPlayer', () => {
             world.events.push(killEvent);
             EffectPlayer(world, 16);
 
-            // 验证冲击波被创建
-            let shockwaveCount = 0;
+            // 验证冲击波被创建（通过 VisualEffect 组件）
+            let circleCount = 0;
             for (const [id, comps] of world.entities) {
-                if (comps.some(Shockwave.check)) {
-                    shockwaveCount++;
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.circles.length > 0) {
+                    circleCount += effect.circles.length;
                 }
             }
 
-            expect(shockwaveCount).toBeGreaterThan(0);
+            expect(circleCount).toBeGreaterThan(0);
         });
     });
 
@@ -199,22 +204,27 @@ describe('EffectPlayer', () => {
     });
 
     describe('冲击波', () => {
-        it('应该生成正确的冲击波实体', () => {
-            const id = spawnShockwave(world, 100, 200, '#ff0000', 150, 5);
+        it('应该生成正确的冲击波圆环', () => {
+            spawnShockwave(world, 100, 200, '#ff0000', 150, 5);
 
-            const comps = world.entities.get(id);
-            expect(comps).toBeDefined();
+            // 验证 VisualEffect 组件中的圆环
+            let circle = null;
+            for (const [id, comps] of world.entities) {
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.circles.length > 0) {
+                    circle = effect.circles[0];
+                    break;
+                }
+            }
 
-            const transform = comps?.find(Transform.check);
-            const shockwave = comps?.find(Shockwave.check);
-
-            expect(transform?.x).toBe(100);
-            expect(transform?.y).toBe(200);
-            expect(shockwave?.color).toBe('#ff0000');
-            expect(shockwave?.maxRadius).toBe(150);
-            expect(shockwave?.width).toBe(5);
-            expect(shockwave?.radius).toBe(10); // 初始半径
-            expect(shockwave?.life).toBe(1.0); // 初始生命周期
+            expect(circle).toBeDefined();
+            expect(circle?.x).toBe(100);
+            expect(circle?.y).toBe(200);
+            expect(circle?.color).toBe('#ff0000');
+            expect(circle?.maxRadius).toBe(150);
+            expect(circle?.width).toBe(5);
+            expect(circle?.radius).toBe(10); // 初始半径
+            expect(circle?.life).toBe(1.0); // 初始生命周期
         });
 
         it('应该在连击升级时生成冲击波', () => {
@@ -229,26 +239,34 @@ describe('EffectPlayer', () => {
             world.events.push(comboEvent);
             EffectPlayer(world, 16);
 
-            // 验证冲击波被创建
-            let shockwaveCount = 0;
+            // 验证冲击波被创建（通过 VisualEffect 组件）
+            let circleCount = 0;
             for (const [id, comps] of world.entities) {
-                if (comps.some(Shockwave.check)) {
-                    shockwaveCount++;
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.circles.length > 0) {
+                    circleCount += effect.circles.length;
                 }
             }
 
-            expect(shockwaveCount).toBeGreaterThan(0);
+            expect(circleCount).toBeGreaterThan(0);
         });
 
         it('应该生成带默认参数的冲击波', () => {
-            const id = spawnShockwave(world, 100, 200);
+            spawnShockwave(world, 100, 200);
 
-            const comps = world.entities.get(id);
-            const shockwave = comps?.find(Shockwave.check);
+            // 验证 VisualEffect 组件中的圆环
+            let circle = null;
+            for (const [id, comps] of world.entities) {
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.circles.length > 0) {
+                    circle = effect.circles[0];
+                    break;
+                }
+            }
 
-            expect(shockwave?.color).toBe('#ffffff'); // 默认白色
-            expect(shockwave?.maxRadius).toBe(150); // 默认最大半径
-            expect(shockwave?.width).toBe(5); // 默认线宽
+            expect(circle?.color).toBe('#ffffff'); // 默认白色
+            expect(circle?.maxRadius).toBe(150); // 默认最大半径
+            expect(circle?.width).toBe(5); // 默认线宽
         });
     });
 
@@ -289,15 +307,16 @@ describe('EffectPlayer', () => {
             world.events.push(comboEvent);
             EffectPlayer(world, 16);
 
-            // 应该生成冲击波
-            let shockwaveCount = 0;
+            // 应该生成冲击波（通过 VisualEffect 组件）
+            let circleCount = 0;
             for (const [id, comps] of world.entities) {
-                if (comps.some(Shockwave.check)) {
-                    shockwaveCount++;
+                const effect = comps.find(VisualEffect.check);
+                if (effect && effect.circles.length > 0) {
+                    circleCount += effect.circles.length;
                 }
             }
 
-            expect(shockwaveCount).toBeGreaterThan(0);
+            expect(circleCount).toBeGreaterThan(0);
         });
     });
 });

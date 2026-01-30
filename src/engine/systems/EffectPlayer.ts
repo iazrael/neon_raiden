@@ -11,13 +11,14 @@
  */
 
 import { World } from '../world';
-import { Transform, Particle, Lifetime, Shockwave, Velocity } from '../components';
+import { Transform, Particle, Lifetime, Velocity } from '../components';
 import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
 import { triggerShake } from './CameraSystem';
 import { getComponents, view } from '../world';
 import { Blueprint } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
 import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES, PARTICLE_DEBUG } from '../blueprints/effects';
+import { spawnCircle } from './VisualEffectSystem';
 
 /**
  * 特效播放器主函数
@@ -280,7 +281,6 @@ export function updateParticles(world: World, dt: number): void {
  * @param color 颜色
  * @param maxRadius 最大半径
  * @param width 线宽
- * @returns 实体 ID
  */
 export function spawnShockwave(
     world: World,
@@ -289,19 +289,9 @@ export function spawnShockwave(
     color: string = '#ffffff',
     maxRadius: number = 150,
     width: number = 5
-): number {
-    const shockwaveBlueprint: Blueprint = {
-        Transform: { x: 0, y: 0, rot: 0 },  // 位置通过参数传入，不放在蓝图里
-        Shockwave: { maxRadius, color, width },
-        Lifetime: {
-            timer: 1000 // 1秒生命周期
-        }
-    };
-
-    // 关键修复：x, y 必须作为参数传入，否则 factory 会用默认值 0,0
-    const id = spawnFromBlueprint(world, shockwaveBlueprint, x, y, 0);
-
-    return id;
+): void {
+    // 使用 VisualEffectSystem 的 spawnCircle API
+    spawnCircle(world, x, y, color, maxRadius, width);
 }
 
 /**

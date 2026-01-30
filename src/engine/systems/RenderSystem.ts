@@ -459,6 +459,31 @@ function drawBossHealthBar(
 }
 
 /**
+ * 绘制 VisualEffect 圆环（冲击波等）
+ */
+function drawVisualEffectCircles(
+    ctx: CanvasRenderingContext2D,
+    world: World,
+    camX: number,
+    camY: number
+): void {
+    for (const [_id, [effect]] of view(world, [VisualEffect])) {
+        for (const circle of effect.circles) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, circle.life);
+            ctx.shadowColor = circle.color;
+            ctx.shadowBlur = 15;
+            ctx.lineWidth = circle.width;
+            ctx.strokeStyle = circle.color;
+            ctx.beginPath();
+            ctx.arc(circle.x - camX, circle.y - camY, circle.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+}
+
+/**
  * 渲染系统主函数
  */
 export function RenderSystem(
@@ -507,12 +532,15 @@ export function RenderSystem(
     }
     context.globalCompositeOperation = 'source-over';
 
-    // 7. 绘制冲击波
+    // 7. 绘制 VisualEffect 圆环（冲击波等）
+    drawVisualEffectCircles(context, world, camX, camY);
+
+    // 8. 绘制旧版冲击波（保留兼容性）
     for (const item of queue.shockwaves) {
         drawShockwave(context, item, camX, camY, dt);
     }
 
-    // 8. 绘制 Boss 血条
+    // 9. 绘制 Boss 血条
     if (queue.bossInfo) {
         drawBossHealthBar(context, queue.bossInfo, canvas.width, canvas.height);
     }
