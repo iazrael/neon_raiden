@@ -34,72 +34,72 @@ export default defineConfig(({ mode }) => {
                     tsconfigPath: './tsconfig.json'
                 }
             }),
-            VitePWA({
-                registerType: 'prompt',
-                includeAssets: ['favicon.svg', 'logo.svg', 'logo-180.png', 'logo-192.png', 'logo-512.png'],
-                manifest: {
-                    name: "霓电战记",
-                    short_name: "霓电战记",
-                    description: "A cyberpunk action game with neon aesthetics",
-                    start_url: "./",
-                    scope: "./",
-                    display: "standalone",
-                    orientation: "portrait-primary",
-                    background_color: "#0a0a0a",
-                    theme_color: "#00ff88",
-                    categories: [
-                        "games"
-                    ],
-                    icons: [
-                        {
-                            src: "./logo.svg",
-                            sizes: "any",
-                            type: "image/svg+xml",
-                            purpose: "any maskable"
-                        },
-                        {
-                            src: "./logo-192.png",
-                            sizes: "192x192",
-                            type: "image/png",
-                            purpose: "any maskable"
-                        },
-                        {
-                            src: "./logo-512.png",
-                            sizes: "512x512",
-                            type: "image/png",
-                            purpose: "any maskable"
-                        }
-                    ],
-                    shortcuts: [
-                        {
-                            name: "Start Game",
-                            short_name: "Play",
-                            description: "Start playing Neon Raiden",
-                            url: "./?mode=play",
-                            icons: [
-                                {
-                                    src: "./logo-192.png",
-                                    sizes: "192x192",
-                                    type: "image/png",
-                                    purpose: "any maskable"
-                                }
-                            ]
-                        }
-                    ],
-                    prefer_related_applications: false
-                },
-                workbox: {
-                    globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3,wav}'],
-                    clientsClaim: true,
-                    skipWaiting: true,
-                    runtimeCaching: [
-                    ]
-                },
-                devOptions: {
-                    enabled: true,
-                    type: 'module'
-                }
-            })
+            // VitePWA({
+            //     registerType: 'prompt',
+            //     includeAssets: ['favicon.svg', 'logo.svg', 'logo-180.png', 'logo-192.png', 'logo-512.png'],
+            //     manifest: {
+            //         name: "霓电战记",
+            //         short_name: "霓电战记",
+            //         description: "A cyberpunk action game with neon aesthetics",
+            //         start_url: "./",
+            //         scope: "./",
+            //         display: "standalone",
+            //         orientation: "portrait-primary",
+            //         background_color: "#0a0a0a",
+            //         theme_color: "#00ff88",
+            //         categories: [
+            //             "games"
+            //         ],
+            //         icons: [
+            //             {
+            //                 src: "./logo.svg",
+            //                 sizes: "any",
+            //                 type: "image/svg+xml",
+            //                 purpose: "any maskable"
+            //             },
+            //             {
+            //                 src: "./logo-192.png",
+            //                 sizes: "192x192",
+            //                 type: "image/png",
+            //                 purpose: "any maskable"
+            //             },
+            //             {
+            //                 src: "./logo-512.png",
+            //                 sizes: "512x512",
+            //                 type: "image/png",
+            //                 purpose: "any maskable"
+            //             }
+            //         ],
+            //         shortcuts: [
+            //             {
+            //                 name: "Start Game",
+            //                 short_name: "Play",
+            //                 description: "Start playing Neon Raiden",
+            //                 url: "./?mode=play",
+            //                 icons: [
+            //                     {
+            //                         src: "./logo-192.png",
+            //                         sizes: "192x192",
+            //                         type: "image/png",
+            //                         purpose: "any maskable"
+            //                     }
+            //                 ]
+            //             }
+            //         ],
+            //         prefer_related_applications: false
+            //     },
+            //     workbox: {
+            //         globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3,wav}'],
+            //         clientsClaim: true,
+            //         skipWaiting: true,
+            //         runtimeCaching: [
+            //         ]
+            //     },
+            //     devOptions: {
+            //         enabled: true,
+            //         type: 'module'
+            //     }
+            // })
         ],
         define: {
             '__APP_VERSION__': JSON.stringify(appVersion),

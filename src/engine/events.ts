@@ -101,7 +101,7 @@ export interface BossSpecialEvent {
 export interface CamShakeEvent {
     type: 'CamShake';
     intensity: number;             // 强度（像素）
-    duration: number;              // 持续秒数
+    duration: number;              // 持续毫秒
 }
 
 // ⑦ 血雾/飙血特效
@@ -109,7 +109,7 @@ export interface BloodFogEvent {
     type: 'BloodFog';
     pos: { x: number; y: number }; // 特效中心
     level: 1 | 2 | 3;              // 大/中/小
-    duration: number;              // 持续秒数
+    duration: number;              // 持续毫秒
 }
 
 // ⑧ 玩家升级（战机等级提升）

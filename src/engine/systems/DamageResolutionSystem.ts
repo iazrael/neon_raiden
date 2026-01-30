@@ -81,7 +81,7 @@ function applyDamage(world: World, event: HitEvent): void {
             type: 'BloodFog',
             pos: event.pos,
             level: event.bloodLevel,
-            duration: 0.3
+            duration: 300
         };
         world.events.push(bloodFogEvent);
 
@@ -90,7 +90,7 @@ function applyDamage(world: World, event: HitEvent): void {
             const shakeEvent: CamShakeEvent = {
                 type: 'CamShake',
                 intensity: event.bloodLevel * 3,
-                duration: 0.2
+                duration: 200
             };
             world.events.push(shakeEvent);
         }

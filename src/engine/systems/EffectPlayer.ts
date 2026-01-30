@@ -156,8 +156,7 @@ function handleBossPhaseChangeEvent(world: World, event: BossPhaseChangeEvent): 
  * 处理震屏事件
  */
 function handleCamShakeEvent(world: World, event: CamShakeEvent): void {
-    // CamShakeEvent.duration 是秒，转换为毫秒
-    triggerCameraShake(event.intensity, event.duration * 1000);
+    triggerCameraShake(event.intensity, event.duration);
 }
 
 /**

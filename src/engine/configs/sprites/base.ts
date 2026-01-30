@@ -40,9 +40,6 @@ export enum SpriteKey {
   PLAYER = 'player',
   OPTION = 'option',
 
-  // Particles (纯颜色绘制)
-  PARTICLE = 'particle',
-
   // Bullets (玩家)
   BULLET_VULCAN = 'bullet.vulcan',
   BULLET_LASER = 'bullet.laser',
@@ -152,16 +149,6 @@ export const SPRITE_REGISTRY: Record<SpriteKey, SpriteEntry> = {
   [SpriteKey.OPTION]: {
     key: SpriteKey.OPTION,
     file: 'option.svg',
-    width: 32,
-    height: 32,
-    pivotX: 0.5,
-    pivotY: 0.5,
-  },
-
-  // ==================== Particles ====================
-  [SpriteKey.PARTICLE]: {
-    key: SpriteKey.PARTICLE,
-    file: '', // 纯颜色绘制，无文件
     width: 32,
     height: 32,
     pivotX: 0.5,

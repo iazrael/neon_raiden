@@ -71,7 +71,7 @@ export function BombSystem(world: World, dt: number): void {
         pushEvent(world, {
             type: 'CamShake',
             intensity: 10,  // 10px 震动
-            duration: 0.5   // 0.5秒
+            duration: 500   // 0.5秒
         } as CamShakeEvent);
 
         // 3. 播放爆炸音效

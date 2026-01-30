@@ -251,7 +251,7 @@ function createBullet(ctx: FireContext, angle: number): void {
             layer: ctx.isPlayer ? CollisionLayer.PlayerBullet : CollisionLayer.EnemyBullet
         },
         Lifetime: {
-            timer: 3 // 3秒后销毁
+            timer: 3000 // 3秒后销毁
         }
     };
 

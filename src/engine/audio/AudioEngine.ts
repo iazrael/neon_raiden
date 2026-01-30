@@ -3,609 +3,609 @@ import { WeaponId } from '../types';
 
 
 export enum ExplosionSize {
-  SMALL = 'small',
-  LARGE = 'large'
+    SMALL = 'small',
+    LARGE = 'large'
 }
 
 
 export class AudioEngine {
-  private ctx: AudioContext | null = null;
-  private masterGain: GainNode | null = null;
+    private ctx: AudioContext | null = null;
+    private masterGain: GainNode | null = null;
 
-  constructor() {
-    this.initContext();
+    constructor() {
+        this.initContext();
 
-    // Resume audio context on user interaction (essential for Safari)
-    const resumeAudio = () => {
-      this.resume();
-    };
-    window.addEventListener('touchstart', resumeAudio, { passive: true });
-    window.addEventListener('click', resumeAudio);
-    window.addEventListener('keydown', resumeAudio);
-    window.addEventListener('pageshow', resumeAudio);
-    window.addEventListener('focus', resumeAudio);
+        // Resume audio context on user interaction (essential for Safari)
+        const resumeAudio = () => {
+            this.resume();
+        };
+        window.addEventListener('touchstart', resumeAudio, { passive: true });
+        window.addEventListener('click', resumeAudio);
+        window.addEventListener('keydown', resumeAudio);
+        window.addEventListener('pageshow', resumeAudio);
+        window.addEventListener('focus', resumeAudio);
 
-    // Handle visibility change to suspend/resume audio
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (this.ctx && this.ctx.state === 'running') {
-          this.ctx.suspend();
+        // Handle visibility change to suspend/resume audio
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (this.ctx && this.ctx.state === 'running') {
+                    this.ctx.suspend();
+                }
+            } else {
+                this.resume();
+            }
+        });
+        window.addEventListener('pagehide', () => {
+            this.pause();
+        });
+    }
+
+    private initContext() {
+        try {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            this.ctx = new AudioContextClass();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.value = 0.3;
+            this.masterGain.connect(this.ctx.destination);
+        } catch (e) {
+            console.warn("Web Audio API not supported");
         }
-      } else {
-        this.resume();
-      }
-    });
-    window.addEventListener('pagehide', () => {
-      this.pause();
-    });
-  }
-
-  private initContext() {
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      this.ctx = new AudioContextClass();
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.3;
-      this.masterGain.connect(this.ctx.destination);
-    } catch (e) {
-      console.warn("Web Audio API not supported");
     }
-  }
 
-  private ensureContext() {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!this.ctx || this.ctx.state === 'closed') {
-      this.initContext();
+    private ensureContext() {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (!this.ctx || this.ctx.state === 'closed') {
+            this.initContext();
+        }
+        if (!this.masterGain && this.ctx) {
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.value = 0.3;
+            this.masterGain.connect(this.ctx.destination);
+        }
     }
-    if (!this.masterGain && this.ctx) {
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.3;
-      this.masterGain.connect(this.ctx.destination);
+
+    resume() {
+        this.ensureContext();
+        if (this.ctx && this.ctx.state !== 'running') {
+            this.ctx.resume().catch(e => console.warn("Audio resume failed", e));
+        }
     }
-  }
 
-  resume() {
-    this.ensureContext();
-    if (this.ctx && this.ctx.state !== 'running') {
-      this.ctx.resume().catch(e => console.warn("Audio resume failed", e));
+    pause() {
+        if (this.ctx && this.ctx.state === 'running') {
+            this.ctx.suspend().catch(e => console.warn("Audio pause failed", e));
+        }
     }
-  }
 
-  pause() {
-    if (this.ctx && this.ctx.state === 'running') {
-      this.ctx.suspend().catch(e => console.warn("Audio pause failed", e));
+    playClick(type: ClickType = ClickType.DEFAULT) {
+        if (!this.ctx || !this.masterGain) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        const now = this.ctx.currentTime;
+
+        if (type === ClickType.CONFIRM) {
+            // High pitch ascending - Success/Start
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(1600, now + 0.1);
+
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === ClickType.CANCEL) {
+            // Lower pitch descending - Back/Close
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === ClickType.MENU) {
+            // Soft short click - Navigation/Tab
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1000, now);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+
+            osc.start(now);
+            osc.stop(now + 0.03);
+        } else {
+            // Default click (existing)
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+            osc.start(now);
+            osc.stop(now + 0.05);
+        }
     }
-  }
 
-  playClick(type: ClickType = ClickType.DEFAULT) {
-    if (!this.ctx || !this.masterGain) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.masterGain);
+    playShoot(type: WeaponId) {
+        if (!this.ctx || !this.masterGain) return;
 
-    const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
 
-    if (type === ClickType.CONFIRM) {
-      // High pitch ascending - Success/Start
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, now);
-      osc.frequency.exponentialRampToValueAtTime(1600, now + 0.1);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
 
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        const now = this.ctx.currentTime;
+        // const type = WEAPON_NAMES[WeaponId];
 
-      osc.start(now);
-      osc.stop(now + 0.1);
-    } else if (type === ClickType.CANCEL) {
-      // Lower pitch descending - Back/Close
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(600, now);
-      osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-
-      osc.start(now);
-      osc.stop(now + 0.1);
-    } else if (type === ClickType.MENU) {
-      // Soft short click - Navigation/Tab
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1000, now);
-
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
-
-      osc.start(now);
-      osc.stop(now + 0.03);
-    } else {
-      // Default click (existing)
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, now);
-      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
-
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-
-      osc.start(now);
-      osc.stop(now + 0.05);
+        if (type === WeaponId.VULCAN) {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === WeaponId.LASER) {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } else if (type === WeaponId.MISSILE) {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(50, now + 0.3);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === WeaponId.WAVE) {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === WeaponId.PLASMA) {
+            osc.type = 'square'; // Buzzier sound
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(50, now + 0.5);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } else if (type === WeaponId.TESLA) {
+            // Electric zap sound - high frequency with modulation
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(1500, now);
+            osc.frequency.linearRampToValueAtTime(2000, now + 0.05);
+            osc.frequency.linearRampToValueAtTime(1500, now + 0.1);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === WeaponId.MAGMA) {
+            // Fiery crackling sound - low rumble with noise
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        } else if (type === WeaponId.SHURIKEN) {
+            // Slicing/whoosh sound - sweeping high frequency
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1000, now);
+            osc.frequency.linearRampToValueAtTime(600, now + 0.15);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
     }
-  }
 
-  playShoot(type: WeaponId) {
-    if (!this.ctx || !this.masterGain) return;
+    playExplosion(size: ExplosionSize) {
+        if (!this.ctx || !this.masterGain) return;
+        const now = this.ctx.currentTime;
 
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+        // 1. Impact (White Noise) - High frequency crunch
+        const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.5, this.ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseBuffer.length; i++) data[i] = Math.random() * 2 - 1;
 
-    osc.connect(gain);
-    gain.connect(this.masterGain);
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const noiseFilter = this.ctx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.setValueAtTime(1000, now);
+        noiseFilter.frequency.exponentialRampToValueAtTime(100, now + 0.3);
 
-    const now = this.ctx.currentTime;
-    // const type = WEAPON_NAMES[WeaponId];
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(size === ExplosionSize.LARGE ? 1.5 : 0.8, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
 
-    if (type === WeaponId.VULCAN) {
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(400, now);
-      osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-      osc.start(now);
-      osc.stop(now + 0.1);
-    } else if (type === WeaponId.LASER) {
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(800, now);
-      osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } else if (type === WeaponId.MISSILE) {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(150, now);
-      osc.frequency.linearRampToValueAtTime(50, now + 0.3);
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-      osc.start(now);
-      osc.stop(now + 0.3);
-    } else if (type === WeaponId.WAVE) {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
-      gain.gain.setValueAtTime(0.4, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-      osc.start(now);
-      osc.stop(now + 0.3);
-    } else if (type === WeaponId.PLASMA) {
-      osc.type = 'square'; // Buzzier sound
-      osc.frequency.setValueAtTime(100, now);
-      osc.frequency.linearRampToValueAtTime(50, now + 0.5);
-      gain.gain.setValueAtTime(0.5, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-      osc.start(now);
-      osc.stop(now + 0.5);
-    } else if (type === WeaponId.TESLA) {
-      // Electric zap sound - high frequency with modulation
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(1500, now);
-      osc.frequency.linearRampToValueAtTime(2000, now + 0.05);
-      osc.frequency.linearRampToValueAtTime(1500, now + 0.1);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-      osc.start(now);
-      osc.stop(now + 0.1);
-    } else if (type === WeaponId.MAGMA) {
-      // Fiery crackling sound - low rumble with noise
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(200, now);
-      osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
-    } else if (type === WeaponId.SHURIKEN) {
-      // Slicing/whoosh sound - sweeping high frequency
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1000, now);
-      osc.frequency.linearRampToValueAtTime(600, now + 0.15);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(this.masterGain);
+        noise.start(now);
+
+        // 2. Bass (Sawtooth/Triangle) - Low frequency rumble
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(10, now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
+
+        const oscGain = this.ctx.createGain();
+        oscGain.gain.setValueAtTime(size === ExplosionSize.LARGE ? 1.5 : 0.8, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.01, now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
+
+        // Lowpass for bass to make it deep
+        const oscFilter = this.ctx.createBiquadFilter();
+        oscFilter.type = 'lowpass';
+        oscFilter.frequency.value = 200;
+
+        osc.connect(oscFilter);
+        oscFilter.connect(oscGain);
+        oscGain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
     }
-  }
-
-  playExplosion(size: ExplosionSize) {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-
-    // 1. Impact (White Noise) - High frequency crunch
-    const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.5, this.ctx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < noiseBuffer.length; i++) data[i] = Math.random() * 2 - 1;
-
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    const noiseFilter = this.ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.setValueAtTime(1000, now);
-    noiseFilter.frequency.exponentialRampToValueAtTime(100, now + 0.3);
-
-    const noiseGain = this.ctx.createGain();
-    noiseGain.gain.setValueAtTime(size === ExplosionSize.LARGE ? 1.5 : 0.8, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(this.masterGain);
-    noise.start(now);
-
-    // 2. Bass (Sawtooth/Triangle) - Low frequency rumble
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(100, now);
-    osc.frequency.exponentialRampToValueAtTime(10, now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
-
-    const oscGain = this.ctx.createGain();
-    oscGain.gain.setValueAtTime(size === ExplosionSize.LARGE ? 1.5 : 0.8, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.01, now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
-
-    // Lowpass for bass to make it deep
-    const oscFilter = this.ctx.createBiquadFilter();
-    oscFilter.type = 'lowpass';
-    oscFilter.frequency.value = 200;
-
-    osc.connect(oscFilter);
-    oscFilter.connect(oscGain);
-    oscGain.connect(this.masterGain);
-    osc.start(now);
-    osc.stop(now + (size === ExplosionSize.LARGE ? 0.8 : 0.4));
-  }
-
-  playHit() {
-    if (!this.ctx || !this.masterGain) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-
-    const now = this.ctx.currentTime;
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(200, now);
-    osc.frequency.exponentialRampToValueAtTime(50, now + 0.05);
-    gain.gain.setValueAtTime(0.2, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-
-    osc.start(now);
-    osc.stop(now + 0.05);
-  }
-
-  playShieldBreak() {
-    if (!this.ctx || !this.masterGain) return;
-
-    const now = this.ctx.currentTime;
-
-    // Layer 1: Main "Pop" (Sharp frequency drop)
-    // Provides the main body of the sound
-    const osc1 = this.ctx.createOscillator();
-    const gain1 = this.ctx.createGain();
-    osc1.connect(gain1);
-    gain1.connect(this.masterGain);
-
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(1200, now);
-    osc1.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-
-    gain1.gain.setValueAtTime(0.7, now);
-    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-
-    osc1.start(now);
-    osc1.stop(now + 0.15);
-
-    // Layer 2: High "Crisp" (Fast snap)
-    // Adds the sharp, high-frequency definition
-    const osc2 = this.ctx.createOscillator();
-    const gain2 = this.ctx.createGain();
-    osc2.connect(gain2);
-    gain2.connect(this.masterGain);
-
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(3000, now);
-    osc2.frequency.exponentialRampToValueAtTime(1000, now + 0.05);
-
-    gain2.gain.setValueAtTime(0.2, now);
-    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-
-    osc2.start(now);
-    osc2.stop(now + 0.05);
-
-    // Layer 3: "Bubble" Character (Watery modulation)
-    // Adds the "bloop" characteristic
-    const osc3 = this.ctx.createOscillator();
-    const gain3 = this.ctx.createGain();
-    osc3.connect(gain3);
-    gain3.connect(this.masterGain);
-
-    osc3.type = 'sine';
-    osc3.frequency.setValueAtTime(400, now);
-    osc3.frequency.linearRampToValueAtTime(600, now + 0.05); // Slight rise
-    osc3.frequency.exponentialRampToValueAtTime(100, now + 0.2); // Fall
-
-    gain3.gain.setValueAtTime(0.4, now);
-    gain3.gain.linearRampToValueAtTime(0.2, now + 0.05);
-    gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-
-    osc3.start(now);
-    osc3.stop(now + 0.2);
-  }
-
-  playBomb() {
-    if (!this.ctx || !this.masterGain) return;
-    // Deep rumbling sweep
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-    const now = this.ctx.currentTime;
-
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(100, now);
-    osc.frequency.exponentialRampToValueAtTime(10, now + 1.5);
-
-    gain.gain.setValueAtTime(0.8, now);
-    gain.gain.linearRampToValueAtTime(0, now + 1.5);
-
-    osc.start(now);
-    osc.stop(now + 1.5);
-  }
-
-  playPowerUp() {
-    if (!this.ctx || !this.masterGain) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-
-    const now = this.ctx.currentTime;
-
-    // "Coin" sound: B5 -> E6 rapid transition
-    // First note
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(987.77, now); // B5
-    osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
-
-    gain.gain.setValueAtTime(0.4, now);
-    gain.gain.linearRampToValueAtTime(0.4, now + 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-
-    osc.start(now);
-    osc.stop(now + 0.4);
-  }
-
-  playVictory() {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
-    notes.forEach((freq, i) => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.connect(gain);
-      gain.connect(this.masterGain!);
-
-      osc.type = 'square';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.2, now + i * 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.4);
-      osc.start(now + i * 0.1);
-      osc.stop(now + i * 0.1 + 0.4);
-    });
-  }
-
-  playDefeat() {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-    const notes = [300, 250, 200, 150];
-    notes.forEach((freq, i) => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.connect(gain);
-      gain.connect(this.masterGain!);
-
-      osc.type = 'sawtooth';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.2, now + i * 0.2);
-      gain.gain.linearRampToValueAtTime(0.01, now + i * 0.2 + 0.3);
-      osc.start(now + i * 0.2);
-      osc.stop(now + i * 0.2 + 0.3);
-    });
-  }
-
-  playWarning() {
-    if (!this.ctx || !this.masterGain) return;
-    console.log('Playing boss warning sound');
-    const now = this.ctx.currentTime;
-
-    // "Wang ~ Wang" effect
-    // Low frequency sawtooth with a bandpass filter sweep
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const filter = this.ctx.createBiquadFilter();
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.masterGain);
-
-    osc.type = 'sawtooth';
-    osc.frequency.value = 150; // Low drone
-
-    filter.type = 'bandpass';
-    filter.Q.value = 5; // High Q for "vocal" quality
-
-    // First "Wang"
-    filter.frequency.setValueAtTime(200, now);
-    filter.frequency.exponentialRampToValueAtTime(800, now + 0.3); // Wah up
-    filter.frequency.exponentialRampToValueAtTime(200, now + 0.6); // Wah down
-
-    // Second "Wang"
-    filter.frequency.setValueAtTime(200, now + 0.8);
-    filter.frequency.exponentialRampToValueAtTime(800, now + 1.1); // Wah up
-    filter.frequency.exponentialRampToValueAtTime(200, now + 1.4); // Wah down
-
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.5, now + 0.1);
-    gain.gain.linearRampToValueAtTime(0.3, now + 0.6);
-    gain.gain.linearRampToValueAtTime(0.5, now + 0.9);
-    gain.gain.linearRampToValueAtTime(0, now + 1.5);
-
-    osc.start(now);
-    osc.stop(now + 1.5);
-  }
-
-  playBossDefeat() {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-
-    // "Mario-style" victory: G C E G C E (Ascending arpeggio)
-    // "Deng deng deng de deng"
-    // Let's try a quick ascending major arpeggio
-    const notes = [
-      { f: 523.25, t: 0.0 }, // C5
-      { f: 659.25, t: 0.1 }, // E5
-      { f: 783.99, t: 0.2 }, // G5
-      { f: 1046.50, t: 0.3 }, // C6
-      { f: 1318.51, t: 0.4 }, // E6
-      { f: 1567.98, t: 0.5 }, // G6 (Sustained)
-    ];
-
-    notes.forEach((note, i) => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.connect(gain);
-      gain.connect(this.masterGain!);
-
-      osc.type = 'square'; // 8-bit style
-      osc.frequency.value = note.f;
-
-      const startTime = now + note.t;
-      const duration = i === notes.length - 1 ? 1.0 : 0.08; // Last note long
-
-      gain.gain.setValueAtTime(0.3, startTime);
-      gain.gain.linearRampToValueAtTime(0.3, startTime + duration - 0.02);
-      gain.gain.linearRampToValueAtTime(0.01, startTime + duration);
-
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    });
-  }
-
-  playLevelUp() {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc.type = 'square';
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-
-    // Mario mushroom sound: wong~wong~wong (three ascending notes)
-    // First "wong" - C5
-    osc.frequency.setValueAtTime(523.25, now);
-    // Second "wong" - E5
-    osc.frequency.setValueAtTime(659.25, now + 0.12);
-    // Third "wong" - G5
-    osc.frequency.setValueAtTime(783.99, now + 0.24);
-
-    // Envelope for each note with distinct attack
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.5, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.12);
-    gain.gain.linearRampToValueAtTime(0.5, now + 0.14);
-    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.24);
-    gain.gain.linearRampToValueAtTime(0.5, now + 0.26);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-
-    osc.start(now);
-    osc.stop(now + 0.5);
-  }
-
-  private shieldOsc: OscillatorNode | null = null;
-  private shieldGain: GainNode | null = null;
-
-  playShieldLoop() {
-    if (!this.ctx || !this.masterGain) return;
-    if (this.shieldOsc) return; // Already playing
-
-    const now = this.ctx.currentTime;
-    this.shieldOsc = this.ctx.createOscillator();
-    this.shieldGain = this.ctx.createGain();
-
-    this.shieldOsc.connect(this.shieldGain);
-    this.shieldGain.connect(this.masterGain);
-
-    // Cheerful high-pitched sine wave loop
-    this.shieldOsc.type = 'sine';
-    this.shieldOsc.frequency.setValueAtTime(880, now);
-
-    // LFO for vibrato effect
-    const lfo = this.ctx.createOscillator();
-    lfo.frequency.value = 8; // 8Hz vibrato
-    const lfoGain = this.ctx.createGain();
-    lfoGain.gain.value = 20; // Depth
-    lfo.connect(lfoGain);
-    lfoGain.connect(this.shieldOsc.frequency);
-    lfo.start(now);
-
-    this.shieldGain.gain.setValueAtTime(0, now);
-    this.shieldGain.gain.linearRampToValueAtTime(0.1, now + 0.5); // Fade in
-
-    this.shieldOsc.start(now);
-
-    // Store LFO to stop it later (hacky, ideally track it properly)
-    (this.shieldOsc as any)._lfo = lfo;
-  }
-
-  stopShieldLoop() {
-    if (!this.ctx || !this.shieldOsc || !this.shieldGain) return;
-
-    const now = this.ctx.currentTime;
-    this.shieldGain.gain.cancelScheduledValues(now);
-    this.shieldGain.gain.setValueAtTime(this.shieldGain.gain.value, now);
-    this.shieldGain.gain.linearRampToValueAtTime(0, now + 0.5); // Fade out
-
-    const osc = this.shieldOsc;
-    const lfo = (osc as any)._lfo;
-
-    setTimeout(() => {
-      osc.stop();
-      if (lfo) lfo.stop();
-      osc.disconnect();
-    }, 500);
-
-    this.shieldOsc = null;
-    this.shieldGain = null;
-  }
-
-  playSlowMotionEnter() {
-    if (!this.ctx || !this.masterGain) return;
-    const now = this.ctx.currentTime;
-
-    // Deep "warp" sound
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(400, now);
-    osc.frequency.exponentialRampToValueAtTime(50, now + 1.0);
-
-    gain.gain.setValueAtTime(0.5, now);
-    gain.gain.linearRampToValueAtTime(0, now + 1.0);
-
-    osc.start(now);
-    osc.stop(now + 1.0);
-  }
+
+    playHit() {
+        if (!this.ctx || !this.masterGain) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        const now = this.ctx.currentTime;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.05);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+        osc.start(now);
+        osc.stop(now + 0.05);
+    }
+
+    playShieldBreak() {
+        if (!this.ctx || !this.masterGain) return;
+
+        const now = this.ctx.currentTime;
+
+        // Layer 1: Main "Pop" (Sharp frequency drop)
+        // Provides the main body of the sound
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(this.masterGain);
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1200, now);
+        osc1.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+
+        gain1.gain.setValueAtTime(0.7, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+        osc1.start(now);
+        osc1.stop(now + 0.15);
+
+        // Layer 2: High "Crisp" (Fast snap)
+        // Adds the sharp, high-frequency definition
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(this.masterGain);
+
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(3000, now);
+        osc2.frequency.exponentialRampToValueAtTime(1000, now + 0.05);
+
+        gain2.gain.setValueAtTime(0.2, now);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+        osc2.start(now);
+        osc2.stop(now + 0.05);
+
+        // Layer 3: "Bubble" Character (Watery modulation)
+        // Adds the "bloop" characteristic
+        const osc3 = this.ctx.createOscillator();
+        const gain3 = this.ctx.createGain();
+        osc3.connect(gain3);
+        gain3.connect(this.masterGain);
+
+        osc3.type = 'sine';
+        osc3.frequency.setValueAtTime(400, now);
+        osc3.frequency.linearRampToValueAtTime(600, now + 0.05); // Slight rise
+        osc3.frequency.exponentialRampToValueAtTime(100, now + 0.2); // Fall
+
+        gain3.gain.setValueAtTime(0.4, now);
+        gain3.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+        osc3.start(now);
+        osc3.stop(now + 0.2);
+    }
+
+    playBomb() {
+        if (!this.ctx || !this.masterGain) return;
+        // Deep rumbling sweep
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(10, now + 1.5);
+
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.linearRampToValueAtTime(0, now + 1.5);
+
+        osc.start(now);
+        osc.stop(now + 1.5);
+    }
+
+    playPowerUp() {
+        if (!this.ctx || !this.masterGain) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        const now = this.ctx.currentTime;
+
+        // "Coin" sound: B5 -> E6 rapid transition
+        // First note
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, now); // B5
+        osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.linearRampToValueAtTime(0.4, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+        osc.start(now);
+        osc.stop(now + 0.4);
+    }
+
+    playVictory() {
+        if (!this.ctx || !this.masterGain) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+        notes.forEach((freq, i) => {
+            const osc = this.ctx!.createOscillator();
+            const gain = this.ctx!.createGain();
+            osc.connect(gain);
+            gain.connect(this.masterGain!);
+
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.2, now + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.4);
+            osc.start(now + i * 0.1);
+            osc.stop(now + i * 0.1 + 0.4);
+        });
+    }
+
+    playDefeat() {
+        if (!this.ctx || !this.masterGain) return;
+        const now = this.ctx.currentTime;
+        const notes = [300, 250, 200, 150];
+        notes.forEach((freq, i) => {
+            const osc = this.ctx!.createOscillator();
+            const gain = this.ctx!.createGain();
+            osc.connect(gain);
+            gain.connect(this.masterGain!);
+
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.2, now + i * 0.2);
+            gain.gain.linearRampToValueAtTime(0.01, now + i * 0.2 + 0.3);
+            osc.start(now + i * 0.2);
+            osc.stop(now + i * 0.2 + 0.3);
+        });
+    }
+
+    playWarning() {
+        if (!this.ctx || !this.masterGain) return;
+        console.log('Playing boss warning sound');
+        const now = this.ctx.currentTime;
+
+        // "Wang ~ Wang" effect
+        // Low frequency sawtooth with a bandpass filter sweep
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.type = 'sawtooth';
+        osc.frequency.value = 150; // Low drone
+
+        filter.type = 'bandpass';
+        filter.Q.value = 5; // High Q for "vocal" quality
+
+        // First "Wang"
+        filter.frequency.setValueAtTime(200, now);
+        filter.frequency.exponentialRampToValueAtTime(800, now + 0.3); // Wah up
+        filter.frequency.exponentialRampToValueAtTime(200, now + 0.6); // Wah down
+
+        // Second "Wang"
+        filter.frequency.setValueAtTime(200, now + 0.8);
+        filter.frequency.exponentialRampToValueAtTime(800, now + 1.1); // Wah up
+        filter.frequency.exponentialRampToValueAtTime(200, now + 1.4); // Wah down
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0.3, now + 0.6);
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.9);
+        gain.gain.linearRampToValueAtTime(0, now + 1.5);
+
+        osc.start(now);
+        osc.stop(now + 1.5);
+    }
+
+    playBossDefeat() {
+        if (!this.ctx || !this.masterGain) return;
+        const now = this.ctx.currentTime;
+
+        // "Mario-style" victory: G C E G C E (Ascending arpeggio)
+        // "Deng deng deng de deng"
+        // Let's try a quick ascending major arpeggio
+        const notes = [
+            { f: 523.25, t: 0.0 }, // C5
+            { f: 659.25, t: 0.1 }, // E5
+            { f: 783.99, t: 0.2 }, // G5
+            { f: 1046.50, t: 0.3 }, // C6
+            { f: 1318.51, t: 0.4 }, // E6
+            { f: 1567.98, t: 0.5 }, // G6 (Sustained)
+        ];
+
+        notes.forEach((note, i) => {
+            const osc = this.ctx!.createOscillator();
+            const gain = this.ctx!.createGain();
+            osc.connect(gain);
+            gain.connect(this.masterGain!);
+
+            osc.type = 'square'; // 8-bit style
+            osc.frequency.value = note.f;
+
+            const startTime = now + note.t;
+            const duration = i === notes.length - 1 ? 1.0 : 0.08; // Last note long
+
+            gain.gain.setValueAtTime(0.3, startTime);
+            gain.gain.linearRampToValueAtTime(0.3, startTime + duration - 0.02);
+            gain.gain.linearRampToValueAtTime(0.01, startTime + duration);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+    }
+
+    playLevelUp() {
+        if (!this.ctx || !this.masterGain) return;
+        const now = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'square';
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        // Mario mushroom sound: wong~wong~wong (three ascending notes)
+        // First "wong" - C5
+        osc.frequency.setValueAtTime(523.25, now);
+        // Second "wong" - E5
+        osc.frequency.setValueAtTime(659.25, now + 0.12);
+        // Third "wong" - G5
+        osc.frequency.setValueAtTime(783.99, now + 0.24);
+
+        // Envelope for each note with distinct attack
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.3, now + 0.12);
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.14);
+        gain.gain.exponentialRampToValueAtTime(0.3, now + 0.24);
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.26);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+        osc.start(now);
+        osc.stop(now + 0.5);
+    }
+
+    private shieldOsc: OscillatorNode | null = null;
+    private shieldGain: GainNode | null = null;
+
+    playShieldLoop() {
+        if (!this.ctx || !this.masterGain) return;
+        if (this.shieldOsc) return; // Already playing
+
+        const now = this.ctx.currentTime;
+        this.shieldOsc = this.ctx.createOscillator();
+        this.shieldGain = this.ctx.createGain();
+
+        this.shieldOsc.connect(this.shieldGain);
+        this.shieldGain.connect(this.masterGain);
+
+        // Cheerful high-pitched sine wave loop
+        this.shieldOsc.type = 'sine';
+        this.shieldOsc.frequency.setValueAtTime(880, now);
+
+        // LFO for vibrato effect
+        const lfo = this.ctx.createOscillator();
+        lfo.frequency.value = 8; // 8Hz vibrato
+        const lfoGain = this.ctx.createGain();
+        lfoGain.gain.value = 20; // Depth
+        lfo.connect(lfoGain);
+        lfoGain.connect(this.shieldOsc.frequency);
+        lfo.start(now);
+
+        this.shieldGain.gain.setValueAtTime(0, now);
+        this.shieldGain.gain.linearRampToValueAtTime(0.1, now + 0.5); // Fade in
+
+        this.shieldOsc.start(now);
+
+        // Store LFO to stop it later (hacky, ideally track it properly)
+        (this.shieldOsc as any)._lfo = lfo;
+    }
+
+    stopShieldLoop() {
+        if (!this.ctx || !this.shieldOsc || !this.shieldGain) return;
+
+        const now = this.ctx.currentTime;
+        this.shieldGain.gain.cancelScheduledValues(now);
+        this.shieldGain.gain.setValueAtTime(this.shieldGain.gain.value, now);
+        this.shieldGain.gain.linearRampToValueAtTime(0, now + 0.5); // Fade out
+
+        const osc = this.shieldOsc;
+        const lfo = (osc as any)._lfo;
+
+        setTimeout(() => {
+            osc.stop();
+            if (lfo) lfo.stop();
+            osc.disconnect();
+        }, 500);
+
+        this.shieldOsc = null;
+        this.shieldGain = null;
+    }
+
+    playSlowMotionEnter() {
+        if (!this.ctx || !this.masterGain) return;
+        const now = this.ctx.currentTime;
+
+        // Deep "warp" sound
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 1.0);
+
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.linearRampToValueAtTime(0, now + 1.0);
+
+        osc.start(now);
+        osc.stop(now + 1.0);
+    }
 }

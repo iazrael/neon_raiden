@@ -55,9 +55,13 @@ export function InputSystem(world: World, dt: number) {
     // === 处理开火 ===
     const existingFire = playerComps.find(FireIntent.check);
     if (isFiring) {
-        if (!existingFire) playerComps.push(new FireIntent());
+        if (!existingFire) {
+            playerComps.push(new FireIntent());
+        }
     } else {
-        if (existingFire) removeComponent(world, world.playerId, existingFire);
+        if (existingFire) {
+            removeComponent(world, world.playerId, existingFire);
+        }
     }
 
 
