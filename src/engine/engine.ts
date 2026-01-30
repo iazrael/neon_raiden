@@ -29,6 +29,7 @@ import { RenderSystem, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { TimeSlowSystem } from './systems/TimeSlowSystem';
+import { VisualEffectSystem } from './systems/VisualEffectSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 // ==============
@@ -164,17 +165,18 @@ export class Engine {
         // P7. 表现层 (视听反馈)
         CameraSystem(world, dt);                        // 17. 相机系统
         EffectPlayer(world, dt);                        // 18. 效果播放系统
-        // AudioSystem(world, dt);                     // 19. 音频系统 (暂时禁用 - 使用旧 GameAudioSystem)
+        VisualEffectSystem(world, dt);                  // 19. 视觉特效系统（更新状态）
+        // AudioSystem(world, dt);                     // 20. 音频系统 (暂时禁用 - 使用旧 GameAudioSystem)
 
         // 拍快照（**必须在清理前**）
         this.snapshot$.next(buildSnapshot(world, dt));
 
         // P8. 清理层 (生命周期)
-        LifetimeSystem(world, dt);                      // 20. 生命周期系统
-        CleanupSystem(world, dt);                       // 21. 清理系统
+        LifetimeSystem(world, dt);                      // 21. 生命周期系统
+        CleanupSystem(world, dt);                       // 22. 清理系统
 
         // 渲染系统（最后执行）
-        RenderSystem(world, this.getRenderContext(), dt);  // 22. 渲染系统
+        RenderSystem(world, this.getRenderContext(), dt);  // 23. 渲染系统
     }
 
     /**
