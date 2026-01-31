@@ -5,7 +5,7 @@
 import { createWorld, generateId, addComponent } from '../../src/engine/world';
 import { WeaponSystem } from '../../src/engine/systems/WeaponSystem';
 import { Transform, Weapon, FireIntent, PlayerTag, EnemyTag, Bullet } from '../../src/engine/components';
-import { WeaponId, AmmoType } from '../../src/engine/types';
+import { WeaponId, AmmoType, WeaponPattern, EnemyWeaponId, EnemyId } from '../../src/engine/types';
 
 describe('WeaponSystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -28,7 +28,7 @@ describe('WeaponSystem', () => {
                 ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 200,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -51,7 +51,7 @@ describe('WeaponSystem', () => {
                 cooldown: 200,
                 curCD: 150, // 冷却中
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             addComponent(world, playerId, weapon);
             addComponent(world, playerId, new PlayerTag());
@@ -76,7 +76,7 @@ describe('WeaponSystem', () => {
                 ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 200,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -102,7 +102,7 @@ describe('WeaponSystem', () => {
                 cooldown: 100,
                 bulletCount: 5,
                 spread: 30, // 30度扩散
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -125,7 +125,7 @@ describe('WeaponSystem', () => {
                 ammoType: AmmoType.WAVE_PULSE,
                 cooldown: 100,
                 bulletCount: 8,
-                pattern: 'radial'
+                pattern: WeaponPattern.RADIAL
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -148,7 +148,7 @@ describe('WeaponSystem', () => {
                 cooldown: 100,
                 bulletCount: 4,
                 spread: 15,
-                pattern: 'spiral'
+                pattern: WeaponPattern.SPIRAL
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -171,7 +171,7 @@ describe('WeaponSystem', () => {
                 cooldown: 100,
                 bulletCount: 3,
                 spread: 45,
-                pattern: 'random'
+                pattern: WeaponPattern.RANDOM
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -191,13 +191,13 @@ describe('WeaponSystem', () => {
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 400, y: 100 }));
             addComponent(world, enemyId, new Weapon({
-                id: 'enemy_normal',
+                id: EnemyWeaponId.ENEMY_NORMAL,
                 ammoType: AmmoType.ENEMY_ORB_RED,
                 cooldown: 100,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
             addComponent(world, enemyId, new FireIntent({ firing: true }));
 
             const beforeEvents = world.events.filter(e => e.type === 'WeaponFired').length;
@@ -219,7 +219,7 @@ describe('WeaponSystem', () => {
                 ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 100,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             }));
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new FireIntent({ firing: true }));
@@ -247,7 +247,7 @@ describe('WeaponSystem', () => {
                 ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 200,
                 bulletCount: 1,
-                pattern: 'spread',
+                pattern: WeaponPattern.SPREAD,
                 fireRateMultiplier: 1.5
             });
             addComponent(world, playerId, weapon);

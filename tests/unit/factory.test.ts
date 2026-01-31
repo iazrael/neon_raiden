@@ -3,7 +3,7 @@
  * 测试 spawnOption 函数
  */
 
-import { World } from '../../src/engine/types';
+import type { World } from '../../src/engine/world';
 import { createWorld } from '../../src/engine/world';
 import { spawnOption } from '../../src/engine/factory';
 import { BLUEPRINT_OPTION_VULCAN } from '../../src/engine/blueprints/fighters';

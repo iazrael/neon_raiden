@@ -4,7 +4,7 @@
 
 import { BossSystem } from '../../src/engine/systems/BossSystem';
 import { WeaponSystem } from '../../src/engine/systems/WeaponSystem';
-import { World } from '../../src/engine/types';
+import type { World } from '../../src/engine/world';
 import { Transform, Velocity, BossTag, BossAI, Weapon, SpeedStat, FireIntent } from '../../src/engine/components';
 import { BossId } from '../../src/engine/types/ids';
 import { AmmoType } from '../../src/engine/types/ids';

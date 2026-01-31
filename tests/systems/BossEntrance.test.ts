@@ -6,7 +6,7 @@
 
 import { BossSystem } from '../../src/engine/systems/BossSystem';
 import { MovementSystem } from '../../src/engine/systems/MovementSystem';
-import { World } from '../../src/engine/types';
+import type { World } from '../../src/engine/world';
 import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, Velocity, BossEntrance, MoveIntent } from '../../src/engine/components';
 import { BossId, EnemyWeaponId } from '../../src/engine/types/ids';
 import { BLUEPRINT_BOSS_GUARDIAN } from '../../src/engine/blueprints/bosses';

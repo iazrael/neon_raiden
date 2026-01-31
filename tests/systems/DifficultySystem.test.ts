@@ -3,7 +3,7 @@
  */
 
 import { DifficultySystem, resetDifficulty, getDifficultyConfig, getEliteChance, getEnemyMultipliers } from '../../src/engine/systems/DifficultySystem';
-import { World } from '../../src/engine/types';
+import type { World } from '../../src/engine/world';
 import { Transform, Health, Weapon } from '../../src/engine/components';
 import { AmmoType } from '../../src/engine/types/ids';
 
@@ -25,7 +25,7 @@ describe('DifficultySystem', () => {
             level: 0,
             difficulty: 1.0,
             events: [],
-            comboState: { count: 0, timer: 0, multiplier: 1 },
+            comboState: { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false },
         } as unknown as World;
 
         // 添加玩家实体
@@ -34,7 +34,7 @@ describe('DifficultySystem', () => {
             new Health({ hp: 100, max: 100 }),
             new Weapon({
                 id: 'player_weapon' as any,
-                ammoType: AmmoType.PLAYER_BULLET,
+                ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 200,
                 level: 1
             }),
@@ -103,7 +103,7 @@ describe('DifficultySystem', () => {
         });
 
         it('应该根据连击数评分', () => {
-            mockWorld.comboState = { count: 50, timer: 5, multiplier: 2 };
+            mockWorld.comboState = { count: 50, timer: 5, level: 2, maxCombo: 50, hasBerserk: false };
             mockWorld.time = 15;
             mockWorld.events = [];
 
@@ -146,7 +146,7 @@ describe('DifficultySystem', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
             const health = playerComps?.find(Health.check) as Health;
             health!.hp = 10;
-            mockWorld.comboState = { count: 0, timer: 0, multiplier: 1 };
+            mockWorld.comboState = { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false };
             mockWorld.time = 15;
             mockWorld.events = [];
 
@@ -264,7 +264,7 @@ describe('DifficultySystem', () => {
             const playerComps = mockWorld.entities.get(mockWorld.playerId);
             const health = playerComps?.find(Health.check) as Health;
             health!.hp = 1;
-            mockWorld.comboState = { count: 0, timer: 0, multiplier: 1 };
+            mockWorld.comboState = { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false };
             mockWorld.score = 0;
             mockWorld.time = 0; // 最小时间
             mockWorld.events = [];

@@ -3,7 +3,7 @@
  */
 
 import { AudioSystem, playSound, playBgm, stopBgm, setMasterVolume, setSfxVolume, setBgmVolume, toggleMute, resetAudio, getAudioState } from '../../src/engine/systems/AudioSystem';
-import { World } from '../../src/engine/types';
+import type { World } from '../../src/engine/world';
 import { HitEvent, KillEvent, PickupEvent, PlaySoundEvent } from '../../src/engine/events';
 
 describe('AudioSystem', () => {

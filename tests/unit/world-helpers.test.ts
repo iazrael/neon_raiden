@@ -6,7 +6,7 @@
  * 测试 getComponents, removeTypes
  */
 
-import { World } from '../../src/engine/types';
+import type { World } from '../../src/engine/world';
 import { createWorld, addComponent, getComponents, removeTypes } from '../../src/engine/world';
 import { Transform, Velocity, BossTag, Health, MoveIntent } from '../../src/engine/components';
 

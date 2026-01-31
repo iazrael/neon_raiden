@@ -16,6 +16,7 @@ import {
 } from '../../src/engine/components';
 import { CollisionLayer, shouldCheckCollision } from '../../src/engine/types/collision';
 import { AmmoType } from '../../src/engine/types';
+import { EnemyId } from '../../src/engine/types/ids';
 
 describe('CollisionSystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -103,7 +104,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 115, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -126,7 +127,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 200, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -150,7 +151,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 140, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -174,7 +175,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 105, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'circle', radius: 10, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -199,7 +200,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 115, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'rect', halfWidth: 20, halfHeight: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -221,7 +222,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 200, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'rect', halfWidth: 20, halfHeight: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -244,7 +245,7 @@ describe('CollisionSystem', () => {
             // 边缘接触
             addComponent(world, id2, new Transform({ x: 140, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'rect', halfWidth: 20, halfHeight: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -268,7 +269,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, id2, new Transform({ x: 115, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'rect', halfWidth: 20, halfHeight: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -291,7 +292,7 @@ describe('CollisionSystem', () => {
             // 圆心在矩形内
             addComponent(world, id2, new Transform({ x: 102, y: 100 }));
             addComponent(world, id2, new HitBox({ shape: 'rect', halfWidth: 20, halfHeight: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, id2, new EnemyTag({ id: 1 }));
+            addComponent(world, id2, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -348,7 +349,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, enemyId, new Transform({ x: 110, y: 100 }));
             addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -377,18 +378,18 @@ describe('CollisionSystem', () => {
             // 两个敌人都在子弹路径上，但彼此不碰撞（距离足够远）
             addComponent(world, enemy1Id, new Transform({ x: 110, y: 100 }));
             addComponent(world, enemy1Id, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemy1Id, new EnemyTag({ id: 1 }));
+            addComponent(world, enemy1Id, new EnemyTag({ id: EnemyId.NORMAL }));
 
             addComponent(world, enemy2Id, new Transform({ x: 200, y: 100 }));
             addComponent(world, enemy2Id, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemy2Id, new EnemyTag({ id: 2 }));
+            addComponent(world, enemy2Id, new EnemyTag({ id: EnemyId.FAST }));
 
             CollisionSystem(world, 0.016);
 
             // 应该只生成一个 HitEvent（只击中 enemy1）
             const hitEvents = world.events.filter(e => e.type === 'Hit');
             expect(hitEvents.length).toBe(1);
-            expect(hitEvents[0].victim).toBe(enemy1Id);
+            expect((hitEvents[0] as any).victim).toBe(enemy1Id);
 
             // 子弹还没被销毁（还能穿透1次）
             const bulletComps = world.entities.get(bulletId);
@@ -412,7 +413,7 @@ describe('CollisionSystem', () => {
             addComponent(world, playerId, new PlayerTag());
 
             // 设置敌人
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             // 玩家子弹
             addComponent(world, playerBulletId, new Transform({ x: 100, y: 100 }));
@@ -451,7 +452,7 @@ describe('CollisionSystem', () => {
             addComponent(world, playerId, new PlayerTag());
             addComponent(world, playerId, new InvulnerableState({ duration: 1000 }));
 
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -474,7 +475,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, enemyId, new Transform({ x: 110, y: 100 }));
             addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -502,7 +503,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, enemyId, new Transform({ x: 110, y: 100 }));
             addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -534,7 +535,7 @@ describe('CollisionSystem', () => {
 
             addComponent(world, enemyId, new Transform({ x: 110, y: 100 }));
             addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
@@ -564,13 +565,13 @@ describe('CollisionSystem', () => {
 
             addComponent(world, enemyId, new Transform({ x: 110, y: 100 }));
             addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
 
             CollisionSystem(world, 0.016);
 
             // 旧事件应该被清空，只保留新事件
             expect(world.events.length).toBe(1);
-            expect(world.events[0].victim).toBe(enemyId);
+            expect((world.events[0] as any).victim).toBe(enemyId);
         });
     });
 
@@ -601,7 +602,7 @@ describe('CollisionSystem', () => {
                 // 子弹在敌人附近
                 addComponent(world, enemyId, new Transform({ x: ex, y: ey }));
                 addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-                addComponent(world, enemyId, new EnemyTag({ id: i }));
+                                addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL as any }));
 
                 addComponent(world, bulletId, new Transform({ x: ex + 5, y: ey }));
                 addComponent(world, bulletId, new HitBox({ shape: 'circle', radius: 10, layer: CollisionLayer.PlayerBullet }));

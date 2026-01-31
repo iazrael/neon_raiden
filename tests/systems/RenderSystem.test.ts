@@ -51,14 +51,20 @@ const createMockWorld = (): World => ({
     time: 0,
     score: 0,
     level: 0,
+    playerLevel: 1,
     difficulty: 1.0,
     spawnCredits: 100,
     spawnTimer: 0,
     enemyCount: 0,
     events: [],
     timeScale: 1,
-    spawnInitialized: false,
-    playerLevel: 1,
+    comboState: {
+        count: 0,
+        timer: 0,
+        level: 0,
+        maxCombo: 0,
+        hasBerserk: false,
+    },
     renderState: {
         camera: {
             x: 0,

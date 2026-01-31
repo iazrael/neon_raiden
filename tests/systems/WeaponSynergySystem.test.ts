@@ -5,7 +5,7 @@
 import { createWorld, generateId, addComponent } from '../../src/engine/world';
 import { WeaponSynergySystem } from '../../src/engine/systems/WeaponSynergySystem';
 import { Transform, Weapon, PlayerTag } from '../../src/engine/components';
-import { WeaponId } from '../../src/engine/types';
+import { WeaponId, WeaponPattern, AmmoType } from '../../src/engine/types';
 
 describe('WeaponSynergySystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -27,17 +27,17 @@ describe('WeaponSynergySystem', () => {
             // 添加火神炮和激光
             const vulcan = new Weapon({
                 id: WeaponId.VULCAN,
-                ammoType: 'vulcanSpread' as any,
+                ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 100,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             const laser = new Weapon({
                 id: WeaponId.LASER,
-                ammoType: 'laserBeam' as any,
+                ammoType: AmmoType.LASER_BEAM,
                 cooldown: 150,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
 
             addComponent(world, playerId, vulcan);
@@ -62,14 +62,14 @@ describe('WeaponSynergySystem', () => {
                 ammoType: 'missileHoming' as any,
                 cooldown: 200,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             const wave = new Weapon({
                 id: WeaponId.WAVE,
                 ammoType: 'wavePulse' as any,
                 cooldown: 300,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
 
             addComponent(world, playerId, missile);
@@ -96,7 +96,7 @@ describe('WeaponSynergySystem', () => {
                 ammoType: 'teslaChain' as any,
                 cooldown: 150,
                 bulletCount: 1,
-                pattern: 'spread',
+                pattern: WeaponPattern.SPREAD,
                 pierce: 5
             });
             const shuriken = new Weapon({
@@ -104,7 +104,7 @@ describe('WeaponSynergySystem', () => {
                 ammoType: 'shurikenBounce' as any,
                 cooldown: 180,
                 bulletCount: 1,
-                pattern: 'spread',
+                pattern: WeaponPattern.SPREAD,
                 pierce: 0
             });
 
@@ -132,14 +132,14 @@ describe('WeaponSynergySystem', () => {
                 ammoType: 'teslaChain' as any,
                 cooldown: 150,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             const shuriken = new Weapon({
                 id: WeaponId.SHURIKEN,
                 ammoType: 'shurikenBounce' as any,
                 cooldown: 180,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
 
             addComponent(world, playerId, tesla);
@@ -163,10 +163,10 @@ describe('WeaponSynergySystem', () => {
 
             const weapon = new Weapon({
                 id: WeaponId.VULCAN,
-                ammoType: 'vulcanSpread' as any,
+                ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 100,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
 
             addComponent(world, playerId, weapon);
@@ -192,14 +192,14 @@ describe('WeaponSynergySystem', () => {
                 ammoType: 'plasmaOrb' as any,
                 cooldown: 200,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             const magma = new Weapon({
                 id: WeaponId.MAGMA,
                 ammoType: 'magmaPool' as any,
                 cooldown: 250,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
 
             addComponent(world, playerId, plasma);
@@ -227,24 +227,24 @@ describe('WeaponSynergySystem', () => {
 
             const vulcan = new Weapon({
                 id: WeaponId.VULCAN,
-                ammoType: 'vulcanSpread' as any,
+                ammoType: AmmoType.VULCAN_SPREAD,
                 cooldown: 100,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             const laser = new Weapon({
                 id: WeaponId.LASER,
-                ammoType: 'laserBeam' as any,
+                ammoType: AmmoType.LASER_BEAM,
                 cooldown: 150,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
             const missile = new Weapon({
                 id: WeaponId.MISSILE,
                 ammoType: 'missileHoming' as any,
                 cooldown: 200,
                 bulletCount: 1,
-                pattern: 'spread'
+                pattern: WeaponPattern.SPREAD
             });
 
             addComponent(world, playerId, vulcan);

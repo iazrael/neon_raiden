@@ -25,7 +25,7 @@ describe('BuffSystem', () => {
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const shield = new Shield({ value: 30, regen: 0, max: 100 });
+            const shield = new Shield({ value: 30, regen: 0 });
             addComponent(world, playerId, shield);
             addComponent(world, playerId, new Buff({
                 type: BuffType.SHIELD,
@@ -45,7 +45,7 @@ describe('BuffSystem', () => {
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const shield = new Shield({ value: 50, regen: 0, max: 100 });
+            const shield = new Shield({ value: 50, regen: 0 });
             addComponent(world, playerId, shield);
             addComponent(world, playerId, new Buff({
                 type: BuffType.SHIELD,
@@ -63,7 +63,7 @@ describe('BuffSystem', () => {
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const shield = new Shield({ value: 95, regen: 0, max: 100 });
+            const shield = new Shield({ value: 95, regen: 0 });
             addComponent(world, playerId, shield);
             addComponent(world, playerId, new Buff({
                 type: BuffType.SHIELD,

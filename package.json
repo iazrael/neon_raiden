@@ -9,9 +9,11 @@
         "preview": "vite preview",
         "icons": "node tools/build-icons.js",
         "splash": "node tools/generate-splash-screens.js",
+        "lint": "tsc --noEmit",
         "test": "jest",
         "test:watch": "jest --watch",
-        "test:coverage": "jest --coverage"
+        "test:coverage": "jest --coverage",
+        "test:all": "tsc --noEmit && jest"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.17",
