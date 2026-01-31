@@ -81,6 +81,7 @@ function App() {
             setSecondaryWeapon(engine.secondaryWeapon as any as WeaponType);
             setWeaponLevel(engine.weaponLevel);
             setShieldPercent(engine.getShieldPercent());
+            setBombs(engine.bombs);
         }, 100); // 每 100ms 同步一次 UI 状态
 
         return () => {

@@ -147,9 +147,8 @@ export function AudioSystem(world: World, dt: number): void {
  * 处理命中事件
  */
 function handleHitEvent(world: World, event: HitEvent): void {
-    // 根据血量等级播放音效
-    // const soundKey = `hit_${event.bloodLevel === 1 ? 'light' : event.bloodLevel === 2 ? 'medium' : 'heavy'}`;
-    // playSound(soundKey);
+    // 播放撞击音效(目前子弹击中, 与敌机相撞等, 所有碰撞都会想)
+    audioPlayer.playHit()
 }
 
 /**

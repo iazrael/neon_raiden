@@ -185,6 +185,8 @@ export class ReactEngine {
     triggerBomb(x?: number, y?: number): void {
         if (this.bombs > 0 && this.state === GameState.PLAYING) {
             this.bombs--;
+            // 不能这里减掉炸弹, 炸弹是归 world 管理的
+            // 鼠标点击按钮触发炸弹, 需要通知 inputManager 去生成这个事件
             this.onBombChange(this.bombs);
 
             // TODO: 通过事件系统触发炸弹效果
