@@ -15,6 +15,7 @@ import { Engine } from './engine';
 import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
 import type { GameSnapshot } from './snapshot';
 import { ComboState, GameState, WeaponId } from './types';
+import { inputManager } from './input/InputManager';
 
 
 
@@ -179,19 +180,19 @@ export class ReactEngine {
 
     /**
      * 触发炸弹
-     * @param x 目标 X 坐标 (可选)
-     * @param y 目标 Y 坐标 (可选)
+     * @param x 目标 X 坐标 (可选,暂未使用)
+     * @param y 目标 Y 坐标 (可选,暂未使用)
      */
     triggerBomb(x?: number, y?: number): void {
-        if (this.bombs > 0 && this.state === GameState.PLAYING) {
-            this.bombs--;
-            // 不能这里减掉炸弹, 炸弹是归 world 管理的
-            // 鼠标点击按钮触发炸弹, 需要通知 inputManager 去生成这个事件
-            this.onBombChange(this.bombs);
+        if (this.state !== GameState.PLAYING) return;
 
-            // TODO: 通过事件系统触发炸弹效果
-            // 目前简化处理：直接调用引擎方法或推送事件
-        }
+        // 通过 InputManager 触发炸弹意图
+        // 实际炸弹数量由 BombSystem 中的 BombComponent 管理
+        inputManager.triggerBomb();
+
+        // 不再在这里减少炸弹数量
+        // 炸弹消费在 BombSystem 中处理
+        // 数量变化通过 snapshot 同步
     }
 
     /**
