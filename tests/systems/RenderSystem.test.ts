@@ -3,7 +3,7 @@
  */
 
 import { RenderSystem } from '../../src/engine/systems/RenderSystem';
-import { World, RenderState } from '../../src/engine/world';
+import { World } from '../../src/engine/world';
 import { Transform, Sprite, PlayerTag, EnemyTag } from '../../src/engine/components';
 import { SpriteKey } from '../../src/engine/configs/sprites';
 
@@ -45,6 +45,7 @@ const mockRenderContext = {
 const createMockWorld = (): World => ({
     entities: new Map(),
     playerId: 1,
+    visualEffectId: 0,
     width: 800,
     height: 600,
     time: 0,
@@ -68,7 +69,11 @@ const createMockWorld = (): World => ({
             shakeTimer: 0,
             shakeIntensity: 0,
         },
-        timeSlowLines: [],
+    },
+    bossState: {
+        bossId: 0,
+        timer: 60000,
+        spawned: false,
     },
 });
 
