@@ -14,7 +14,7 @@
 import { Engine } from './engine';
 import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
 import type { GameSnapshot } from './snapshot';
-import { ComboState, GameStatus, WeaponId } from './types';
+import { ComboState, GameState, WeaponId } from './types';
 
 
 
@@ -27,7 +27,7 @@ export class ReactEngine {
 
 
     // ========== 游戏状态 (与旧 GameEngine 兼容) ==========
-    public state: GameStatus = GameStatus.MENU;
+    public state: GameState = GameState.MENU;
     public score: number = 0;
     public level: number = 1;
     public maxLevels: number = 5;
@@ -56,7 +56,7 @@ export class ReactEngine {
     // ========== 回调函数 (与旧 GameEngine 兼容) ==========
     private onScoreChange: (score: number) => void = () => {};
     private onLevelChange: (level: number) => void = () => {};
-    private onStateChange: (state: GameStatus) => void = () => {};
+    private onStateChange: (state: GameState) => void = () => {};
     private onHpChange: (hp: number) => void = () => {};
     private onBombChange: (bombs: number) => void = () => {};
     private onMaxLevelChange: (level: number) => void = () => {};
@@ -67,7 +67,7 @@ export class ReactEngine {
         canvas: HTMLCanvasElement | null = null,
         onScoreChange?: (s: number) => void,
         onLevelChange?: (l: number) => void,
-        onStateChange?: (s: GameStatus) => void,
+        onStateChange?: (s: GameState) => void,
         onHpChange?: (hp: number) => void,
         onBombChange?: (bombs: number) => void,
         onMaxLevelChange?: (level: number) => void,
@@ -99,6 +99,8 @@ export class ReactEngine {
         // 订阅快照流以同步状态
         this.snapshotSubscription = this.engine.snapshot$.subscribe((snapshot: GameSnapshot | null) => {
             if (snapshot) {
+                // 更新一下状态
+                snapshot.state = this.state;
                 this.syncFromSnapshot(snapshot);
             }
         });
@@ -107,7 +109,7 @@ export class ReactEngine {
         this.engine.start(canvas, blueprint);
 
         // 更新状态
-        this.state = GameStatus.PLAYING;
+        this.state = GameState.PLAYING;
         this.onStateChange(this.state);
     }
 
@@ -143,8 +145,8 @@ export class ReactEngine {
      */
     pause(): void {
         this.engine.pause();
-        if (this.state === GameStatus.PLAYING) {
-            this.state = GameStatus.PAUSED;
+        if (this.state === GameState.PLAYING) {
+            this.state = GameState.PAUSED;
             this.onStateChange(this.state);
         }
     }
@@ -154,8 +156,8 @@ export class ReactEngine {
      */
     resume(): void {
         this.engine.resume();
-        if (this.state === GameStatus.PAUSED) {
-            this.state = GameStatus.PLAYING;
+        if (this.state === GameState.PAUSED) {
+            this.state = GameState.PLAYING;
             this.onStateChange(this.state);
         }
     }
@@ -165,7 +167,7 @@ export class ReactEngine {
      */
     stop(): void {
         this.engine.stop();
-        this.state = GameStatus.MENU;
+        this.state = GameState.MENU;
         this.onStateChange(this.state);
 
         // 清理订阅
@@ -181,7 +183,7 @@ export class ReactEngine {
      * @param y 目标 Y 坐标 (可选)
      */
     triggerBomb(x?: number, y?: number): void {
-        if (this.bombs > 0 && this.state === GameStatus.PLAYING) {
+        if (this.bombs > 0 && this.state === GameState.PLAYING) {
             this.bombs--;
             this.onBombChange(this.bombs);
 

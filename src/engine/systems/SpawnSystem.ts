@@ -251,7 +251,8 @@ function doSpawnBoss(world: World, bossId: BossId): void {
     // 在屏幕上方中央生成 Boss
     const x = world.width / 2;
     const y = -150;
-    spawnBoss(world, blueprint, x, y, 0);
+    const id = spawnBoss(world, blueprint, x, y, 0);
+    world.bossState.bossId = id;
     console.log(`Spawned Boss '${bossId}' at (${x}, ${y})`);
 }
 
@@ -259,6 +260,7 @@ function doSpawnBoss(world: World, bossId: BossId): void {
  * 重置 Boss 刷怪状态（用于关卡切换）
  */
 export function resetBossSpawnState(world: World): void {
+    world.bossState.bossId = 0;
     world.bossState.timer = 0;
     world.bossState.spawned = false;
 }

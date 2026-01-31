@@ -97,7 +97,6 @@ interface RenderQueue {
     sprites: RenderItem[];
     playerEffect: PlayerEffectData | null;
     bossInfo: BossInfo | null;
-    timeSlowActive: boolean;
     visualEffect: VisualEffect;
     meteors: VisualMeteor[];
 }
@@ -123,55 +122,39 @@ function collectRenderItems(world: World): RenderQueue {
         sprites: [],
         playerEffect: null,
         bossInfo: null,
-        timeSlowActive: false,
         visualEffect: null,
         meteors: [],
     };
     const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
     queue.visualEffect = effect;
     queue.meteors = effect?.meteors ?? [];
-    
-    for (const [id, comps] of world.entities) {
-        // 时间减速状态
-        if (comps.some(TimeSlow.check)) {
-            queue.timeSlowActive = true;
-        }
 
-        const transform = comps.find(Transform.check);
-        if (!transform) continue;
-
-        // 精灵
-        const sprite = comps.find(Sprite.check);
-        if (sprite) {
-            queue.sprites.push({
-                type: "sprite",
-                layer: determineLayer(comps),
+    // 收集玩家信息, 绘制额外的护盾\血条等
+    if (world.playerId > 0) {
+        const [shield, invulnerable, health, transform] = getComponents(world, world.playerId, [Shield, InvulnerableState, Health, Transform])
+        if (shield || invulnerable) {
+            queue.playerEffect = {
                 transform,
-                sprite,
-            });
+                shield,
+                invulnerable,
+                health,
+            };
         }
+    }
 
-        // 玩家特效
-        if (id === world.playerId) {
-            const shield = comps.find(Shield.check);
-            const invulnerable = comps.find(InvulnerableState.check);
-            const health = comps.find(Health.check);
-            if (shield || invulnerable) {
-                queue.playerEffect = {
-                    transform,
-                    shield,
-                    invulnerable,
-                    health,
-                };
-            }
-        }
-
-        // Boss 信息
-        const bossTag = comps.find(BossTag.check);
-        const health = comps.find(Health.check);
-        if (bossTag && health) {
-            queue.bossInfo = { transform, health };
-        }
+    if (world.bossState.bossId > 0) {
+        // 收集 boss 信息
+        const [transform, health] = getComponents(world, world.bossState.bossId, [Transform, Health]);
+        queue.bossInfo = { transform, health };
+    }
+    // 收集所有可以绘制的精灵
+    for (const [id, [transform, sprite], comps] of view(world, [Transform, Sprite])) {
+        queue.sprites.push({
+            type: "sprite",
+            layer: determineLayer(comps),
+            transform,
+            sprite,
+        });
     }
 
     return queue;
@@ -184,7 +167,7 @@ function drawBackground(
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
-    timeSlowActive: boolean,
+    timeScale: number,
     meteors: VisualMeteor[],
 ): void {
     // 黑色背景
@@ -192,7 +175,6 @@ function drawBackground(
     ctx.fillRect(0, 0, width, height);
 
     const t = Date.now() / 1000;
-    const timeScale = timeSlowActive ? 0.5 : 1.0;
 
     // 远处的星星（慢速）
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
@@ -578,7 +560,7 @@ export function RenderSystem(
     const queue = collectRenderItems(world);
 
     // 2. 绘制背景（传递流星数据）
-    drawBackground(context, width, height, queue.timeSlowActive, queue.meteors);
+    drawBackground(context, width, height, world.timeScale, queue.meteors);
 
     // 计算相机偏移
     const camX = camera.shakeX;
@@ -603,9 +585,7 @@ export function RenderSystem(
     drawVisualEffectCircles(context, queue.visualEffect, camX, camY);
 
     // 绘制时间减速特效
-    if (queue.timeSlowActive) {
-        drawTimeSlowEffect(context, queue.visualEffect, width, height);
-    }
+    drawTimeSlowEffect(context, queue.visualEffect, width, height);
 
     // 9. 绘制 Boss 血条
     if (queue.bossInfo) {

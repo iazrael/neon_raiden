@@ -1,33 +1,7 @@
-import { EntityId, Component, GameStatus, ComboState } from './types';
+import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
 import { Event as GameEvent } from './events';
 import { BOSS_SPAWN_TIME } from './configs';
 
-
-/** 相机状态 */
-export interface CameraState {
-    x: number;
-    y: number;
-    shakeX: number;
-    shakeY: number;
-    zoom: number;
-    /** 震屏剩余时间（毫秒） */
-    shakeTimer: number;
-    /** 震屏强度 */
-    shakeIntensity: number;
-}
-
-/** 渲染状态 */
-export interface RenderState {
-    camera: CameraState;
-}
-
-/** Boss 刷怪状态 */
-export interface BossSpawnState {
-    /** Boss 出现时间（毫秒），默认 60000 (60秒) */
-    timer: number;
-    /** Boss 是否已刷出 */
-    spawned: boolean;
-}
 
 // 世界接口
 export interface World {
@@ -53,6 +27,7 @@ export interface World {
     spawnCredits: number;
     // 刷怪检测频率
     spawnTimer: number;
+
     // 当前敌人数量
     enemyCount: number;
     // 画布宽
@@ -65,16 +40,14 @@ export interface World {
     // 时间缩放（用于 TIME_SLOW 等效果，1.0 = 正常速度）
     timeScale: number;
 
-    // UI状态字段
-    status?: GameStatus;
-    maxLevelReached?: number;
+    // 连击状态
     comboState?: ComboState;
 
     // 渲染状态（由 CameraSystem/RenderSystem 共享）
     renderState: RenderState;
 
     // Boss 刷怪状态
-    bossState: BossSpawnState;
+    bossState: BossState;
 }
 
 
@@ -110,6 +83,7 @@ export function createWorld(): World {
             },
         },
         bossState: {
+            bossId: 0,
             timer: BOSS_SPAWN_TIME,
             spawned: false,
         },

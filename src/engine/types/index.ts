@@ -1,9 +1,11 @@
+import { BossId } from './ids';
+
 export * from './ids'
 export * from './base'
 export * from './collision'
 
 
-export enum GameStatus {
+export enum GameState {
     MENU,
     PLAYING,
     PAUSED,
@@ -25,3 +27,31 @@ export interface ComboState {
     hasBerserk: boolean;
 }
 
+
+/** 相机状态 */
+export interface CameraState {
+    x: number;
+    y: number;
+    shakeX: number;
+    shakeY: number;
+    zoom: number;
+    /** 震屏剩余时间（毫秒） */
+    shakeTimer: number;
+    /** 震屏强度 */
+    shakeIntensity: number;
+}
+
+/** 渲染状态 */
+export interface RenderState {
+    camera: CameraState;
+}
+
+/** Boss 刷怪状态 */
+export interface BossState {
+    /** boss 的实体 ID */
+    bossId: number;
+    /** Boss 出现时间（毫秒），默认 60000 (60秒) */
+    timer: number;
+    /** Boss 是否已刷出 */
+    spawned: boolean;
+}

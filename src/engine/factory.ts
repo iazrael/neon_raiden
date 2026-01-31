@@ -74,18 +74,6 @@ export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number, ro
 
 export function spawnBoss(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot);
-
-    // 初始化Boss相关组件
-    const bossComps = world.entities.get(id);
-    if (bossComps) {
-        // 添加Boss入场状态组件（使Boss快速进入可视区域）
-        const entrance = new BossEntrance({
-            targetY: 150,      // 可视区域顶部
-            entranceSpeed: 150 // 快速向下移动（150像素/秒）
-        });
-        bossComps.push(entrance);
-    }
-
     return id;
 }
 

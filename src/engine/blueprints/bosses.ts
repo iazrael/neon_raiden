@@ -51,6 +51,10 @@ function createBossBlueprint(
         SpeedStat: { maxLinear: 120, maxAngular: 2 },
         ScoreValue: { value: score },
         DropTable: { table: DROPTABLE_BOSS },
+        BossEntrance: {
+            targetY: 150,      // 可视区域顶部
+            entranceSpeed: 150 // 快速向下移动（150像素/秒）
+        },
         Weapon: weaponSpec ? { ...weaponSpec } : undefined, // 初始化第一阶段武器
         Velocity: { vx: 0, vy: 0 } // 初始化速度为0（由BossSystem控制）
     };
