@@ -10,14 +10,14 @@
  * 执行顺序：P7 - 在 DamageResolutionSystem 之后
  */
 
-import { World } from '../world';
-import { Transform, Particle, Lifetime, Velocity } from '../components';
+import { getEntity, World } from '../world';
+import { Transform, Particle, Lifetime, Velocity, PlayerTag, EnemyTag, BossTag } from '../components';
 import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
 import { triggerShake } from './CameraSystem';
 import { getComponents, view } from '../world';
-import { Blueprint } from '../blueprints';
+import { Blueprint, ENEMY_WEAPON_TABLE } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
-import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES, PARTICLE_DEBUG } from '../blueprints/effects';
+import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES, PARTICLE_DEBUG, ParticleId } from '../blueprints/effects';
 import { spawnCircle, spawnParticles } from './VisualEffectSystem';
 
 /**
@@ -33,9 +33,11 @@ export function EffectPlayer(world: World, dt: number): void {
     for (const event of events) {
         switch (event.type) {
             case 'Hit':
+                // 碰撞
                 handleHitEvent(world, event as HitEvent);
                 break;
             case 'Kill':
+                // 击杀
                 handleKillEvent(world, event as KillEvent);
                 break;
             case 'Pickup':
@@ -48,6 +50,7 @@ export function EffectPlayer(world: World, dt: number): void {
                 handleCamShakeEvent(world, event as CamShakeEvent);
                 break;
             case 'BloodFog':
+                // 飙血
                 handleBloodFogEvent(world, event as BloodFogEvent);
                 break;
             case 'LevelUp':
@@ -78,8 +81,14 @@ export function EffectPlayer(world: World, dt: number): void {
  */
 function handleHitEvent(world: World, event: HitEvent): void {
     // 生成爆炸粒子 - 使用新的物理粒子系统
-    const config = EXPLOSION_PARTICLES.hit;
-    spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
+    // FIXME: 受伤效果在 handleBloodFogEvent 里已经有了
+    // if (event.victim === world.playerId) {
+    //     // 玩家受伤
+    //     spawnParticles(world, event.pos.x, event.pos.y, PARTICLE_EFFECTS[ParticleId.PlayerHited])
+    // } else {
+    //     // 敌人或boss
+    //     spawnParticles(world, event.pos.x, event.pos.y, PARTICLE_EFFECTS[ParticleId.EnemyHited])
+    // }
 }
 
 /**
@@ -88,51 +97,35 @@ function handleHitEvent(world: World, event: HitEvent): void {
  */
 function handleKillEvent(world: World, event: KillEvent): void {
     // 生成大型爆炸粒子 - 使用新的物理粒子系统
-    const config = EXPLOSION_PARTICLES.large;
-    spawnExplosionParticles(world, event.pos.x, event.pos.y, config);
-
-    // 添加冲击波 - 缩小最大半径，避免圈太大
-    spawnShockwave(world, event.pos.x, event.pos.y, '#ffffff', 120, 6);
-}
-
-/**
- * 生成爆炸粒子 - 使用 VisualEffectSystem
- * 生成多个粒子，每个有随机速度向四周飞散
- */
-function spawnExplosionParticles(world: World, x: number, y: number, config: typeof EXPLOSION_PARTICLES[keyof typeof EXPLOSION_PARTICLES]): void {
-    // 调试日志
-    if (PARTICLE_DEBUG.enabled && PARTICLE_DEBUG.logSpawns) {
-        console.log(`[EffectPlayer] 生成爆炸粒子: ${config.count}个, 位置(${x.toFixed(1)}, ${y.toFixed(1)}), 颜色=${config.color}`);
+    // 获取实体
+    const entity = getEntity(world, event.victim)
+    if (entity.find(PlayerTag.check)) {
+        spawnParticles(world, event.pos.x, event.pos.y, PARTICLE_EFFECTS[ParticleId.PlayerDefeated]);
+    } else if (entity.find(EnemyTag.check)) {
+        spawnParticles(world, event.pos.x, event.pos.y, PARTICLE_EFFECTS[ParticleId.EnemyDefeated]);
+    } else if (entity.find(BossTag.check)) {
+        spawnParticles(world, event.pos.x, event.pos.y, PARTICLE_EFFECTS[ParticleId.BossDefeated]);
     }
-
-    // 使用 VisualEffectSystem 的 spawnParticles API
-    spawnParticles(world, x, y, config.count, {
-        speedMin: config.speedMin,
-        speedMax: config.speedMax,
-        life: config.life,
-        color: config.color,
-        sizeMin: config.sizeMin,
-        sizeMax: config.sizeMax,
-    });
 }
+
 
 /**
  * 处理拾取事件
  */
 function handlePickupEvent(world: World, event: PickupEvent): void {
     // 生成拾取特效
-    spawnParticle(world, 'pickup', event.pos.x, event.pos.y);
+    // spawnParticle(world, 'pickup', event.pos.x, event.pos.y);
 }
 
 /**
  * 处理 Boss 阶段切换事件
  */
 function handleBossPhaseChangeEvent(world: World, event: BossPhaseChangeEvent): void {
-    // 生成 Boss 阶段切换特效
-    spawnParticle(world, 'boss_phase', world.width / 2, world.height / 2);
+    // // 生成 Boss 阶段切换特效
+    // spawnParticle(world, 'boss_phase', world.width / 2, world.height / 2);
 
-    // 触发震屏（500毫秒）
-    triggerShake(world, 10, 500);
+    // // 触发震屏（500毫秒）
+    // triggerShake(world, 10, 500);
 }
 
 /**
@@ -146,97 +139,103 @@ function handleCamShakeEvent(world: World, event: CamShakeEvent): void {
  * 处理飙血特效事件
  */
 function handleBloodFogEvent(world: World, event: BloodFogEvent): void {
-    const bloodKey = `blood_${event.level === 1 ? 'light' : event.level === 2 ? 'medium' : 'heavy'}`;
-    spawnParticle(world, bloodKey, event.pos.x, event.pos.y);
+    let bloodKey = ParticleId.BloodLight
+    if (event.level === 2){
+        bloodKey = ParticleId.BloodMedium
+    }else if(event.level === 3){
+        bloodKey = ParticleId.BloodHeavy
+    }
+    // console.log(`[EffectPlayer] bloodKey=${bloodKey}`)
+    spawnParticles(world, event.pos.x, event.pos.y, PARTICLE_EFFECTS[bloodKey]);
 }
 
 /**
  * 处理升级事件
  */
 function handleLevelUpEvent(world: World, event: LevelUpEvent): void {
-    // 获取玩家位置
-    const [transform] = getComponents(world, world.playerId, [Transform])
+    // // 获取玩家位置
+    // const [transform] = getComponents(world, world.playerId, [Transform])
 
-    if (transform) {
-        spawnParticle(world, 'levelup', transform.x, transform.y);
-    } else {
-        spawnParticle(world, 'levelup', world.width / 2, world.height - 100);
-    }
+    // if (transform) {
+    //     spawnParticle(world, 'levelup', transform.x, transform.y);
+    // } else {
+    //     spawnParticle(world, 'levelup', world.width / 2, world.height - 100);
+    // }
 
-    // 触发震屏（300毫秒）
-    triggerShake(world, 5, 300);
+    // // 触发震屏（300毫秒）
+    // triggerShake(world, 5, 300);
 }
 
 /**
  * 处理连击升级事件
  */
 function handleComboUpgradeEvent(world: World, event: ComboUpgradeEvent): void {
-    // 生成连击升级特效
-    spawnParticle(world, 'combo_upgrade', event.pos.x, event.pos.y);
+    // // 生成连击升级特效
+    // spawnParticle(world, 'combo_upgrade', event.pos.x, event.pos.y);
 
-    // 添加冲击波
-    spawnShockwave(world, event.pos.x, event.pos.y, event.color, 200, 8);
+    // // 添加冲击波
+    // spawnShockwave(world, event.pos.x, event.pos.y, event.color, 200, 8);
 }
 
 /**
  * 处理狂暴模式事件
  */
 function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
-    // 生成狂暴模式特效
-    spawnParticle(world, 'berserk', event.pos.x, event.pos.y);
+    // // 生成狂暴模式特效
+    // spawnParticle(world, 'berserk', event.pos.x, event.pos.y);
 
-    // 触发强烈震屏（800毫秒）
-    triggerShake(world, 15, 800);
+    // // 触发强烈震屏（800毫秒）
+    // triggerShake(world, 15, 800);
 }
 
 /**
  * 处理炸弹爆炸事件
  */
 function handleBombExplodedEvent(world: World, event: BombExplodedEvent): void {
-    // 生成全屏闪光特效
-    spawnParticle(world, 'screen_flash', world.width / 2, world.height / 2);
+    // // 生成全屏闪光特效
+    // spawnParticle(world, 'screen_flash', world.width / 2, world.height / 2);
 
-    // 在爆炸位置生成超大型爆炸粒子
-    spawnParticle(world, 'bomb_explosion', event.pos.x, event.pos.y);
+    // // 在爆炸位置生成超大型爆炸粒子
+    // spawnParticle(world, 'bomb_explosion', event.pos.x, event.pos.y);
 
-    // 在屏幕四周生成额外的爆炸装饰
-    const margin = 100;
-    spawnParticle(world, 'explosion_large', margin, margin);
-    spawnParticle(world, 'explosion_large', world.width - margin, margin);
-    spawnParticle(world, 'explosion_large', margin, world.height - margin);
-    spawnParticle(world, 'explosion_large', world.width - margin, world.height - margin);
+    // // 在屏幕四周生成额外的爆炸装饰
+    // const margin = 100;
+    // spawnParticle(world, 'explosion_large', margin, margin);
+    // spawnParticle(world, 'explosion_large', world.width - margin, margin);
+    // spawnParticle(world, 'explosion_large', margin, world.height - margin);
+    // spawnParticle(world, 'explosion_large', world.width - margin, world.height - margin);
 }
 
-/**
- * 生成粒子实体
- */
-function spawnParticle(world: World, effectKey: string, x: number, y: number): number {
-    const config = PARTICLE_EFFECTS[effectKey];
-    if (!config) {
-        console.warn(`EffectPlayer: No config found for effect '${effectKey}'`);
-        return 0;
-    }
+// /**
+//  * 生成粒子实体
+//  */
+// function spawnParticle(world: World, effectKey: string, x: number, y: number): number {
+//     const config = PARTICLE_EFFECTS[effectKey];
+//     if (!config) {
+//         console.warn(`EffectPlayer: No config found for effect '${effectKey}'`);
+//         return 0;
+//     }
 
-    // 创建粒子动画蓝图
-    const particleBlueprint: Blueprint = {
-        Transform: { x: 0, y: 0, rot: 0 },  // 位置通过参数传入
-        Particle: {
-            frame: 0,
-            maxFrame: config.frames,
-            fps: config.fps,
-            color: config.color,  // 存储颜色用于渲染
-            scale: config.scale   // 存储缩放用于大小
-        },
-        Lifetime: {
-            timer: config.lifetime  // lifetime 已经是毫秒，直接使用
-        }
-    };
+//     // 创建粒子动画蓝图
+//     const particleBlueprint: Blueprint = {
+//         Transform: { x: 0, y: 0, rot: 0 },  // 位置通过参数传入
+//         Particle: {
+//             frame: 0,
+//             maxFrame: config.frames,
+//             fps: config.fps,
+//             color: config.color,  // 存储颜色用于渲染
+//             scale: config.scale   // 存储缩放用于大小
+//         },
+//         Lifetime: {
+//             timer: config.lifetime  // lifetime 已经是毫秒，直接使用
+//         }
+//     };
 
-    // 关键修复：x, y 必须作为参数传入
-    const id = spawnFromBlueprint(world, particleBlueprint, x, y, 0);
+//     // 关键修复：x, y 必须作为参数传入
+//     const id = spawnFromBlueprint(world, particleBlueprint, x, y, 0);
 
-    return id;
-}
+//     return id;
+// }
 
 /**
  * 更新粒子动画帧
@@ -299,5 +298,5 @@ function handleWeaponEffectEvent(world: World, event: WeaponEffectEvent): void {
             return;
     }
 
-    spawnParticle(world, effectKey, event.pos.x, event.pos.y);
+    // spawnParticle(world, effectKey, event.pos.x, event.pos.y);
 }

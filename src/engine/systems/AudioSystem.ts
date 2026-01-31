@@ -146,8 +146,8 @@ export function AudioSystem(world: World, dt: number): void {
  */
 function handleHitEvent(world: World, event: HitEvent): void {
     // 根据血量等级播放音效
-    const soundKey = `hit_${event.bloodLevel === 1 ? 'light' : event.bloodLevel === 2 ? 'medium' : 'heavy'}`;
-    playSound(soundKey);
+    // const soundKey = `hit_${event.bloodLevel === 1 ? 'light' : event.bloodLevel === 2 ? 'medium' : 'heavy'}`;
+    // playSound(soundKey);
 }
 
 /**

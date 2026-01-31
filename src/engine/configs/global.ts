@@ -12,5 +12,9 @@ export const PHYSICS = {
     PLAYER_SPEED: 300,
 };
 
+
+// 跟敌人的碰撞伤害
+export const COLLISION_DAMAGE = 10;
+
 // 资源路径根目录
 export const BASE_ASSET_PATH = './assets/sprites/';

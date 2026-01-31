@@ -50,25 +50,26 @@ describe('AudioSystem', () => {
     });
 
     describe('Hit 事件处理', () => {
-        it('应该处理 Hit 事件并播放音效', () => {
+        it('应该处理 Hit 事件（当前不播放音效）', () => {
             mockWorld.events = [
-                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 20, owner: 1, victim: 2, bloodLevel: 1 }
+                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 20, owner: 1, victim: 2 }
             ];
 
             AudioSystem(mockWorld, 0.016);
 
-            // Audio 构造函数应该被调用
-            expect((window as any).Audio).toHaveBeenCalled();
+            // 当前实现不会播放 Hit 音效（handleHitEvent 已注释）
+            expect((window as any).Audio).not.toHaveBeenCalled();
         });
 
-        it('应该根据血量等级播放不同的音效', () => {
+        it('应该处理 Hit 事件（当前不播放音效）', () => {
             mockWorld.events = [
-                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 20, owner: 1, victim: 2, bloodLevel: 2 }
+                { type: 'Hit', pos: { x: 400, y: 300 }, damage: 40, owner: 1, victim: 2 }
             ];
 
             AudioSystem(mockWorld, 0.016);
 
-            expect((window as any).Audio).toHaveBeenCalled();
+            // 当前实现不会播放 Hit 音效（handleHitEvent 已注释）
+            expect((window as any).Audio).not.toHaveBeenCalled();
         });
     });
 

@@ -476,17 +476,13 @@ function handleBulletHit(
     const victimTransform = victimComps.find(Transform.check) as Transform;
     if (!victimTransform) return;
 
-    // 确定飙血等级
-    const bloodLevel: 1 | 2 | 3 = damage > 30 ? 3 : damage > 15 ? 2 : 1;
-
-    // 生成 HitEvent
+    // 生成 HitEvent（bloodLevel 由 DamageResolutionSystem 根据伤害值计算）
     const hitEvent: HitEvent = {
         type: 'Hit',
         pos: { x: victimTransform.x, y: victimTransform.y },
         damage,
         owner: attackerId,
-        victim: victimId,
-        bloodLevel
+        victim: victimId
     };
     pushEvent(world, hitEvent);
 
@@ -564,14 +560,13 @@ function handlePlayerHitEnemy(
     const enemyTransform = enemyComps.find(Transform.check);
     if (!enemyTransform) return;
 
-    // 生成 HitEvent（玩家受到冲撞伤害）
+    // 生成 HitEvent（玩家受到冲撞伤害，bloodLevel 由 DamageResolutionSystem 根据伤害值计算）
     const hitEvent: HitEvent = {
         type: 'Hit',
         pos: { x: enemyTransform.x, y: enemyTransform.y },
         damage: 20, // FIXME: 冲撞伤害值可配置
         owner: enemyId,
-        victim: playerId,
-        bloodLevel: 2
+        victim: playerId
     };
     pushEvent(world, hitEvent);
 
@@ -581,8 +576,7 @@ function handlePlayerHitEnemy(
         pos: { x: enemyTransform.x, y: enemyTransform.y },
         damage: 10, // FIXME: 冲撞伤害值可配置
         owner: playerId,
-        victim: enemyId,
-        bloodLevel: 1
+        victim: enemyId
     };
     pushEvent(world, enemyHitEvent);
 }

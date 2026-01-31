@@ -48,8 +48,8 @@ export * from './CameraSystem';
 export {
     VisualEffectSystem,
     spawnParticles,
-    spawnTimeSlowLines,
-    clearTimeSlowLines,
+    spawnLines as spawnTimeSlowLines,
+    clearLines as clearTimeSlowLines,
     spawnCircle
 } from './VisualEffectSystem';
 export { EffectPlayer, updateParticles } from './EffectPlayer';

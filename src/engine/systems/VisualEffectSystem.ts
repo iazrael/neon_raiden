@@ -15,6 +15,7 @@
 
 import { World, view } from '../world';
 import { VisualEffect, VisualParticle, VisualLine, VisualCircle } from '../components/visual';
+import { ParticleEffectConfig } from '../blueprints/effects';
 
 // ========== 创建 API ==========
 
@@ -30,23 +31,15 @@ export function spawnParticles(
     world: World,
     x: number,
     y: number,
-    count: number,
-    config: {
-        speedMin?: number;
-        speedMax?: number;
-        life: number;
-        color: string;
-        sizeMin?: number;
-        sizeMax?: number;
-    }
+    config: ParticleEffectConfig
 ): void {
     for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < config.count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speedMin = config.speedMin ?? 100;
-            const speedMax = config.speedMax ?? 300;
+            const speedMin = config.speedMin;
+            const speedMax = config.speedMax;
             const speed = speedMin + Math.random() * (speedMax - speedMin);
-
+            const size = config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin);
             effect.particles.push({
                 x,
                 y,
@@ -55,7 +48,7 @@ export function spawnParticles(
                 life: config.life,
                 maxLife: config.life,
                 color: config.color,
-                size: (config.sizeMin ?? 2) + Math.random() * ((config.sizeMax ?? 5) - (config.sizeMin ?? 2)),
+                size: size,
             });
         }
         return;
@@ -68,7 +61,7 @@ export function spawnParticles(
  * @param width 画布宽度
  * @param maxHeight 最大数量
  */
-export function spawnTimeSlowLines(world: World, width: number, maxHeight: number = 20): void {
+export function spawnLines(world: World, width: number, maxHeight: number = 20): void {
     for (const [_id, [effect]] of view(world, [VisualEffect])) {
         // 补充到最大数量
         while (effect.lines.length < maxHeight) {
@@ -76,7 +69,7 @@ export function spawnTimeSlowLines(world: World, width: number, maxHeight: numbe
                 x: Math.random() * width,
                 y: -50,
                 length: Math.random() * 100 + 50,
-                speed: Math.random() * 200 + 100,
+                speed: Math.random() * 5 + 2,
                 alpha: Math.random() * 0.5 + 0.2,
             });
         }
@@ -88,7 +81,7 @@ export function spawnTimeSlowLines(world: World, width: number, maxHeight: numbe
  * 清空时间减速线条
  * @param world 世界对象
  */
-export function clearTimeSlowLines(world: World): void {
+export function clearLines(world: World): void {
     for (const [_id, [effect]] of view(world, [VisualEffect])) {
         effect.lines = [];
     }
@@ -131,14 +124,14 @@ export function spawnCircle(
  * 更新粒子位置和生命周期
  */
 function updateParticles(particles: VisualParticle[], dt: number): void {
-    const dtSeconds = dt / 1000;
+    const timeScale = dt / (1000 / 60); // 60 fps
 
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
 
         // 更新位置
-        p.x += p.vx * dtSeconds;
-        p.y += p.vy * dtSeconds;
+        p.x += p.vx * timeScale;
+        p.y += p.vy * timeScale;
 
         // 更新生命周期
         p.life -= dt;
@@ -153,14 +146,14 @@ function updateParticles(particles: VisualParticle[], dt: number): void {
 /**
  * 更新线条位置
  */
-function updateLines(lines: VisualLine[], height: number): void {
-    const dtSeconds = 1 / 60; // 假设 60fps
+function updateLines(lines: VisualLine[], height: number, dt: number): void {
+    const timeScale = dt / (1000 / 60); // 60 fps
 
     for (let i = lines.length - 1; i >= 0; i--) {
         const line = lines[i];
 
         // 更新位置
-        line.y += line.speed * dtSeconds;
+        line.y += line.speed * timeScale;
 
         // 清理超出屏幕的线条
         if (line.y > height + 100) {
@@ -173,7 +166,7 @@ function updateLines(lines: VisualLine[], height: number): void {
  * 更新圆环动画
  */
 function updateCircles(circles: VisualCircle[], dt: number): void {
-    const timeScale = dt / 16.66;
+    const timeScale = dt / (1000 / 60); // 60 fps
 
     for (let i = circles.length - 1; i >= 0; i--) {
         const circle = circles[i];
@@ -205,7 +198,7 @@ export function VisualEffectSystem(world: World, dt: number): void {
 
         // 更新线条
         if (effect.lines.length > 0) {
-            updateLines(effect.lines, height);
+            updateLines(effect.lines, height, dt);
         }
 
         // 更新圆环

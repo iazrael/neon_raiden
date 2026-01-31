@@ -18,6 +18,14 @@ import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, Bomb
 import { removeComponent, view, getEvents, World } from '../world';
 
 /**
+ * 飙血等级阈值配置
+ */
+const BLOOD_LEVEL_THRESHOLDS = {
+    HEAVY: 30,   // >30 为重击
+    MEDIUM: 15,  // >15 为中击
+} as const;
+
+/**
  * 伤害结算系统主函数
  * @param world 世界对象
  * @param dt 时间增量（毫秒）
@@ -76,20 +84,25 @@ function applyDamage(world: World, event: HitEvent): void {
     if (remainingDamage > 0) {
         health.hp -= remainingDamage;
 
+        // 根据伤害值计算飙血等级
+        const bloodLevel: 1 | 2 | 3 = remainingDamage > BLOOD_LEVEL_THRESHOLDS.HEAVY ? 3
+            : remainingDamage > BLOOD_LEVEL_THRESHOLDS.MEDIUM ? 2
+            : 1;
+
         // 生成飙血特效事件
         const bloodFogEvent: BloodFogEvent = {
             type: 'BloodFog',
             pos: event.pos,
-            level: event.bloodLevel,
+            level: bloodLevel,
             duration: 300
         };
         world.events.push(bloodFogEvent);
 
         // 生成相机震动事件（根据伤害等级）
-        if (event.bloodLevel >= 2) {
+        if (bloodLevel >= 2) {
             const shakeEvent: CamShakeEvent = {
                 type: 'CamShake',
-                intensity: event.bloodLevel * 3,
+                intensity: bloodLevel * 3,
                 duration: 200
             };
             world.events.push(shakeEvent);
@@ -197,8 +210,7 @@ function handleBombExplosion(world: World, event: BombExplodedEvent): void {
             pos: { x: 0, y: 0 },
             damage: maxHp * 2,  // 造成200%最大生命值的伤害，确保击杀
             owner: event.playerId,
-            victim: enemyId,
-            bloodLevel: 3  // 最大飙血等级
+            victim: enemyId
         };
         world.events.push(hitEvent);
     }

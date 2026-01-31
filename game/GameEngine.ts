@@ -301,6 +301,7 @@ export class GameEngine {
 
             this.enemyBullets = [];
             this.enemies.forEach(e => {
+                // 炸弹释放时：对所有敌人造成伤害并显示爆炸效果
                 this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.color);
                 e.hp -= PowerupEffects.bombDamage;
                 if (e.hp <= 0) {
@@ -695,6 +696,7 @@ export class GameEngine {
                 this.difficultySys.recordPlayerDefeatedByBoss(this.level);
             }
 
+            // 玩家死亡时：显示玩家战机爆炸效果
             this.createExplosion(this.player.x, this.player.y, ExplosionSize.LARGE, '#00ffff');
             this.audio.playExplosion(ExplosionSize.LARGE);
             this.audio.playDefeat();
@@ -765,6 +767,7 @@ export class GameEngine {
                     b.lifetime -= dt;
                     if (b.lifetime <= 0) {
                         b.markedForDeletion = true;
+                        // 导弹生命周期结束时：显示导弹自毁爆炸效果
                         this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ca0ac7ff');
                     }
                 }
@@ -871,6 +874,7 @@ export class GameEngine {
         const by = this.boss.y;
         const bossLevel = this.level;
 
+        // Boss被击败时：在Boss位置显示中心爆炸效果
         this.createExplosion(bx, by, ExplosionSize.LARGE, '#ffffff');
         this.addShockwave(bx, by);
         this.screenShake = 30;
@@ -878,6 +882,7 @@ export class GameEngine {
         for (let i = 0; i < 15; i++) {
             setTimeout(() => {
                 if (this.state === GameState.VICTORY) return;
+                // Boss被击败时：连续显示多次随机位置的爆炸，制造壮观的爆炸连锁效果
                 this.createExplosion(bx + (Math.random() - 0.5) * 150, by + (Math.random() - 0.5) * 150, ExplosionSize.LARGE, '#fff');
             }, i * 100);
         }
@@ -998,6 +1003,7 @@ export class GameEngine {
             obstacles.forEach(obstacle => {
                 if (this.isColliding(b, obstacle)) {
                     b.markedForDeletion = true;
+                    // 玩家子弹与障碍物碰撞时：显示子弹撞击效果
                     this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#888888');
                     blockedByObstacle = true;
                 }
@@ -1031,6 +1037,7 @@ export class GameEngine {
                 obstacles.forEach(obstacle => {
                     if (this.isColliding(e, obstacle)) {
                         e.markedForDeletion = true;
+                        // 敌人子弹与障碍物碰撞时：显示子弹撞击效果
                         this.createExplosion(e.x, e.y, ExplosionSize.SMALL, '#888888');
                     }
                 });
@@ -1043,6 +1050,7 @@ export class GameEngine {
                 if (!this.player.invulnerable) {
                     this.takeDamage(10);
                 }
+                // 敌人/敌人子弹与玩家碰撞时：显示玩家受击爆炸效果
                 this.createExplosion(this.player.x, this.player.y, ExplosionSize.SMALL, '#00ffff');
             }
         });
@@ -1152,6 +1160,7 @@ export class GameEngine {
                     chainRange: level1.chainRange,
                     weaponType: WeaponType.TESLA
                 });
+                // 武器协同(LASER+TESLA)触发电链时：显示连锁闪电击中效果
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
             } else if (result.effect === SynergyEffectType.DAMAGE_BOOST) {
                 // WAVE+PLASMA or MISSILE+VULCAN: Apply damage multiplier
@@ -1161,6 +1170,7 @@ export class GameEngine {
             } else if (result.effect === SynergyEffectType.BURN) {
                 // MAGMA+SHURIKEN: Apply burn DOT (simplified: instant extra damage)
                 this.tagSys.setTag(target, 'burn_dot', 3000);
+                // 武器协同(MAGMA+SHURIKEN)触发燃烧时：显示火焰燃烧效果
                 this.createExplosion(target.x, target.y, ExplosionSize.SMALL, result.color);
             } else if (result.effect === SynergyEffectType.SHIELD_REGEN) {
                 const cap = this.getShieldCap();
@@ -1195,6 +1205,7 @@ export class GameEngine {
                 this.killEnemy(target);
             }
         } else if (b.type !== 'bullet' || b.weaponType !== WeaponType.PLASMA) {
+            // 子弹击中敌人时：显示普通击中火花效果（PLASMA除外，因为它有专门的爆炸效果）
             this.createExplosion(b.x, b.y, ExplosionSize.SMALL, '#ffe066');
         }
 
@@ -1283,6 +1294,7 @@ export class GameEngine {
         this.score += finalScore;
         this.onScoreChange(this.score);
         this.checkAndApplyLevelUp();
+        // 敌人被击败时：显示敌人死亡爆炸效果
         this.createExplosion(e.x, e.y, ExplosionSize.LARGE, e.type === 'enemy' ? '#c53030' : '#fff');
         this.audio.playExplosion(ExplosionSize.SMALL);
 
@@ -1311,6 +1323,7 @@ export class GameEngine {
     }
 
     createPlasmaExplosion(x: number, y: number) {
+        // 等离子弹爆炸时：显示等离子中心爆炸效果
         this.createExplosion(x, y, ExplosionSize.LARGE, '#ed64a6');
         this.addShockwave(x, y, '#ed64a6');
         this.screenShake = 15;
@@ -1353,6 +1366,7 @@ export class GameEngine {
                     weaponType: WeaponType.TESLA
                 });
             });
+            // 武器协同(TESLA+PLASMA)触发等离子风暴时：显示紫色连锁爆炸效果
             this.createExplosion(x, y, ExplosionSize.LARGE, '#a855f7');
         }
 
@@ -1552,9 +1566,15 @@ export class GameEngine {
         }
     }
 
-    addShockwave(x: number, y: number, color: string = '#ffffff', maxRadius: number = 150, width: number = 5) {
+    addShockwave(x: number, y: number, color: string = '#ffffff', maxRadius: number = 150, 
+        width: number = 5) {
         this.shockwaves.push({
-            x, y, radius: 10, maxRadius, color, life: 1.0, width
+            x, y, 
+            radius: 10, 
+            maxRadius, 
+            color, 
+            life: 1.0, 
+            width
         });
     }
 

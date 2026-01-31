@@ -79,11 +79,10 @@ interface BossInfo {
  */
 interface RenderQueue {
     sprites: RenderItem[];
-    particles: RenderItem[];
-    shockwaves: RenderItem[];
     playerEffect: PlayerEffectData | null;
     bossInfo: BossInfo | null;
     timeSlowActive: boolean;
+    visualEffect: VisualEffect;
 }
 
 /**
@@ -105,19 +104,28 @@ function determineLayer(comps: Component[]): number {
 function collectRenderItems(world: World): RenderQueue {
     const queue: RenderQueue = {
         sprites: [],
-        particles: [],
-        shockwaves: [],
         playerEffect: null,
         bossInfo: null,
         timeSlowActive: false,
+        visualEffect: null,
     };
 
     for (const [id, comps] of world.entities) {
-        const transform = comps.find(Transform.check) as Transform | undefined;
+        // 特效没有 transform
+        const visualEffect = comps.find(VisualEffect.check);
+        if (visualEffect) {
+            queue.visualEffect = visualEffect
+        }
+        // 时间减速状态
+        if (comps.some(TimeSlow.check)) {
+            queue.timeSlowActive = true;
+        }
+
+        const transform = comps.find(Transform.check);
         if (!transform) continue;
 
         // 精灵
-        const sprite = comps.find(Sprite.check) as Sprite | undefined;
+        const sprite = comps.find(Sprite.check);
         if (sprite) {
             queue.sprites.push({
                 type: 'sprite',
@@ -127,84 +135,29 @@ function collectRenderItems(world: World): RenderQueue {
             });
         }
 
-        // 粒子
-        const particle = comps.find(Particle.check) as Particle | undefined;
-        if (particle) {
-            queue.particles.push({
-                type: 'particle',
-                layer: 0,
-                transform,
-                particle,
-                lifetime: comps.find(Lifetime.check) as Lifetime | undefined,
-            });
-        }
-
-        // 冲击波
-        const shockwave = comps.find(Shockwave.check) as Shockwave | undefined;
-        if (shockwave) {
-            queue.shockwaves.push({
-                type: 'shockwave',
-                layer: 0,
-                transform,
-                shockwave,
-            });
-        }
-
         // 玩家特效
         if (id === world.playerId) {
-            const shield = comps.find(Shield.check) as Shield | undefined;
-            const invulnerable = comps.find(InvulnerableState.check) as InvulnerableState | undefined;
-            const health = comps.find(Health.check) as Health | undefined;
+            const shield = comps.find(Shield.check);
+            const invulnerable = comps.find(InvulnerableState.check);
+            const health = comps.find(Health.check);
             if (shield || invulnerable) {
                 queue.playerEffect = { transform, shield, invulnerable, health };
             }
         }
 
         // Boss 信息
-        const bossTag = comps.find(BossTag.check) as BossTag | undefined;
-        const health = comps.find(Health.check) as Health | undefined;
+        const bossTag = comps.find(BossTag.check);
+        const health = comps.find(Health.check);
         if (bossTag && health) {
             queue.bossInfo = { transform, health };
         }
 
-        // 时间减速状态
-        if (comps.some(TimeSlow.check)) {
-            queue.timeSlowActive = true;
-        }
+
     }
 
     return queue;
 }
 
-/**
- * 绘制时间减速特效
- */
-function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, world: World, width: number, height: number): void {
-    // 从 VisualEffect 组件获取线条
-    let lines: VisualLine[] = [];
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        lines = effect.lines;
-        break;
-    }
-
-    ctx.save();
-
-    // 蓝色色调覆盖
-    ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
-    ctx.fillRect(0, 0, width, height);
-
-    // 绘制线条
-    for (const line of lines) {
-        ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(line.x, line.y);
-        ctx.lineTo(line.x, line.y + line.length);
-        ctx.stroke();
-    }
-
-    ctx.restore();
-}
 
 /**
  * 绘制背景星空效果
@@ -291,67 +244,67 @@ function drawSprite(
     ctx.restore();
 }
 
-/**
- * 绘制粒子
- */
-function drawParticle(
-    ctx: CanvasRenderingContext2D,
-    item: RenderItem,
-    camX: number,
-    camY: number
-): void {
-    const { transform, particle, lifetime } = item;
-    if (!particle) return;
+// /**
+//  * 绘制粒子
+//  */
+// function drawParticle(
+//     ctx: CanvasRenderingContext2D,
+//     item: RenderItem,
+//     camX: number,
+//     camY: number
+// ): void {
+//     const { transform, particle, lifetime } = item;
+//     if (!particle) return;
 
-    // 计算透明度 - 基于 Lifetime 衰减
-    let alpha = 1;
-    if (lifetime) {
-        const maxLife = particle.maxLife > 0
-            ? particle.maxLife
-            : particle.maxFrame * 16.66;
-        alpha = Math.max(0, Math.min(1, lifetime.timer / maxLife));
-    }
+//     // 计算透明度 - 基于 Lifetime 衰减
+//     let alpha = 1;
+//     if (lifetime) {
+//         const maxLife = particle.maxLife > 0
+//             ? particle.maxLife
+//             : particle.maxFrame * 16.66;
+//         alpha = Math.max(0, Math.min(1, lifetime.timer / maxLife));
+//     }
 
-    const size = particle.scale;
+//     const size = particle.scale;
 
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = particle.color;
-    ctx.beginPath();
-    ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-}
+//     ctx.save();
+//     ctx.globalAlpha = alpha;
+//     ctx.fillStyle = particle.color;
+//     ctx.beginPath();
+//     ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
+//     ctx.fill();
+//     ctx.restore();
+// }
 
-/**
- * 绘制冲击波
- */
-function drawShockwave(
-    ctx: CanvasRenderingContext2D,
-    item: RenderItem,
-    camX: number,
-    camY: number,
-    dt: number
-): void {
-    const { transform, shockwave } = item;
-    if (!shockwave) return;
+// /**
+//  * 绘制冲击波
+//  */
+// function drawShockwave(
+//     ctx: CanvasRenderingContext2D,
+//     item: RenderItem,
+//     camX: number,
+//     camY: number,
+//     dt: number
+// ): void {
+//     const { transform, shockwave } = item;
+//     if (!shockwave) return;
 
-    // 更新冲击波动画
-    const timeScale = dt / 16.66;
-    shockwave.radius += (shockwave.maxRadius - shockwave.radius) * 0.1 * timeScale;
-    shockwave.life -= 0.02 * timeScale;
+//     // 更新冲击波动画
+//     const timeScale = dt / 16.66;
+//     shockwave.radius += (shockwave.maxRadius - shockwave.radius) * 0.1 * timeScale;
+//     shockwave.life -= 0.02 * timeScale;
 
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, shockwave.life);
-    ctx.shadowColor = shockwave.color;
-    ctx.shadowBlur = 15;
-    ctx.lineWidth = shockwave.width;
-    ctx.strokeStyle = shockwave.color;
-    ctx.beginPath();
-    ctx.arc(transform.x - camX, transform.y - camY, shockwave.radius, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-}
+//     ctx.save();
+//     ctx.globalAlpha = Math.max(0, shockwave.life);
+//     ctx.shadowColor = shockwave.color;
+//     ctx.shadowBlur = 15;
+//     ctx.lineWidth = shockwave.width;
+//     ctx.strokeStyle = shockwave.color;
+//     ctx.beginPath();
+//     ctx.arc(transform.x - camX, transform.y - camY, shockwave.radius, 0, Math.PI * 2);
+//     ctx.stroke();
+//     ctx.restore();
+// }
 
 /**
  * 绘制玩家特效（护盾、无敌状态）
@@ -463,24 +416,27 @@ function drawBossHealthBar(
  */
 function drawVisualEffectCircles(
     ctx: CanvasRenderingContext2D,
-    world: World,
+    effect: VisualEffect,
     camX: number,
     camY: number
 ): void {
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        for (const circle of effect.circles) {
-            ctx.save();
-            ctx.globalAlpha = Math.max(0, circle.life);
-            ctx.shadowColor = circle.color;
-            ctx.shadowBlur = 15;
-            ctx.lineWidth = circle.width;
-            ctx.strokeStyle = circle.color;
-            ctx.beginPath();
-            ctx.arc(circle.x - camX, circle.y - camY, circle.radius, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
-        }
+    if (!effect || effect.circles.length === 0) {
+        return
     }
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    // ctx.shadowBlur = 15;
+    for (const circle of effect?.circles) {
+        ctx.globalAlpha = Math.max(0, circle.life);
+        // ctx.shadowColor = circle.color;
+        // ctx.shadowBlur = 15;
+        ctx.lineWidth = circle.width;
+        ctx.strokeStyle = circle.color;
+        ctx.beginPath();
+        ctx.arc(circle.x - camX, circle.y - camY, circle.radius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    ctx.restore();
 }
 
 /**
@@ -488,23 +444,52 @@ function drawVisualEffectCircles(
  */
 function drawVisualEffectParticles(
     ctx: CanvasRenderingContext2D,
-    world: World,
+    effect: VisualEffect,
     camX: number,
     camY: number
 ): void {
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        for (const p of effect.particles) {
-            const alpha = Math.max(0, p.life / p.maxLife);
-
-            ctx.save();
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x - camX, p.y - camY, p.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
+    if (!effect || effect.particles.length === 0) {
+        return
     }
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const p of effect?.particles) {
+        const alpha = Math.max(0, p.life / p.maxLife);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x - camX, p.y - camY, p.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+
+/**
+ * 绘制时间减速特效
+ */
+function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, effect: VisualEffect, width: number, height: number): void {
+    // 从 VisualEffect 组件获取线条
+    if (!effect || effect.lines.length === 0) {
+        return
+    }
+    ctx.save();
+
+    // 蓝色色调覆盖
+    ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
+    ctx.fillRect(0, 0, width, height);
+
+    // 绘制线条
+    for (const line of effect.lines) {
+        ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(line.x, line.y);
+        ctx.lineTo(line.x, line.y + line.length);
+        ctx.stroke();
+    }
+
+    ctx.restore();
 }
 
 /**
@@ -515,7 +500,7 @@ export function RenderSystem(
     renderCtx: RenderContext,
     dt: number
 ): void {
-    const { canvas, context } = renderCtx;
+    const { canvas, context, width, height } = renderCtx;
     const { camera } = world.renderState;
 
     // 调试日志
@@ -527,12 +512,8 @@ export function RenderSystem(
     const queue = collectRenderItems(world);
 
     // 2. 绘制背景
-    drawBackground(context, canvas.width, canvas.height, queue.timeSlowActive);
+    drawBackground(context, width, height, queue.timeSlowActive);
 
-    // 绘制时间减速特效
-    if (queue.timeSlowActive) {
-        drawTimeSlowEffect(context, world, canvas.width, canvas.height);
-    }
 
     // 计算相机偏移
     const camX = camera.shakeX;
@@ -550,25 +531,19 @@ export function RenderSystem(
     }
 
     // 6. 绘制粒子
-    context.globalCompositeOperation = 'lighter';
     // 6.1 绘制 VisualEffect 粒子（爆炸火花等）
-    drawVisualEffectParticles(context, world, camX, camY);
-    // 6.2 绘制旧版粒子（帧动画粒子，保留兼容性）
-    for (const item of queue.particles) {
-        drawParticle(context, item, camX, camY);
-    }
-    context.globalCompositeOperation = 'source-over';
+    drawVisualEffectParticles(context, queue.visualEffect, camX, camY);
 
     // 7. 绘制 VisualEffect 圆环（冲击波等）
-    drawVisualEffectCircles(context, world, camX, camY);
+    drawVisualEffectCircles(context, queue.visualEffect, camX, camY);
 
-    // 8. 绘制旧版冲击波（保留兼容性）
-    for (const item of queue.shockwaves) {
-        drawShockwave(context, item, camX, camY, dt);
+    // 绘制时间减速特效
+    if (queue.timeSlowActive) {
+        drawTimeSlowEffect(context, queue.visualEffect, width, height);
     }
 
     // 9. 绘制 Boss 血条
     if (queue.bossInfo) {
-        drawBossHealthBar(context, queue.bossInfo, canvas.width, canvas.height);
+        drawBossHealthBar(context, queue.bossInfo, width, height);
     }
 }

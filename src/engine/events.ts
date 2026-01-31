@@ -54,7 +54,6 @@ export interface HitEvent {
     damage: number;                // 本次伤害值
     owner: EntityId;               // 子弹/技能 owner
     victim: EntityId;              // 被击中实体
-    bloodLevel: 1 | 2 | 3;         // 飙血等级（轻/中/重）
 }
 
 // ② 击杀（HP ≤ 0）

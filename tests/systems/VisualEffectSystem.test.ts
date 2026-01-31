@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createWorld, generateId, World, addComponent } from '../../src/engine/world';
-import { VisualEffectSystem, spawnParticles, spawnTimeSlowLines, clearTimeSlowLines, spawnCircle } from '../../src/engine/systems/VisualEffectSystem';
+import { VisualEffectSystem, spawnParticles, spawnLines, clearLines, spawnCircle } from '../../src/engine/systems/VisualEffectSystem';
 import { VisualEffect } from '../../src/engine/components/visual';
 
 describe('VisualEffectSystem', () => {
@@ -25,7 +25,12 @@ describe('VisualEffectSystem', () => {
 
     describe('spawnParticles API', () => {
         it('应该创建正确数量的粒子', () => {
-            spawnParticles(world, 100, 200, 10, {
+            spawnParticles(world, 100, 200, {
+                count: 10,
+                speedMin: 0,
+                speedMax: 0,
+                sizeMin: 2,
+                sizeMax: 2,
                 life: 1000,
                 color: '#ff0000',
             });
@@ -34,7 +39,12 @@ describe('VisualEffectSystem', () => {
         });
 
         it('应该正确设置粒子初始位置', () => {
-            spawnParticles(world, 100, 200, 5, {
+            spawnParticles(world, 100, 200, {
+                count: 5,
+                speedMin: 0,
+                speedMax: 0,
+                sizeMin: 2,
+                sizeMax: 2,
                 life: 1000,
                 color: '#ff0000',
             });
@@ -46,26 +56,26 @@ describe('VisualEffectSystem', () => {
         });
     });
 
-    describe('spawnTimeSlowLines API', () => {
+    describe('spawnLines API', () => {
         it('应该补充到指定数量的线条', () => {
-            spawnTimeSlowLines(world, 800, 20);
+            spawnLines(world, 800, 20);
 
             expect(visualEffect.lines.length).toBe(20);
         });
 
         it('多次调用应该维持最大数量', () => {
-            spawnTimeSlowLines(world, 800, 10);
+            spawnLines(world, 800, 10);
             expect(visualEffect.lines.length).toBe(10);
 
-            spawnTimeSlowLines(world, 800, 10);
+            spawnLines(world, 800, 10);
             expect(visualEffect.lines.length).toBe(10); // 不会重复添加
         });
 
-        it('clearTimeSlowLines 应该清空所有线条', () => {
-            spawnTimeSlowLines(world, 800, 20);
+        it('clearLines 应该清空所有线条', () => {
+            spawnLines(world, 800, 20);
             expect(visualEffect.lines.length).toBe(20);
 
-            clearTimeSlowLines(world);
+            clearLines(world);
             expect(visualEffect.lines.length).toBe(0);
         });
     });
@@ -93,9 +103,12 @@ describe('VisualEffectSystem', () => {
 
     describe('粒子更新', () => {
         it('应该更新粒子位置', () => {
-            spawnParticles(world, 100, 200, 1, {
+            spawnParticles(world, 100, 200, {
+                count: 1,
                 speedMin: 50,
                 speedMax: 50,
+                sizeMin: 2,
+                sizeMax: 2,
                 life: 1000,
                 color: '#ff0000',
             });
@@ -107,7 +120,12 @@ describe('VisualEffectSystem', () => {
         });
 
         it('应该减少粒子生命周期', () => {
-            spawnParticles(world, 0, 0, 1, {
+            spawnParticles(world, 0, 0, {
+                count: 1,
+                speedMin: 0,
+                speedMax: 0,
+                sizeMin: 2,
+                sizeMax: 2,
                 life: 500,
                 color: '#ff0000',
             });
@@ -118,7 +136,12 @@ describe('VisualEffectSystem', () => {
         });
 
         it('应该清理过期的粒子', () => {
-            spawnParticles(world, 0, 0, 1, {
+            spawnParticles(world, 0, 0, {
+                count: 1,
+                speedMin: 0,
+                speedMax: 0,
+                sizeMin: 2,
+                sizeMax: 2,
                 life: 50,
                 color: '#ff0000',
             });
@@ -131,7 +154,7 @@ describe('VisualEffectSystem', () => {
 
     describe('线条更新', () => {
         it('应该更新线条位置', () => {
-            spawnTimeSlowLines(world, 800, 1);
+            spawnLines(world, 800, 1);
             const initialY = visualEffect.lines[0].y;
 
             VisualEffectSystem(world, 16);
@@ -140,7 +163,7 @@ describe('VisualEffectSystem', () => {
         });
 
         it('应该清理超出屏幕的线条', () => {
-            spawnTimeSlowLines(world, 800, 1);
+            spawnLines(world, 800, 1);
             visualEffect.lines[0].y = 700; // 超出 height (600) + 100
 
             VisualEffectSystem(world, 16);
@@ -186,8 +209,16 @@ describe('VisualEffectSystem', () => {
         it('没有 VisualEffect 实体不应该崩溃', () => {
             world.entities.clear();
             expect(() => VisualEffectSystem(world, 16)).not.toThrow();
-            expect(() => spawnParticles(world, 0, 0, 1, { life: 100, color: '#fff' })).not.toThrow();
-            expect(() => spawnTimeSlowLines(world, 800)).not.toThrow();
+            expect(() => spawnParticles(world, 0, 0, {
+                count: 1,
+                speedMin: 0,
+                speedMax: 0,
+                sizeMin: 2,
+                sizeMax: 2,
+                life: 100,
+                color: '#fff'
+            })).not.toThrow();
+            expect(() => spawnLines(world, 800)).not.toThrow();
             expect(() => spawnCircle(world, 0, 0)).not.toThrow();
         });
     });

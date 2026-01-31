@@ -517,7 +517,7 @@ describe('CollisionSystem', () => {
             });
         });
 
-        it('伤害值应该正确影响飙血等级', () => {
+        it('伤害值应该正确传递到 HitEvent（bloodLevel 由 DamageResolutionSystem 计算）', () => {
             const bulletId = generateId();
             const enemyId = generateId();
             const playerId = generateId();
@@ -539,14 +539,14 @@ describe('CollisionSystem', () => {
             CollisionSystem(world, 0.016);
 
             const hitEvents = world.events.filter(e => e.type === 'Hit');
-            expect(hitEvents[0].bloodLevel).toBe(3); // damage > 30
+            expect(hitEvents[0].damage).toBe(35); // 验证伤害值正确传递
         });
     });
 
     describe('清理事件队列', () => {
         it('每帧应该先清空上一帧的事件', () => {
             // 添加旧事件
-            world.events.push({ type: 'Hit', pos: { x: 0, y: 0 }, damage: 10, owner: 1, victim: 2, bloodLevel: 1 });
+            world.events.push({ type: 'Hit', pos: { x: 0, y: 0 }, damage: 10, owner: 1, victim: 2 });
 
             const bulletId = generateId();
             const enemyId = generateId();
