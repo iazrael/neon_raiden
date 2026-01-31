@@ -19,6 +19,7 @@ import {
     VisualParticle,
     VisualLine,
     VisualCircle,
+    VisualMeteor,
 } from "../components/visual";
 import { ParticleEffectConfig } from "../blueprints/effects";
 
@@ -133,6 +134,52 @@ export function spawnCircle(
     });
 }
 
+/**
+ * 生成流星
+ * @param world 世界对象
+ * @param width 画布宽度
+ * @param height 画布高度
+ * @param dt 距离上次调用的时间（毫秒）
+ * @param timer 累积计时器（引用传递）
+ */
+export function spawnMeteor(
+    world: World,
+    width: number,
+    height: number,
+    dt: number,
+    timer: { value: number },
+): void {
+    // 累加计时器
+    timer.value += dt;
+
+    // 每 200ms 检查一次
+    const SPAWN_INTERVAL = 200;
+    if (timer.value < SPAWN_INTERVAL) {
+        return;
+    }
+    timer.value = 0;
+
+    // 10% 概率生成
+    const SPAWN_CHANCE = 0.1;
+    if (Math.random() >= SPAWN_CHANCE) {
+        return;
+    }
+
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    if (!effect) {
+        return;
+    }
+
+    // 生成流星（复用老系统参数）
+    effect.meteors.push({
+        x: Math.random() * width,
+        y: -100,
+        length: Math.random() * 50 + 20,  // 20-70
+        vx: (Math.random() - 0.5) * 5,    // -2.5 到 2.5
+        vy: Math.random() * 10 + 10,      // 10-20
+    });
+}
+
 // ========== 更新逻辑 ==========
 
 /**
@@ -200,9 +247,35 @@ function updateCircles(circles: VisualCircle[], dt: number): void {
 }
 
 /**
+ * 更新流星位置
+ */
+function updateMeteors(
+    meteors: VisualMeteor[],
+    width: number,
+    height: number,
+    dt: number,
+): void {
+    const timeScale = dt / (1000 / 60); // 60 fps
+
+    for (let i = meteors.length - 1; i >= 0; i--) {
+        const m = meteors[i];
+
+        // 更新位置
+        m.x += m.vx * timeScale;
+        m.y += m.vy * timeScale;
+
+        // 清理超出屏幕的流星
+        if (m.y > height + 100 || m.x < -100 || m.x > width + 100) {
+            meteors.splice(i, 1);
+        }
+    }
+}
+
+/**
  * 视觉特效系统主函数
  */
 export function VisualEffectSystem(world: World, dt: number): void {
+    const width = world.width;
     const height = world.height;
     const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
     if (!effect) {
@@ -221,5 +294,10 @@ export function VisualEffectSystem(world: World, dt: number): void {
     // 更新圆环
     if (effect.circles.length > 0) {
         updateCircles(effect.circles, dt);
+    }
+
+    // 更新流星
+    if (effect.meteors.length > 0) {
+        updateMeteors(effect.meteors, width, height, dt);
     }
 }
