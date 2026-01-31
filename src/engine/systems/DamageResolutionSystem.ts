@@ -12,17 +12,31 @@
  * 执行顺序：P5 - 在 CollisionSystem 之后
  */
 
-import { EntityId } from '../types';
-import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from '../components';
-import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, BombExplodedEvent, EventTags } from '../events';
-import { removeComponent, view, getEvents, World } from '../world';
+import { EntityId } from "../types";
+import {
+    Health,
+    Shield,
+    DamageOverTime,
+    DestroyTag,
+    ScoreValue,
+    Transform,
+} from "../components";
+import {
+    HitEvent,
+    KillEvent,
+    BloodFogEvent,
+    CamShakeEvent,
+    PlaySoundEvent,
+    EventTags,
+} from "../events";
+import { removeComponent, view, getEvents, World } from "../world";
 
 /**
  * 飙血等级阈值配置
  */
 const BLOOD_LEVEL_THRESHOLDS = {
-    HEAVY: 30,   // >30 为重击
-    MEDIUM: 15,  // >15 为中击
+    HEAVY: 30, // >30 为重击
+    MEDIUM: 15, // >15 为中击
 } as const;
 
 /**
@@ -40,12 +54,7 @@ export function DamageResolutionSystem(world: World, dt: number): void {
 
     // 处理持续伤害 (DOT)
     processDamageOverTime(world, dt);
-
-    // 处理炸弹爆炸事件
-    const bombEvents = getEvents<BombExplodedEvent>(world, EventTags.BombExploded);
-    for (const event of bombEvents) {
-        handleBombExplosion(world, event);
-    }
+    
 }
 
 /**
@@ -85,33 +94,36 @@ function applyDamage(world: World, event: HitEvent): void {
         health.hp -= remainingDamage;
 
         // 根据伤害值计算飙血等级
-        const bloodLevel: 1 | 2 | 3 = remainingDamage > BLOOD_LEVEL_THRESHOLDS.HEAVY ? 3
-            : remainingDamage > BLOOD_LEVEL_THRESHOLDS.MEDIUM ? 2
-            : 1;
+        const bloodLevel: 1 | 2 | 3 =
+            remainingDamage > BLOOD_LEVEL_THRESHOLDS.HEAVY
+                ? 3
+                : remainingDamage > BLOOD_LEVEL_THRESHOLDS.MEDIUM
+                  ? 2
+                  : 1;
 
         // 生成飙血特效事件
         const bloodFogEvent: BloodFogEvent = {
-            type: 'BloodFog',
+            type: "BloodFog",
             pos: event.pos,
             level: bloodLevel,
-            duration: 300
+            duration: 300,
         };
         world.events.push(bloodFogEvent);
 
         // 生成相机震动事件（根据伤害等级）
         if (bloodLevel >= 2) {
             const shakeEvent: CamShakeEvent = {
-                type: 'CamShake',
+                type: "CamShake",
                 intensity: bloodLevel * 3,
-                duration: 200
+                duration: 200,
             };
             world.events.push(shakeEvent);
         }
 
         // 生成音效事件
         const soundEvent: PlaySoundEvent = {
-            type: 'PlaySound',
-            name: 'hit'
+            type: "PlaySound",
+            name: "hit",
         };
         world.events.push(soundEvent);
     }
@@ -135,11 +147,14 @@ function processDamageOverTime(world: World, dt: number): void {
             const health = comps.find(Health.check);
 
             if (health && transform) {
-                health.hp -= dot.damagePerSecond * dot.interval / 1000;
+                health.hp -= (dot.damagePerSecond * dot.interval) / 1000;
 
                 // 检查死亡
                 if (health.hp <= 0) {
-                    handleDeath(world, id, 0, { x: transform.x, y: transform.y });
+                    handleDeath(world, id, 0, {
+                        x: transform.x,
+                        y: transform.y,
+                    });
                 }
             }
         }
@@ -153,7 +168,12 @@ function processDamageOverTime(world: World, dt: number): void {
 /**
  * 处理死亡
  */
-function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: { x: number; y: number }): void {
+function handleDeath(
+    world: World,
+    victimId: EntityId,
+    killerId: EntityId,
+    pos: { x: number; y: number },
+): void {
     const victimComps = world.entities.get(victimId);
     if (!victimComps) return;
 
@@ -163,55 +183,24 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
 
     // 生成 KillEvent
     const killEvent: KillEvent = {
-        type: 'Kill',
+        type: "Kill",
         pos,
         victim: victimId,
         killer: killerId,
-        score
+        score,
     };
     world.events.push(killEvent);
 
     // 播放死亡音效
     const soundEvent: PlaySoundEvent = {
-        type: 'PlaySound',
-        name: 'explosion'
+        type: "PlaySound",
+        name: "explosion",
     };
     world.events.push(soundEvent);
 
     // 添加销毁标记
     const hasDestroyTag = victimComps.some(DestroyTag.check);
     if (!hasDestroyTag) {
-        victimComps.push(new DestroyTag({ reason: 'killed' }));
-    }
-}
-
-/**
- * 处理炸弹爆炸 - 对所有敌人造成致命伤害
- */
-function handleBombExplosion(world: World, event: BombExplodedEvent): void {
-    // 遍历所有实体，找到敌人
-    for (const [enemyId, comps] of world.entities) {
-        // 检查是否是敌人（有 EnemyTag 组件）
-        const hasEnemyTag = comps.some(c =>
-            c.constructor.name === 'EnemyTag' ||
-            (c as any).id?.startsWith?.('ENEMY_')
-        );
-
-        if (!hasEnemyTag) continue;
-
-        // 获取敌人的生命值组件
-        const health = comps.find(Health.check);
-        if (!health) continue;
-
-        // 造成致命伤害（直接扣完所有血量）
-        const maxHp = health.max || 100;
-        const hitEvent: HitEvent = {
-            type: 'Hit',
-            pos: { x: 0, y: 0 },
-            damage: maxHp * 2,  // 造成200%最大生命值的伤害，确保击杀
-            owner: event.playerId,
-            victim: enemyId
-        };
-        world.events.push(hitEvent);
+        victimComps.push(new DestroyTag({ reason: "killed" }));
     }
 }

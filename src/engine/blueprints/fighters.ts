@@ -37,8 +37,8 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
     // Weapon: WEAPON_TABLE[WeaponId.SHURIKEN],
     Weapon: WEAPON_TABLE[WeaponId.VULCAN],
 
-    /** 炸弹组件 - 初始炸弹库存（0颗，最多9颗） */
-    Bomb: { count: 0, maxCount: 9 },
+    /** 炸弹组件 - 初始炸弹库存（3颗，最多9颗） */
+    Bomb: { count: 3, maxCount: 9 },
 
     /** 僚机数量组件 - 初始僚机数量（0个，最多2个） */
     OptionCount: { count: 0, maxCount: 2 },

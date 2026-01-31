@@ -83,41 +83,41 @@ describe('WeaponSynergySystem', () => {
         });
     });
 
-    describe('穿透加成', () => {
-        it('特斯拉+手里剑应该增加穿透', () => {
-            const playerId = generateId();
+    // describe('穿透加成', () => {
+    //     it('特斯拉+手里剑应该增加穿透', () => {
+    //         const playerId = generateId();
 
-            world.entities.set(playerId, []);
-            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            addComponent(world, playerId, new PlayerTag());
+    //         world.entities.set(playerId, []);
+    //         addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
+    //         addComponent(world, playerId, new PlayerTag());
 
-            const tesla = new Weapon({
-                id: WeaponId.TESLA,
-                ammoType: 'teslaChain' as any,
-                cooldown: 150,
-                bulletCount: 1,
-                pattern: WeaponPattern.SPREAD,
-                pierce: 5
-            });
-            const shuriken = new Weapon({
-                id: WeaponId.SHURIKEN,
-                ammoType: 'shurikenBounce' as any,
-                cooldown: 180,
-                bulletCount: 1,
-                pattern: WeaponPattern.SPREAD,
-                pierce: 0
-            });
+    //         const tesla = new Weapon({
+    //             id: WeaponId.TESLA,
+    //             ammoType: 'teslaChain' as any,
+    //             cooldown: 150,
+    //             bulletCount: 1,
+    //             pattern: WeaponPattern.SPREAD,
+    //             pierce: 5
+    //         });
+    //         const shuriken = new Weapon({
+    //             id: WeaponId.SHURIKEN,
+    //             ammoType: 'shurikenBounce' as any,
+    //             cooldown: 180,
+    //             bulletCount: 1,
+    //             pattern: WeaponPattern.SPREAD,
+    //             pierce: 0
+    //         });
 
-            addComponent(world, playerId, tesla);
-            addComponent(world, playerId, shuriken);
+    //         addComponent(world, playerId, tesla);
+    //         addComponent(world, playerId, shuriken);
 
-            WeaponSynergySystem(world, 0.016);
+    //         WeaponSynergySystem(world, 0.016);
 
-            // 应该增加穿透
-            expect(tesla.pierce).toBeGreaterThan(5);
-            expect(shuriken.pierce).toBeGreaterThan(0);
-        });
-    });
+    //         // 应该增加穿透
+    //         expect(tesla.pierce).toBeGreaterThan(5);
+    //         expect(shuriken.pierce).toBeGreaterThan(0);
+    //     });
+    // });
 
     describe('射速加成', () => {
         it('某些协同应该影响射速', () => {

@@ -17,7 +17,7 @@ export class InputManager {
 
     // 动作状态
     private _isFiring = false;
-    private _programmaticBomb = false;
+    private _isBombing = false;
 
     private canvas: HTMLCanvasElement | null = null;
 
@@ -98,7 +98,7 @@ export class InputManager {
         this.pointerDelta = { x: 0, y: 0 };
         this.isPointerDown = false;
         this._isFiring = false;
-        this._programmaticBomb = false;
+        this._isBombing = false;
     }
 
     // ========== 对外接口 (供 InputSystem 使用) ==========
@@ -131,23 +131,23 @@ export class InputManager {
      * @returns 键盘(B键)或程序(UI按钮)触发状态
      */
     public isBombing(): boolean {
-        return this.keys.has('KeyB') || this._programmaticBomb;
+        return this.keys.has('KeyB') || this._isBombing;
     }
 
     /**
      * 程序化触发炸弹 (供 UI 按钮调用)
      */
     public triggerBomb(): void {
-        this._programmaticBomb = true;
+        this._isBombing = true;
     }
 
     /**
      * 消费程序触发状态 (供 InputSystem 调用)
      * @returns 是否成功消费
      */
-    public consumeProgrammaticBomb(): boolean {
-        if (this._programmaticBomb) {
-            this._programmaticBomb = false;
+    public consumeBomb(): boolean {
+        if (this._isBombing) {
+            this._isBombing = false;
             return true;
         }
         return false;

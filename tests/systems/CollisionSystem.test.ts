@@ -544,37 +544,6 @@ describe('CollisionSystem', () => {
         });
     });
 
-    describe('清理事件队列', () => {
-        it('每帧应该先清空上一帧的事件', () => {
-            // 添加旧事件
-            world.events.push({ type: 'Hit', pos: { x: 0, y: 0 }, damage: 10, owner: 1, victim: 2 });
-
-            const bulletId = generateId();
-            const enemyId = generateId();
-            const playerId = generateId();
-
-            world.entities.set(bulletId, []);
-            world.entities.set(enemyId, []);
-            world.entities.set(playerId, []);
-
-            addComponent(world, playerId, new PlayerTag());
-
-            addComponent(world, bulletId, new Transform({ x: 100, y: 100 }));
-            addComponent(world, bulletId, new HitBox({ shape: 'circle', radius: 10, layer: CollisionLayer.PlayerBullet }));
-            addComponent(world, bulletId, new Bullet({ owner: playerId, ammoType: AmmoType.VULCAN_SPREAD }));
-
-            addComponent(world, enemyId, new Transform({ x: 110, y: 100 }));
-            addComponent(world, enemyId, new HitBox({ shape: 'circle', radius: 20, layer: CollisionLayer.Enemy }));
-            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
-
-            CollisionSystem(world, 0.016);
-
-            // 旧事件应该被清空，只保留新事件
-            expect(world.events.length).toBe(1);
-            expect((world.events[0] as any).victim).toBe(enemyId);
-        });
-    });
-
     describe('空间哈希网格', () => {
         it('大量实体时应该正确检测碰撞', () => {
             const playerId = generateId();

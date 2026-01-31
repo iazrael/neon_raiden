@@ -110,7 +110,7 @@ export function InputSystem(world: World, dt: number) {
             playerComps.push(new BombIntent());
         }
         // 消费程序触发状态，防止重复触发
-        inputManager.consumeProgrammaticBomb();
+        inputManager.consumeBomb();
     } else {
         if (existingBomb) removeComponent(world, world.playerId, existingBomb);
     }

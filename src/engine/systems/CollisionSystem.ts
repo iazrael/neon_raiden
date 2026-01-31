@@ -21,7 +21,7 @@
 import { EntityId, Component } from '../types';
 import { Transform, HitBox, Bullet, PlayerTag, EnemyTag, PickupItem, InvulnerableState, DestroyTag } from '../components';
 import { CollisionLayer, shouldCheckCollision } from '../types/collision';
-import { pushEvent, World } from '../world';
+import { pushEvent, view, World } from '../world';
 import { HitEvent, PickupEvent } from '../events';
 import { COLLISION_DAMAGE } from '../configs';
 
@@ -130,11 +130,10 @@ const collisionCache = new Map<EntityId, CollisionCache>();
 function buildCollisionCache(world: World): Map<EntityId, CollisionCache> {
     collisionCache.clear();
 
-    for (const [id, comps] of world.entities) {
-        const hitBox = comps.find(HitBox.check);
-        const transform = comps.find(Transform.check);
-
-        if (!hitBox || !transform) continue;
+    for (const [id,[hitBox, transform], comps] of view(world, [HitBox, Transform])) {
+        // 检查是否已销毁（避免重复处理）
+        const hasDestroyTag = comps.some(DestroyTag.check);
+        if (hasDestroyTag) continue; // 已销毁，跳过
 
         // 直接从 HitBox 读取碰撞层
         const layer = hitBox.layer;
