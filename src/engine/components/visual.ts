@@ -52,17 +52,33 @@ export interface VisualCircle {
     width: number;
 }
 
+/** 视觉流星 - 背景流星效果 */
+export interface VisualMeteor {
+    /** X坐标 */
+    x: number;
+    /** Y坐标 */
+    y: number;
+    /** 拖尾长度 */
+    length: number;
+    /** X轴速度（像素/秒） */
+    vx: number;
+    /** Y轴速度（像素/秒） */
+    vy: number;
+}
+
 /** 视觉特效组件 - 容器，保存各种视觉特效数据 */
 export class VisualEffect extends Component {
     constructor(cfg?: {
         particles?: VisualParticle[];
         lines?: VisualLine[];
         circles?: VisualCircle[];
+        meteors?: VisualMeteor[];
     }) {
         super();
         this.particles = cfg?.particles ?? [];
         this.lines = cfg?.lines ?? [];
         this.circles = cfg?.circles ?? [];
+        this.meteors = cfg?.meteors ?? [];
     }
 
     /** 粒子数组 */
@@ -71,6 +87,8 @@ export class VisualEffect extends Component {
     lines: VisualLine[];
     /** 圆环数组（冲击波等） */
     circles: VisualCircle[];
+    /** 流星数组（背景流星效果） */
+    meteors: VisualMeteor[];
 
     static check(c: any): c is VisualEffect {
         return c instanceof VisualEffect;
