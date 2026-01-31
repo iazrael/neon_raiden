@@ -31,6 +31,7 @@ import {
     Lifetime,
     VisualEffect,
     VisualLine,
+    VisualMeteor,
 } from "../components";
 import { DebugConfig } from "../config/DebugConfig";
 
@@ -98,6 +99,7 @@ interface RenderQueue {
     bossInfo: BossInfo | null;
     timeSlowActive: boolean;
     visualEffect: VisualEffect;
+    meteors: VisualMeteor[];
 }
 
 /**
@@ -123,9 +125,11 @@ function collectRenderItems(world: World): RenderQueue {
         bossInfo: null,
         timeSlowActive: false,
         visualEffect: null,
+        meteors: [],
     };
     const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
     queue.visualEffect = effect;
+    queue.meteors = effect?.meteors ?? [];
     
     for (const [id, comps] of world.entities) {
         // 时间减速状态
@@ -181,6 +185,7 @@ function drawBackground(
     width: number,
     height: number,
     timeSlowActive: boolean,
+    meteors: VisualMeteor[],
 ): void {
     // 黑色背景
     ctx.fillStyle = "#050505";
@@ -207,6 +212,38 @@ function drawBackground(
         ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
         ctx.fill();
     }
+
+    // 绘制流星
+    drawMeteors(ctx, meteors, timeScale);
+}
+
+/**
+ * 绘制流星背景效果
+ */
+function drawMeteors(
+    ctx: CanvasRenderingContext2D,
+    meteors: VisualMeteor[],
+    timeScale: number,
+): void {
+    if (meteors.length === 0) {
+        return;
+    }
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.lineWidth = 2;
+
+    for (const m of meteors) {
+        ctx.beginPath();
+        // 从当前位置向速度反方向延伸，形成拖尾
+        const tailX = m.x - m.vx * 5 * timeScale;
+        const tailY = m.y - m.vy * 5 * timeScale;
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+    }
+
+    ctx.restore();
 }
 
 /**
@@ -540,8 +577,8 @@ export function RenderSystem(
     // 1. 单次收集所有渲染项
     const queue = collectRenderItems(world);
 
-    // 2. 绘制背景
-    drawBackground(context, width, height, queue.timeSlowActive);
+    // 2. 绘制背景（传递流星数据）
+    drawBackground(context, width, height, queue.timeSlowActive, queue.meteors);
 
     // 计算相机偏移
     const camX = camera.shakeX;
