@@ -131,8 +131,8 @@ function buildCollisionCache(world: World): Map<EntityId, CollisionCache> {
     collisionCache.clear();
 
     for (const [id, comps] of world.entities) {
-        const hitBox = comps.find(HitBox.check) as HitBox | undefined;
-        const transform = comps.find(Transform.check) as Transform | undefined;
+        const hitBox = comps.find(HitBox.check);
+        const transform = comps.find(Transform.check);
 
         if (!hitBox || !transform) continue;
 
@@ -175,8 +175,6 @@ const spatialGrid = createSpatialGrid(128);
  * @param dt 时间增量（毫秒）
  */
 export function CollisionSystem(world: World, _dt: number): void {
-    // 清空上一帧的事件队列（保持原有行为）
-    world.events.length = 0;
 
     // 1. 构建组件缓存
     const cache = buildCollisionCache(world);
@@ -442,8 +440,8 @@ function handleBulletHit(
     comps1: Component[],
     comps2: Component[]
 ): void {
-    const bullet1 = comps1.find(Bullet.check) as Bullet | undefined;
-    const bullet2 = comps2.find(Bullet.check) as Bullet | undefined;
+    const bullet1 = comps1.find(Bullet.check);
+    const bullet2 = comps2.find(Bullet.check);
 
     let attackerId: EntityId;
     let victimId: EntityId;
@@ -474,7 +472,7 @@ function handleBulletHit(
     const damage = bullet?.damage ?? 10;
 
     // 获取受害者位置
-    const victimTransform = victimComps.find(Transform.check) as Transform;
+    const victimTransform = victimComps.find(Transform.check);
     if (!victimTransform) return;
 
     // 生成 HitEvent（bloodLevel 由 DamageResolutionSystem 根据伤害值计算）
@@ -616,12 +614,12 @@ function handlePlayerPickup(
     if (player1 && pickup2) {
         playerId = id1;
         pickup = pickup2;
-        pickupTransform = comps2.find(Transform.check) as Transform;
+        pickupTransform = comps2.find(Transform.check);
         pickupComps = comps2;
     } else {
         playerId = id2;
         pickup = pickup1!;
-        pickupTransform = comps1.find(Transform.check) as Transform;
+        pickupTransform = comps1.find(Transform.check);
         pickupComps = comps1;
     }
 

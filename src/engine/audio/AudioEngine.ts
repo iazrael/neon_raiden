@@ -142,7 +142,6 @@ export class AudioEngine {
         gain.connect(this.masterGain);
 
         const now = this.ctx.currentTime;
-        // const type = WEAPON_NAMES[WeaponId];
 
         if (type === WeaponId.VULCAN) {
             osc.type = 'square';

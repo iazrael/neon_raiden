@@ -12,6 +12,8 @@
 
 import { World } from '../world';
 import { HitEvent, KillEvent, PickupEvent, WeaponFiredEvent, BossPhaseChangeEvent, PlaySoundEvent, ComboBreakEvent, ComboUpgradeEvent } from '../events';
+import { audioPlayer } from '../audio';
+import { WeaponId } from '../types';
 
 /**
  * 音效类型
@@ -188,8 +190,10 @@ function handlePickupEvent(world: World, event: PickupEvent): void {
 function handleWeaponFiredEvent(world: World, event: WeaponFiredEvent): void {
     // 根据武器 ID 和发射者确定音效
     const isPlayer = event.owner === world.playerId;
-    const soundKey = isPlayer ? 'shoot_player' : 'shoot_enemy';
-    playSound(soundKey);
+    if(isPlayer){
+        // FIXME: 太吵了, 先注释掉测试其他音效
+        // audioPlayer.playShoot(event.weaponId as WeaponId)
+    }
 }
 
 /**
