@@ -100,12 +100,17 @@ export function InputSystem(world: World, dt: number) {
         }
     }
 
-    // === 处理炸弹 (B键) ===
+    // === 处理炸弹 (B键 + 程序触发) ===
     const existingBomb = playerComps.find(BombIntent.check);
+    // isBombing 现在同时检查键盘和程序触发
     if (isBombing) {
         // 炸弹通常是一次性触发，这里持续按住会持续产生意图
-        // 后续 SkillSystem 需要处理冷却或消耗
-        if (!existingBomb) playerComps.push(new BombIntent());
+        // 后续 BombSystem 需要处理冷却或消耗
+        if (!existingBomb) {
+            playerComps.push(new BombIntent());
+        }
+        // 消费程序触发状态，防止重复触发
+        inputManager.consumeProgrammaticBomb();
     } else {
         if (existingBomb) removeComponent(world, world.playerId, existingBomb);
     }
