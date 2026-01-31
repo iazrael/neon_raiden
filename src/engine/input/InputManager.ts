@@ -18,6 +18,7 @@ export class InputManager {
     // 动作状态
     private _isFiring = false;
     private _isBombing = false;
+    private _programmaticBomb = false;
 
     private canvas: HTMLCanvasElement | null = null;
 
@@ -125,8 +126,27 @@ export class InputManager {
         return this.keys.has('Space') || this._isFiring;
     }
 
-    public isBombing() {
-        return this.keys.has('KeyB');
+    public isBombing(): boolean {
+        return this.keys.has('KeyB') || this._programmaticBomb;
+    }
+
+    /**
+     * 程序化触发炸弹 (供 UI 按钮调用)
+     */
+    public triggerBomb(): void {
+        this._programmaticBomb = true;
+    }
+
+    /**
+     * 消费程序触发状态 (供 InputSystem 调用)
+     * @returns 是否成功消费
+     */
+    public consumeProgrammaticBomb(): boolean {
+        if (this._programmaticBomb) {
+            this._programmaticBomb = false;
+            return true;
+        }
+        return false;
     }
 }
 
