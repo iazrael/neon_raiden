@@ -8,7 +8,7 @@ import { VisualEffect } from './components/visual';
 
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
-// import { AudioSystem } from './systems/AudioSystem'; // 暂时禁用 - 使用旧 GameAudioSystem
+import { AudioSystem } from './systems/AudioSystem';
 import { BombSystem } from './systems/BombSystem';
 import { EnemySystem } from './systems/EnemySystem';
 import { BossSystem } from './systems/BossSystem';
@@ -172,7 +172,7 @@ export class Engine {
         EffectPlayer(world, dt);                        // 18. 效果播放系统
         
         VisualEffectSystem(world, dt);                  // 19. 视觉特效系统（更新状态）
-        // AudioSystem(world, dt);                     // 20. 音频系统 (暂时禁用 - 使用旧 GameAudioSystem)
+        AudioSystem(world, dt);                     // 20. 音频系统
 
         // 拍快照（**必须在清理前**）
         this.snapshot$.next(buildSnapshot(world, dt));

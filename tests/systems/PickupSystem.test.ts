@@ -4,7 +4,7 @@
 
 import { createWorld, generateId, addComponent, view } from '../../src/engine/world';
 import { PickupSystem } from '../../src/engine/systems/PickupSystem';
-import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff, TimeSlow, Option } from '../../src/engine/components';
+import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff, TimeSlow, Option, OptionCount } from '../../src/engine/components';
 import { WeaponId, BuffType, AmmoType } from '../../src/engine/types';
 import { PickupEvent } from '../../src/engine/events';
 import { pushEvent } from '../../src/engine/world';
@@ -289,11 +289,9 @@ describe('PickupSystem', () => {
             addComponent(world, playerId, new PlayerTag());
 
             // 先添加第一个僚机和 OptionCount 组件
-            const { OptionCount } = require('../../src/engine/components');
             addComponent(world, playerId, new OptionCount({ count: 1, maxCount: 2 }));
 
             // 手动创建第一个僚机实体
-            const { Option } = require('../../src/engine/components');
             const option1Id = generateId();
             world.entities.set(option1Id, [
                 new Transform({ x: 400, y: 500, rot: 0 }),

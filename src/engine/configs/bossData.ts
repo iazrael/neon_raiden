@@ -343,6 +343,6 @@ if (process.env.NODE_ENV !== 'production') {
         validation.warnings.forEach(warn => console.warn(`  ⚠ ${warn}`));
     }
     if (validation.valid && validation.warnings.length === 0) {
-        console.log('✓ Boss配置验证通过');
+        // console.log('✓ Boss配置验证通过');
     }
 }

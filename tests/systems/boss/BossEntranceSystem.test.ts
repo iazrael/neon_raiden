@@ -8,12 +8,11 @@
 
 import { BossEntranceSystem } from '../../../src/engine/systems/boss/BossEntranceSystem';
 import { MovementSystem } from '../../../src/engine/systems/MovementSystem';
-import { World } from '../../../src/engine/types';
-import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, Velocity, BossEntrance, MoveIntent, SpeedModifier } from '../../../src/engine/components';
+import { Transform, Health, BossTag, BossAI, SpeedStat, Weapon, Velocity, BossEntrance, MoveIntent, SpeedModifier, InvulnerableState } from '../../../src/engine/components';
 import { BossId, EnemyWeaponId } from '../../../src/engine/types/ids';
 import { BLUEPRINT_BOSS_GUARDIAN } from '../../../src/engine/blueprints/bosses';
 import { spawnBoss } from '../../../src/engine/factory';
-import { removeTypes } from '../../../src/engine/world';
+import { removeTypes, World } from '../../../src/engine/world';
 
 describe('BossEntranceSystem', () => {
     let world: World;
@@ -171,7 +170,6 @@ describe('BossEntranceSystem', () => {
             // 注意：InvulnerableState可能在components/combat.ts中
             // 如果不存在则跳过此测试
             try {
-                const { InvulnerableState } = require('../../../src/engine/components');
                 bossComps!.push(new InvulnerableState({ duration: -1 }));
 
                 // 模拟Boss到达目标位置

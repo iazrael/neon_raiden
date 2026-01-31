@@ -4,7 +4,7 @@
 
 import { createWorld, generateId, addComponent } from '../../src/engine/world';
 import { DamageResolutionSystem } from '../../src/engine/systems/DamageResolutionSystem';
-import { Transform, Health, Shield, DestroyTag, ScoreValue } from '../../src/engine/components';
+import { Transform, Health, Shield, DestroyTag, ScoreValue, DamageOverTime } from '../../src/engine/components';
 import { HitEvent } from '../../src/engine/events';
 
 describe('DamageResolutionSystem', () => {
@@ -30,7 +30,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 30,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 2
             };
             world.events.push(hitEvent);
 
@@ -53,7 +52,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 0,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 1
             };
             world.events.push(hitEvent);
 
@@ -79,7 +77,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 30,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 1
             };
             world.events.push(hitEvent);
 
@@ -106,7 +103,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 50,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 2
             };
             world.events.push(hitEvent);
 
@@ -135,7 +131,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 60, // 超过当前HP
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 3
             };
             world.events.push(hitEvent);
 
@@ -164,7 +159,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 20,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 2
             };
             world.events.push(hitEvent);
 
@@ -188,7 +182,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 20,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 2
             };
             world.events.push(hitEvent);
 
@@ -214,7 +207,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 30,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 2
             };
             world.events.push(hitEvent);
 
@@ -243,7 +235,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 50, // 高伤害
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 3
             };
             world.events.push(hitEvent);
 
@@ -267,7 +258,6 @@ describe('DamageResolutionSystem', () => {
                 damage: 30,
                 owner: 1,
                 victim: victimId,
-                bloodLevel: 2
             };
             world.events.push(hitEvent);
 
@@ -287,8 +277,7 @@ describe('DamageResolutionSystem', () => {
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
 
-            const { DamageOverTime: DOT } = require('../../src/engine/components/combat');
-            addComponent(world, victimId, new DOT({
+            addComponent(world, victimId, new DamageOverTime({
                 damagePerSecond: 10,
                 remaining: 1,
                 interval: 0.2

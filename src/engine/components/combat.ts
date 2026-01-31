@@ -10,13 +10,13 @@ export class Shield extends Component {
      */
     constructor(cfg: {
         /** 当前护盾值 */
-        value?: number;
+        value: number;
         /** 护盾恢复速度 */
-        regen?: number;
+        regen: number;
     }) {
         super();
-        this.value = cfg.value ?? 0;
-        this.regen = cfg.regen ?? 0;
+        this.value = cfg.value;
+        this.regen = cfg.regen;
     }
     public value = 0;
     public regen = 0;

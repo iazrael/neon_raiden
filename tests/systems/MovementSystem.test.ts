@@ -52,7 +52,7 @@ describe('MovementSystem with TimeScale', () => {
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 0, y: 0, rot: 0 }));
             addComponent(world, playerId, new Velocity({ vx: 100, vy: 0, vrot: 0 }));
-            addComponent(world, playerId, new PlayerTag({}));
+            addComponent(world, playerId, new PlayerTag());
 
             world.timeScale = 0.5;
             MovementSystem(world, 1000);
@@ -66,7 +66,7 @@ describe('MovementSystem with TimeScale', () => {
             world.entities.set(optionId, []);
             addComponent(world, optionId, new Transform({ x: 0, y: 0, rot: 0 }));
             addComponent(world, optionId, new Velocity({ vx: 80, vy: 80, vrot: 0 }));
-            addComponent(world, optionId, new PlayerTag({ isOption: true }));
+            addComponent(world, optionId, new PlayerTag());
 
             world.timeScale = 0.5;
             MovementSystem(world, 1000);
@@ -83,13 +83,13 @@ describe('MovementSystem with TimeScale', () => {
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 0, y: 0, rot: 0 }));
             addComponent(world, playerId, new Velocity({ vx: 100, vy: 0, vrot: 0 }));
-            addComponent(world, playerId, new PlayerTag({}));
+            addComponent(world, playerId, new PlayerTag());
 
             const enemyId = generateId();
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 0, y: 100, rot: 0 }));
             addComponent(world, enemyId, new Velocity({ vx: 100, vy: 0, vrot: 0 }));
-            addComponent(world, enemyId, new EnemyTag({}));
+            addComponent(world, enemyId, new EnemyTag({id: 'GUARDIAN' as any}));
 
             world.timeScale = 0.5;
             MovementSystem(world, 1000);
@@ -163,7 +163,7 @@ describe('MovementSystem with TimeScale', () => {
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 100, y: 100, rot: 0 }));
             addComponent(world, playerId, new Velocity({ vx: 0, vy: 0, vrot: Math.PI }));
-            addComponent(world, playerId, new PlayerTag({}));
+            addComponent(world, playerId, new PlayerTag());
 
             world.timeScale = 0.5;
             MovementSystem(world, 1000);

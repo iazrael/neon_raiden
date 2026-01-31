@@ -4,7 +4,8 @@
  * 测试Boss配置数据的完整性和正确性
  */
 
-import { BOSS_DATA, validateBossConfigs } from '../../src/engine/configs/bossData';
+import { ENEMY_WEAPON_TABLE } from '../../src/engine/blueprints';
+import { BOSS_DATA, BossMovementPattern, validateBossConfigs } from '../../src/engine/configs/bossData';
 import { BossId } from '../../src/engine/types/ids';
 
 describe('Boss配置验证', () => {
@@ -37,7 +38,6 @@ describe('Boss配置验证', () => {
 
     describe('武器配置', () => {
         it('所有weaponId应该在ENEMY_WEAPON_TABLE中存在', () => {
-            const { ENEMY_WEAPON_TABLE } = require('../../src/engine/blueprints/weapons');
 
             Object.values(BOSS_DATA).forEach(bossSpec => {
                 bossSpec.phases.forEach(phase => {
@@ -59,7 +59,6 @@ describe('Boss配置验证', () => {
 
     describe('移动模式配置', () => {
         it('所有movePattern应该是有效的', () => {
-            const { BossMovementPattern } = require('../../src/engine/configs/bossData');
             const validPatterns = Object.values(BossMovementPattern);
 
             Object.values(BOSS_DATA).forEach(bossSpec => {

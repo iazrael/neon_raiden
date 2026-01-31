@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createWorld, generateId, World, addComponent } from '../../src/engine/world';
 import { EffectPlayer, updateParticles, spawnShockwave } from '../../src/engine/systems/EffectPlayer';
 import { Transform, Particle, Lifetime, Sprite, Shockwave, VisualEffect, EnemyTag } from '../../src/engine/components';
-import { HitEvent, KillEvent, ComboUpgradeEvent } from '../../src/engine/events';
+import { HitEvent, KillEvent, ComboUpgradeEvent, BloodFogEvent } from '../../src/engine/events';
 
 describe('EffectPlayer', () => {
     let world: World;
@@ -88,7 +88,7 @@ describe('EffectPlayer', () => {
                 duration: 0.3
             };
 
-            world.events.push(bloodFogEvent);
+            world.events.push(bloodFogEvent as BloodFogEvent);
             EffectPlayer(world, 16);
 
             // 应该生成飙血粒子（使用 VisualEffect 组件）
@@ -111,7 +111,7 @@ describe('EffectPlayer', () => {
             // 创建victim实体（敌人）
             const victimId = generateId();
             const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            const enemyTag = new EnemyTag({ id: victimId });
+            const enemyTag = new EnemyTag({ id: 'GUARDIAN' as any });
             world.entities.set(victimId, [transform, enemyTag]);
 
             const killEvent: KillEvent = {
@@ -141,7 +141,7 @@ describe('EffectPlayer', () => {
             // 创建victim实体（敌人）
             const victimId = generateId();
             const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            const enemyTag = new EnemyTag({ id: victimId });
+            const enemyTag = new EnemyTag({ id: 'GUARDIAN' as any });
             world.entities.set(victimId, [transform, enemyTag]);
 
             const killEvent: KillEvent = {

@@ -38,7 +38,6 @@ const shieldHandler: DurationBuffHandler = {
             shield.value = Math.min(shield.value + buff.value * (dt / 1000), 100);
         } else if (buff.value > 0) {
             // 如果没有护盾组件，添加一个
-            const Shield = require('../components/combat').Shield;
             comps.push(new Shield({ value: buff.value, regen: 0 }));
         }
     }

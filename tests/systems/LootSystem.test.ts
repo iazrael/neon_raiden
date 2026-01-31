@@ -65,7 +65,7 @@ describe('LootSystem', () => {
 
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 400, y: 300 }));
-            addComponent(world, enemyId, new EnemyTag({ id: 1 }));
+            addComponent(world, enemyId, new EnemyTag({ id: 'GUARDIAN' as any }));
             // 没有 DropTable
 
             pushEvent(world, {
@@ -161,7 +161,7 @@ describe('LootSystem', () => {
 
     describe('保底掉落', () => {
         it('应该能够启用和禁用保底掉落', () => {
-            enableGuaranteedDrop(1000);
+            enableGuaranteedDrop(world, 1000);
             expect(() => LootSystem(world, 0.016)).not.toThrow();
             disableGuaranteedDrop();
         });

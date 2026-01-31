@@ -6,6 +6,8 @@
 
 import { Engine } from '../../src/engine/engine';
 import { Blueprint } from '../../src/engine/blueprints';
+import * as fs from 'fs';
+import { SpriteKey } from '../../src/engine/configs';
 
 // Mock Canvas
 class MockCanvasRenderingContext2D {
@@ -38,8 +40,8 @@ class MockResizeObserver {
 // 简单的玩家蓝图
 const PLAYER_BLUEPRINT: Blueprint = {
     Transform: { x: 400, y: 500, rot: 0 },
-    Velocity: { dx: 0, dy: 0 },
-    Sprite: { srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5, color: '#00ff00' }
+    Velocity: { vx: 0, vy: 0 , vrot: 0},
+    Sprite: { spriteKey: SpriteKey.PLAYER, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5, color: '#00ff00' }
 };
 
 describe('Engine Pipeline 集成测试', () => {
@@ -189,7 +191,6 @@ describe('Engine Pipeline 集成测试', () => {
     describe('Engine 导入验证', () => {
         it('所有系统都应该被导入', () => {
             // 通过检查 Engine 文件内容来验证所有系统都被导入
-            const fs = require('fs');
             const engineContent = fs.readFileSync(
                 require.resolve('../../src/engine/engine.ts'),
                 'utf-8'
@@ -204,7 +205,6 @@ describe('Engine Pipeline 集成测试', () => {
         });
 
         it('framePipeline 应该调用所有系统', () => {
-            const fs = require('fs');
             const engineContent = fs.readFileSync(
                 require.resolve('../../src/engine/engine.ts'),
                 'utf-8'
