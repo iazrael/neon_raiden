@@ -1,6 +1,6 @@
 import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
 import { Event as GameEvent } from './events';
-import { BOSS_SPAWN_TIME } from './configs';
+import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
 
 
 // 世界接口
@@ -34,14 +34,12 @@ export interface World {
     width: number;
     // 画布高
     height: number;
-    // 刷怪系统是否已初始化（用于赠送初始点数）
-    spawnInitialized: boolean;
 
     // 时间缩放（用于 TIME_SLOW 等效果，1.0 = 正常速度）
     timeScale: number;
 
     // 连击状态
-    comboState?: ComboState;
+    comboState: ComboState;
 
     // 渲染状态（由 CameraSystem/RenderSystem 共享）
     renderState: RenderState;
@@ -64,13 +62,12 @@ export function createWorld(): World {
         visualEffectId: 0,
         playerLevel: 1,
         difficulty: 1,
-        spawnCredits: 0,
+        spawnCredits: STARTING_CREDITS,
         spawnTimer: 0,
         enemyCount: 0,
         timeScale: 1,
         width: 0,
         height: 0,
-        spawnInitialized: false,
         renderState: {
             camera: {
                 x: 0,
@@ -81,6 +78,13 @@ export function createWorld(): World {
                 shakeTimer: 0,
                 shakeIntensity: 0,
             },
+        },
+        comboState: {
+            timer: 0,
+            level: 0,
+            maxCombo: 0,
+            hasBerserk: false,
+            count: 0,
         },
         bossState: {
             bossId: 0,

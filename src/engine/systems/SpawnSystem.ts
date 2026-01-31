@@ -146,16 +146,6 @@ export function SpawnSystem(world: World, dt: number): void {
     if (!config) return;
 
     // ==============================
-    // 0. 初始化检查（开局赠送）
-    // ==============================
-    // 如果是第一次运行，赠送初始点数
-    if (!world.spawnInitialized) {
-        world.spawnCredits = config.startingCredits;
-        world.spawnInitialized = true;
-        // console.log(`SpawnSystem: Initial bonus - ${config.startingCredits} credits`);
-    }
-
-    // ==============================
     // 1. 发工资 (Income Phase)
     // ==============================
     // 使用正弦波模拟"张弛有度"的刷怪节奏

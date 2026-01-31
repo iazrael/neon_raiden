@@ -165,7 +165,7 @@ export class Engine {
         PickupSystem(world, dt);                        // 13. 拾取系统
         DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
         LootSystem(world, dt);                          // 15. 掉落系统
-        // ComboSystem(world, dt);                         // 16. 连击系统
+        ComboSystem(world, dt);                             // 16. 连击系统
 
         // P7. 表现层 (视听反馈)
         CameraSystem(world, dt);                        // 17. 相机系统

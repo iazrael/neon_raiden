@@ -337,11 +337,10 @@ describe('ComboSystem', () => {
 
     describe('初始化', () => {
         it('首次运行应该初始化 comboState', () => {
-            expect(world.comboState).toBeUndefined();
+            expect(world.comboState).toBeDefined();
 
             ComboSystem(world, 0.016);
-
-            expect(world.comboState).toBeDefined();
+            
             expect(world.comboState?.count).toBe(0);
             expect(world.comboState?.timer).toBe(0);
             expect(world.comboState?.level).toBe(0);

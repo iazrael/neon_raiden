@@ -12,8 +12,8 @@
  */
 
 import { ComboState } from '../types';
-import { KillEvent, ComboUpgradeEvent, ComboBreakEvent, BerserkModeEvent } from '../events';
-import { pushEvent, World } from '../world';
+import { KillEvent, ComboUpgradeEvent, ComboBreakEvent, BerserkModeEvent, EventTags } from '../events';
+import { pushEvent, getEvents, World } from '../world';
 
 /**
  * 连击配置
@@ -36,21 +36,10 @@ const COMBO_CONFIG = {
  * @param dt 时间增量（毫秒）
  */
 export function ComboSystem(world: World, dt: number): void {
-    // 初始化连击状态（使用旧接口结构）
-    if (!world.comboState) {
-        world.comboState = {
-            count: 0,
-            timer: 0,
-            level: 0,
-            maxCombo: 0,
-            hasBerserk: false
-        };
-    }
-
     const combo = world.comboState;
 
     // 1. 收集本帧的击杀事件
-    const killEvents = world.events.filter(e => e.type === 'Kill') as KillEvent[];
+    const killEvents = getEvents<KillEvent>(world, EventTags.Kill);
 
     if (killEvents.length > 0) {
         // 有击杀，增加连击
@@ -68,7 +57,7 @@ export function ComboSystem(world: World, dt: number): void {
 
         // 根据连击倍率加分（通过等级获取倍率）
         const levelConfig = getLevelConfig(combo.level);
-        const multiplier = levelConfig?.scoreMult ?? 1;
+        const multiplier = levelConfig.scoreMult;
         for (const event of killEvents) {
             world.score += Math.floor(event.score * multiplier);
         }
@@ -158,7 +147,7 @@ function resetCombo(combo: ComboState): void {
  * 获取当前连击得分倍率
  */
 export function getComboScoreMultiplier(world: World): number {
-    const level = world.comboState?.level ?? 0;
+    const level = world.comboState.level ?? 0;
     const levelConfig = getLevelConfig(level);
     return levelConfig?.scoreMult ?? 1;
 }
@@ -167,7 +156,7 @@ export function getComboScoreMultiplier(world: World): number {
  * 获取当前连击伤害倍率
  */
 export function getComboDamageMultiplier(world: World): number {
-    const level = world.comboState?.level ?? 0;
+    const level = world.comboState.level ?? 0;
     const levelConfig = getLevelConfig(level);
     return levelConfig?.multiplier ?? 1;
 }

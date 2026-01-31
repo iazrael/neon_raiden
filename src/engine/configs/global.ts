@@ -12,6 +12,8 @@ export const PHYSICS = {
     PLAYER_SPEED: 300,
 };
 
+export const STARTING_CREDITS = 100
+
 
 // 跟敌人的碰撞伤害
 export const COLLISION_DAMAGE = 10;
