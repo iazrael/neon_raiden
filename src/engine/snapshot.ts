@@ -11,7 +11,7 @@ import {
     BossTag,
     Bomb,
 } from "./components";
-import { World, getComponents, view } from "./world";
+import { World, getComponents, getEntity, view } from "./world";
 
 // ========== 游戏快照接口 ==========
 export interface GameSnapshot {
@@ -55,10 +55,11 @@ export interface GameSnapshot {
 
 export function buildSnapshot(world: World, t: number): GameSnapshot {
     // 安全检查：如果玩家不存在或 ID 无效，返回默认快照
-    if (world.playerId <= 0) {
+    const playerComps = getEntity(world, world.playerId);
+    if (!playerComps) {
         return {
             t,
-            state: GameState.MENU,
+            state: GameState.GAME_OVER,
             score: 0,
             level: 1,
             showLevelTransition: false,
