@@ -69,7 +69,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 50, max: 100, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 50, max: 100 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -95,7 +95,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 20, max: 100, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 20, max: 100 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -113,6 +113,63 @@ describe('DamageResolutionSystem', () => {
 
             expect(shield.value).toBe(0); // 护盾归零
             expect(health.hp).toBe(70); // 生命值减少30
+        });
+
+        it('护盾被完全消耗时应该触发 ShieldBrokenEvent', () => {
+            const victimId = generateId();
+            world.entities.set(victimId, []);
+
+            addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
+            addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
+            addComponent(world, victimId, new Shield({ value: 30, max: 100 }));
+
+            const hitEvent: HitEvent = {
+                type: 'Hit',
+                pos: { x: 100, y: 100 },
+                damage: 50, // 超过护盾值，护盾会被完全消耗
+                owner: 1,
+                victim: victimId,
+            };
+            world.events.push(hitEvent);
+
+            DamageResolutionSystem(world, 0.016);
+
+            // 验证护盾破碎事件
+            const shieldBrokenEvents = world.events.filter(e => e.type === 'ShieldBroken');
+            expect(shieldBrokenEvents.length).toBe(1);
+            expect(shieldBrokenEvents[0]).toMatchObject({
+                type: 'ShieldBroken',
+                pos: { x: 100, y: 100 },
+                owner: victimId,
+            });
+        });
+
+        it('护盾未完全消耗时不应该触发 ShieldBrokenEvent', () => {
+            const victimId = generateId();
+            world.entities.set(victimId, []);
+
+            addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
+            addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
+            addComponent(world, victimId, new Shield({ value: 50, max: 100 }));
+
+            const hitEvent: HitEvent = {
+                type: 'Hit',
+                pos: { x: 100, y: 100 },
+                damage: 30, // 护盾足够吸收伤害
+                owner: 1,
+                victim: victimId,
+            };
+            world.events.push(hitEvent);
+
+            DamageResolutionSystem(world, 0.016);
+
+            // 不应该有护盾破碎事件
+            const shieldBrokenEvents = world.events.filter(e => e.type === 'ShieldBroken');
+            expect(shieldBrokenEvents.length).toBe(0);
+
+            // 护盾应该还有剩余
+            const shield = world.entities.get(victimId)?.find(Shield.check) as Shield;
+            expect(shield.value).toBe(20);
         });
     });
 
@@ -199,7 +256,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 0, max: 100, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 0, max: 100 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -227,7 +284,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 0, max: 100, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 0, max: 100 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -250,7 +307,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 0, max: 100, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 0, max: 100 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',

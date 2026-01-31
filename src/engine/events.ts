@@ -17,7 +17,8 @@ export type Event =
     | BerserkModeEvent
     | ComboUpgradeEvent
     | BombExplodedEvent
-    | WeaponEffectEvent;
+    | WeaponEffectEvent
+    | ShieldBrokenEvent;
 
 
 /**
@@ -165,4 +166,11 @@ export interface WeaponEffectEvent {
     pos: { x: number; y: number }; // 特效位置
     weaponType: string;            // 武器类型
     effectType: 'explosion' | 'chain' | 'burn' | 'bounce'; // 特效类型
+}
+
+// ⑯ 护盾破碎特效事件
+export interface ShieldBrokenEvent {
+    type: 'ShieldBroken';
+    pos: { x: number; y: number }; // 护盾破碎位置
+    owner: EntityId;               // 护盾 owner
 }

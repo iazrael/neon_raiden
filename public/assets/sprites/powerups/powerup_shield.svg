@@ -1,18 +1,12 @@
-<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <filter id="glow-shield" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <rect x="5" y="5" width="30" height="30" rx="5" fill="#14141e" fill-opacity="0.8" stroke="#cbd5e1" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 40 40" width="40" height="40">
+  <!-- Background -->
+  <rect x="-15" y="-15" width="30" height="30" rx="5" ry="5" fill="rgba(20, 20, 30, 0.8)" stroke="#00ff00" stroke-width="3"/>
   
-  <!-- Shield Icon -->
-  <g filter="url(#glow-shield)">
-    <path d="M20 8 C12 8 10 14 10 18 C10 26 15 32 20 34 C25 32 30 26 30 18 C30 14 28 8 20 8 Z" fill="none" stroke="#cbd5e1" stroke-width="2" />
-    <path d="M20 12 L20 30 M12 20 L28 20" stroke="#cbd5e1" stroke-width="1.5" opacity="0.6"/>
-  </g>
+  <!-- Shield shape -->
+  <path d="M0,-10 C10,-10 10,-5 10,0 C10,10 0,12 0,12 C0,12 -10,10 -10,0 C-10,-5 -10,-10 0,-10 Z" 
+        fill="none" stroke="#00ff00" stroke-width="2"/>
+  
+  <!-- Inner cross -->
+  <line x1="0" y1="-6" x2="0" y2="6" stroke="#00ff00" stroke-width="2"/>
+  <line x1="-6" y1="0" x2="6" y2="0" stroke="#00ff00" stroke-width="2"/>
 </svg>

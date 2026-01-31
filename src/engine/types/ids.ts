@@ -182,6 +182,7 @@ export const PickupId = {
     HP: 'pickup_buff_hp',
     BOMB: 'pickup_buff_bomb',
     OPTION: 'pickup_buff_option',
+    SHIELD: 'pickup_buff_shield',
     INVINCIBILITY: 'pickup_buff_invincibility',
     TIME_SLOW: 'pickup_buff_time_slow',
 

@@ -15,7 +15,13 @@
  */
 
 import { Component } from "../types/base";
-import { World, getComponents, getComponentsFromComps, getEntity, view } from "../world";
+import {
+    World,
+    getComponents,
+    getComponentsFromComps,
+    getEntity,
+    view,
+} from "../world";
 import {
     Transform,
     Sprite,
@@ -53,7 +59,6 @@ enum RenderLayer {
     PLAYER = 1,
     PICKUP = 2,
 }
-
 
 /**
  * 渲染项
@@ -122,9 +127,15 @@ function collectRenderItems(world: World): RenderQueue {
     queue.meteors = effect?.meteors ?? [];
 
     // 收集玩家信息, 绘制额外的护盾\血条等
-    const player = getEntity(world, world.playerId)
+    const player = getEntity(world, world.playerId);
     if (player) {
-        const [shield, invulnerable, health, transform] = getComponentsFromComps(player, [Shield, InvulnerableState, Health, Transform])
+        const [shield, invulnerable, health, transform] =
+            getComponentsFromComps(player, [
+                Shield,
+                InvulnerableState,
+                Health,
+                Transform,
+            ]);
         if (shield || invulnerable) {
             queue.playerEffect = {
                 transform,
@@ -136,14 +147,20 @@ function collectRenderItems(world: World): RenderQueue {
     }
 
     // 收集 boss 信息
-    const boss = getEntity(world, world.bossState.bossId)
+    const boss = getEntity(world, world.bossState.bossId);
     if (boss) {
-        const [transform, health] = getComponentsFromComps(boss, [Transform, Health]);  
+        const [transform, health] = getComponentsFromComps(boss, [
+            Transform,
+            Health,
+        ]);
         queue.bossInfo = { transform, health };
     }
-    
+
     // 收集所有可以绘制的精灵
-    for (const [id, [transform, sprite], comps] of view(world, [Transform, Sprite])) {
+    for (const [id, [transform, sprite], comps] of view(world, [
+        Transform,
+        Sprite,
+    ])) {
         queue.sprites.push({
             layer: determineLayer(comps),
             transform,
@@ -356,7 +373,8 @@ function drawPlayerEffect(
         ctx.save();
         ctx.translate(x, y);
 
-        const alpha = Math.min(1, shield.value / shield.max);
+        // 做一下保底, 即使最小了, 但是为了感官, 还是要能可见
+        const alpha = Math.max(0.3, Math.min(1, shield.value / shield.max));
 
         ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
         ctx.lineWidth = 3;

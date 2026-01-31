@@ -28,6 +28,7 @@ export const PICKUP_REGISTRY: Record<string, Blueprint> = {
     [PickupId.HP]: BuffPickups.BLUEPRINT_POWERUP_HP,
     [PickupId.BOMB]: BuffPickups.BLUEPRINT_POWERUP_BOMB,
     [PickupId.OPTION]: BuffPickups.BLUEPRINT_POWERUP_OPTION,
+    [PickupId.SHIELD]: BuffPickups.BLUEPRINT_POWERUP_SHIELD,
     [PickupId.INVINCIBILITY]: BuffPickups.BLUEPRINT_POWERUP_INVINCIBILITY,
     [PickupId.TIME_SLOW]: BuffPickups.BLUEPRINT_POWERUP_TIME_SLOW,
 

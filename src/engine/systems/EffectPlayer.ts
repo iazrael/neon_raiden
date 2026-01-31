@@ -12,7 +12,7 @@
 
 import { getEntity, World } from '../world';
 import { Transform, Particle, Lifetime, Velocity, PlayerTag, EnemyTag, BossTag } from '../components';
-import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent } from '../events';
+import { HitEvent, KillEvent, PickupEvent, BossPhaseChangeEvent, CamShakeEvent, BloodFogEvent, LevelUpEvent, ComboUpgradeEvent, BerserkModeEvent, BombExplodedEvent, WeaponEffectEvent, ShieldBrokenEvent } from '../events';
 import { triggerShake } from './CameraSystem';
 import { getComponents, view } from '../world';
 import { Blueprint, ENEMY_WEAPON_TABLE } from '../blueprints';
@@ -72,6 +72,9 @@ export function EffectPlayer(world: World, dt: number): void {
                 break;
             case 'WeaponEffect':
                 handleWeaponEffectEvent(world, event as WeaponEffectEvent);
+                break;
+            case 'ShieldBroken':
+                handleShieldBrokenEvent(world, event as ShieldBrokenEvent);
                 break;
         }
     }
@@ -201,6 +204,19 @@ function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
 function handleBombExplodedEvent(world: World, event: BombExplodedEvent): void {
     spawnCircle(world, world.width / 2, world.height / 2, "#fff", 500, 30);
 }
+
+/**
+ * 处理护盾破碎事件
+ */
+function handleShieldBrokenEvent(world: World, event: ShieldBrokenEvent): void {
+    // 护盾这个圈, 从owner位置来开始
+    const [transform] = getComponents(world, event.owner, [Transform])
+    if (transform) {
+        spawnCircle(world, transform.x, transform.y, "#00ffff" , 60, 3);
+    }   
+}
+
+
 
 // /**
 //  * 生成粒子实体

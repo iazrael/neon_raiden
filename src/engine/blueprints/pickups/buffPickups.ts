@@ -99,6 +99,27 @@ export const BLUEPRINT_POWERUP_OPTION: Blueprint = {
 };
 
 /**
+ * 护盾道具蓝图
+ * 立即恢复护盾到最大值，并在Buff持续期间持续恢复
+ */
+export const BLUEPRINT_POWERUP_SHIELD: Blueprint = {
+    /** 变换组件 - 设置道具的初始位置和旋转角度 */
+    Transform: { x: 0, y: 0, rot: 0 },
+
+    /** 速度组件 - 道具缓慢下降 */
+    Velocity: { vx: 0, vy: PICKUP_FALL_SPEED, vrot: 0 },
+
+    /** 精灵组件 - 使用 SpriteKey */
+    Sprite: { spriteKey: SpriteKey.POWERUP_SHIELD, scale: 1 },
+
+    /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
+    PickupItem: { kind: 'buff', blueprint: BuffType.SHIELD, autoPickup: true },
+
+    /** 碰撞盒组件 - 设置道具的碰撞检测区域 */
+    HitBox: { shape: 'rect', halfWidth: 12, halfHeight: 12, layer: CollisionLayer.Pickup },
+};
+
+/**
  * 无敌护盾道具蓝图
  * 获得短暂的无敌护盾
  */

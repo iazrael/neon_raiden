@@ -20,13 +20,17 @@ describe('BuffSystem', () => {
 
 
     describe('SHIELD Buff - 持续效果', () => {
-        it('应该恢复护盾值', () => {
+        it('应该立即加满护盾并持续恢复', () => {
             const playerId = generateId();
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const shield = new Shield({ value: 30, max: 100, regen: 0 });
+            const shield = new Shield({ value: 30, max: 100 });
             addComponent(world, playerId, shield);
+
+            // 模拟PickupSystem的行为：立即加满
+            shield.value = shield.max;
+
             addComponent(world, playerId, new Buff({
                 type: BuffType.SHIELD,
                 value: 20, // 每秒恢复20点
@@ -35,27 +39,15 @@ describe('BuffSystem', () => {
 
             BuffSystem(world, 100); // 100ms
 
-            // 20 * 0.1 = 2点恢复
-            expect(shield.value).toBe(32);
-            expect(shield.regen).toBe(20);
-        });
+            // 保持满值
+            expect(shield.value).toBe(100);
 
-        it('应该设置护盾再生', () => {
-            const playerId = generateId();
+            // 模拟受伤
+            shield.value = 50;
 
-            world.entities.set(playerId, []);
-            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const shield = new Shield({ value: 50, max: 100, regen: 0 });
-            addComponent(world, playerId, shield);
-            addComponent(world, playerId, new Buff({
-                type: BuffType.SHIELD,
-                value: 10,
-                remaining: 5000
-            }));
-
-            BuffSystem(world, 16);
-
-            expect(shield.regen).toBe(10);
+            // 持续恢复
+            BuffSystem(world, 1000); // 1秒
+            expect(shield.value).toBe(70); // 50 + 20*1
         });
 
         it('护盾值不应超过最大值', () => {
@@ -63,8 +55,12 @@ describe('BuffSystem', () => {
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const shield = new Shield({ value: 95, max: 100, regen: 0 });
+            const shield = new Shield({ value: 95, max: 100 });
             addComponent(world, playerId, shield);
+
+            // 模拟PickupSystem的行为：立即加满
+            shield.value = shield.max;
+
             addComponent(world, playerId, new Buff({
                 type: BuffType.SHIELD,
                 value: 100, // 大量恢复
@@ -74,6 +70,33 @@ describe('BuffSystem', () => {
             BuffSystem(world, 1000);
 
             expect(shield.value).toBe(100);
+        });
+
+        it('持续恢复时不超过最大值', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
+            const shield = new Shield({ value: 30, max: 100 });
+            addComponent(world, playerId, shield);
+
+            // 模拟PickupSystem的行为：立即加满
+            shield.value = shield.max;
+
+            addComponent(world, playerId, new Buff({
+                type: BuffType.SHIELD,
+                value: 50, // 每秒恢复50点
+                remaining: 5000
+            }));
+
+            BuffSystem(world, 100); // 保持100
+
+            // 模拟受伤
+            shield.value = 80;
+
+            // 持续恢复
+            BuffSystem(world, 1000); // 1秒，应该恢复50点但不超过100
+            expect(shield.value).toBe(100); // 80 + 50 = 130，但上限是100
         });
     });
 

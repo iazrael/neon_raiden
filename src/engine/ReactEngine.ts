@@ -36,7 +36,7 @@ export class ReactEngine {
     // 玩家状态
     public hp: number = 100;
     public bombs: number = 0;
-    public shield: number = 0;
+    public shieldPercent: number = 0;
     public playerLevel: number = 1;
     public weaponId: WeaponId = WeaponId.VULCAN;
     public secondaryWeapon: WeaponId | null = null;
@@ -200,8 +200,7 @@ export class ReactEngine {
      */
     getShieldPercent(): number {
         // 护盾最大值为生命值的一半
-        const maxShield = this.hp * 0.5;
-        return maxShield > 0 ? Math.max(0, Math.min(100, (this.shield / maxShield) * 100)) : 0;
+        return this.shieldPercent;
     }
 
     /**
@@ -229,8 +228,7 @@ export class ReactEngine {
         // 同步玩家状态
         this.hp = snapshot.player.hp;
         this.bombs = snapshot.player.bombs;
-        // shieldPercent 是通过 getShieldPercent() 方法计算的，不需要存储
-        this.shield = 0;  // 由 snapshot 更新
+        this.shieldPercent = snapshot.player.shieldPercent;
         this.weaponId = snapshot.player.weaponId;
         this.secondaryWeapon = snapshot.player.secondaryWeapon;
         this.weaponLevel = snapshot.player.weaponLevel;

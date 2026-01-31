@@ -28,8 +28,9 @@ import {
     CamShakeEvent,
     PlaySoundEvent,
     EventTags,
+    ShieldBrokenEvent,
 } from "../events";
-import { removeComponent, view, getEvents, World } from "../world";
+import { removeComponent, view, getEvents, World, pushEvent } from "../world";
 
 /**
  * 飙血等级阈值配置
@@ -86,6 +87,13 @@ function applyDamage(world: World, event: HitEvent): void {
         } else {
             remainingDamage -= shield.value;
             shield.value = 0;
+            // 生成护盾破碎特效事件
+            const shieldBrokenEvent: ShieldBrokenEvent = {
+                type: "ShieldBroken",
+                pos: event.pos,
+                owner: event.victim,
+            };
+            pushEvent(world, shieldBrokenEvent);
         }
     }
 

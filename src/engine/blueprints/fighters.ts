@@ -18,9 +18,8 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
     /** 生命值组件 - 设置战机的当前生命值和最大生命值 */
     Health: { hp: 150, max: 200 },
 
-    /** 护盾组件 - 设置战机的初始护盾值和再生速率
-     */
-    Shield: { value: 100, max: 100, regen: 1 },
+    /** 护盾组件 - 设置战机的初始护盾值 */
+    Shield: { value: 100, max: 100 },
 
     /** 速度状态组件 - 设置战机的最大线性速度和角速度 */
     SpeedStat: { maxLinear: 7 * 60, maxAngular: 5 },

@@ -11,7 +11,7 @@
  */
 
 import {  Component } from '../types';
-import { Transform, Weapon, Buff, Health, Bomb, OptionCount, Lifetime } from '../components';
+import { Transform, Weapon, Buff, Health, Bomb, OptionCount, Lifetime, Shield } from '../components';
 import { WeaponId, BuffType } from '../types';
 import { getEvents, pushEvent,World } from '../world';
 import { EventTags, PickupEvent, PlaySoundEvent } from '../events';
@@ -237,10 +237,14 @@ function addDurationBuff(world: World, playerComps: Component[], buffType: BuffT
             break;
 
         case BuffType.SHIELD:
-            // SHIELD: 护盾 Buff
+            // SHIELD: 护盾 Buff - 立即加满护盾
+            const shield = playerComps.find(Shield.check) as Shield | undefined;
+            if (shield) {
+                shield.value = shield.max;
+            }
             playerComps.push(new Buff({
                 type: BuffType.SHIELD,
-                value: 1,
+                value: 20, // 每秒恢复20点
                 remaining: 5000 // 默认 5 秒持续时间
             }));
             break;

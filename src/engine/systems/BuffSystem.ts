@@ -11,11 +11,11 @@
  * 执行顺序：P2 - 在决策层之后
  */
 
-import { World } from '../world';
-import { Component } from '../types';
-import { Buff, Health, Shield, InvulnerableState } from '../components';
-import { BuffType } from '../types';
-import { removeComponent, removeTypes, view } from '../world';
+import { World } from "../world";
+import { Component } from "../types";
+import { Buff, Health, Shield, InvulnerableState } from "../components";
+import { BuffType } from "../types";
+import { removeComponent, removeTypes, view } from "../world";
 
 /**
  * 持续效果 Buff 处理器
@@ -34,11 +34,10 @@ const shieldHandler: DurationBuffHandler = {
         const shield = comps.find(Shield.check);
         if (shield) {
             // 持续恢复护盾（buff.value 是每秒恢复量，dt 是毫秒）
-            shield.regen += buff.value;
-            // 恢复护盾到最大值
-            shield.value = shield.max;
+            const recovery = (buff.value * dt) / 1000;
+            shield.value = Math.min(shield.value + recovery, shield.max);
         }
-    }
+    },
 };
 
 /**
@@ -53,7 +52,7 @@ const invincibilityHandler: DurationBuffHandler = {
             // 添加无敌状态组件（buff.remaining 单位是毫秒）
             invState = new InvulnerableState({
                 duration: buff.remaining,
-                flashColor: '#ffff00' // 金色闪烁
+                flashColor: "#ffff00", // 金色闪烁
             });
             comps.push(invState);
         }
@@ -68,8 +67,41 @@ const invincibilityHandler: DurationBuffHandler = {
                 comps.splice(idx, 1);
             }
         }
-    }
+    },
 };
+
+// /**
+//  * TIME_SLOW Buff - 时间减速
+//  */
+// const timeSlowHandler: DurationBuffHandler = {
+//     update(buff: Buff, world: World, comps: Component[], dt: number): void {
+//         // 使用 view 查询 TimeSlow 实体
+//         const timeSlowEntities = [...view(world, [TimeSlow])];
+// TODO: 明天改造
+//         if (timeSlowEntities.length > 0) {
+//             // 存在 TimeSlow 实体: 应用减速
+//             const [, [timeSlow]] = timeSlowEntities[0];
+
+//             // 限制范围防止异常值
+//             const safeScale = Math.max(0.1, Math.min(2.0, timeSlow.scale));
+//             world.timeScale = safeScale;
+
+//             // 生成时间减速线条特效
+//             spawnLines(world, world.width, 20);
+//         } else {
+//             // ❗不存在 TimeSlow 实体: 重置为正常速度
+//             world.timeScale = 1.0;
+
+//             // 清除时间减速线条特效
+//             clearLines(world);
+//         }
+//     },
+
+//     onExpired(buff: Buff, world: World, comps: Component[]): void {
+//         // ❗不存在 TimeSlow 实体: 重置为正常速度
+//         world.timeScale = 1.0;
+//     },
+// };
 
 /**
  * 持续效果 Buff 处理器映射表
@@ -78,6 +110,7 @@ const invincibilityHandler: DurationBuffHandler = {
 const DURATION_BUFF_HANDLERS: Partial<Record<BuffType, DurationBuffHandler>> = {
     [BuffType.SHIELD]: shieldHandler,
     [BuffType.INVINCIBILITY]: invincibilityHandler,
+    // [BuffType.TIME_SLOW]: timeSlowHandler,
 };
 
 /**

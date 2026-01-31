@@ -21,6 +21,7 @@ import {
     ComboBreakEvent,
     ComboUpgradeEvent,
     BombExplodedEvent,
+    ShieldBrokenEvent,
 } from "../events";
 import { audioPlayer } from "../audio";
 import { ExplosionSize } from "../audio/AudioEngine";
@@ -66,6 +67,9 @@ export function AudioSystem(world: World, dt: number): void {
                 break;
             case "BombExploded":
                 handleBombExplosionEvent(world, event as BombExplodedEvent);
+                break;
+            case "ShieldBroken":
+                handleShieldBrokenEvent(world, event as ShieldBrokenEvent);
                 break;
         }
     }
@@ -161,6 +165,13 @@ function handleComboUpgradeEvent(world: World, event: ComboUpgradeEvent): void {
  */
 function handleBombExplosionEvent(world: World, event: BombExplodedEvent): void {
     audioPlayer.playBomb()
+}
+
+/**
+ * 处理护盾破碎事件
+ */
+function handleShieldBrokenEvent(world: World, event: ShieldBrokenEvent): void {
+    audioPlayer.playShieldBreak()
 }
 
 
