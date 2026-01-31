@@ -20,6 +20,7 @@ import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
 import { view, World } from '../world';
 import { getEnemyStats } from '../configs/enemyGrowth';
+import { BOSS_SPAWN_TIME } from '../configs';
 
 
 /**
@@ -214,29 +215,13 @@ export function SpawnSystem(world: World, dt: number): void {
     }
 }
 
-/**
- * Boss 刷怪计时器状态
- */
-interface BossSpawnState {
-    timer: number;
-    spawned: boolean;
-}
 
-const bossSpawnState: BossSpawnState = {
-    timer: 0,
-    spawned: false
-};
-
-/**
- * Boss 出现时间（毫秒）
- */
-const BOSS_SPAWN_TIME = 60 * 1000; // 60秒后Boss出现
 
 /**
  * 检查是否需要刷 Boss
  */
 function shouldSpawnBoss(world: World): boolean {
-    if (bossSpawnState.spawned) return false;
+    if (world.bossState.spawned) return false;
 
     // 检查场上是否已有 Boss
     for (const [id, [_]] of view(world, [BossTag])) {
@@ -244,9 +229,9 @@ function shouldSpawnBoss(world: World): boolean {
     }
 
     // 时间到了，刷 Boss (使用配置的时间或默认 60 秒)
-    const spawnTime = bossSpawnState.timer > 0 ? bossSpawnState.timer : BOSS_SPAWN_TIME;
+    const spawnTime = world.bossState.timer > 0 ? world.bossState.timer : BOSS_SPAWN_TIME;
     if (world.time >= spawnTime) {
-        bossSpawnState.spawned = true;
+        world.bossState.spawned = true;
         return true;
     }
 
@@ -273,15 +258,15 @@ function doSpawnBoss(world: World, bossId: BossId): void {
 /**
  * 重置 Boss 刷怪状态（用于关卡切换）
  */
-export function resetBossSpawnState(): void {
-    bossSpawnState.timer = 0;
-    bossSpawnState.spawned = false;
+export function resetBossSpawnState(world: World): void {
+    world.bossState.timer = 0;
+    world.bossState.spawned = false;
 }
 
 /**
  * 设置 Boss 出现时间
  */
-export function setBossSpawnTime(time: number): void {
+export function setBossSpawnTime(world: World, time: number): void {
     // 修改 BOSS_SPAWN_TIME 常量的效果需要持久化到状态中
-    bossSpawnState.timer = time;
+    world.bossState.timer = time;
 }

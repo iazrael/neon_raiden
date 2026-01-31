@@ -23,6 +23,7 @@ import { Transform, HitBox, Bullet, PlayerTag, EnemyTag, PickupItem, Invulnerabl
 import { CollisionLayer, shouldCheckCollision } from '../types/collision';
 import { pushEvent, World } from '../world';
 import { HitEvent, PickupEvent } from '../events';
+import { COLLISION_DAMAGE } from '../configs';
 
 // ==================== 空间哈希网格 ====================
 
@@ -564,7 +565,7 @@ function handlePlayerHitEnemy(
     const hitEvent: HitEvent = {
         type: 'Hit',
         pos: { x: enemyTransform.x, y: enemyTransform.y },
-        damage: 20, // FIXME: 冲撞伤害值可配置
+        damage: COLLISION_DAMAGE,
         owner: enemyId,
         victim: playerId
     };
@@ -574,7 +575,7 @@ function handlePlayerHitEnemy(
     const enemyHitEvent: HitEvent = {
         type: 'Hit',
         pos: { x: enemyTransform.x, y: enemyTransform.y },
-        damage: 10, // FIXME: 冲撞伤害值可配置
+        damage: COLLISION_DAMAGE,
         owner: playerId,
         victim: enemyId
     };

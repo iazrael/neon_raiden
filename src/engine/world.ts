@@ -1,5 +1,6 @@
 import { EntityId, Component, GameStatus, ComboState } from './types';
 import { Event as GameEvent } from './events';
+import { BOSS_SPAWN_TIME } from './configs';
 
 
 /** 相机状态 */
@@ -18,6 +19,14 @@ export interface CameraState {
 /** 渲染状态 */
 export interface RenderState {
     camera: CameraState;
+}
+
+/** Boss 刷怪状态 */
+export interface BossSpawnState {
+    /** Boss 出现时间（毫秒），默认 60000 (60秒) */
+    timer: number;
+    /** Boss 是否已刷出 */
+    spawned: boolean;
 }
 
 // 世界接口
@@ -63,6 +72,9 @@ export interface World {
 
     // 渲染状态（由 CameraSystem/RenderSystem 共享）
     renderState: RenderState;
+
+    // Boss 刷怪状态
+    bossState: BossSpawnState;
 }
 
 
@@ -96,6 +108,10 @@ export function createWorld(): World {
                 shakeTimer: 0,
                 shakeIntensity: 0,
             },
+        },
+        bossState: {
+            timer: BOSS_SPAWN_TIME,
+            spawned: false,
         },
     };
 }
@@ -137,6 +153,17 @@ type InstanceTuple<T extends Ctor[]> = {
  * 使用 [...T] 语法强制 TypeScript 将输入推导为元组，而不是数组。
  * 这样 [Transform, Velocity] 就会被识别为 [Transform, Velocity]，
  * 而不是 (Transform | Velocity)[]
+ * @example
+ * ```ts
+ * // 使用 view 查询 TimeSlow 实体
+ * const timeSlowEntities = [...view(world, [TimeSlow])];
+ * ```
+ * ```ts
+ * for (const [_id, [particle, lifetime], comps] of view(world, [Particle, Lifetime])) {
+ *      // ...
+ * }
+ * ```
+ * 
  */
 export function* view<T extends Ctor[]>(
     w: World,

@@ -13,9 +13,14 @@
  * 执行顺序：P7 - 在 DamageResolutionSystem 之后，RenderSystem 之前
  */
 
-import { World, view } from '../world';
-import { VisualEffect, VisualParticle, VisualLine, VisualCircle } from '../components/visual';
-import { ParticleEffectConfig } from '../blueprints/effects';
+import { World, getComponents, view } from "../world";
+import {
+    VisualEffect,
+    VisualParticle,
+    VisualLine,
+    VisualCircle,
+} from "../components/visual";
+import { ParticleEffectConfig } from "../blueprints/effects";
 
 // ========== 创建 API ==========
 
@@ -31,27 +36,29 @@ export function spawnParticles(
     world: World,
     x: number,
     y: number,
-    config: ParticleEffectConfig
+    config: ParticleEffectConfig,
 ): void {
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        for (let i = 0; i < config.count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speedMin = config.speedMin;
-            const speedMax = config.speedMax;
-            const speed = speedMin + Math.random() * (speedMax - speedMin);
-            const size = config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin);
-            effect.particles.push({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                life: config.life,
-                maxLife: config.life,
-                color: config.color,
-                size: size,
-            });
-        }
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    if (!effect) {
         return;
+    }
+    for (let i = 0; i < config.count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speedMin = config.speedMin;
+        const speedMax = config.speedMax;
+        const speed = speedMin + Math.random() * (speedMax - speedMin);
+        const size =
+            config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin);
+        effect.particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: config.life,
+            maxLife: config.life,
+            color: config.color,
+            size: size,
+        });
     }
 }
 
@@ -61,19 +68,24 @@ export function spawnParticles(
  * @param width 画布宽度
  * @param maxHeight 最大数量
  */
-export function spawnLines(world: World, width: number, maxHeight: number = 20): void {
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        // 补充到最大数量
-        while (effect.lines.length < maxHeight) {
-            effect.lines.push({
-                x: Math.random() * width,
-                y: -50,
-                length: Math.random() * 100 + 50,
-                speed: Math.random() * 5 + 2,
-                alpha: Math.random() * 0.5 + 0.2,
-            });
-        }
+export function spawnLines(
+    world: World,
+    width: number,
+    maxHeight: number = 20,
+): void {
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    if (!effect) {
         return;
+    }
+    // 补充到最大数量
+    while (effect.lines.length < maxHeight) {
+        effect.lines.push({
+            x: Math.random() * width,
+            y: -50,
+            length: Math.random() * 100 + 50,
+            speed: Math.random() * 5 + 2,
+            alpha: Math.random() * 0.5 + 0.2,
+        });
     }
 }
 
@@ -82,9 +94,11 @@ export function spawnLines(world: World, width: number, maxHeight: number = 20):
  * @param world 世界对象
  */
 export function clearLines(world: World): void {
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        effect.lines = [];
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    if (!effect) {
+        return;
     }
+    effect.lines = [];
 }
 
 /**
@@ -100,22 +114,23 @@ export function spawnCircle(
     world: World,
     x: number,
     y: number,
-    color: string = '#ffffff',
+    color: string = "#ffffff",
     maxRadius: number = 150,
-    width: number = 5
+    width: number = 5,
 ): void {
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        effect.circles.push({
-            x,
-            y,
-            radius: 10,
-            maxRadius,
-            life: 1.0,
-            color,
-            width,
-        });
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    if (!effect) {
         return;
     }
+    effect.circles.push({
+        x,
+        y,
+        radius: 10,
+        maxRadius,
+        life: 1.0,
+        color,
+        width,
+    });
 }
 
 // ========== 更新逻辑 ==========
@@ -189,21 +204,22 @@ function updateCircles(circles: VisualCircle[], dt: number): void {
  */
 export function VisualEffectSystem(world: World, dt: number): void {
     const height = world.height;
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    if (!effect) {
+        return;
+    }
+    // 更新粒子
+    if (effect.particles.length > 0) {
+        updateParticles(effect.particles, dt);
+    }
 
-    for (const [_id, [effect]] of view(world, [VisualEffect])) {
-        // 更新粒子
-        if (effect.particles.length > 0) {
-            updateParticles(effect.particles, dt);
-        }
+    // 更新线条
+    if (effect.lines.length > 0) {
+        updateLines(effect.lines, height, dt);
+    }
 
-        // 更新线条
-        if (effect.lines.length > 0) {
-            updateLines(effect.lines, height, dt);
-        }
-
-        // 更新圆环
-        if (effect.circles.length > 0) {
-            updateCircles(effect.circles, dt);
-        }
+    // 更新圆环
+    if (effect.circles.length > 0) {
+        updateCircles(effect.circles, dt);
     }
 }

@@ -3,17 +3,14 @@
  */
 
 import { SpawnSystem, resetBossSpawnState, setBossSpawnTime } from '../../src/engine/systems/SpawnSystem';
-import { World, Component } from '../../src/engine/types';
 import { Transform, Health, BossTag, BossAI, SpeedStat } from '../../src/engine/components';
 import { EnemyId } from '../../src/engine/types/ids';
+import { World } from '../../src/engine/world';
 
 describe('SpawnSystem', () => {
     let mockWorld: World;
 
     beforeEach(() => {
-        // 重置 Boss 状态
-        resetBossSpawnState();
-
         // 创建模拟世界对象
         mockWorld = {
             entities: new Map(),
@@ -31,7 +28,11 @@ describe('SpawnSystem', () => {
             events: [],
             comboState: { count: 0, timer: 0, multiplier: 1 },
             removedEntities: [],
+            bossState: { timer: 60000, spawned: false },
         } as unknown as World;
+
+        // 重置 Boss 状态
+        resetBossSpawnState(mockWorld);
     });
 
     describe('刷怪点数机制', () => {
@@ -131,7 +132,7 @@ describe('SpawnSystem', () => {
 
     describe('重置功能', () => {
         it('resetBossSpawnState 应该重置 Boss 生成状态', () => {
-            resetBossSpawnState();
+            resetBossSpawnState(mockWorld);
 
             // 重置后，时间满足条件应该再次触发 Boss
             mockWorld.time = 61;
@@ -141,7 +142,7 @@ describe('SpawnSystem', () => {
         });
 
         it('setBossSpawnTime 应该设置 Boss 出现时间', () => {
-            setBossSpawnTime(120);
+            setBossSpawnTime(mockWorld, 120);
 
             // 设置后需要检查逻辑
             expect(() => SpawnSystem(mockWorld, 0.1)).not.toThrow();

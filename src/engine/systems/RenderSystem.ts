@@ -14,10 +14,25 @@
  * 执行顺序：P7 - 在 CameraSystem 之后
  */
 
-import { Component } from '../types/base';
-import { World, view } from '../world';
-import { Transform, Sprite, Particle, PlayerTag, EnemyTag, Shield, InvulnerableState, Health, BossTag, TimeSlow, Shockwave, Lifetime, VisualEffect, VisualLine } from '../components';
-import { DebugConfig } from '../config/DebugConfig';
+import { Component } from "../types/base";
+import { World, getComponents, view } from "../world";
+import {
+    Transform,
+    Sprite,
+    Particle,
+    PlayerTag,
+    EnemyTag,
+    Shield,
+    InvulnerableState,
+    Health,
+    BossTag,
+    TimeSlow,
+    Shockwave,
+    Lifetime,
+    VisualEffect,
+    VisualLine,
+} from "../components";
+import { DebugConfig } from "../config/DebugConfig";
 
 /**
  * 渲染上下文
@@ -41,7 +56,7 @@ enum RenderLayer {
 /**
  * 渲染项类型
  */
-type RenderItemType = 'sprite' | 'particle' | 'shockwave';
+type RenderItemType = "sprite" | "particle" | "shockwave";
 
 /**
  * 渲染项
@@ -109,13 +124,10 @@ function collectRenderItems(world: World): RenderQueue {
         timeSlowActive: false,
         visualEffect: null,
     };
-
+    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
+    queue.visualEffect = effect;
+    
     for (const [id, comps] of world.entities) {
-        // 特效没有 transform
-        const visualEffect = comps.find(VisualEffect.check);
-        if (visualEffect) {
-            queue.visualEffect = visualEffect
-        }
         // 时间减速状态
         if (comps.some(TimeSlow.check)) {
             queue.timeSlowActive = true;
@@ -128,7 +140,7 @@ function collectRenderItems(world: World): RenderQueue {
         const sprite = comps.find(Sprite.check);
         if (sprite) {
             queue.sprites.push({
-                type: 'sprite',
+                type: "sprite",
                 layer: determineLayer(comps),
                 transform,
                 sprite,
@@ -141,7 +153,12 @@ function collectRenderItems(world: World): RenderQueue {
             const invulnerable = comps.find(InvulnerableState.check);
             const health = comps.find(Health.check);
             if (shield || invulnerable) {
-                queue.playerEffect = { transform, shield, invulnerable, health };
+                queue.playerEffect = {
+                    transform,
+                    shield,
+                    invulnerable,
+                    health,
+                };
             }
         }
 
@@ -151,27 +168,29 @@ function collectRenderItems(world: World): RenderQueue {
         if (bossTag && health) {
             queue.bossInfo = { transform, health };
         }
-
-
     }
 
     return queue;
 }
 
-
 /**
  * 绘制背景星空效果
  */
-function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number, timeSlowActive: boolean): void {
+function drawBackground(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    timeSlowActive: boolean,
+): void {
     // 黑色背景
-    ctx.fillStyle = '#050505';
+    ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, width, height);
 
     const t = Date.now() / 1000;
     const timeScale = timeSlowActive ? 0.5 : 1.0;
 
     // 远处的星星（慢速）
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
     for (let i = 0; i < 50; i++) {
         const sx = (i * 137) % width;
         const sy = (i * 97 + t * 20 * timeScale) % height;
@@ -179,7 +198,7 @@ function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: nu
     }
 
     // 近处的星星（快速）
-    ctx.fillStyle = 'rgba(200, 230, 255, 0.8)';
+    ctx.fillStyle = "rgba(200, 230, 255, 0.8)";
     for (let i = 0; i < 30; i++) {
         const speed = (i % 3) + 2;
         const sx = (i * 57) % width;
@@ -198,7 +217,7 @@ function drawSprite(
     item: RenderItem,
     camX: number,
     camY: number,
-    zoom: number
+    zoom: number,
 ): void {
     const { transform, sprite } = item;
     if (!sprite) return;
@@ -231,13 +250,13 @@ function drawSprite(
         ctx.drawImage(image, -pivotX, -pivotY, itemWidth, itemHeight);
     } else {
         // 图片未加载，使用颜色占位
-        ctx.fillStyle = sprite.color || '#fff';
+        ctx.fillStyle = sprite.color || "#fff";
         ctx.fillRect(-pivotX, -pivotY, itemWidth, itemHeight);
     }
 
     // 受伤闪烁效果
     if (sprite.hitFlashUntil && Date.now() < sprite.hitFlashUntil) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
         ctx.fillRect(-pivotX, -pivotY, itemWidth, itemHeight);
     }
 
@@ -313,7 +332,7 @@ function drawPlayerEffect(
     ctx: CanvasRenderingContext2D,
     data: PlayerEffectData,
     camX: number,
-    camY: number
+    camY: number,
 ): void {
     const { transform, shield, invulnerable, health } = data;
     const x = transform.x - camX;
@@ -330,7 +349,7 @@ function drawPlayerEffect(
         ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
         ctx.lineWidth = 3;
         ctx.shadowBlur = 10;
-        ctx.shadowColor = '#00ffff';
+        ctx.shadowColor = "#00ffff";
         ctx.beginPath();
         ctx.arc(0, 0, 40, 0, Math.PI * 2);
         ctx.stroke();
@@ -349,14 +368,14 @@ function drawPlayerEffect(
         ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
         ctx.lineWidth = 3;
         ctx.shadowBlur = 20;
-        ctx.shadowColor = '#ffd700';
+        ctx.shadowColor = "#ffd700";
         ctx.beginPath();
         ctx.arc(0, 0, 40, 0, Math.PI * 2);
         ctx.stroke();
 
         // 粒子效果
         for (let i = 0; i < 5; i++) {
-            const angle = (t + i * Math.PI * 2 / 5) % (Math.PI * 2);
+            const angle = (t + (i * Math.PI * 2) / 5) % (Math.PI * 2);
             const radius = 45 + Math.sin(t * 2 + i) * 5;
             const px = Math.cos(angle) * radius;
             const py = Math.sin(angle) * radius;
@@ -378,7 +397,7 @@ function drawBossHealthBar(
     ctx: CanvasRenderingContext2D,
     bossInfo: BossInfo,
     screenWidth: number,
-    screenHeight: number
+    screenHeight: number,
 ): void {
     const { health } = bossInfo;
     const hpPercent = health.hp / health.max;
@@ -389,24 +408,24 @@ function drawBossHealthBar(
     const barY = 20;
 
     // 背景条
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+    ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
     ctx.fillRect(barX, barY, barWidth, barHeight);
 
     // 当前血量
     let barColor: string;
     if (hpPercent > 0.6) {
-        barColor = '#00ff00';
+        barColor = "#00ff00";
     } else if (hpPercent > 0.3) {
-        barColor = '#ffff00';
+        barColor = "#ffff00";
     } else {
-        barColor = '#ff0000';
+        barColor = "#ff0000";
     }
 
     ctx.fillStyle = barColor;
     ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
 
     // 边框
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
     ctx.lineWidth = 2;
     ctx.strokeRect(barX, barY, barWidth, barHeight);
 }
@@ -418,13 +437,13 @@ function drawVisualEffectCircles(
     ctx: CanvasRenderingContext2D,
     effect: VisualEffect,
     camX: number,
-    camY: number
+    camY: number,
 ): void {
     if (!effect || effect.circles.length === 0) {
-        return
+        return;
     }
     ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = "source-over";
     // ctx.shadowBlur = 15;
     for (const circle of effect?.circles) {
         ctx.globalAlpha = Math.max(0, circle.life);
@@ -433,7 +452,13 @@ function drawVisualEffectCircles(
         ctx.lineWidth = circle.width;
         ctx.strokeStyle = circle.color;
         ctx.beginPath();
-        ctx.arc(circle.x - camX, circle.y - camY, circle.radius, 0, Math.PI * 2);
+        ctx.arc(
+            circle.x - camX,
+            circle.y - camY,
+            circle.radius,
+            0,
+            Math.PI * 2,
+        );
         ctx.stroke();
     }
     ctx.restore();
@@ -446,13 +471,13 @@ function drawVisualEffectParticles(
     ctx: CanvasRenderingContext2D,
     effect: VisualEffect,
     camX: number,
-    camY: number
+    camY: number,
 ): void {
     if (!effect || effect.particles.length === 0) {
-        return
+        return;
     }
     ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = "lighter";
     for (const p of effect?.particles) {
         const alpha = Math.max(0, p.life / p.maxLife);
         ctx.globalAlpha = alpha;
@@ -464,19 +489,23 @@ function drawVisualEffectParticles(
     ctx.restore();
 }
 
-
 /**
  * 绘制时间减速特效
  */
-function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, effect: VisualEffect, width: number, height: number): void {
+function drawTimeSlowEffect(
+    ctx: CanvasRenderingContext2D,
+    effect: VisualEffect,
+    width: number,
+    height: number,
+): void {
     // 从 VisualEffect 组件获取线条
     if (!effect || effect.lines.length === 0) {
-        return
+        return;
     }
     ctx.save();
 
     // 蓝色色调覆盖
-    ctx.fillStyle = 'rgba(200, 230, 255, 0.1)';
+    ctx.fillStyle = "rgba(200, 230, 255, 0.1)";
     ctx.fillRect(0, 0, width, height);
 
     // 绘制线条
@@ -498,14 +527,14 @@ function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, effect: VisualEffect,
 export function RenderSystem(
     world: World,
     renderCtx: RenderContext,
-    dt: number
+    dt: number,
 ): void {
     const { canvas, context, width, height } = renderCtx;
     const { camera } = world.renderState;
 
     // 调试日志
     if (DebugConfig.render.enabled && DebugConfig.render.logEntities) {
-        console.log('[RenderSystem] Entities:', world.entities.size);
+        console.log("[RenderSystem] Entities:", world.entities.size);
     }
 
     // 1. 单次收集所有渲染项
@@ -513,7 +542,6 @@ export function RenderSystem(
 
     // 2. 绘制背景
     drawBackground(context, width, height, queue.timeSlowActive);
-
 
     // 计算相机偏移
     const camX = camera.shakeX;
