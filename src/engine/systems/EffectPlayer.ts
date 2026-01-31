@@ -18,7 +18,12 @@ import { getComponents, view } from '../world';
 import { Blueprint, ENEMY_WEAPON_TABLE } from '../blueprints';
 import { spawnFromBlueprint } from '../factory';
 import { PARTICLE_EFFECTS, EXPLOSION_PARTICLES, PARTICLE_DEBUG, ParticleId } from '../blueprints/effects';
-import { spawnCircle, spawnParticles } from './VisualEffectSystem';
+import { spawnCircle, spawnMeteor, spawnParticles } from './VisualEffectSystem';
+
+/**
+ * 流星生成计时器
+ */
+const meteorTimer = { value: 0 };
 
 /**
  * 特效播放器主函数
@@ -71,6 +76,8 @@ export function EffectPlayer(world: World, dt: number): void {
         }
     }
 
+    // 生成流星
+    spawnMeteor(world, world.width, world.height, dt, meteorTimer);  
     // 更新所有粒子动画帧
     updateParticles(world, dt);
 }
