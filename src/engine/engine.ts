@@ -29,7 +29,7 @@ import { RenderSystem, type RenderContext } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { TimeSlowSystem } from './systems/TimeSlowSystem';
-import { VisualEffectSystem } from './systems/VisualEffectSystem';
+import { VisualEffectSystem, spawnMeteor } from './systems/VisualEffectSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 // ==============
@@ -40,6 +40,11 @@ export class Engine {
     private canvas: HTMLCanvasElement;
     private resizeObserver: ResizeObserver;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
+
+    /**
+     * 流星生成计时器
+     */
+    private meteorTimer = { value: 0 };
 
     /**
      * 最大时间增量（毫秒）
@@ -165,6 +170,7 @@ export class Engine {
         // P7. 表现层 (视听反馈)
         CameraSystem(world, dt);                        // 17. 相机系统
         EffectPlayer(world, dt);                        // 18. 效果播放系统
+        spawnMeteor(world, world.width, world.height, dt, this.meteorTimer);  // 18.5 生成流星
         VisualEffectSystem(world, dt);                  // 19. 视觉特效系统（更新状态）
         // AudioSystem(world, dt);                     // 20. 音频系统 (暂时禁用 - 使用旧 GameAudioSystem)
 
