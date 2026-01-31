@@ -199,6 +199,8 @@ function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
  * 处理炸弹爆炸事件
  */
 function handleBombExplodedEvent(world: World, event: BombExplodedEvent): void {
+
+    spawnCircle(world, world.width / 2, world.height / 2, "#fff", 500, 30);
     // // 生成全屏闪光特效
     // spawnParticle(world, 'screen_flash', world.width / 2, world.height / 2);
 

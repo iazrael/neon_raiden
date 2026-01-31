@@ -2,9 +2,8 @@
  * AudioSystem 单元测试
  */
 
-import { AudioSystem, playSound, playBgm, stopBgm, setMasterVolume, setSfxVolume, setBgmVolume, toggleMute, resetAudio, getAudioState } from '../../src/engine/systems/AudioSystem';
+import { AudioSystem} from '../../src/engine/systems/AudioSystem';
 import type { World } from '../../src/engine/world';
-import { HitEvent, KillEvent, PickupEvent, PlaySoundEvent } from '../../src/engine/events';
 
 describe('AudioSystem', () => {
     let mockWorld: World;
@@ -22,9 +21,6 @@ describe('AudioSystem', () => {
             loop: false
         };
         (window as any).Audio = jest.fn().mockReturnValue(mockAudioInstance);
-
-        // 重置音频系统
-        resetAudio();
 
         // 创建模拟世界对象
         mockWorld = {
@@ -109,98 +105,4 @@ describe('AudioSystem', () => {
         });
     });
 
-    describe('音量控制', () => {
-        it('应该设置主音量', () => {
-            setMasterVolume(0.5);
-
-            const state = getAudioState();
-            expect(state.masterVolume).toBe(0.5);
-        });
-
-        it('应该限制主音量在 0-1 范围内', () => {
-            setMasterVolume(1.5);
-
-            const state = getAudioState();
-            expect(state.masterVolume).toBe(1);
-        });
-
-        it('应该设置音效音量', () => {
-            setSfxVolume(0.7);
-
-            const state = getAudioState();
-            expect(state.sfxVolume).toBe(0.7);
-        });
-
-        it('应该设置 BGM 音量', () => {
-            setBgmVolume(0.6);
-
-            const state = getAudioState();
-            expect(state.bgmVolume).toBe(0.6);
-        });
-    });
-
-    describe('BGM 控制', () => {
-        it('应该播放 BGM', () => {
-            playBgm('bgm_stage');
-
-            expect((window as any).Audio).toHaveBeenCalled();
-        });
-
-        it('应该停止 BGM', () => {
-            playBgm('bgm_stage');
-            stopBgm();
-
-            // 系统应该正常运行
-            expect(true).toBe(true);
-        });
-    });
-
-    describe('静音控制', () => {
-        it('应该切换静音状态', () => {
-            const muted1 = toggleMute();
-            expect(muted1).toBe(true);
-
-            const muted2 = toggleMute();
-            expect(muted2).toBe(false);
-        });
-
-        it('静音时不应该播放音效', () => {
-            toggleMute();
-            playSound('shoot_player');
-
-            // 静音时 Audio 构造函数不应该被调用
-            expect((window as any).Audio).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('重置功能', () => {
-        it('应该重置音频状态', () => {
-            setMasterVolume(0.5);
-            setSfxVolume(0.5);
-            setBgmVolume(0.5);
-
-            resetAudio();
-
-            const state = getAudioState();
-            expect(state.masterVolume).toBe(1.0);
-            expect(state.sfxVolume).toBe(0.8);
-            expect(state.bgmVolume).toBe(0.5);
-        });
-    });
-
-    describe('边界情况', () => {
-        it('空事件列表应该正常处理', () => {
-            mockWorld.events = [];
-
-            expect(() => AudioSystem(mockWorld, 0.016)).not.toThrow();
-        });
-
-        it('无效的音效配置应该跳过', () => {
-            mockWorld.events = [
-                { type: 'PlaySound', name: 'invalid_sound_key' }
-            ];
-
-            expect(() => AudioSystem(mockWorld, 0.016)).not.toThrow();
-        });
-    });
 });

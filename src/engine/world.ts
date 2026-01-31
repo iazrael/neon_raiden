@@ -243,6 +243,40 @@ export function getComponents<T extends Ctor[]>(
 }
 
 /**
+ * 从 comps 一次取多个类型的组件（类型安全）
+ *
+ * @param comps 组件数组
+ * @param types 组件构造函数数组
+ * @returns 组件元组（未找到的组件位置为 undefined）
+ *
+ * @example
+ * ```ts
+ * // 一次性获取
+ * const [entrance, speedStat, moveIntent] = getComponentsFromComps(
+ *     comps,
+ *     [BossEntrance, SpeedStat, MoveIntent]
+ * );
+ * // entrance: BossEntrance | undefined
+ * // speedStat: SpeedStat | undefined
+ * // moveIntent: MoveIntent | undefined
+ * ```
+ */
+export function getComponentsFromComps<T extends Ctor[]>(
+    comps: Component[],
+    types: [...T]
+): { [K in keyof T]: T[K] extends Ctor<infer U> ? U | undefined : undefined } {
+    const result: any[] = [];
+    for (const Ctor of types) {
+        const found = comps.find(c => c instanceof Ctor);
+        result.push(found ?? undefined);
+    }
+
+    return result as any;
+}
+
+
+
+/**
  * 按类型移除组件（类型安全）
  *
  * @param w World 对象

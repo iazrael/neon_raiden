@@ -15,7 +15,7 @@
  */
 
 import { Component } from "../types/base";
-import { World, getComponents, view } from "../world";
+import { World, getComponents, getComponentsFromComps, getEntity, view } from "../world";
 import {
     Transform,
     Sprite,
@@ -54,22 +54,14 @@ enum RenderLayer {
     PICKUP = 2,
 }
 
-/**
- * 渲染项类型
- */
-type RenderItemType = "sprite" | "particle" | "shockwave";
 
 /**
  * 渲染项
  */
 interface RenderItem {
-    type: RenderItemType;
     layer: number;
     transform: Transform;
-    sprite?: Sprite;
-    particle?: Particle;
-    shockwave?: Shockwave;
-    lifetime?: Lifetime;
+    sprite: Sprite;
 }
 
 /**
@@ -130,8 +122,9 @@ function collectRenderItems(world: World): RenderQueue {
     queue.meteors = effect?.meteors ?? [];
 
     // 收集玩家信息, 绘制额外的护盾\血条等
-    if (world.playerId > 0) {
-        const [shield, invulnerable, health, transform] = getComponents(world, world.playerId, [Shield, InvulnerableState, Health, Transform])
+    const player = getEntity(world, world.playerId)
+    if (player) {
+        const [shield, invulnerable, health, transform] = getComponentsFromComps(player, [Shield, InvulnerableState, Health, Transform])
         if (shield || invulnerable) {
             queue.playerEffect = {
                 transform,
@@ -142,15 +135,16 @@ function collectRenderItems(world: World): RenderQueue {
         }
     }
 
-    if (world.bossState.bossId > 0) {
-        // 收集 boss 信息
-        const [transform, health] = getComponents(world, world.bossState.bossId, [Transform, Health]);
+    // 收集 boss 信息
+    const boss = getEntity(world, world.bossState.bossId)
+    if (boss) {
+        const [transform, health] = getComponentsFromComps(boss, [Transform, Health]);  
         queue.bossInfo = { transform, health };
     }
+    
     // 收集所有可以绘制的精灵
     for (const [id, [transform, sprite], comps] of view(world, [Transform, Sprite])) {
         queue.sprites.push({
-            type: "sprite",
             layer: determineLayer(comps),
             transform,
             sprite,
