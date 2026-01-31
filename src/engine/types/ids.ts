@@ -88,14 +88,14 @@ export enum WeaponPattern {
  */
 export enum AmmoType {
     // === 玩家弹药 ===
-    VULCAN_SPREAD = 'vulcanSpread',   // 散弹扇形
-    LASER_BEAM = 'laserBeam',         // 激光束
-    MISSILE_HOMING = 'missileHoming', // 追踪导弹
-    WAVE_PULSE = 'wavePulse',         // 波动脉冲
-    PLASMA_ORB = 'plasmaOrb',         // 等离子球
-    TESLA_CHAIN = 'teslaChain',       // 电磁连锁
-    MAGMA_POOL = 'magmaPool',         // 熔岩池
-    SHURIKEN_BOUNCE = 'shurikenBounce', // 手里剑反弹
+    VULCAN_SPREAD = 'vulcan_spread',   // 散弹扇形
+    LASER_BEAM = 'laser_beam',         // 激光束
+    MISSILE_HOMING = 'missile_homing', // 追踪导弹
+    WAVE_PULSE = 'wave_pulse',         // 波动脉冲
+    PLASMA_ORB = 'plasma_orb',         // 等离子球
+    TESLA_CHAIN = 'tesla_chain',       // 电磁连锁
+    MAGMA_POOL = 'magma_pool',         // 熔岩池
+    SHURIKEN_BOUNCE = 'shuriken_bounce', // 手里剑反弹
 
     // === 敌人弹药 ===
     ENEMY_ORB_RED = 'enemy_orb_red',       // 普通红球

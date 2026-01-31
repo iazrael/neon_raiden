@@ -113,7 +113,7 @@ export const AMMO_TABLE: Record<AmmoType, AmmoSpec> = {
         /** 子弹飞行速度（像素/秒） */
         speed: 1200,
         /** 可穿透敌人数（0 = 不穿透） */
-        pierce: 5,
+        pierce: 3,
         /** 可反弹次数（0 = 不反弹） */
         bounces: 0,
         /** 命中时触发的效果 ID 列表（字符串引用） */

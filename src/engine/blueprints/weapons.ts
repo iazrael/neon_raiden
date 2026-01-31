@@ -65,7 +65,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
 
     /**
      * 波浪炮武器蓝图
-     * 范围攻击武器，能够同时打击多个目标
+     * 范围攻击武器，一发炮弹能够同时打击多个聚在一起目标
      */
     [WeaponId.WAVE]: {
         id: WeaponId.WAVE,
@@ -73,9 +73,9 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
         cooldown: 400,
         curCD: 0,
         maxLevel: 3,
-        pattern: WeaponPattern.SPREAD,
+        pattern: WeaponPattern.AIMED,
         bulletCount: 1,
-        spread: 30,
+        spread: 0,
         pierceBonus: 0,
         bouncesBonus: 0
     },
