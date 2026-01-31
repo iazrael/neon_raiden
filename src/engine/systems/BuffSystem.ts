@@ -34,11 +34,9 @@ const shieldHandler: DurationBuffHandler = {
         const shield = comps.find(Shield.check);
         if (shield) {
             // 持续恢复护盾（buff.value 是每秒恢复量，dt 是毫秒）
-            shield.regen = buff.value;
-            shield.value = Math.min(shield.value + buff.value * (dt / 1000), 100);
-        } else if (buff.value > 0) {
-            // 如果没有护盾组件，添加一个
-            comps.push(new Shield({ value: buff.value, regen: 0 }));
+            shield.regen += buff.value;
+            // 恢复护盾到最大值
+            shield.value = shield.max;
         }
     }
 };

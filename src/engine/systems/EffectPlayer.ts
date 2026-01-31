@@ -199,20 +199,7 @@ function handleBerserkModeEvent(world: World, event: BerserkModeEvent): void {
  * 处理炸弹爆炸事件
  */
 function handleBombExplodedEvent(world: World, event: BombExplodedEvent): void {
-
     spawnCircle(world, world.width / 2, world.height / 2, "#fff", 500, 30);
-    // // 生成全屏闪光特效
-    // spawnParticle(world, 'screen_flash', world.width / 2, world.height / 2);
-
-    // // 在爆炸位置生成超大型爆炸粒子
-    // spawnParticle(world, 'bomb_explosion', event.pos.x, event.pos.y);
-
-    // // 在屏幕四周生成额外的爆炸装饰
-    // const margin = 100;
-    // spawnParticle(world, 'explosion_large', margin, margin);
-    // spawnParticle(world, 'explosion_large', world.width - margin, margin);
-    // spawnParticle(world, 'explosion_large', margin, world.height - margin);
-    // spawnParticle(world, 'explosion_large', world.width - margin, world.height - margin);
 }
 
 // /**

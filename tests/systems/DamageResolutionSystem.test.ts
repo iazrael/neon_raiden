@@ -69,7 +69,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 50, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 50, max: 100, regen: 0 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -95,7 +95,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 20, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 20, max: 100, regen: 0 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -199,7 +199,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 0, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 0, max: 100, regen: 0 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -227,7 +227,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 0, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 0, max: 100, regen: 0 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',
@@ -250,7 +250,7 @@ describe('DamageResolutionSystem', () => {
 
             addComponent(world, victimId, new Transform({ x: 100, y: 100 }));
             addComponent(world, victimId, new Health({ hp: 100, max: 100 }));
-            addComponent(world, victimId, new Shield({ value: 0, regen: 0 }));
+            addComponent(world, victimId, new Shield({ value: 0, max: 100, regen: 0 }));
 
             const hitEvent: HitEvent = {
                 type: 'Hit',

@@ -95,7 +95,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         x: tr.x,
         y: tr.y,
         bombs: bombs?.count || 0,
-        shieldPercent: (shield.value / (hl.max * 0.5)) * 100,
+        shieldPercent: (shield.value / shield.max) * 100,
         weaponId: wp.id as WeaponId,
         secondaryWeapon: null, // TODO: 从SecondaryWeapon组件获取
         weaponLevel: wp.level,

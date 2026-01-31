@@ -356,8 +356,7 @@ function drawPlayerEffect(
         ctx.save();
         ctx.translate(x, y);
 
-        const maxShield = health ? health.max * 0.5 : 50;
-        const alpha = Math.min(1, shield.value / maxShield);
+        const alpha = Math.min(1, shield.value / shield.max);
 
         ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
         ctx.lineWidth = 3;

@@ -2,7 +2,8 @@ import { AmmoType, BuffType, Component, EntityId, EnemyWeaponId, WeaponId, Weapo
 
 // 「攻击 & 防御 & 增益」
 
-/** 护盾组件 - 存储实体的护盾信息 */
+/** 护盾组件 - 存储实体的护盾信息
+ */
 export class Shield extends Component {
     /**
      * 构造函数
@@ -11,14 +12,20 @@ export class Shield extends Component {
     constructor(cfg: {
         /** 当前护盾值 */
         value: number;
-        /** 护盾恢复速度 */
+
+        /** 护盾最大值 */
+        
+        max: number;
+        /** 护盾恢复速度, 每秒 1 点 */
         regen: number;
     }) {
         super();
         this.value = cfg.value;
+        this.max = cfg.max;
         this.regen = cfg.regen;
     }
     public value = 0;
+    public max = 0; 
     public regen = 0;
     static check(c: any): c is Shield { return c instanceof Shield; }
 }
