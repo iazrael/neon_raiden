@@ -4,23 +4,18 @@
 
 import { AudioSystem} from '../../src/engine/systems/AudioSystem';
 import type { World } from '../../src/engine/world';
+import * as audioModule from '../../src/engine/audio';
 
 describe('AudioSystem', () => {
     let mockWorld: World;
-    let originalAudio: typeof Audio;
 
     beforeEach(() => {
-        // 保存原始 Audio 构造函数
-        originalAudio = (window as any).Audio;
-
-        // Mock Audio 构造函数
-        const mockAudioInstance = {
-            play: jest.fn().mockResolvedValue(undefined),
-            pause: jest.fn(),
-            volume: 0.5,
-            loop: false
-        };
-        (window as any).Audio = jest.fn().mockReturnValue(mockAudioInstance);
+        // Mock audioPlayer 的方法
+        jest.spyOn(audioModule.audioPlayer, 'playHit').mockImplementation(() => {});
+        jest.spyOn(audioModule.audioPlayer, 'playExplosion').mockImplementation(() => {});
+        jest.spyOn(audioModule.audioPlayer, 'playPowerUp').mockImplementation(() => {});
+        jest.spyOn(audioModule.audioPlayer, 'playShoot').mockImplementation(() => {});
+        jest.spyOn(audioModule.audioPlayer, 'playShieldBreak').mockImplementation(() => {});
 
         // 创建模拟世界对象
         mockWorld = {
@@ -37,47 +32,71 @@ describe('AudioSystem', () => {
             enemyCount: 0,
             events: [],
             comboState: { count: 0, timer: 0, multiplier: 1 },
+            bossState: {
+                bossId: 100,
+                currentPhase: 1,
+                maxPhases: 3,
+                phaseStartTime: 0,
+            },
         } as unknown as World;
     });
 
     afterEach(() => {
-        // 恢复原始 Audio 构造函数
-        (window as any).Audio = originalAudio;
+        // 恢复所有 spy
+        jest.restoreAllMocks();
     });
 
     describe('Hit 事件处理', () => {
-        it('应该处理 Hit 事件（当前不播放音效）', () => {
+        it('应该处理 Hit 事件并播放命中音效', () => {
             mockWorld.events = [
                 { type: 'Hit', pos: { x: 400, y: 300 }, damage: 20, owner: 1, victim: 2 }
             ];
 
             AudioSystem(mockWorld, 0.016);
 
-            // 当前实现不会播放 Hit 音效（handleHitEvent 已注释）
-            expect((window as any).Audio).not.toHaveBeenCalled();
+            expect(audioModule.audioPlayer.playHit).toHaveBeenCalled();
         });
 
-        it('应该处理 Hit 事件（当前不播放音效）', () => {
+        it('应该处理高伤害 Hit 事件并播放命中音效', () => {
             mockWorld.events = [
                 { type: 'Hit', pos: { x: 400, y: 300 }, damage: 40, owner: 1, victim: 2 }
             ];
 
             AudioSystem(mockWorld, 0.016);
 
-            // 当前实现不会播放 Hit 音效（handleHitEvent 已注释）
-            expect((window as any).Audio).not.toHaveBeenCalled();
+            expect(audioModule.audioPlayer.playHit).toHaveBeenCalled();
         });
     });
 
     describe('Kill 事件处理', () => {
-        it('应该处理 Kill 事件并播放爆炸音效', () => {
+        it('应该处理普通敌人 Kill 事件并播放小型爆炸音效', () => {
             mockWorld.events = [
                 { type: 'Kill', pos: { x: 400, y: 300 }, victim: 2, killer: 1, score: 100 }
             ];
 
             AudioSystem(mockWorld, 0.016);
 
-            expect((window as any).Audio).toHaveBeenCalled();
+            expect(audioModule.audioPlayer.playExplosion).toHaveBeenCalled();
+        });
+
+        it('应该处理玩家 Kill 事件并播放大型爆炸音效', () => {
+            mockWorld.events = [
+                { type: 'Kill', pos: { x: 400, y: 300 }, victim: 1, killer: 2, score: 0 }
+            ];
+
+            AudioSystem(mockWorld, 0.016);
+
+            expect(audioModule.audioPlayer.playExplosion).toHaveBeenCalled();
+        });
+
+        it('应该处理 Boss Kill 事件并播放大型爆炸音效', () => {
+            mockWorld.events = [
+                { type: 'Kill', pos: { x: 400, y: 300 }, victim: 100, killer: 1, score: 5000 }
+            ];
+
+            AudioSystem(mockWorld, 0.016);
+
+            expect(audioModule.audioPlayer.playExplosion).toHaveBeenCalled();
         });
     });
 
@@ -89,19 +108,33 @@ describe('AudioSystem', () => {
 
             AudioSystem(mockWorld, 0.016);
 
-            expect((window as any).Audio).toHaveBeenCalled();
+            expect(audioModule.audioPlayer.playPowerUp).toHaveBeenCalled();
         });
     });
 
     describe('PlaySound 事件处理', () => {
-        it('应该处理 PlaySound 事件', () => {
+        it('应该处理 PlaySound 事件（当前 playSound 函数未实现）', () => {
             mockWorld.events = [
                 { type: 'PlaySound', name: 'shoot_player' }
             ];
 
             AudioSystem(mockWorld, 0.016);
 
-            expect((window as any).Audio).toHaveBeenCalled();
+            // playSound 函数当前被注释掉，不做任何事情
+            // 所以不应该调用任何 audioPlayer 方法
+            expect(audioModule.audioPlayer.playShoot).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('ShieldBroken 事件处理', () => {
+        it('应该处理 ShieldBroken 事件并播放护盾破碎音效', () => {
+            mockWorld.events = [
+                { type: 'ShieldBroken', pos: { x: 400, y: 300 }, owner: 1 }
+            ];
+
+            AudioSystem(mockWorld, 0.016);
+
+            expect(audioModule.audioPlayer.playShieldBreak).toHaveBeenCalled();
         });
     });
 
