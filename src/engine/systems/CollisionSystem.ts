@@ -18,12 +18,21 @@
  * - 组件缓存：减少重复的 find 操作
  */
 
-import { EntityId, Component } from '../types';
-import { Transform, HitBox, Bullet, PlayerTag, EnemyTag, PickupItem, InvulnerableState, DestroyTag } from '../components';
-import { CollisionLayer, shouldCheckCollision } from '../types/collision';
-import { pushEvent, view, World } from '../world';
-import { HitEvent, PickupEvent } from '../events';
-import { COLLISION_DAMAGE } from '../configs';
+import { EntityId, Component } from "../types";
+import {
+    Transform,
+    HitBox,
+    Bullet,
+    PlayerTag,
+    EnemyTag,
+    PickupItem,
+    InvulnerableState,
+    DestroyTag,
+} from "../components";
+import { CollisionLayer, shouldCheckCollision } from "../types/collision";
+import { pushEvent, view, World } from "../world";
+import { HitEvent, PickupEvent } from "../events";
+import { COLLISION_DAMAGE, ULTIMATE_DAMAGE } from "../configs";
 
 // ==================== 空间哈希网格 ====================
 
@@ -59,23 +68,27 @@ function clearGrid(grid: SpatialGrid): void {
     grid.entityCells.clear();
 }
 
-
 /**
  * 获取实体占据的所有网格单元
  */
-function getOccupiedCells(hitBox: HitBox, transform: Transform, cellSize: number): string[] {
+function getOccupiedCells(
+    hitBox: HitBox,
+    transform: Transform,
+    cellSize: number,
+): string[] {
     const cells: string[] = [];
 
     // 根据形状计算边界
     let minX: number, maxX: number, minY: number, maxY: number;
 
-    if (hitBox.shape === 'circle' || hitBox.shape === 'capsule') {
+    if (hitBox.shape === "circle" || hitBox.shape === "capsule") {
         const radius = hitBox.radius ?? hitBox.capRadius ?? 20;
         minX = Math.floor((transform.x - radius) / cellSize);
         maxX = Math.floor((transform.x + radius) / cellSize);
         minY = Math.floor((transform.y - radius) / cellSize);
         maxY = Math.floor((transform.y + radius) / cellSize);
-    } else { // rect
+    } else {
+        // rect
         const hw = hitBox.halfWidth ?? 20;
         const hh = hitBox.halfHeight ?? 20;
         minX = Math.floor((transform.x - hw) / cellSize);
@@ -96,7 +109,7 @@ function getOccupiedCells(hitBox: HitBox, transform: Transform, cellSize: number
  * 获取相邻网格单元的键（3x3 区域）
  */
 function getNeighborKeys(key: string): string[] {
-    const [cx, cy] = key.split(',').map(Number);
+    const [cx, cy] = key.split(",").map(Number);
     const neighbors: string[] = [];
 
     for (let dx = -1; dx <= 1; dx++) {
@@ -130,7 +143,10 @@ const collisionCache = new Map<EntityId, CollisionCache>();
 function buildCollisionCache(world: World): Map<EntityId, CollisionCache> {
     collisionCache.clear();
 
-    for (const [id,[hitBox, transform], comps] of view(world, [HitBox, Transform])) {
+    for (const [id, [hitBox, transform], comps] of view(world, [
+        HitBox,
+        Transform,
+    ])) {
         // 检查是否已销毁（避免重复处理）
         const hasDestroyTag = comps.some(DestroyTag.check);
         if (hasDestroyTag) continue; // 已销毁，跳过
@@ -152,7 +168,12 @@ function buildCollisionCache(world: World): Map<EntityId, CollisionCache> {
 interface CollisionPair {
     id1: EntityId;
     id2: EntityId;
-    type: 'bullet_hit_enemy' | 'bullet_hit_player' | 'player_hit_enemy' | 'bullet_collision' | 'player_pickup';
+    type:
+        | "bullet_hit_enemy"
+        | "bullet_hit_player"
+        | "player_hit_enemy"
+        | "bullet_collision"
+        | "player_pickup";
 }
 
 /**
@@ -174,7 +195,6 @@ const spatialGrid = createSpatialGrid(128);
  * @param dt 时间增量（毫秒）
  */
 export function CollisionSystem(world: World, _dt: number): void {
-
     // 1. 构建组件缓存
     const cache = buildCollisionCache(world);
 
@@ -247,21 +267,40 @@ function collectCollisions(cache: Map<EntityId, CollisionCache>): void {
                     if (!cache2) continue;
 
                     // 碰撞层过滤
-                    if (!shouldCheckCollision(cache1.layer, cache2.layer)) continue;
+                    if (!shouldCheckCollision(cache1.layer, cache2.layer))
+                        continue;
 
                     // 检测碰撞
-                    if (!isColliding(cache1.transform, cache1.hitBox, cache2.transform, cache2.hitBox)) {
+                    if (
+                        !isColliding(
+                            cache1.transform,
+                            cache1.hitBox,
+                            cache2.transform,
+                            cache2.hitBox,
+                        )
+                    ) {
                         continue;
                     }
 
                     // 确定碰撞类型
-                    const type = determineCollisionType(cache1.layer, cache2.layer);
+                    const type = determineCollisionType(
+                        cache1.layer,
+                        cache2.layer,
+                    );
                     if (type) {
                         // 扩展池
                         if (collisionCount >= collisionPairsPool.length) {
-                            collisionPairsPool.push({ id1: 0, id2: 0, type: 'bullet_hit_enemy' });
+                            collisionPairsPool.push({
+                                id1: 0,
+                                id2: 0,
+                                type: "bullet_hit_enemy",
+                            });
                         }
-                        collisionPairsPool[collisionCount++] = { id1, id2, type };
+                        collisionPairsPool[collisionCount++] = {
+                            id1,
+                            id2,
+                            type,
+                        };
                     }
                 }
             }
@@ -274,40 +313,52 @@ function collectCollisions(cache: Map<EntityId, CollisionCache>): void {
  */
 function determineCollisionType(
     layer1: CollisionLayer,
-    layer2: CollisionLayer
-): CollisionPair['type'] | null {
+    layer2: CollisionLayer,
+): CollisionPair["type"] | null {
     // 基于碰撞层快速判断
     const l1 = layer1;
     const l2 = layer2;
 
     // 子弹击中敌人
-    if ((l1 === CollisionLayer.PlayerBullet && l2 === CollisionLayer.Enemy) ||
-        (l2 === CollisionLayer.PlayerBullet && l1 === CollisionLayer.Enemy)) {
-        return 'bullet_hit_enemy';
+    if (
+        (l1 === CollisionLayer.PlayerBullet && l2 === CollisionLayer.Enemy) ||
+        (l2 === CollisionLayer.PlayerBullet && l1 === CollisionLayer.Enemy)
+    ) {
+        return "bullet_hit_enemy";
     }
 
     // 子弹击中玩家
-    if ((l1 === CollisionLayer.EnemyBullet && l2 === CollisionLayer.Player) ||
-        (l2 === CollisionLayer.EnemyBullet && l1 === CollisionLayer.Player)) {
-        return 'bullet_hit_player';
+    if (
+        (l1 === CollisionLayer.EnemyBullet && l2 === CollisionLayer.Player) ||
+        (l2 === CollisionLayer.EnemyBullet && l1 === CollisionLayer.Player)
+    ) {
+        return "bullet_hit_player";
     }
 
     // 玩家撞到敌人
-    if ((l1 === CollisionLayer.Player && l2 === CollisionLayer.Enemy) ||
-        (l2 === CollisionLayer.Player && l1 === CollisionLayer.Enemy)) {
-        return 'player_hit_enemy';
+    if (
+        (l1 === CollisionLayer.Player && l2 === CollisionLayer.Enemy) ||
+        (l2 === CollisionLayer.Player && l1 === CollisionLayer.Enemy)
+    ) {
+        return "player_hit_enemy";
     }
 
     // 子弹互击
-    if ((l1 === CollisionLayer.PlayerBullet && l2 === CollisionLayer.EnemyBullet) ||
-        (l2 === CollisionLayer.PlayerBullet && l1 === CollisionLayer.EnemyBullet)) {
-        return 'bullet_collision';
+    if (
+        (l1 === CollisionLayer.PlayerBullet &&
+            l2 === CollisionLayer.EnemyBullet) ||
+        (l2 === CollisionLayer.PlayerBullet &&
+            l1 === CollisionLayer.EnemyBullet)
+    ) {
+        return "bullet_collision";
     }
 
     // 玩家拾取道具
-    if ((l1 === CollisionLayer.Player && l2 === CollisionLayer.Pickup) ||
-        (l2 === CollisionLayer.Player && l1 === CollisionLayer.Pickup)) {
-        return 'player_pickup';
+    if (
+        (l1 === CollisionLayer.Player && l2 === CollisionLayer.Pickup) ||
+        (l2 === CollisionLayer.Player && l1 === CollisionLayer.Pickup)
+    ) {
+        return "player_pickup";
     }
 
     return null;
@@ -321,34 +372,50 @@ function determineCollisionType(
  * 注意：capsule 暂时用其包围圆近似处理
  */
 function isColliding(
-    t1: Transform, h1: HitBox,
-    t2: Transform, h2: HitBox
+    t1: Transform,
+    h1: HitBox,
+    t2: Transform,
+    h2: HitBox,
 ): boolean {
     const shape1 = h1.shape;
     const shape2 = h2.shape;
 
     // 圆形 vs 圆形
-    if (shape1 === 'circle' && shape2 === 'circle') {
+    if (shape1 === "circle" && shape2 === "circle") {
         return circleVsCircle(t1, h1, t2, h2);
     }
 
     // 圆形 vs 矩形
-    if (shape1 === 'circle' && shape2 === 'rect') {
+    if (shape1 === "circle" && shape2 === "rect") {
         return circleVsRect(t1, h1, t2, h2);
     }
-    if (shape1 === 'rect' && shape2 === 'circle') {
+    if (shape1 === "rect" && shape2 === "circle") {
         return circleVsRect(t2, h2, t1, h1);
     }
 
     // 矩形 vs 矩形
-    if (shape1 === 'rect' && shape2 === 'rect') {
+    if (shape1 === "rect" && shape2 === "rect") {
         return rectVsRect(t1, h1, t2, h2);
     }
 
     // 胶囊暂时用包围圆近似（使用 capRadius 作为半径）
-    if (shape1 === 'capsule' || shape2 === 'capsule') {
-        const approxH1 = shape1 === 'capsule' ? { ...h1, shape: 'circle' as const, radius: h1.capRadius ?? 20 } : h1;
-        const approxH2 = shape2 === 'capsule' ? { ...h2, shape: 'circle' as const, radius: h2.capRadius ?? 20 } : h2;
+    if (shape1 === "capsule" || shape2 === "capsule") {
+        const approxH1 =
+            shape1 === "capsule"
+                ? {
+                      ...h1,
+                      shape: "circle" as const,
+                      radius: h1.capRadius ?? 20,
+                  }
+                : h1;
+        const approxH2 =
+            shape2 === "capsule"
+                ? {
+                      ...h2,
+                      shape: "circle" as const,
+                      radius: h2.capRadius ?? 20,
+                  }
+                : h2;
         return isColliding(t1, approxH1, t2, approxH2);
     }
 
@@ -358,7 +425,12 @@ function isColliding(
 /**
  * 圆形 vs 圆形碰撞
  */
-function circleVsCircle(t1: Transform, h1: HitBox, t2: Transform, h2: HitBox): boolean {
+function circleVsCircle(
+    t1: Transform,
+    h1: HitBox,
+    t2: Transform,
+    h2: HitBox,
+): boolean {
     const r1 = h1.radius ?? 20;
     const r2 = h2.radius ?? 20;
     const dx = t1.x - t2.x;
@@ -371,14 +443,25 @@ function circleVsCircle(t1: Transform, h1: HitBox, t2: Transform, h2: HitBox): b
 /**
  * 圆形 vs 矩形碰撞
  */
-function circleVsRect(tCircle: Transform, hCircle: HitBox, tRect: Transform, hRect: HitBox): boolean {
+function circleVsRect(
+    tCircle: Transform,
+    hCircle: HitBox,
+    tRect: Transform,
+    hRect: HitBox,
+): boolean {
     const radius = hCircle.radius ?? 20;
     const halfWidth = hRect.halfWidth ?? 20;
     const halfHeight = hRect.halfHeight ?? 20;
 
     // 找到矩形上距离圆心最近的点
-    const closestX = Math.max(tRect.x - halfWidth, Math.min(tCircle.x, tRect.x + halfWidth));
-    const closestY = Math.max(tRect.y - halfHeight, Math.min(tCircle.y, tRect.y + halfHeight));
+    const closestX = Math.max(
+        tRect.x - halfWidth,
+        Math.min(tCircle.x, tRect.x + halfWidth),
+    );
+    const closestY = Math.max(
+        tRect.y - halfHeight,
+        Math.min(tCircle.y, tRect.y + halfHeight),
+    );
 
     // 计算圆心到最近点的距离
     const dx = tCircle.x - closestX;
@@ -391,7 +474,12 @@ function circleVsRect(tCircle: Transform, hCircle: HitBox, tRect: Transform, hRe
 /**
  * 矩形 vs 矩形碰撞（AABB）
  */
-function rectVsRect(t1: Transform, h1: HitBox, t2: Transform, h2: HitBox): boolean {
+function rectVsRect(
+    t1: Transform,
+    h1: HitBox,
+    t2: Transform,
+    h2: HitBox,
+): boolean {
     const halfWidth1 = h1.halfWidth ?? 20;
     const halfHeight1 = h1.halfHeight ?? 20;
     const halfWidth2 = h2.halfWidth ?? 20;
@@ -418,13 +506,13 @@ function handleCollision(world: World, collision: CollisionPair): void {
 
     if (!comps1 || !comps2) return;
 
-    if (type === 'bullet_hit_enemy' || type === 'bullet_hit_player') {
+    if (type === "bullet_hit_enemy" || type === "bullet_hit_player") {
         handleBulletHit(world, id1, id2, comps1, comps2);
-    } else if (type === 'player_hit_enemy') {
+    } else if (type === "player_hit_enemy") {
         handlePlayerHitEnemy(world, id1, id2, comps1, comps2);
-    } else if (type === 'bullet_collision') {
+    } else if (type === "bullet_collision") {
         handleBulletCollision(world, comps1, comps2);
-    } else if (type === 'player_pickup') {
+    } else if (type === "player_pickup") {
         handlePlayerPickup(world, id1, id2, comps1, comps2);
     }
 }
@@ -437,7 +525,7 @@ function handleBulletHit(
     id1: EntityId,
     id2: EntityId,
     comps1: Component[],
-    comps2: Component[]
+    comps2: Component[],
 ): void {
     const bullet1 = comps1.find(Bullet.check);
     const bullet2 = comps2.find(Bullet.check);
@@ -462,11 +550,6 @@ function handleBulletHit(
         bulletComps = comps2;
     }
 
-    // 检查受害者是否处于无敌状态
-    if (victimComps.some(InvulnerableState.check)) {
-        return; // 无敌状态，跳过伤害
-    }
-
     // 从子弹组件获取伤害值
     const damage = bullet?.damage ?? 10;
 
@@ -474,15 +557,18 @@ function handleBulletHit(
     const victimTransform = victimComps.find(Transform.check);
     if (!victimTransform) return;
 
-    // 生成 HitEvent（bloodLevel 由 DamageResolutionSystem 根据伤害值计算）
-    const hitEvent: HitEvent = {
-        type: 'Hit',
-        pos: { x: victimTransform.x, y: victimTransform.y },
-        damage,
-        owner: attackerId,
-        victim: victimId
-    };
-    pushEvent(world, hitEvent);
+    // 检查受害者是否处于无敌状态, 无敌不受伤, 子弹还是继续消费掉
+    if (!victimComps.some(InvulnerableState.check)) {
+        // 生成 HitEvent（bloodLevel 由 DamageResolutionSystem 根据伤害值计算）
+        const hitEvent: HitEvent = {
+            type: "Hit",
+            pos: { x: victimTransform.x, y: victimTransform.y },
+            damage,
+            owner: attackerId,
+            victim: victimId,
+        };
+        pushEvent(world, hitEvent);
+    }
 
     // 处理子弹穿透和销毁
     consumeBullet(bulletComps, bullet);
@@ -491,31 +577,44 @@ function handleBulletHit(
 /**
  * 消耗子弹（处理穿透和销毁）
  */
-function consumeBullet(bulletComps: Component[], bullet: Bullet | undefined): void {
+function consumeBullet(
+    bulletComps: Component[],
+    bullet: Bullet | undefined,
+): void {
     if (!bullet) {
-        markForDestroy(bulletComps, 'consumed', 'bullet');
+        markForDestroy(bulletComps, "consumed", "bullet");
         return;
     }
 
     if (bullet.pierceLeft > 0) {
         bullet.pierceLeft--;
         if (bullet.pierceLeft === 0) {
-            markForDestroy(bulletComps, 'consumed', 'bullet');
+            markForDestroy(bulletComps, "consumed", "bullet");
         }
     } else {
-        markForDestroy(bulletComps, 'consumed', 'bullet');
+        markForDestroy(bulletComps, "consumed", "bullet");
     }
 }
 
 /**
  * 标记实体销毁
  */
-function markForDestroy(entityComps: Component[], reason: string, pool?: string): void {
+function markForDestroy(
+    entityComps: Component[],
+    reason: string,
+    pool?: string,
+): void {
     if (!entityComps.some(DestroyTag.check)) {
-        entityComps.push(new DestroyTag({
-            reason: reason as 'timeout' | 'killed' | 'consumed' | 'offscreen',
-            reusePool: pool as 'bullet' | 'enemy' | 'pickup'
-        }));
+        entityComps.push(
+            new DestroyTag({
+                reason: reason as
+                    | "timeout"
+                    | "killed"
+                    | "consumed"
+                    | "offscreen",
+                reusePool: pool as "bullet" | "enemy" | "pickup",
+            }),
+        );
     }
 }
 
@@ -527,7 +626,7 @@ function handlePlayerHitEnemy(
     id1: EntityId,
     id2: EntityId,
     comps1: Component[],
-    comps2: Component[]
+    comps2: Component[],
 ): void {
     const player1 = comps1.find(PlayerTag.check);
     const enemy2 = comps2.find(EnemyTag.check);
@@ -549,32 +648,31 @@ function handlePlayerHitEnemy(
         enemyComps = comps1;
     }
 
-    // 检查玩家是否无敌
-    if (playerComps.some(InvulnerableState.check)) {
-        return; // 玩家无敌，不受到伤害
-    }
-
     // 获取敌人位置
     const enemyTransform = enemyComps.find(Transform.check);
     if (!enemyTransform) return;
 
-    // 生成 HitEvent（玩家受到冲撞伤害，bloodLevel 由 DamageResolutionSystem 根据伤害值计算）
-    const hitEvent: HitEvent = {
-        type: 'Hit',
-        pos: { x: enemyTransform.x, y: enemyTransform.y },
-        damage: COLLISION_DAMAGE,
-        owner: enemyId,
-        victim: playerId
-    };
-    pushEvent(world, hitEvent);
+    // 检查玩家是否无敌, 无敌时, 玩家不受到伤害, 敌人要受到伤害, 并且是直接死亡
+    const isPlayerInvulnerable = playerComps.some(InvulnerableState.check);
+    if (!isPlayerInvulnerable) {
+        // 生成 HitEvent 玩家受到冲撞伤害
+        const hitEvent: HitEvent = {
+            type: "Hit",
+            pos: { x: enemyTransform.x, y: enemyTransform.y },
+            damage: COLLISION_DAMAGE,
+            owner: enemyId,
+            victim: playerId,
+        };
+        pushEvent(world, hitEvent);
+    }
 
     // 敌人也受到冲撞伤害
     const enemyHitEvent: HitEvent = {
-        type: 'Hit',
+        type: "Hit",
         pos: { x: enemyTransform.x, y: enemyTransform.y },
-        damage: COLLISION_DAMAGE,
+        damage: isPlayerInvulnerable ? ULTIMATE_DAMAGE : COLLISION_DAMAGE,
         owner: playerId,
-        victim: enemyId
+        victim: enemyId,
     };
     pushEvent(world, enemyHitEvent);
 }
@@ -585,10 +683,10 @@ function handlePlayerHitEnemy(
 function handleBulletCollision(
     _world: World,
     comps1: Component[],
-    comps2: Component[]
+    comps2: Component[],
 ): void {
-    markForDestroy(comps1, 'consumed', 'bullet');
-    markForDestroy(comps2, 'consumed', 'bullet');
+    markForDestroy(comps1, "consumed", "bullet");
+    markForDestroy(comps2, "consumed", "bullet");
 }
 
 /**
@@ -599,7 +697,7 @@ function handlePlayerPickup(
     id1: EntityId,
     id2: EntityId,
     comps1: Component[],
-    comps2: Component[]
+    comps2: Component[],
 ): void {
     const player1 = comps1.find(PlayerTag.check);
     const pickup1 = comps1.find(PickupItem.check);
@@ -626,13 +724,13 @@ function handlePlayerPickup(
 
     // 生成 PickupEvent
     const pickupEvent: PickupEvent = {
-        type: 'Pickup',
+        type: "Pickup",
         pos: { x: pickupTransform.x, y: pickupTransform.y },
         itemId: pickup.blueprint,
-        owner: playerId
+        owner: playerId,
     };
     pushEvent(world, pickupEvent);
 
     // 标记道具为已消耗
-    markForDestroy(pickupComps, 'consumed', 'pickup');
+    markForDestroy(pickupComps, "consumed", "pickup");
 }

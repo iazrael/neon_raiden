@@ -154,6 +154,9 @@ describe('VisualEffectSystem', () => {
 
     describe('线条更新', () => {
         it('应该更新线条位置', () => {
+            // 设置时间减速激活状态，这样线条不会被系统自动清除
+            world.timeSlowActive = true;
+
             spawnLines(world, 800, 1);
             const initialY = visualEffect.lines[0].y;
 
@@ -162,12 +165,17 @@ describe('VisualEffectSystem', () => {
             expect(visualEffect.lines[0].y).toBeGreaterThan(initialY);
         });
 
-        it('应该清理超出屏幕的线条', () => {
-            spawnLines(world, 800, 1);
-            visualEffect.lines[0].y = 700; // 超出 height (600) + 100
+        it('时间减速结束时应该清除所有线条', () => {
+            // 激活时间减速，生成线条
+            world.timeSlowActive = true;
+            spawnLines(world, 800, 10);
+            expect(visualEffect.lines.length).toBeGreaterThan(0);
 
+            // 结束时间减速
+            world.timeSlowActive = false;
             VisualEffectSystem(world, 16);
 
+            // 线条应该被清除
             expect(visualEffect.lines.length).toBe(0);
         });
     });

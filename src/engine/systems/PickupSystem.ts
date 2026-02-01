@@ -278,11 +278,12 @@ function addDurationBuff(
             break;
         }
         case BuffType.SHIELD: {
-            // SHIELD: 护盾 Buff - 立即加满护盾
-            const shield = playerComps.find(Shield.check);
-            if (shield) {
-                shield.value = shield.max;
-            }
+            // SHIELD: 护盾自动增加 Buff
+            // const shield = playerComps.find(Shield.check);
+            // if (shield) {
+            //    立即加满护盾, 体验不太好
+            //     shield.value = shield.max;
+            // }
             const config = BUFF_CONFIG[BuffType.SHIELD];
             const shieldAutoRegen = ensureComponent(
                 world,

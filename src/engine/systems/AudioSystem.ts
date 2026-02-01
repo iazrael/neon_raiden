@@ -22,6 +22,7 @@ import {
     ComboUpgradeEvent,
     BombExplodedEvent,
     ShieldBrokenEvent,
+    TimeSlowEvent,
 } from "../events";
 import { audioPlayer } from "../audio";
 import { ExplosionSize } from "../audio/AudioEngine";
@@ -51,10 +52,7 @@ export function AudioSystem(world: World, dt: number): void {
                 handleWeaponFiredEvent(world, event as WeaponFiredEvent);
                 break;
             case "BossPhaseChange":
-                handleBossPhaseChangeEvent(
-                    world,
-                    event as BossPhaseChangeEvent,
-                );
+                handleBossPhaseChangeEvent(world, event as BossPhaseChangeEvent);
                 break;
             case "PlaySound":
                 handlePlaySoundEvent(world, event as PlaySoundEvent);
@@ -70,6 +68,9 @@ export function AudioSystem(world: World, dt: number): void {
                 break;
             case "ShieldBroken":
                 handleShieldBrokenEvent(world, event as ShieldBrokenEvent);
+                break;
+            case "TimeSlow":
+                handleTimeSlowEvent(world, event as TimeSlowEvent);
                 break;
         }
     }
@@ -87,15 +88,15 @@ function handleHitEvent(world: World, event: HitEvent): void {
  * 处理击杀事件
  */
 function handleKillEvent(world: World, event: KillEvent): void {
-    if(event.victim === world.playerId) {
+    if (event.victim === world.playerId) {
         // 玩家被击杀, 播放死亡音效
-        audioPlayer.playExplosion(ExplosionSize.LARGE)
-    }else if(event.victim === world.bossState.bossId) {
+        audioPlayer.playExplosion(ExplosionSize.LARGE);
+    } else if (event.victim === world.bossState.bossId) {
         // 敌人或boss
-        audioPlayer.playExplosion(ExplosionSize.LARGE)
-    }else{
+        audioPlayer.playExplosion(ExplosionSize.LARGE);
+    } else {
         // 普通敌人
-        audioPlayer.playExplosion(ExplosionSize.SMALL)
+        audioPlayer.playExplosion(ExplosionSize.SMALL);
     }
 }
 
@@ -104,7 +105,7 @@ function handleKillEvent(world: World, event: KillEvent): void {
  */
 function handlePickupEvent(world: World, event: PickupEvent): void {
     // 根据道具类型播放音效
-    audioPlayer.playPowerUp()
+    audioPlayer.playPowerUp();
     // const itemId = event.itemId;
     // let soundKey = "pickup_power";
 
@@ -132,10 +133,7 @@ function handleWeaponFiredEvent(world: World, event: WeaponFiredEvent): void {
 /**
  * 处理 Boss 阶段切换事件
  */
-function handleBossPhaseChangeEvent(
-    world: World,
-    event: BossPhaseChangeEvent,
-): void {
+function handleBossPhaseChangeEvent(world: World, event: BossPhaseChangeEvent): void {
     playSound("boss_phase_change");
 }
 
@@ -164,17 +162,25 @@ function handleComboUpgradeEvent(world: World, event: ComboUpgradeEvent): void {
  * 处理炸弹爆炸事件
  */
 function handleBombExplosionEvent(world: World, event: BombExplodedEvent): void {
-    audioPlayer.playBomb()
+    audioPlayer.playBomb();
 }
 
 /**
  * 处理护盾破碎事件
  */
 function handleShieldBrokenEvent(world: World, event: ShieldBrokenEvent): void {
-    audioPlayer.playShieldBreak()
+    audioPlayer.playShieldBreak();
 }
 
-
+/**
+ * 处理时间减速事件
+ */
+function handleTimeSlowEvent(world: World, event: TimeSlowEvent): void {
+    if (event.action === "start") {
+        // 播放时间减速音效
+        audioPlayer.playSlowMotionEnter();
+    }
+}
 
 /**
  * 播放音效
@@ -182,17 +188,14 @@ function handleShieldBrokenEvent(world: World, event: ShieldBrokenEvent): void {
  */
 export function playSound(soundKey: string): void {
     // if (audioState.muted) return;
-
     // const config = SOUND_CONFIGS[soundKey];
     // if (!config) {
     //     console.warn(`AudioSystem: No config found for sound '${soundKey}'`);
     //     return;
     // }
-
     // // 计算最终音量
     // const volume =
     //     config.volume * audioState.masterVolume * audioState.sfxVolume;
-
     // // 创建音频元素并播放
     // const audio = new Audio(config.src);
     // audio.volume = Math.max(0, Math.min(1, volume));
@@ -201,5 +204,3 @@ export function playSound(soundKey: string): void {
     //     console.debug(`Audio play failed: ${err.message}`);
     // });
 }
-
-

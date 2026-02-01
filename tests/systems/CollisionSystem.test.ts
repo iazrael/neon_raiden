@@ -17,6 +17,7 @@ import {
 import { CollisionLayer, shouldCheckCollision } from '../../src/engine/types/collision';
 import { AmmoType } from '../../src/engine/types';
 import { EnemyId } from '../../src/engine/types/ids';
+import { ULTIMATE_DAMAGE } from '../../src/engine/configs/global';
 
 describe('CollisionSystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -461,7 +462,7 @@ describe('CollisionSystem', () => {
             expect(hitEvents.length).toBe(0);
         });
 
-        it('无敌状态的玩家冲撞敌人时不应受到伤害', () => {
+        it('无敌状态的玩家冲撞敌人时不应受到伤害，敌人受到终极伤害', () => {
             const playerId = generateId();
             const enemyId = generateId();
 
@@ -479,9 +480,18 @@ describe('CollisionSystem', () => {
 
             CollisionSystem(world, 0.016);
 
-            // 不应该生成任何 HitEvent
+            // 玩家无敌时，只有敌人受到 ULTIMATE_DAMAGE 伤害
             const hitEvents = world.events.filter(e => e.type === 'Hit');
-            expect(hitEvents.length).toBe(0);
+            expect(hitEvents.length).toBe(1);
+
+            const enemyHitEvent = hitEvents.find(e => e.victim === enemyId);
+            expect(enemyHitEvent).toBeDefined();
+            expect(enemyHitEvent?.damage).toBe(ULTIMATE_DAMAGE);
+            expect(enemyHitEvent?.owner).toBe(playerId);
+
+            // 玩家不应该受到伤害
+            const playerHitEvent = hitEvents.find(e => e.victim === playerId);
+            expect(playerHitEvent).toBeUndefined();
         });
     });
 

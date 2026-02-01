@@ -18,7 +18,8 @@ export type Event =
     | ComboUpgradeEvent
     | BombExplodedEvent
     | WeaponEffectEvent
-    | ShieldBrokenEvent;
+    | ShieldBrokenEvent
+    | TimeSlowEvent;
 
 
 /**
@@ -41,6 +42,8 @@ export const EventTags = {
     ComboUpgrade: 'ComboUpgrade',
     BombExploded: 'BombExploded',
     WeaponEffect: 'WeaponEffect',
+    ShieldBroken: 'ShieldBroken',
+    TimeSlow: 'TimeSlow',
 } as const;
 
 
@@ -173,4 +176,12 @@ export interface ShieldBrokenEvent {
     type: 'ShieldBroken';
     pos: { x: number; y: number }; // 护盾破碎位置
     owner: EntityId;               // 护盾 owner
+}
+
+// ⑰ 时间减速事件
+export interface TimeSlowEvent {
+    type: 'TimeSlow';
+    scale: number;                 // 时间缩放比例
+    duration: number;              // 持续毫秒
+    action: 'start' | 'end';       // 开始或结束
 }

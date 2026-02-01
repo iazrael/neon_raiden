@@ -22,6 +22,7 @@ const createMockWorld = (): World => ({
     enemyCount: 0,
     events: [],
     timeScale: 1,
+    timeSlowActive: false,
     comboState: {
         count: 0,
         timer: 0,

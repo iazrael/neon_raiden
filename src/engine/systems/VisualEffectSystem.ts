@@ -14,13 +14,7 @@
  */
 
 import { World, getComponents, view } from "../world";
-import {
-    VisualEffect,
-    VisualParticle,
-    VisualLine,
-    VisualCircle,
-    VisualMeteor,
-} from "../components/visual";
+import { VisualEffect, VisualParticle, VisualLine, VisualCircle, VisualMeteor } from "../components/visual";
 import { ParticleEffectConfig } from "../blueprints/effects";
 
 // ========== 创建 API ==========
@@ -33,12 +27,7 @@ import { ParticleEffectConfig } from "../blueprints/effects";
  * @param count 粒子数量
  * @param config 粒子配置
  */
-export function spawnParticles(
-    world: World,
-    x: number,
-    y: number,
-    config: ParticleEffectConfig,
-): void {
+export function spawnParticles(world: World, x: number, y: number, config: ParticleEffectConfig): void {
     const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
     if (!effect) {
         return;
@@ -48,8 +37,7 @@ export function spawnParticles(
         const speedMin = config.speedMin;
         const speedMax = config.speedMax;
         const speed = speedMin + Math.random() * (speedMax - speedMin);
-        const size =
-            config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin);
+        const size = config.sizeMin + Math.random() * (config.sizeMax - config.sizeMin);
         effect.particles.push({
             x,
             y,
@@ -69,11 +57,7 @@ export function spawnParticles(
  * @param width 画布宽度
  * @param maxHeight 最大数量
  */
-export function spawnLines(
-    world: World,
-    width: number,
-    maxHeight: number = 20,
-): void {
+export function spawnLines(world: World, width: number, maxHeight: number = 20): void {
     const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
     if (!effect) {
         return;
@@ -117,7 +101,7 @@ export function spawnCircle(
     y: number,
     color: string = "#ffffff",
     maxRadius: number = 150,
-    width: number = 5,
+    width: number = 5
 ): void {
     const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
     if (!effect) {
@@ -142,13 +126,7 @@ export function spawnCircle(
  * @param dt 距离上次调用的时间（毫秒）
  * @param timer 累积计时器（引用传递）
  */
-export function spawnMeteor(
-    world: World,
-    width: number,
-    height: number,
-    dt: number,
-    timer: { value: number },
-): void {
+export function spawnMeteor(world: World, width: number, height: number, dt: number, timer: { value: number }): void {
     // 累加计时器
     timer.value += dt;
 
@@ -174,9 +152,9 @@ export function spawnMeteor(
     effect.meteors.push({
         x: Math.random() * width,
         y: -100,
-        length: Math.random() * 50 + 20,  // 20-70
-        vx: (Math.random() - 0.5) * 5,    // -2.5 到 2.5
-        vy: Math.random() * 10 + 10,      // 10-20
+        length: Math.random() * 50 + 20, // 20-70
+        vx: (Math.random() - 0.5) * 5, // -2.5 到 2.5
+        vy: Math.random() * 10 + 10, // 10-20
     });
 }
 
@@ -249,12 +227,7 @@ function updateCircles(circles: VisualCircle[], dt: number): void {
 /**
  * 更新流星位置
  */
-function updateMeteors(
-    meteors: VisualMeteor[],
-    width: number,
-    height: number,
-    dt: number,
-): void {
+function updateMeteors(meteors: VisualMeteor[], width: number, height: number, dt: number): void {
     const timeScale = dt / (1000 / 60); // 60 fps
 
     for (let i = meteors.length - 1; i >= 0; i--) {
@@ -281,6 +254,14 @@ export function VisualEffectSystem(world: World, dt: number): void {
     if (!effect) {
         return;
     }
+    if (world.timeSlowActive) {
+        // 生成或补充时间减速线条特效
+        spawnLines(world, world.width, 20);
+    } else {
+        // 清除时间减速线条特效
+        clearLines(world);
+    }
+
     // 更新粒子
     if (effect.particles.length > 0) {
         updateParticles(effect.particles, dt);

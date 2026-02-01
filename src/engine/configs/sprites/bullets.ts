@@ -151,7 +151,7 @@ export const ENEMY_BULLET_SPRITES: Record<EnemyAmmoType, BulletSpriteSpec> = {
     },
     [AmmoType.ENEMY_PULSE]: {
         spriteKey: SpriteKey.BULLET_ENEMY_PULSE,
-        color: '#ff9999ff',
+        color: '#ea0d0dff',
     },
     [AmmoType.ENEMY_VOID_ORB]: {
         spriteKey: SpriteKey.BULLET_ENEMY_VOID_ORB,

@@ -14,6 +14,8 @@ export const PHYSICS = {
 
 export const STARTING_CREDITS = 100
 
+// 究极伤害, 一百万
+export const ULTIMATE_DAMAGE = 1000000;
 
 // 跟敌人的碰撞伤害
 export const COLLISION_DAMAGE = 10;

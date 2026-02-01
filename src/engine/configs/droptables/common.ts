@@ -10,7 +10,7 @@ export interface DropItemSpec {
 
 // 1. 杂兵掉落表 (90% 什么都不掉，8% 加分/回血，2% 武器)
 export const DROPTABLE_COMMON: DropItemSpec[] = [
-    { item: PickupId.NONE, weight: 900 },
+    // { item: PickupId.NONE, weight: 900 },
     { item: PickupId.POWER, weight: 5 },
     { item: PickupId.HP, weight: 50 },
     { item: PickupId.SHIELD, weight: 50 },

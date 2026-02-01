@@ -38,6 +38,7 @@ export interface World {
 
     // 时间缩放（用于 TIME_SLOW 等效果，1.0 = 正常速度）
     timeScale: number;
+    timeSlowActive: boolean;
 
     // 连击状态
     comboState: ComboState;
@@ -67,6 +68,7 @@ export function createWorld(): World {
         spawnTimer: 0,
         enemyCount: 0,
         timeScale: 1,
+        timeSlowActive: false,
         width: 0,
         height: 0,
         renderState: {

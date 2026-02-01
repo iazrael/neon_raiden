@@ -81,6 +81,7 @@ const createMockWorld = (): World => ({
         timer: 60000,
         spawned: false,
     },
+    timeSlowActive: false
 });
 
 describe('RenderSystem', () => {

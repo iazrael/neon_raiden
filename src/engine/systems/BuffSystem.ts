@@ -11,26 +11,15 @@
  * 执行顺序：P2 - 在决策层之后
  */
 
-import { view, removeComponentFromComps, World } from "../world";
+import { view, removeComponentFromComps, World, pushEvent } from "../world";
 import { Component } from "../types";
-import {
-    Shield,
-    InvulnerableState,
-    ShieldAutoRegen,
-    TimeSlowState,
-    PlayerTag,
-} from "../components";
-import { clearLines, spawnLines } from "./VisualEffectSystem";
+import { Shield, InvulnerableState, ShieldAutoRegen, TimeSlowState, PlayerTag } from "../components";
+import { TimeSlowEvent } from "../events";
 
 /**
  * SHIELD Buff - 增加护盾值或恢复护盾
  */
-function handleShieldRegen(
-    world: World,
-    dt: number,
-    comps: Component[],
-    shieldAutoRegen: ShieldAutoRegen,
-): void {
+function handleShieldRegen(world: World, dt: number, comps: Component[], shieldAutoRegen: ShieldAutoRegen): void {
     // 找到护盾组件
     const shield = comps.find(Shield.check);
     if (shield) {
@@ -49,12 +38,7 @@ function handleShieldRegen(
 /**
  * INVINCIBILITY Buff - 无敌状态
  */
-function handleInvincibility(
-    world: World,
-    dt: number,
-    comps: Component[],
-    invState: InvulnerableState,
-): void {
+function handleInvincibility(world: World, dt: number, comps: Component[], invState: InvulnerableState): void {
     // 更新时间
     invState.duration -= dt;
     // 如果时间过期，移除组件
@@ -67,29 +51,41 @@ function handleInvincibility(
 /**
  * TIME_SLOW Buff - 时间减速
  */
-function handleTimeSlow(
-    world: World,
-    dt: number,
-    comps: Component[],
-    timeSlow: TimeSlowState,
-): void {
-        // 更新时间
-        timeSlow.duration -= dt;
+function handleTimeSlow(world: World, dt: number, comps: Component[], timeSlow: TimeSlowState): void {
+    // 更新时间
+    timeSlow.duration -= dt;
     // 应用时间缩放
     // 限制范围防止异常值
     const safeScale = Math.max(0.1, Math.min(2.0, timeSlow.scale));
     world.timeScale = safeScale;
-    // 生成时间减速线条特效
-    spawnLines(world, world.width, 20);
 
-        // 如果时间过期，移除组件
-        if (timeSlow.duration <= 0) {
+    // 如果之前没有减速, 那就抛出一个 Start 事件
+    if (!world.timeSlowActive) {
+        pushEvent(world, {
+            type: "TimeSlow",
+            scale: safeScale,
+            duration: timeSlow.duration,
+            action: "start",
+        } as TimeSlowEvent);
+    }
+    world.timeSlowActive = true;
+
+    // 如果时间过期，移除组件
+    if (timeSlow.duration <= 0) {
         // 移除buff组件
-            removeComponentFromComps(comps, timeSlow);
+        removeComponentFromComps(comps, timeSlow);
         // 重置时间缩放
         world.timeScale = 1.0;
-        // 清除时间减速线条特效
-        clearLines(world);
+        // 抛出一个 End 事件
+        if (world.timeSlowActive) {
+            pushEvent(world, {
+                type: "TimeSlow",
+                scale: safeScale,
+                duration: timeSlow.duration,
+                action: "end",
+            } as TimeSlowEvent);
+        }
+        world.timeSlowActive = false;
     }
 }
 
@@ -99,11 +95,8 @@ function handleTimeSlow(
  * @param dt 时间增量（毫秒）
  */
 export function BuffSystem(world: World, dt: number): void {
-
     // 更新无敌状态
-    for (const [id, [invulnerableState], comps] of view(world, [
-        InvulnerableState,
-    ])) {
+    for (const [id, [invulnerableState], comps] of view(world, [InvulnerableState])) {
         // 更新无敌状态剩余时间
         handleInvincibility(world, dt, comps, invulnerableState);
     }

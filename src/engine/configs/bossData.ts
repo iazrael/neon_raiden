@@ -122,7 +122,7 @@ export const BOSS_DATA: Record<BossId, BossSpec> = {
             },
             { // P2: 50% - 0% (狂暴)
                 threshold: 0.5,
-                movePattern: BossMovementPattern.FOLLOW, // 开始追踪
+                movePattern: BossMovementPattern.ZIGZAG, // 开始追踪
                 weaponId: EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED, // 弹幕更密
                 modifiers: { moveSpeed: 1.5, fireRate: 1.5 },
                 phaseColor: '#ffaa00'

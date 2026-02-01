@@ -218,7 +218,7 @@ export const ENEMY_WEAPON_TABLE: Record<EnemyWeaponId, WeaponSpec> = {
         ammoType: AmmoType.ENEMY_ORB_BLUE,
         cooldown: 1000,
         bulletCount: 8,
-        spread: 360,
+        spread: 180,
         pattern: WeaponPattern.RADIAL
     },
     [EnemyWeaponId.GUARDIAN_RADIAL_ENRAGED]: {

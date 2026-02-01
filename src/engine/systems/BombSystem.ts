@@ -12,25 +12,11 @@
  */
 
 import { World } from "../world";
-import {
-    Bomb,
-    BombIntent,
-    Bullet,
-    DestroyTag,
-    EnemyTag,
-    Health,
-    PlayerTag,
-    Transform,
-} from "../components";
+import { Bomb, BombIntent, Bullet, DestroyTag, EnemyTag, Health, PlayerTag, Transform } from "../components";
 import { removeComponent, view } from "../world";
 import { pushEvent } from "../world";
-import {
-    BombExplodedEvent,
-    PlaySoundEvent,
-    CamShakeEvent,
-    EventTags,
-    HitEvent,
-} from "../events";
+import { BombExplodedEvent, PlaySoundEvent, CamShakeEvent, EventTags, HitEvent } from "../events";
+import { ULTIMATE_DAMAGE } from "../configs";
 
 /**
  * 炸弹使用冷却时间（毫秒）
@@ -47,10 +33,7 @@ let lastBombTime = 0;
  * 炸弹系统主函数
  */
 export function BombSystem(world: World, dt: number): void {
-    for (const [playerId, [playerTag, bombIntent, bomb], playerComps] of view(
-        world,
-        [PlayerTag, BombIntent, Bomb],
-    )) {
+    for (const [playerId, [playerTag, bombIntent, bomb], playerComps] of view(world, [PlayerTag, BombIntent, Bomb])) {
         // 检查是否有炸弹库存组件
         if (bomb.count <= 0) {
             // 没有炸弹，移除意图并播放"空弹"音效
@@ -80,9 +63,7 @@ export function BombSystem(world: World, dt: number): void {
         const playerTransform = playerComps.find(Transform.check);
         pushEvent(world, {
             type: "BombExploded",
-            pos: playerTransform
-                ? { x: playerTransform.x, y: playerTransform.y }
-                : { x: 0, y: 0 },
+            pos: playerTransform ? { x: playerTransform.x, y: playerTransform.y } : { x: 0, y: 0 },
             playerId: world.playerId,
         } as BombExplodedEvent);
 
@@ -106,23 +87,18 @@ export function BombSystem(world: World, dt: number): void {
 
 /**
  * 处理炸弹爆炸 - 对所有敌人造成致命伤害
- * 
+ *
  * 注意：此函数直接发送 HitEvent 而不是依赖 BombExplodedEvent
  */
 function handleBombExplosion(world: World): void {
     // 遍历所有实体，找到敌人
-    for (const [enemyId, [tag, health, transform]] of view(world, [
-        EnemyTag,
-        Health,
-        Transform,
-    ])) {
+    for (const [enemyId, [tag, transform]] of view(world, [EnemyTag, Transform])) {
         // 获取敌人的生命值组件
-        // 造成致命伤害（直接扣完所有血量）
-        const maxHp = health.max || 100;
+        // 造成致命伤害（直接扣完所有血量, 100万）
         const hitEvent: HitEvent = {
             type: "Hit",
             pos: { x: transform.x, y: transform.y },
-            damage: maxHp * 2, // 造成200%最大生命值的伤害，确保击杀
+            damage: ULTIMATE_DAMAGE, // 确保击杀
             owner: world.playerId,
             victim: enemyId,
         };
