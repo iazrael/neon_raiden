@@ -30,4 +30,4 @@ export type { GameSnapshot } from './snapshot';
 export { SpriteManager } from './SpriteManager';
 
 // ========== 事件 ==========
-export * from './events';
+export * from './events/index';
