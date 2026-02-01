@@ -25,7 +25,7 @@ import {
 } from "../components";
 import { WeaponId, BuffType } from "../types";
 import { ensureComponent, getEvents, pushEvent, World } from "../world";
-import { PickupEvent, PlaySoundEvent } from "../events/index";
+import { PickupEvent, PlaySoundEvent } from "../events";
 import { WEAPON_TABLE } from "../blueprints/weapons";
 import {
     POWERUP_LIMITS,

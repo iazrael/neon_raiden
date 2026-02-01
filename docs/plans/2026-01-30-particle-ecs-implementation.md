@@ -172,7 +172,7 @@ const hitEvent: HitEvent = {
     owner: playerId,
     victim: enemyId
 };
-world.events.push(hitEvent);
+pushEvent(world, hitEvent);
 ```
 
 **Step 2: 确认 DamageResolutionSystem 传递 HitEvent**

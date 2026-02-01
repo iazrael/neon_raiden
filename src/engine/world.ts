@@ -1,8 +1,6 @@
 import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
-import { GameEvent, EventType } from './events/index';
+import { GameEvent, EventType } from './events';
 import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
-import * as Components from './components';
-import { ComponentShape } from './blueprints';
 
 // 世界接口
 export interface World {

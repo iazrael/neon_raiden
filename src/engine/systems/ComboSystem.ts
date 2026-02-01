@@ -12,7 +12,7 @@
  */
 
 import { ComboState } from '../types';
-import { KillEvent, ComboUpgradeEvent, ComboBreakEvent, BerserkModeEvent } from '../events/index';
+import { KillEvent } from '../events';
 import { pushEvent, getEvents, World } from '../world';
 
 /**

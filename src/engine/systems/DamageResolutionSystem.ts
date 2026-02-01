@@ -13,22 +13,8 @@
  */
 
 import { EntityId } from "../types";
-import {
-    Health,
-    Shield,
-    DamageOverTime,
-    DestroyTag,
-    ScoreValue,
-    Transform,
-} from "../components";
-import {
-    HitEvent,
-    KillEvent,
-    BloodFogEvent,
-    CamShakeEvent,
-    PlaySoundEvent,
-    ShieldBrokenEvent,
-} from "../events/index";
+import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from "../components";
+import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, ShieldBrokenEvent } from "../events";
 import { removeComponent, view, getEvents, World, pushEvent } from "../world";
 
 /**
@@ -46,7 +32,7 @@ const BLOOD_LEVEL_THRESHOLDS = {
  */
 export function DamageResolutionSystem(world: World, dt: number): void {
     // 处理所有 HitEvent
-    const hitEvents = getEvents<HitEvent>(world, 'Hit');
+    const hitEvents = getEvents<HitEvent>(world, "Hit");
 
     for (const event of hitEvents) {
         applyDamage(world, event);
@@ -54,7 +40,6 @@ export function DamageResolutionSystem(world: World, dt: number): void {
 
     // 处理持续伤害 (DOT)
     processDamageOverTime(world, dt);
-    
 }
 
 /**
@@ -115,7 +100,7 @@ function applyDamage(world: World, event: HitEvent): void {
             level: bloodLevel,
             duration: 300,
         };
-        world.events.push(bloodFogEvent);
+        pushEvent(world, bloodFogEvent);
 
         // 生成相机震动事件（根据伤害等级）
         if (bloodLevel >= 2) {
@@ -124,7 +109,7 @@ function applyDamage(world: World, event: HitEvent): void {
                 intensity: bloodLevel * 3,
                 duration: 200,
             };
-            world.events.push(shakeEvent);
+            pushEvent(world, shakeEvent);
         }
 
         // 生成音效事件
@@ -132,7 +117,7 @@ function applyDamage(world: World, event: HitEvent): void {
             type: "PlaySound",
             name: "hit",
         };
-        world.events.push(soundEvent);
+        pushEvent(world, soundEvent);
     }
 
     // 检查死亡
@@ -175,12 +160,7 @@ function processDamageOverTime(world: World, dt: number): void {
 /**
  * 处理死亡
  */
-function handleDeath(
-    world: World,
-    victimId: EntityId,
-    killerId: EntityId,
-    pos: { x: number; y: number },
-): void {
+function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: { x: number; y: number }): void {
     const victimComps = world.entities.get(victimId);
     if (!victimComps) return;
 
@@ -196,14 +176,14 @@ function handleDeath(
         killer: killerId,
         score,
     };
-    world.events.push(killEvent);
+    pushEvent(world, killEvent);
 
     // 播放死亡音效
     const soundEvent: PlaySoundEvent = {
         type: "PlaySound",
         name: "explosion",
     };
-    world.events.push(soundEvent);
+    pushEvent(world, soundEvent);
 
     // 添加销毁标记
     const hasDestroyTag = victimComps.some(DestroyTag.check);

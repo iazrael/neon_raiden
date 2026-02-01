@@ -15,7 +15,7 @@ import { World } from "../world";
 import { Bomb, BombIntent, Bullet, DestroyTag, EnemyTag, Health, PlayerTag, Transform } from "../components";
 import { removeComponent, view } from "../world";
 import { pushEvent } from "../world";
-import { BombExplodedEvent, PlaySoundEvent, CamShakeEvent, HitEvent } from "../events/index";
+import { HitEvent } from "../events";
 import { ULTIMATE_DAMAGE } from "../configs";
 
 /**
@@ -102,7 +102,7 @@ function handleBombExplosion(world: World): void {
             owner: world.playerId,
             victim: enemyId,
         };
-        world.events.push(hitEvent);
+        pushEvent(world, hitEvent);
     }
     // 所有的子弹也销毁
     for (const [bulletId, [bullet], comps] of view(world, [Bullet])) {

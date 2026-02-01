@@ -1,12 +1,6 @@
 import { EntityId } from "../types";
+import { BaseEvent } from "./base";
 
-/**
- * 所有事件的基础接口
- * 使用 extends BaseEvent<'EventName'> 来定义新事件
- */
-export interface BaseEvent<T extends string> {
-  type: T;
-}
 
 // ① 命中（碰撞瞬间）
 export interface HitEvent extends BaseEvent<'Hit'> {

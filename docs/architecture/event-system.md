@@ -212,7 +212,7 @@ const hits = getEvents<HitEvent>(world, EventTags.Hit);
 ### 修改后
 
 ```typescript
-import { HitEvent } from '../events/index';
+import { HitEvent } from '../events';
 
 // 发送事件不需要类型断言
 pushEvent(world, {

@@ -1,4 +1,4 @@
-import type { GameEvent, EventType, HitEvent } from '../src/engine/events/index';
+import type { GameEvent, EventType, HitEvent } from '../src/engine/events';
 
 describe('Event Types', () => {
   it('应该正确导出 GameEvent 联合类型', () => {

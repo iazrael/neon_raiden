@@ -13,7 +13,7 @@
 
 import { getEvents, view, World } from "../world";
 import { CameraShake } from "../components";
-import { CamShakeEvent } from "../events/index";
+import { CamShakeEvent } from "../events";
 import { CameraState } from "../types";
 
 /**

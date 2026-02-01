@@ -16,7 +16,7 @@ import { DropTable, Transform } from '../components';
 import { spawnPickup } from '../factory';
 import { PickupId } from '../types/ids';
 import { PICKUP_REGISTRY } from '../configs/droptables';
-import { KillEvent, PickupEvent } from '../events/index';
+import { KillEvent, PickupEvent } from '../events';
 import { getEvents, pushEvent } from '../world';
 
 /**

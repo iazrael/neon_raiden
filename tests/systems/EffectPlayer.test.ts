@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createWorld, generateId, World, addComponent } from '../../src/engine/world';
+import { createWorld, generateId, World, addComponent, pushEvent } from '../../src/engine/world';
 import { EffectPlayer, updateParticles, spawnShockwave } from '../../src/engine/systems/EffectPlayer';
 import { Transform, Particle, Lifetime, Sprite, Shockwave, VisualEffect, EnemyTag } from '../../src/engine/components';
 import { HitEvent, KillEvent, ComboUpgradeEvent, BloodFogEvent } from '../../src/engine/events';
@@ -37,7 +37,7 @@ describe('EffectPlayer', () => {
                 victim: 2
             };
 
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
             EffectPlayer(world, 16);
 
             // HitEvent 不应该直接生成粒子（现在通过 BloodFogEvent 处理）
@@ -62,7 +62,7 @@ describe('EffectPlayer', () => {
                 victim: 2
             };
 
-            world.events.push(smallHit);
+            pushEvent(world, smallHit);
             EffectPlayer(world, 16);
 
             // HitEvent 不会生成爆炸粒子（现在通过 BloodFogEvent 处理）
@@ -88,7 +88,7 @@ describe('EffectPlayer', () => {
                 duration: 0.3
             };
 
-            world.events.push(bloodFogEvent as BloodFogEvent);
+            pushEvent(world, bloodFogEvent as BloodFogEvent);
             EffectPlayer(world, 16);
 
             // 应该生成飙血粒子（使用 VisualEffect 组件）
@@ -122,7 +122,7 @@ describe('EffectPlayer', () => {
                 score: 100
             };
 
-            world.events.push(killEvent);
+            pushEvent(world, killEvent);
             EffectPlayer(world, 16);
 
             // 验证大型爆炸粒子被创建（现在使用 VisualEffect 组件）
@@ -152,7 +152,7 @@ describe('EffectPlayer', () => {
                 score: 100
             };
 
-            world.events.push(killEvent);
+            pushEvent(world, killEvent);
             EffectPlayer(world, 16);
 
             // 验证冲击波被创建（通过 VisualEffect 组件）
@@ -251,7 +251,7 @@ describe('EffectPlayer', () => {
                 color: '#00ffff'
             };
 
-            world.events.push(comboEvent);
+            pushEvent(world, comboEvent);
             EffectPlayer(world, 16);
 
             // 验证冲击波被创建（通过 VisualEffect 组件）
@@ -298,7 +298,7 @@ describe('EffectPlayer', () => {
                 color: '#00ffff'
             };
 
-            world.events.push(comboEvent);
+            pushEvent(world, comboEvent);
             EffectPlayer(world, 16);
 
             // 注意：当前 handleComboUpgradeEvent 实现为空，所以这个测试预期不会有粒子
@@ -324,7 +324,7 @@ describe('EffectPlayer', () => {
                 color: '#00ffff'
             };
 
-            world.events.push(comboEvent);
+            pushEvent(world, comboEvent);
             EffectPlayer(world, 16);
 
             // 验证冲击波被创建（通过 VisualEffect 组件）

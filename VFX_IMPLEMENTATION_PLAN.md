@@ -473,7 +473,7 @@ describe('EffectPlayer', () => {
                 bloodLevel: 2
             };
 
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
             EffectPlayer(world, 16);
 
             // 验证粒子实体被创建
@@ -498,7 +498,7 @@ describe('EffectPlayer', () => {
                 bloodLevel: 1
             };
 
-            world.events.push(smallHit);
+            pushEvent(world, smallHit);
             EffectPlayer(world, 16);
 
             // 应该生成 explosion_small
@@ -524,7 +524,7 @@ describe('EffectPlayer', () => {
                 score: 100
             };
 
-            world.events.push(killEvent);
+            pushEvent(world, killEvent);
             EffectPlayer(world, 16);
 
             // 验证大型爆炸粒子被创建
@@ -596,7 +596,7 @@ describe('EffectPlayer', () => {
                 color: '#00ffff'
             };
 
-            world.events.push(comboEvent);
+            pushEvent(world, comboEvent);
             EffectPlayer(world, 16);
 
             // 验证冲击波被创建

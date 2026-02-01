@@ -2,7 +2,7 @@
  * DamageResolutionSystem 单元测试
  */
 
-import { createWorld, generateId, addComponent } from '../../src/engine/world';
+import { createWorld, generateId, addComponent, pushEvent } from '../../src/engine/world';
 import { DamageResolutionSystem } from '../../src/engine/systems/DamageResolutionSystem';
 import { Transform, Health, Shield, DestroyTag, ScoreValue, DamageOverTime } from '../../src/engine/components';
 import { HitEvent } from '../../src/engine/events';
@@ -31,7 +31,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -53,7 +53,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -78,7 +78,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -104,7 +104,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -130,7 +130,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -159,7 +159,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -189,7 +189,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -217,7 +217,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -240,7 +240,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -265,7 +265,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -293,7 +293,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 
@@ -316,7 +316,7 @@ describe('DamageResolutionSystem', () => {
                 owner: 1,
                 victim: victimId,
             };
-            world.events.push(hitEvent);
+            pushEvent(world, hitEvent);
 
             DamageResolutionSystem(world, 0.016);
 

@@ -14,7 +14,6 @@
 import { BossId, Component } from '../../types';
 import { Health, BossTag, BossAI, Weapon, SpeedStat, BossVisual } from '../../components';
 import { BOSS_DATA, BossPhaseSpec } from '../../configs/bossData';
-import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../../events/index';
 import { pushEvent, view, World } from '../../world';
 import { ENEMY_WEAPON_TABLE } from '../../blueprints/weapons';
 
