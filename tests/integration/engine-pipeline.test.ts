@@ -4,6 +4,17 @@
  * 验证 Engine 的 framePipeline 按正确顺序执行所有系统
  */
 
+// 在导入 Engine 之前 mock 音频模块，避免 AudioEngine 初始化警告
+jest.mock('../../src/engine/audio', () => ({
+    audioPlayer: {
+        playHit: jest.fn(),
+        playExplosion: jest.fn(),
+        playPowerUp: jest.fn(),
+        playShoot: jest.fn(),
+        playShieldBreak: jest.fn(),
+    },
+}));
+
 import { Engine } from '../../src/engine/engine';
 import { Blueprint } from '../../src/engine/blueprints';
 import * as fs from 'fs';

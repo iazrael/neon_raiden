@@ -2,7 +2,18 @@
  * AudioSystem 单元测试
  */
 
-import { AudioSystem} from '../../src/engine/systems/AudioSystem';
+// 在导入 AudioSystem 之前 mock 音频模块，避免 AudioEngine 初始化警告
+jest.mock('../../src/engine/audio', () => ({
+    audioPlayer: {
+        playHit: jest.fn(),
+        playExplosion: jest.fn(),
+        playPowerUp: jest.fn(),
+        playShoot: jest.fn(),
+        playShieldBreak: jest.fn(),
+    },
+}));
+
+import { AudioSystem } from '../../src/engine/systems/AudioSystem';
 import type { World } from '../../src/engine/world';
 import * as audioModule from '../../src/engine/audio';
 
