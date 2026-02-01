@@ -12,8 +12,6 @@
  * - P8 清理层 (生命周期)
  */
 
-export { TimeSlowSystem } from "./TimeSlowSystem";
-
 // P1: 决策层
 export { InputSystem } from "./InputSystem";
 export { EnemySystem } from "./EnemySystem";

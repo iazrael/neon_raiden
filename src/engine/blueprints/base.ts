@@ -7,7 +7,7 @@ export type Blueprint = Partial<{
 }>;
 
 /** 把组件类映射成它自己的对象形状 */
-type ComponentShape<T> = T extends new (arg: infer P) => any
+export type ComponentShape<T> = T extends new (arg: infer P) => any
     ? P extends any[]              // 是元组？
     ? never                      // 禁止元组，强制用对象
     : P                          // 返回对象本身

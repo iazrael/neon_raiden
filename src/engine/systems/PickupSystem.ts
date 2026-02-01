@@ -10,23 +10,32 @@
  * 执行顺序：P5 - 在交互层之后
  */
 
-import {  Component } from '../types';
-import { Transform, Weapon, Buff, Health, Bomb, OptionCount, Lifetime, Shield } from '../components';
-import { WeaponId, BuffType } from '../types';
-import { getEvents, pushEvent,World } from '../world';
-import { EventTags, PickupEvent, PlaySoundEvent } from '../events';
-import { WEAPON_TABLE } from '../blueprints/weapons';
+import { Component } from "../types";
+import {
+    Transform,
+    Weapon,
+    Health,
+    Bomb,
+    OptionCount,
+    Lifetime,
+    Shield,
+    InvulnerableState,
+    TimeSlowState,
+    ShieldAutoRegen,
+} from "../components";
+import { WeaponId, BuffType } from "../types";
+import { ensureComponent, getEvents, pushEvent, World } from "../world";
+import { EventTags, PickupEvent, PlaySoundEvent } from "../events";
+import { WEAPON_TABLE } from "../blueprints/weapons";
 import {
     POWERUP_LIMITS,
     BUFF_CONFIG,
     OPTION_BLUEPRINT_MAP,
     POWERUP_CONFIG,
     BUFF_CATEGORY_CONFIG,
-    BuffCategory
-} from '../configs/powerups';
-import { spawnOption, spawnFromBlueprint } from '../factory';
-import { BLUEPRINT_TIME_SLOW } from '../blueprints/effects';
-import { findTimeSlowEntity } from '../utils/timeUtils';
+    BuffCategory,
+} from "../configs/powerups";
+import { spawnOption, spawnFromBlueprint } from "../factory";
 
 /**
  * 拾取处理器接口
@@ -48,9 +57,15 @@ const weaponPickupHandler: PickupHandler = {
 
         if (existingWeapon && existingWeapon.id === weaponId) {
             // 已有该武器，升级武器等级
-            existingWeapon.level = Math.min(existingWeapon.level + 1, POWERUP_LIMITS.MAX_WEAPON_LEVEL);
+            existingWeapon.level = Math.min(
+                existingWeapon.level + 1,
+                POWERUP_LIMITS.MAX_WEAPON_LEVEL,
+            );
             // 升级时可能增加子弹数量或减少冷却
-            existingWeapon.bulletCount = Math.min(existingWeapon.bulletCount + 1, POWERUP_LIMITS.MAX_BULLET_COUNT);
+            existingWeapon.bulletCount = Math.min(
+                existingWeapon.bulletCount + 1,
+                POWERUP_LIMITS.MAX_BULLET_COUNT,
+            );
         } else {
             // 移除旧武器，添加新武器
             if (existingWeapon) {
@@ -65,10 +80,10 @@ const weaponPickupHandler: PickupHandler = {
 
         // 播放音效
         pushEvent(world, {
-            type: 'PlaySound',
-            name: 'weapon_pickup'
+            type: "PlaySound",
+            name: "weapon_pickup",
         } as PlaySoundEvent);
-    }
+    },
 };
 
 /**
@@ -87,15 +102,15 @@ const buffPickupHandler: PickupHandler = {
             applyInstantBuff(world, playerComps, type);
         } else {
             // 持续效果添加 Buff 组件
-            addDurationBuff(world, playerComps, type, playerId);
+            addDurationBuff(world, playerId, playerComps, type);
         }
 
         // 播放音效
         pushEvent(world, {
-            type: 'PlaySound',
-            name: 'buff_pickup'
+            type: "PlaySound",
+            name: "buff_pickup",
         } as PlaySoundEvent);
-    }
+    },
 };
 
 /**
@@ -121,8 +136,8 @@ const optionPickupHandler: PickupHandler = {
         if (optionCount.count >= optionCount.maxCount) {
             // 已经满了，只播放音效，不创建新僚机
             pushEvent(world, {
-                type: 'PlaySound',
-                name: 'buff_pickup'
+                type: "PlaySound",
+                name: "buff_pickup",
             } as PlaySoundEvent);
             return;
         }
@@ -143,10 +158,10 @@ const optionPickupHandler: PickupHandler = {
 
         // 播放音效
         pushEvent(world, {
-            type: 'PlaySound',
-            name: 'buff_pickup'
+            type: "PlaySound",
+            name: "buff_pickup",
         } as PlaySoundEvent);
-    }
+    },
 };
 
 /**
@@ -155,13 +170,17 @@ const optionPickupHandler: PickupHandler = {
 const PICKUP_HANDLERS = {
     weapons: weaponPickupHandler,
     buffs: buffPickupHandler,
-    options: optionPickupHandler
+    options: optionPickupHandler,
 } as const;
 
 /**
  * 应用一次性 Buff 效果
  */
-function applyInstantBuff(world: World, playerComps: Component[], buffType: BuffType): void {
+function applyInstantBuff(
+    world: World,
+    playerComps: Component[],
+    buffType: BuffType,
+): void {
     switch (buffType) {
         case BuffType.POWER:
             // POWER: 武器升级
@@ -169,7 +188,7 @@ function applyInstantBuff(world: World, playerComps: Component[], buffType: Buff
             if (weapon) {
                 weapon.level = Math.min(
                     weapon.level + BUFF_CONFIG[BuffType.POWER].levelIncrease,
-                    BUFF_CONFIG[BuffType.POWER].maxLevel
+                    BUFF_CONFIG[BuffType.POWER].maxLevel,
                 );
             }
             break;
@@ -178,7 +197,10 @@ function applyInstantBuff(world: World, playerComps: Component[], buffType: Buff
             // HP: 恢复生命值
             const health = playerComps.find(Health.check);
             if (health) {
-                health.hp = Math.min(health.hp + BUFF_CONFIG[BuffType.HP].healAmount, health.max);
+                health.hp = Math.min(
+                    health.hp + BUFF_CONFIG[BuffType.HP].healAmount,
+                    health.max,
+                );
             }
             break;
 
@@ -193,8 +215,8 @@ function applyInstantBuff(world: World, playerComps: Component[], buffType: Buff
                 // 如果达到上限，播放提示音
                 if (bomb.count === bomb.maxCount && oldCount < bomb.maxCount) {
                     pushEvent(world, {
-                        type: 'PlaySound',
-                        name: 'bomb_max'
+                        type: "PlaySound",
+                        name: "bomb_max",
                     } as PlaySoundEvent);
                 }
             } else {
@@ -204,10 +226,10 @@ function applyInstantBuff(world: World, playerComps: Component[], buffType: Buff
 
             // 播放拾取特效
             pushEvent(world, {
-                type: 'Pickup',
+                type: "Pickup",
                 pos: { x: 0, y: 0 },
                 itemId: BuffType.BOMB,
-                owner: 0
+                owner: 0,
             } as PickupEvent);
             break;
 
@@ -220,35 +242,60 @@ function applyInstantBuff(world: World, playerComps: Component[], buffType: Buff
 /**
  * 添加持续 Buff 效果
  */
-function addDurationBuff(world: World, playerComps: Component[], buffType: BuffType, playerId: number): void {
+function addDurationBuff(
+    world: World,
+    playerId: number,
+    playerComps: Component[],
+    buffType: BuffType,
+): void {
     switch (buffType) {
-        case BuffType.INVINCIBILITY:
+        case BuffType.INVINCIBILITY: {
             // INVINCIBILITY: 添加短暂无敌 Buff
-            playerComps.push(new Buff({
-                type: BuffType.INVINCIBILITY,
-                value: 1,
-                remaining: BUFF_CONFIG[BuffType.INVINCIBILITY].duration
-            }));
+            const config = BUFF_CONFIG[BuffType.INVINCIBILITY];
+            const invulnerable = ensureComponent(
+                world,
+                playerId,
+                InvulnerableState,
+                {
+                    duration: config.duration,
+                    flashColor: config.flashColor,
+                },
+            );
+            // 重复拾取时刷新倒计时
+            invulnerable.duration = config.duration;
             break;
-
-        case BuffType.TIME_SLOW:
+        }
+        case BuffType.TIME_SLOW: {
             // TIME_SLOW: 时间减速 - 创建/刷新 TimeSlow 实体
-            handleTimeSlowPickup(world, playerId);
+            const config = BUFF_CONFIG[BuffType.TIME_SLOW];
+            const timeSlow = ensureComponent(world, playerId, TimeSlowState, {
+                duration: config.duration,
+                scale: config.scale,
+                scope: config.scope,
+            });
+            // 刷新时间
+            timeSlow.duration = config.duration;
             break;
-
-        case BuffType.SHIELD:
+        }
+        case BuffType.SHIELD: {
             // SHIELD: 护盾 Buff - 立即加满护盾
-            const shield = playerComps.find(Shield.check) as Shield | undefined;
+            const shield = playerComps.find(Shield.check);
             if (shield) {
                 shield.value = shield.max;
             }
-            playerComps.push(new Buff({
-                type: BuffType.SHIELD,
-                value: 20, // 每秒恢复20点
-                remaining: 5000 // 默认 5 秒持续时间
-            }));
+            const config = BUFF_CONFIG[BuffType.SHIELD];
+            const shieldAutoRegen = ensureComponent(
+                world,
+                playerId,
+                ShieldAutoRegen,
+                {
+                    regenPerSecond: config.regenPerSecond,
+                    duration: config.duration,
+                },
+            );
+            shieldAutoRegen.duration = config.duration;
             break;
-
+        }
         default:
             console.warn(`Unknown duration buff type: ${buffType}`);
             break;
@@ -278,7 +325,8 @@ export function PickupSystem(world: World, dt: number): void {
         else if (isBuffType(itemId)) {
             if (itemId === BuffType.OPTION) {
                 // OPTION 是特殊的，需要调用 option handler
-                const blueprintType = POWERUP_CONFIG[BuffType.OPTION].blueprintType;
+                const blueprintType =
+                    POWERUP_CONFIG[BuffType.OPTION].blueprintType;
                 PICKUP_HANDLERS.options.handle(world, playerId, blueprintType);
             } else {
                 PICKUP_HANDLERS.buffs.handle(world, playerId, itemId);
@@ -301,27 +349,3 @@ function isBuffType(id: string): id is BuffType {
     return Object.values(BuffType).includes(id as BuffType);
 }
 
-/**
- * 处理 TIME_SLOW 道具拾取
- * 创建或刷新 TimeSlow 实体
- */
-function handleTimeSlowPickup(world: World, playerId: number): void {
-    const existingTimeSlow = findTimeSlowEntity(world);
-
-    if (existingTimeSlow) {
-        // 已存在: 刷新 Lifetime
-        const timeSlowComps = world.entities.get(existingTimeSlow);
-        if (timeSlowComps) {
-            const lifetime = timeSlowComps.find(Lifetime.check);
-            if (lifetime) {
-                // duration 已经是毫秒，lifetime.timer 也是毫秒，直接赋值
-                lifetime.timer = BUFF_CONFIG[BuffType.TIME_SLOW].duration;
-            }
-            // 注意: TimeSlow 实体必须有 Lifetime 组件(由 BLUEPRINT_TIME_SLOW 定义)
-            // 如果缺少 Lifetime,说明蓝图配置错误,应视为严重错误
-        }
-    } else {
-        // 不存在: 创建新的 TimeSlow 实体
-        spawnFromBlueprint(world, BLUEPRINT_TIME_SLOW);
-    }
-}

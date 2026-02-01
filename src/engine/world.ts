@@ -1,7 +1,8 @@
 import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
 import { Event as GameEvent } from './events';
 import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
-
+import * as Components from './components';
+import { ComponentShape } from './blueprints';
 
 // 世界接口
 export interface World {
@@ -191,6 +192,16 @@ export function removeComponent<T extends Component>(w: World, id: EntityId, com
     }
 }
 
+// ========== 从comps数组移除指定组件 ==========
+export function removeComponentFromComps<T extends Component>(comps: Component[], comp: T) {
+    const index = comps.indexOf(comp);
+    if (index !== -1) {
+        comps.splice(index, 1);
+    }
+}
+
+
+
 // ======= 判断是否存在指定组件 =======
 export function hasComponent<T extends Component>(w: World, id: EntityId, compCtor: Ctor<T>): boolean {
     const comps = w.entities.get(id);
@@ -294,7 +305,7 @@ export function ensureComponent<T extends Component>(
     w: World,
     id: EntityId,
     Ctor: Ctor<T>,
-    cfg: ConstructorParameters<typeof Ctor.prototype.constructor>[0]
+    cfg: {[K in keyof T]?: T[K]}
 ): T {
     // 步骤 1: 检查实体是否存在,不存在则创建
     if (!w.entities.has(id)) {

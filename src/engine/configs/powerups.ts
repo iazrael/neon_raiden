@@ -88,16 +88,27 @@ export const BUFF_CONFIG = {
     [BuffType.INVINCIBILITY]: {
         /** 无敌持续时间（毫秒） */
         duration: 3000,
-        /** 描述文本 */
-        description: '3秒无敌',
+        /** 闪烁颜色 */
+        flashColor: '#FFD700',
     },
 
     [BuffType.TIME_SLOW]: {
         /** 时间减缓持续时间（毫秒） */
         duration: 5000,
-        /** 描述文本 */
-        description: '5秒时间减缓',
+        /** 时间减缓比例 (0.5 = 50% 速度) */
+        scale: 0.5,
+        /** 影响范围 (预留未来扩展区域限制) */
+        scope: 'global',
     },
+
+    // 护盾的增益 Buff 配置
+    [BuffType.SHIELD]: {
+        /** 护盾恢复持续时间（毫秒） */
+        duration: 5000,
+        /** 护盾恢复速率（每秒恢复点） */
+        regenPerSecond: 20,
+    },
+
 } as const;
 
 /**

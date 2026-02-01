@@ -3,7 +3,7 @@
  */
 
 import { EntityId } from '../types';
-import { PlayerTag, TimeSlow } from '../components';
+import { PlayerTag, TimeSlowState } from '../components';
 import { getEntity, view, World } from '../world';
 
 /**
@@ -64,31 +64,27 @@ export function isBulletFromPlayer(world: World, ownerId: EntityId): boolean {
 }
 
 /**
- * 查找当前激活的 TimeSlow 实体
+ * 查找当前激活的 TimeSlowState 玩家实体
  *
  * @param world - 游戏世界对象
- * @returns TimeSlow 实体的 ID,如果不存在则返回 undefined
+ * @returns 持有 TimeSlowState 组件的玩家实体 ID，如果不存在则返回 undefined
  *
  * @description
- * 查询世界中的 TimeSlow 实体。TimeSlow 实体代表时间减速效果的状态,
- * 由 PickupSystem 在拾取 TIME_SLOW 道具时创建。
- *
- * 游戏中同时最多存在一个 TimeSlow 实体。重复拾取 TIME_SLOW 道具会刷新现有实体的生命周期。
+ * 查询持有 TimeSlowState 组件的玩家实体。
+ * 注意：TimeSlowState 现在是玩家身上的组件，而不是独立实体。
+ * 时间减速效果只能由玩家触发。
  *
  * @example
  * ```ts
- * const existingTimeSlow = findTimeSlowEntity(world);
- * if (existingTimeSlow) {
- *     // 刷新现有 TimeSlow 的持续时间
- *     refreshLifetime(world, existingTimeSlow);
- * } else {
- *     // 创建新的 TimeSlow 实体
- *     spawnFromBlueprint(world, BLUEPRINT_TIME_SLOW);
+ * const playerId = findTimeSlowEntity(world);
+ * if (playerId) {
+ *     // 玩家正在使用时间减速
+ *     console.log("Time slow is active on player");
  * }
  * ```
  */
 export function findTimeSlowEntity(world: World): EntityId | undefined {
-    for (const [id, [_]] of view(world, [TimeSlow])) {
+    for (const [id, [_]] of view(world, [PlayerTag, TimeSlowState])) {
         return id;
     }
     return undefined;

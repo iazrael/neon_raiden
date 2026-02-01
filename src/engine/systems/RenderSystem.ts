@@ -32,12 +32,13 @@ import {
     InvulnerableState,
     Health,
     BossTag,
-    TimeSlow,
     Shockwave,
     Lifetime,
     VisualEffect,
     VisualLine,
     VisualMeteor,
+    VisualParticle,
+    VisualCircle,
 } from "../components";
 import { DebugConfig } from "../config/DebugConfig";
 
@@ -465,17 +466,17 @@ function drawBossHealthBar(
  */
 function drawVisualEffectCircles(
     ctx: CanvasRenderingContext2D,
-    effect: VisualEffect,
+    circles: VisualCircle[],
     camX: number,
     camY: number,
 ): void {
-    if (!effect || effect.circles.length === 0) {
+    if (!circles || circles.length === 0) {
         return;
     }
     ctx.save();
     ctx.globalCompositeOperation = "source-over";
     // ctx.shadowBlur = 15;
-    for (const circle of effect?.circles) {
+    for (const circle of circles) {
         ctx.globalAlpha = Math.max(0, circle.life);
         // ctx.shadowColor = circle.color;
         // ctx.shadowBlur = 15;
@@ -499,16 +500,16 @@ function drawVisualEffectCircles(
  */
 function drawVisualEffectParticles(
     ctx: CanvasRenderingContext2D,
-    effect: VisualEffect,
+    particles: VisualParticle[],
     camX: number,
     camY: number,
 ): void {
-    if (!effect || effect.particles.length === 0) {
+    if (!particles || particles.length === 0) {
         return;
     }
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    for (const p of effect?.particles) {
+    for (const p of particles) {
         const alpha = Math.max(0, p.life / p.maxLife);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
@@ -524,12 +525,12 @@ function drawVisualEffectParticles(
  */
 function drawTimeSlowEffect(
     ctx: CanvasRenderingContext2D,
-    effect: VisualEffect,
+    lines: VisualLine[],
     width: number,
     height: number,
 ): void {
     // 从 VisualEffect 组件获取线条
-    if (!effect || effect.lines.length === 0) {
+    if (!lines || lines.length === 0) {
         return;
     }
     ctx.save();
@@ -539,7 +540,7 @@ function drawTimeSlowEffect(
     ctx.fillRect(0, 0, width, height);
 
     // 绘制线条
-    for (const line of effect.lines) {
+    for (const line of lines) {
         ctx.strokeStyle = `rgba(173, 216, 230, ${line.alpha})`;
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -588,15 +589,17 @@ export function RenderSystem(
         drawPlayerEffect(context, queue.playerEffect, camX, camY);
     }
 
-    // 6. 绘制粒子
-    // 6.1 绘制 VisualEffect 粒子（爆炸火花等）
-    drawVisualEffectParticles(context, queue.visualEffect, camX, camY);
+    // 6. 绘制特效
+    if (queue.visualEffect) {
+        // 6. 绘制 VisualEffect 粒子（爆炸火花等）
+        drawVisualEffectParticles(context, queue.visualEffect.particles, camX, camY);
 
-    // 7. 绘制 VisualEffect 圆环（冲击波等）
-    drawVisualEffectCircles(context, queue.visualEffect, camX, camY);
+        // 7. 绘制 VisualEffect 圆环（冲击波等）
+        drawVisualEffectCircles(context, queue.visualEffect.circles, camX, camY);
 
-    // 绘制时间减速特效
-    drawTimeSlowEffect(context, queue.visualEffect, width, height);
+        // 8. 绘制时间减速特效
+        drawTimeSlowEffect(context, queue.visualEffect.lines, width, height);
+    }
 
     // 9. 绘制 Boss 血条
     if (queue.bossInfo) {

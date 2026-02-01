@@ -284,7 +284,7 @@ describe('ECS辅助函数', () => {
             expect(world.entities.has(newId)).toBe(false);
 
             // Act - 确保组件存在
-            const velocity = ensureComponent(world, newId, Velocity, { vx: 100, vy: 200 });
+            const velocity = ensureComponent(world, newId, Velocity, { vx: 100, vy: 200, vrot: 0 });
 
             // Assert - 实体和组件都应该被创建
             expect(world.entities.has(newId)).toBe(true);
@@ -358,7 +358,7 @@ describe('ECS辅助函数', () => {
             addComponent(world, entityId, transform);
 
             // Act - 使用 ensureComponent 添加另一个组件
-            const velocity = ensureComponent(world, entityId, Velocity, { vx: 10, vy: 20 });
+            const velocity = ensureComponent(world, entityId, Velocity, { vx: 10, vy: 20, vrot: 0 });
 
             // Assert - 两个组件都应该存在
             const [trans, vel] = getComponents(world, entityId, [Transform, Velocity]);

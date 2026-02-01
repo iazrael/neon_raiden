@@ -5,8 +5,7 @@
 
 import { createWorld, generateId, addComponent } from '../../src/engine/world';
 import { BuffSystem } from '../../src/engine/systems/BuffSystem';
-import { Transform, Buff, Shield, PlayerTag, InvulnerableState } from '../../src/engine/components';
-import { BuffType } from '../../src/engine/types';
+import { Transform, Shield, PlayerTag, InvulnerableState, ShieldAutoRegen } from '../../src/engine/components';
 
 describe('BuffSystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -31,10 +30,10 @@ describe('BuffSystem', () => {
             // 模拟PickupSystem的行为：立即加满
             shield.value = shield.max;
 
-            addComponent(world, playerId, new Buff({
-                type: BuffType.SHIELD,
-                value: 20, // 每秒恢复20点
-                remaining: 5000
+            // 添加护盾自动恢复组件
+            addComponent(world, playerId, new ShieldAutoRegen({
+                regenPerSecond: 20, // 每秒恢复20点
+                duration: 5000
             }));
 
             BuffSystem(world, 100); // 100ms
@@ -61,10 +60,10 @@ describe('BuffSystem', () => {
             // 模拟PickupSystem的行为：立即加满
             shield.value = shield.max;
 
-            addComponent(world, playerId, new Buff({
-                type: BuffType.SHIELD,
-                value: 100, // 大量恢复
-                remaining: 5000
+            // 添加护盾自动恢复组件
+            addComponent(world, playerId, new ShieldAutoRegen({
+                regenPerSecond: 100, // 大量恢复
+                duration: 5000
             }));
 
             BuffSystem(world, 1000);
@@ -83,10 +82,10 @@ describe('BuffSystem', () => {
             // 模拟PickupSystem的行为：立即加满
             shield.value = shield.max;
 
-            addComponent(world, playerId, new Buff({
-                type: BuffType.SHIELD,
-                value: 50, // 每秒恢复50点
-                remaining: 5000
+            // 添加护盾自动恢复组件
+            addComponent(world, playerId, new ShieldAutoRegen({
+                regenPerSecond: 50, // 每秒恢复50点
+                duration: 5000
             }));
 
             BuffSystem(world, 100); // 保持100
@@ -107,10 +106,9 @@ describe('BuffSystem', () => {
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
             addComponent(world, playerId, new PlayerTag());
-            addComponent(world, playerId, new Buff({
-                type: BuffType.INVINCIBILITY,
-                value: 1,
-                remaining: 3000 // 3秒
+            addComponent(world, playerId, new InvulnerableState({
+                duration: 3000, // 3秒
+                flashColor: '#FFD700'
             }));
 
             BuffSystem(world, 16);
@@ -127,10 +125,9 @@ describe('BuffSystem', () => {
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
             addComponent(world, playerId, new PlayerTag());
-            addComponent(world, playerId, new Buff({
-                type: BuffType.INVINCIBILITY,
-                value: 1,
-                remaining: 100 // 即将结束
+            addComponent(world, playerId, new InvulnerableState({
+                duration: 100, // 即将结束
+                flashColor: '#FFD700'
             }));
 
             BuffSystem(world, 50);
@@ -142,9 +139,7 @@ describe('BuffSystem', () => {
             BuffSystem(world, 100);
             comps = world.entities.get(playerId);
             invState = comps?.find(InvulnerableState.check);
-            const buff = comps?.find(Buff.check);
 
-            expect(buff).toBeUndefined();
             expect(invState).toBeUndefined();
         });
     });
@@ -152,39 +147,41 @@ describe('BuffSystem', () => {
 
 
     describe('Buff 生命周期', () => {
-        it('Buff 时间应该随时间递减', () => {
+        it('ShieldAutoRegen 时间应该随时间递减', () => {
             const playerId = generateId();
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            const buff = new Buff({
-                type: BuffType.SHIELD,
-                value: 10,
-                remaining: 5000
+            const shield = new Shield({ value: 50, max: 100 });
+            addComponent(world, playerId, shield);
+            const shieldRegen = new ShieldAutoRegen({
+                regenPerSecond: 10,
+                duration: 5000
             });
-            addComponent(world, playerId, buff);
+            addComponent(world, playerId, shieldRegen);
 
             BuffSystem(world, 1000); // 1秒
 
-            expect(buff.remaining).toBe(4000);
+            expect(shieldRegen.duration).toBe(4000);
         });
 
-        it('过期的 Buff 应该被移除', () => {
+        it('过期的 ShieldAutoRegen 应该被移除', () => {
             const playerId = generateId();
 
             world.entities.set(playerId, []);
             addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
-            addComponent(world, playerId, new Buff({
-                type: BuffType.SHIELD,
-                value: 10,
-                remaining: 50
+            const shield = new Shield({ value: 50, max: 100 });
+            addComponent(world, playerId, shield);
+            addComponent(world, playerId, new ShieldAutoRegen({
+                regenPerSecond: 10,
+                duration: 50
             }));
 
             BuffSystem(world, 100); // 超过持续时间
 
             const comps = world.entities.get(playerId);
-            const buff = comps?.find(Buff.check);
-            expect(buff).toBeUndefined();
+            const shieldRegen = comps?.find(ShieldAutoRegen.check);
+            expect(shieldRegen).toBeUndefined();
         });
     });
 

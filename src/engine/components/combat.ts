@@ -12,7 +12,6 @@ export class Shield extends Component {
     constructor(cfg: {
         /** 当前护盾值 */
         value: number;
-
         /** 护盾最大值 */
         max: number;
     }) {
@@ -174,38 +173,6 @@ export class PickupItem extends Component {
     static check(c: any): c is PickupItem { return c instanceof PickupItem; }
 }
 
-/** 增益效果组件 - 存储实体身上的增益效果 */
-export class Buff extends Component {
-    /**
-     * 构造函数
-     * @param cfg 增益效果配置
-     */
-    constructor(cfg: {
-        /** 增益类型 */
-        type: BuffType;
-        /** 效果数值 */
-        value: number;
-        /** 持续时间, 单位毫秒 */
-        remaining: number;
-    }) {
-        super();
-        this.type = cfg.type;
-        this.value = cfg.value;
-        this.remaining = cfg.remaining;
-    }
-    public type: BuffType;
-    public value: number;
-    public remaining: number;
-    static check(c: any): c is Buff { return c instanceof Buff; }
-    /** 每帧由 BuffSystem 调用 */
-    update(dt: number): void {
-        this.remaining -= dt;
-    }
-
-    isFinished(): boolean {
-        return this.remaining <= 0;
-    }
-}
 
 /** 掉落表组件 - 定义实体被销毁时的掉落物品 */
 export class DropTable extends Component {
@@ -278,7 +245,7 @@ export class DamageOverTime extends Component {
 
 /**
  * 无敌状态 (包含视觉效果)
- * 用法：受伤瞬间挂上，DamageResolutionSystem 每帧减时；存在期间**跳过一切伤害逻辑**
+ * 用法: 拾取后生效，持续时间结束后移除
  */
 export class InvulnerableState extends Component {
     constructor(cfg: {
@@ -294,15 +261,6 @@ export class InvulnerableState extends Component {
     public duration: number; // 剩余无敌时间（毫秒）
     public flashColor?: string;
 
-    /** 每帧由 DamageResolutionSystem 调用 */
-    tick(dt: number) {
-        this.duration -= dt;
-    }
-
-    /** 倒计时结束？ */
-    isFinished(): boolean {
-        return this.duration <= 0;
-    }
 
     static check(c: any): c is InvulnerableState { return c instanceof InvulnerableState; }
 }
@@ -311,23 +269,47 @@ export class InvulnerableState extends Component {
  * TimeSlow 时间减速组件
  * 用法：TIME_SLOW 道具拾取时创建独立实体，TimeSlowSystem 设置全局 timeScale
  */
-export class TimeSlow extends Component {
+export class TimeSlowState extends Component {
     constructor(cfg: {
         /** 时间缩放比例 (0.5 = 50% 速度) */
         scale: number;
+        /** 持续时间（毫秒） */
+        duration: number;
         /** 影响范围 (预留未来扩展区域限制) */
         scope?: 'global' | 'area';
     }) {
         super();
         this.scale = cfg.scale;
+        this.duration = cfg.duration;
         this.scope = cfg.scope ?? 'global';
     }
     public scale: number;
+    public duration: number;    
     public scope: 'global' | 'area';
 
-    static check(c: any): c is TimeSlow { return c instanceof TimeSlow; }
+    static check(c: any): c is TimeSlowState { return c instanceof TimeSlowState; }
 }
 
+/** 护盾自动恢复 buff 组件 - 定义护盾自动恢复效果 */
+export class ShieldAutoRegen extends Component {
+    /**
+     * 构造函数
+     * @param cfg 护盾自动恢复配置
+     */
+    constructor(cfg: {
+        /** 每秒恢复护盾值 */
+        regenPerSecond: number;
+        /** 持续时间, 单位毫秒 */
+        duration: number;
+    }) {
+        super();
+        this.regenPerSecond = cfg.regenPerSecond;
+        this.duration = cfg.duration;
+    }
+    public regenPerSecond: number;
+    public duration: number;
+    static check(c: any): c is ShieldAutoRegen { return c instanceof ShieldAutoRegen; }
+}
 
 /**
  * Option 组件 - 僚机实体专用组件

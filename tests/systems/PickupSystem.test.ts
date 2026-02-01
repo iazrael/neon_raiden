@@ -4,10 +4,11 @@
 
 import { createWorld, generateId, addComponent, view } from '../../src/engine/world';
 import { PickupSystem } from '../../src/engine/systems/PickupSystem';
-import { Transform, Weapon, PlayerTag, PickupItem, Health, Buff, TimeSlow, Option, OptionCount } from '../../src/engine/components';
+import { Transform, Weapon, PlayerTag, PickupItem, Health, TimeSlowState, Option, OptionCount, InvulnerableState } from '../../src/engine/components';
 import { WeaponId, BuffType, AmmoType } from '../../src/engine/types';
 import { PickupEvent } from '../../src/engine/events';
 import { pushEvent } from '../../src/engine/world';
+import { BUFF_CONFIG } from '../../src/engine/configs/powerups';
 
 describe('PickupSystem', () => {
     let world: ReturnType<typeof createWorld>;
@@ -193,9 +194,9 @@ describe('PickupSystem', () => {
             PickupSystem(world, 0.016);
 
             const comps = world.entities.get(playerId);
-            const buff = comps?.find(Buff.check);
-            expect(buff).toBeDefined();
-            expect((buff as Buff).type).toBe(BuffType.INVINCIBILITY);
+            const invState = comps?.find(InvulnerableState.check);
+            expect(invState).toBeDefined();
+            expect(invState?.duration).toBe(BUFF_CONFIG[BuffType.INVINCIBILITY].duration);
         });
 
         it('TIME_SLOW Buff 应该创建 TimeSlow 实体', () => {
@@ -214,20 +215,11 @@ describe('PickupSystem', () => {
 
             PickupSystem(world, 0.016);
 
-            // 应该创建 TimeSlow 实体，而不是添加 Buff
-            let timeSlowFound = false;
-            for (const [, comps] of world.entities) {
-                if (comps.find(TimeSlow.check)) {
-                    timeSlowFound = true;
-                    break;
-                }
-            }
-            expect(timeSlowFound).toBe(true);
-
-            // 玩家不应该有 TIME_SLOW Buff
+            // 玩家应该有 TimeSlowState 组件
             const playerComps = world.entities.get(playerId);
-            const buff = playerComps?.find(Buff.check);
-            expect(buff).toBeUndefined();
+            const timeSlowState = playerComps?.find(TimeSlowState.check);
+            expect(timeSlowState).toBeDefined();
+            expect(timeSlowState?.duration).toBe(BUFF_CONFIG[BuffType.TIME_SLOW].duration);
         });
     });
 

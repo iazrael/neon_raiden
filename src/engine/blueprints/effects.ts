@@ -389,7 +389,10 @@ export interface EffectSpec {
 
 /**
  * 游戏效果配置表
- * （保留用于未来游戏机制扩展）
+ *
+ * @deprecated 此表当前未使用，保留用于未来游戏机制扩展
+ * 未来可用于：爆炸伤害范围效果、持续伤害区域、范围扩大效果等
+ * eslint-disable-next-line @typescript-eslint/no-unused-vars
  */
 export const EFFECT_TABLE: Record<string, EffectSpec> = {
     // 基础伤害
@@ -488,23 +491,3 @@ export const EFFECT_TABLE: Record<string, EffectSpec> = {
     },
 };
 
-// =============================================================================
-// 蓝图定义
-// =============================================================================
-
-/**
- * TimeSlow 实体蓝图
- * 拾取 TIME_SLOW 道具时创建此实体
- */
-export const BLUEPRINT_TIME_SLOW: Blueprint = {
-    /** 时间减速组件 */
-    TimeSlow: {
-        scale: 0.5,           // 50% 速度
-        scope: 'global'
-    },
-
-    /** 生命周期组件 */
-    Lifetime: {
-        timer: 5000  // 5000毫秒 = 5秒 (与 BUFF_CONFIG[BuffType.TIME_SLOW].duration 一致)
-    }
-};
