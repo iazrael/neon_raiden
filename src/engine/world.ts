@@ -274,6 +274,49 @@ export function getComponentsFromComps<T extends Ctor[]>(
     return result as any;
 }
 
+/**
+ * 确保有指定类型的组件, 没有就创建一个, 并返回组件
+ *
+ * @param w World 对象
+ * @param id 实体ID
+ * @param Ctor 组件构造函数
+ * @param cfg 组件构造配置对象(必需)
+ * @returns 组件实例
+ * @example
+ * ```ts
+ * // 获取或创建 Health 组件
+ * const health = ensureComponent(world, bossId, Health, {hp: 100, max: 100});
+ * // 组件已存在时,配置参数被忽略
+ * const existing = ensureComponent(world, bossId, Health, {hp: 200}); // 返回已有实例
+ * ```
+ */
+export function ensureComponent<T extends Component>(
+    w: World,
+    id: EntityId,
+    Ctor: Ctor<T>,
+    cfg: ConstructorParameters<typeof Ctor.prototype.constructor>[0]
+): T {
+    // 步骤 1: 检查实体是否存在,不存在则创建
+    if (!w.entities.has(id)) {
+        w.entities.set(id, []);
+    }
+
+    // 步骤 2: 查找是否已有该类型的组件
+    const comps = w.entities.get(id)!;
+    const existing = comps.find(c => c instanceof Ctor);
+
+    // 步骤 3: 如果存在则返回,否则创建新组件并添加
+    if (existing) {
+        return existing as T;
+    }
+
+    // 创建新组件并添加到实体
+    const newComp = new (Ctor as any)(cfg);
+    comps.push(newComp);
+    return newComp;
+}
+
+
 
 
 /**
