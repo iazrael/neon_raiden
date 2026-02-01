@@ -1,5 +1,5 @@
 import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
-import { Event as GameEvent } from './events';
+import { GameEvent, EventType } from './events/index';
 import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
 import * as Components from './components';
 import { ComponentShape } from './blueprints';
@@ -399,16 +399,16 @@ export function pushEvent(w: World, event: GameEvent) {
 /**
  * 获取指定类型的事件（类型安全）
  * @param w World 对象
- * @param eventType 事件类型（使用 EventTags，如 EventTags.Hit）
+ * @param eventType 事件类型字符串（如 'Hit', 'Kill'，有自动补全）
  * @returns 匹配的事件数组
  *
  * @example
  * ```ts
- * // 旧方式（需要硬编码字符串）
- * const hitEvents = world.events.filter((e): e is HitEvent => e.type === 'Hit');
+ * // 直接使用字符串字面量，有类型检查和自动补全
+ * const hitEvents = getEvents<HitEvent>(world, 'Hit');
  *
- * // 新方式（类型安全）
- * const hitEvents = getEvents(world, EventTags.Hit); // 类型自动推断为 HitEvent[]
+ * // ❌ 拼写错误会在编译时被捕获
+ * const hits = getEvents<HitEvent>(world, 'HIT'); // Error!
  * ```
  */
 export function getEvents<T extends GameEvent>(
