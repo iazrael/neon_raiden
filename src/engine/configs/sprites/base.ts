@@ -167,8 +167,8 @@ export const SPRITE_REGISTRY: Record<SpriteKey, SpriteEntry> = {
     [SpriteKey.BULLET_LASER]: {
         key: SpriteKey.BULLET_LASER,
         file: "bullet_laser.svg",
-        width: 8,
-        height: 50,
+        width: 6,
+        height: 38,
         pivotX: 0.5,
         pivotY: 0.5,
     },

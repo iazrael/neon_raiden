@@ -52,7 +52,7 @@ class MockResizeObserver {
 const PLAYER_BLUEPRINT: Blueprint = {
     Transform: { x: 400, y: 500, rot: 0 },
     Velocity: { vx: 0, vy: 0 , vrot: 0},
-    Sprite: { spriteKey: SpriteKey.PLAYER, srcW: 32, srcH: 32, scale: 1, pivotX: 0.5, pivotY: 0.5, color: '#00ff00' }
+    Sprite: { spriteKey: SpriteKey.PLAYER, color: '#00ff00' }
 };
 
 describe('Engine Pipeline 集成测试', () => {

@@ -241,6 +241,36 @@ function drawMeteors(
 }
 
 /**
+ * 绘制圆角矩形路径
+ * @param ctx Canvas 上下文
+ * @param x 矩形左上角 X 坐标
+ * @param y 矩形左上角 Y 坐标
+ * @param width 矩形宽度
+ * @param height 矩形高度
+ * @param radius 圆角半径
+ */
+function drawRoundedRectPath(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number
+): void {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
+/**
  * 绘制单个精灵
  */
 function drawSprite(
@@ -276,7 +306,31 @@ function drawSprite(
     const rotation = transform.rot + sprite.rotate90 * 90;
     ctx.rotate((rotation * Math.PI) / 180);
 
-    // 绘制图片
+    // 绘制边框（如果有配置）
+    if (sprite.border) {
+        const borderSize = sprite.border.size
+            ? sprite.border.size * zoom
+            : Math.max(itemWidth, itemHeight); // 使用精灵尺寸
+
+        ctx.save();
+        ctx.strokeStyle = sprite.border.color;
+        ctx.lineWidth = sprite.border.width ?? 3;
+        ctx.shadowColor = sprite.border.color;
+        ctx.shadowBlur = sprite.border.glow ?? 10;
+
+        drawRoundedRectPath(
+            ctx,
+            -borderSize / 2,
+            -borderSize / 2,
+            borderSize,
+            borderSize,
+            sprite.border.radius ?? 5
+        );
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // 绘制精灵图
     if (image && image.complete) {
         ctx.drawImage(image, -pivotX, -pivotY, itemWidth, itemHeight);
     } else {

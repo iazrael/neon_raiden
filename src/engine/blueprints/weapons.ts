@@ -104,7 +104,7 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     [WeaponId.TESLA]: {
         id: WeaponId.TESLA,
         ammoType: AmmoType.TESLA_CHAIN,
-        cooldown: 200,
+        cooldown: 500,
         curCD: 0,
         maxLevel: 6,
         pattern: WeaponPattern.AIMED,

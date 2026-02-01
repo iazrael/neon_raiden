@@ -78,6 +78,22 @@ export class Shockwave extends Component {
 }
 
 
+/**
+ * 边框配置接口
+ */
+export interface SpriteBorder {
+    /** 边框颜色（如 '#ff0000', 'cyan'） */
+    color: string;
+    /** 边框宽度（像素），默认 3 */
+    width?: number;
+    /** 圆角半径（像素），默认 5 */
+    radius?: number;
+    /** 发光强度（0=不发光），默认 10 */
+    glow?: number;
+    /** 边框尺寸（可选，不指定则使用精灵原始尺寸） */
+    size?: number;
+}
+
 /** 精灵组件 - 存储实体的纹理信息 */
 export class Sprite extends Component {
     /**
@@ -95,22 +111,9 @@ export class Sprite extends Component {
         rotate90?: number;
         /** 受伤闪烁截止时间 */
         hitFlashUntil?: number;
+        /** 边框配置（可选） */
+        border?: SpriteBorder;
 
-        // === 以下为兼容性字段，已废弃 ===
-        /** @deprecated 使用 spriteKey 替代 */
-        texture?: string;
-        /** @deprecated 从 registry 自动获取 */
-        srcX?: number;
-        /** @deprecated 从 registry 自动获取 */
-        srcY?: number;
-        /** @deprecated 从 registry 自动获取 */
-        srcW?: number;
-        /** @deprecated 从 registry 自动获取 */
-        srcH?: number;
-        /** @deprecated 从 registry 自动获取 */
-        pivotX?: number;
-        /** @deprecated 从 registry 自动获取 */
-        pivotY?: number;
     }) {
         super();
         this.spriteKey = cfg.spriteKey;
@@ -118,15 +121,8 @@ export class Sprite extends Component {
         this.scale = cfg.scale ?? 1;
         this.rotate90 = cfg.rotate90 ?? 0;
         this.hitFlashUntil = cfg.hitFlashUntil;
+        this.border = cfg.border;
 
-        // 兼容性字段
-        this.texture = cfg.texture ?? '';
-        this.srcX = cfg.srcX ?? 0;
-        this.srcY = cfg.srcY ?? 0;
-        this.srcW = cfg.srcW ?? 1;
-        this.srcH = cfg.srcH ?? 1;
-        this.pivotX = cfg.pivotX ?? 0.5;
-        this.pivotY = cfg.pivotY ?? 0.5;
     }
 
     /** Sprite 唯一标识符 */
@@ -144,21 +140,8 @@ export class Sprite extends Component {
     /** 受伤闪烁截止时间 */
     public hitFlashUntil?: number;
 
-    // === 以下为兼容性字段，已废弃 ===
-    /** @deprecated 使用 spriteKey 替代 */
-    public texture: string;
-    /** @deprecated 使用 width getter 替代 */
-    public srcX = 0;
-    /** @deprecated 使用 height getter 替代 */
-    public srcY = 0;
-    /** @deprecated 使用 width getter 替代 */
-    public srcW = 1;
-    /** @deprecated 使用 height getter 替代 */
-    public srcH = 1;
-    /** @deprecated 从 registry 自动获取 */
-    public pivotX = 0.5;
-    /** @deprecated 从 registry 自动获取 */
-    public pivotY = 0.5;
+    /** 边框配置（可选） */
+    public border?: SpriteBorder;
 
     /**
      * 获取 sprite 配置

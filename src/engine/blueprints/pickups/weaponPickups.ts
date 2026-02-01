@@ -10,6 +10,20 @@ import { CollisionLayer } from "../../types/collision";
 const PICKUP_FALL_SPEED = 100;
 
 /**
+ * 创建武器掉落物的边框配置
+ * @param color 边框颜色
+ */
+function createWeaponBorder(color: string) {
+    return {
+        color,
+        width: 3,
+        radius: 5,
+        glow: 1,
+        size: 30
+    };
+}
+
+/**
  * 离子机炮道具蓝图
  * 获得离子机炮武器
  */
@@ -24,7 +38,8 @@ export const BLUEPRINT_POWERUP_VULCAN: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.VULCAN_SPREAD].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.VULCAN_SPREAD].color,
-        scale: 1
+        scale: 1,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.VULCAN_SPREAD].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -49,7 +64,8 @@ export const BLUEPRINT_POWERUP_LASER: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.LASER_BEAM].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.LASER_BEAM].color,
-        scale: 1
+        scale: 0.6,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.LASER_BEAM].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -74,7 +90,8 @@ export const BLUEPRINT_POWERUP_MISSILE: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.MISSILE_HOMING].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.MISSILE_HOMING].color,
-        scale: 1
+        scale: 0.7,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.MISSILE_HOMING].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -99,7 +116,8 @@ export const BLUEPRINT_POWERUP_SHURIKEN: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.SHURIKEN_BOUNCE].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.SHURIKEN_BOUNCE].color,
-        scale: 1
+        scale: 0.9,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.SHURIKEN_BOUNCE].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -124,7 +142,8 @@ export const BLUEPRINT_POWERUP_TESLA: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.TESLA_CHAIN].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.TESLA_CHAIN].color,
-        scale: 1
+        scale: 0.4,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.TESLA_CHAIN].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -149,7 +168,8 @@ export const BLUEPRINT_POWERUP_MAGMA: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.MAGMA_POOL].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.MAGMA_POOL].color,
-        scale: 1
+        scale: 0.9,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.MAGMA_POOL].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -174,7 +194,8 @@ export const BLUEPRINT_POWERUP_WAVE: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.WAVE_PULSE].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.WAVE_PULSE].color,
-        scale: 1
+        scale: 0.5,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.WAVE_PULSE].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
@@ -199,7 +220,8 @@ export const BLUEPRINT_POWERUP_PLASMA: Blueprint = {
     Sprite: {
         spriteKey: BULLET_SPRITE_CONFIG[AmmoType.PLASMA_ORB].spriteKey,
         color: BULLET_SPRITE_CONFIG[AmmoType.PLASMA_ORB].color,
-        scale: 1
+        scale: 0.9,
+        border: createWeaponBorder(BULLET_SPRITE_CONFIG[AmmoType.PLASMA_ORB].color)
     },
 
     /** 拾取物品组件 - 设置道具的类型和自动拾取属性 */
