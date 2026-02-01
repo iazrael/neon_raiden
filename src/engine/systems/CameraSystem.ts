@@ -13,7 +13,7 @@
 
 import { getEvents, view, World } from "../world";
 import { CameraShake } from "../components";
-import { CamShakeEvent, EventTags } from "../events";
+import { CamShakeEvent } from "../events/index";
 import { CameraState } from "../types";
 
 /**
@@ -70,7 +70,7 @@ function handleShakeEvents(
     world: World,
     camera: CameraState,
 ): void {
-    const events = getEvents<CamShakeEvent>(world, EventTags.CamShake);
+    const events = getEvents<CamShakeEvent>(world, 'CamShake');
 
     for (const shakeEvent of events) {
         const intensity = Math.min(

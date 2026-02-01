@@ -14,7 +14,7 @@
 import { BossId, Component } from '../../types';
 import { Health, BossTag, BossAI, Weapon, SpeedStat, BossVisual } from '../../components';
 import { BOSS_DATA, BossPhaseSpec } from '../../configs/bossData';
-import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../../events';
+import { BossPhaseChangeEvent, PlaySoundEvent, BossSpecialEvent } from '../../events/index';
 import { pushEvent, view, World } from '../../world';
 import { ENEMY_WEAPON_TABLE } from '../../blueprints/weapons';
 
@@ -96,13 +96,13 @@ function applyPhaseModifiers(
         type: 'BossPhaseChange',
         phase: phaseIndex + 1,  // 显示使用1-based索引（内部是0-based）
         bossId: entityId
-    } as BossPhaseChangeEvent);
+    });
 
     // 3. 播放阶段切换音效
     pushEvent(world, {
         type: 'PlaySound',
         name: 'boss_phase_change'
-    } as PlaySoundEvent);
+    });
 
     // 4. 应用修正器
     const modifiers = phaseSpec.modifiers || {};

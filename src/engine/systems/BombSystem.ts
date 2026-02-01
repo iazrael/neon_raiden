@@ -15,7 +15,7 @@ import { World } from "../world";
 import { Bomb, BombIntent, Bullet, DestroyTag, EnemyTag, Health, PlayerTag, Transform } from "../components";
 import { removeComponent, view } from "../world";
 import { pushEvent } from "../world";
-import { BombExplodedEvent, PlaySoundEvent, CamShakeEvent, EventTags, HitEvent } from "../events";
+import { BombExplodedEvent, PlaySoundEvent, CamShakeEvent, HitEvent } from "../events/index";
 import { ULTIMATE_DAMAGE } from "../configs";
 
 /**
@@ -41,7 +41,7 @@ export function BombSystem(world: World, dt: number): void {
             pushEvent(world, {
                 type: "PlaySound",
                 name: "bomb_empty",
-            } as PlaySoundEvent);
+            });
             return;
         }
 
@@ -65,20 +65,20 @@ export function BombSystem(world: World, dt: number): void {
             type: "BombExploded",
             pos: playerTransform ? { x: playerTransform.x, y: playerTransform.y } : { x: 0, y: 0 },
             playerId: world.playerId,
-        } as BombExplodedEvent);
+        });
 
         // 2. 触发震屏
         pushEvent(world, {
             type: "CamShake",
             intensity: 10, // 10px 震动
             duration: 500, // 0.5秒
-        } as CamShakeEvent);
+        });
 
         // 3. 播放爆炸音效
         pushEvent(world, {
             type: "PlaySound",
             name: "bomb_explode_large",
-        } as PlaySoundEvent);
+        });
 
         // 4. 对所有敌人造成致命伤害
         handleBombExplosion(world);

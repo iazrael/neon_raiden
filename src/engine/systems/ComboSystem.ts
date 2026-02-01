@@ -12,7 +12,7 @@
  */
 
 import { ComboState } from '../types';
-import { KillEvent, ComboUpgradeEvent, ComboBreakEvent, BerserkModeEvent, EventTags } from '../events';
+import { KillEvent, ComboUpgradeEvent, ComboBreakEvent, BerserkModeEvent } from '../events/index';
 import { pushEvent, getEvents, World } from '../world';
 
 /**
@@ -39,7 +39,7 @@ export function ComboSystem(world: World, dt: number): void {
     const combo = world.comboState;
 
     // 1. 收集本帧的击杀事件
-    const killEvents = getEvents<KillEvent>(world, EventTags.Kill);
+    const killEvents = getEvents<KillEvent>(world, 'Kill');
 
     if (killEvents.length > 0) {
         // 有击杀，增加连击
@@ -73,7 +73,7 @@ export function ComboSystem(world: World, dt: number): void {
                     type: 'ComboBreak',
                     combo: combo.count,
                     reason: 'timeout'
-                } as ComboBreakEvent);
+                });
             }
             resetCombo(combo);
         }
@@ -108,7 +108,7 @@ function checkComboUpgrade(world: World, combo: ComboState): void {
             level: newLevel,
             name: levelConfig.name,
             color: levelConfig.color
-        } as ComboUpgradeEvent);
+        });
 
         // 检查是否触发狂暴模式
         if (newLevel === 4 && !combo.hasBerserk) {
@@ -116,7 +116,7 @@ function checkComboUpgrade(world: World, combo: ComboState): void {
             pushEvent(world, {
                 type: 'BerserkMode',
                 pos: { x: world.width / 2, y: world.height / 2 }
-            } as BerserkModeEvent);
+            });
         }
     }
 }

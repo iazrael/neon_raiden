@@ -16,7 +16,7 @@ import { DropTable, Transform } from '../components';
 import { spawnPickup } from '../factory';
 import { PickupId } from '../types/ids';
 import { PICKUP_REGISTRY } from '../configs/droptables';
-import { EventTags, KillEvent, PickupEvent } from '../events';
+import { KillEvent, PickupEvent } from '../events/index';
 import { getEvents, pushEvent } from '../world';
 
 /**
@@ -67,7 +67,7 @@ export function LootSystem(world: World, dt: number): void {
     updateGuaranteedDropTimer(world, dt);
 
     // 收集本帧的所有死亡事件
-    const killEvents = getEvents<KillEvent>(world, EventTags.Kill);
+    const killEvents = getEvents<KillEvent>(world, 'Kill');
 
     if (killEvents.length === 0) return;
 

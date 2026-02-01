@@ -25,7 +25,7 @@ import {
 } from "../components";
 import { WeaponId, BuffType } from "../types";
 import { ensureComponent, getEvents, pushEvent, World } from "../world";
-import { EventTags, PickupEvent, PlaySoundEvent } from "../events";
+import { PickupEvent, PlaySoundEvent } from "../events/index";
 import { WEAPON_TABLE } from "../blueprints/weapons";
 import {
     POWERUP_LIMITS,
@@ -82,7 +82,7 @@ const weaponPickupHandler: PickupHandler = {
         pushEvent(world, {
             type: "PlaySound",
             name: "weapon_pickup",
-        } as PlaySoundEvent);
+        });
     },
 };
 
@@ -109,7 +109,7 @@ const buffPickupHandler: PickupHandler = {
         pushEvent(world, {
             type: "PlaySound",
             name: "buff_pickup",
-        } as PlaySoundEvent);
+        });
     },
 };
 
@@ -160,7 +160,7 @@ const optionPickupHandler: PickupHandler = {
         pushEvent(world, {
             type: "PlaySound",
             name: "buff_pickup",
-        } as PlaySoundEvent);
+        });
     },
 };
 
@@ -217,7 +217,7 @@ function applyInstantBuff(
                     pushEvent(world, {
                         type: "PlaySound",
                         name: "bomb_max",
-                    } as PlaySoundEvent);
+                    });
                 }
             } else {
                 // 首次拾取，创建 Bomb 组件
@@ -230,7 +230,7 @@ function applyInstantBuff(
                 pos: { x: 0, y: 0 },
                 itemId: BuffType.BOMB,
                 owner: 0,
-            } as PickupEvent);
+            });
             break;
 
         default:
@@ -310,7 +310,7 @@ function addDurationBuff(
  */
 export function PickupSystem(world: World, dt: number): void {
     // 收集本帧的所有拾取事件
-    const pickupEvents = getEvents<PickupEvent>(world, EventTags.Pickup);
+    const pickupEvents = getEvents<PickupEvent>(world, 'Pickup');
 
     if (pickupEvents.length === 0) return;
 

@@ -27,9 +27,8 @@ import {
     BloodFogEvent,
     CamShakeEvent,
     PlaySoundEvent,
-    EventTags,
     ShieldBrokenEvent,
-} from "../events";
+} from "../events/index";
 import { removeComponent, view, getEvents, World, pushEvent } from "../world";
 
 /**
@@ -47,7 +46,7 @@ const BLOOD_LEVEL_THRESHOLDS = {
  */
 export function DamageResolutionSystem(world: World, dt: number): void {
     // 处理所有 HitEvent
-    const hitEvents = getEvents<HitEvent>(world, EventTags.Hit);
+    const hitEvents = getEvents<HitEvent>(world, 'Hit');
 
     for (const event of hitEvents) {
         applyDamage(world, event);
