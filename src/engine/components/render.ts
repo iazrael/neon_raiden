@@ -109,8 +109,6 @@ export class Sprite extends Component {
         scale?: number;
         /** 旋转角度（度） */
         rotate90?: number;
-        /** 受伤闪烁截止时间 */
-        hitFlashUntil?: number;
         /** 边框配置（可选） */
         border?: SpriteBorder;
 
@@ -120,7 +118,6 @@ export class Sprite extends Component {
         this.color = cfg.color ?? '';
         this.scale = cfg.scale ?? 1;
         this.rotate90 = cfg.rotate90 ?? 0;
-        this.hitFlashUntil = cfg.hitFlashUntil;
         this.border = cfg.border;
 
     }
@@ -136,9 +133,6 @@ export class Sprite extends Component {
 
     /** 旋转角度（度） */
     public rotate90 = 0;
-
-    /** 受伤闪烁截止时间 */
-    public hitFlashUntil?: number;
 
     /** 边框配置（可选） */
     public border?: SpriteBorder;
@@ -171,19 +165,6 @@ export class Sprite extends Component {
         return SpriteManager.getImage(this.spriteKey);
     }
 
-    /**
-     * 触发受伤闪烁效果
-     */
-    flash(durationMs: number = 100): void {
-        this.hitFlashUntil = Date.now() + durationMs;
-    }
-
-    /**
-     * 检查是否正在闪烁
-     */
-    get isFlashing(): boolean {
-        return this.hitFlashUntil !== undefined && Date.now() < this.hitFlashUntil;
-    }
 
     static check(c: any): c is Sprite { return c instanceof Sprite; }
 }

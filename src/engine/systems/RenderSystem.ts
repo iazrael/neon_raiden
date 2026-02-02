@@ -339,12 +339,6 @@ function drawSprite(
         ctx.fillRect(-pivotX, -pivotY, itemWidth, itemHeight);
     }
 
-    // 受伤闪烁效果
-    if (sprite.hitFlashUntil && Date.now() < sprite.hitFlashUntil) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-        ctx.fillRect(-pivotX, -pivotY, itemWidth, itemHeight);
-    }
-
     ctx.restore();
 }
 
