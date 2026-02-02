@@ -283,9 +283,9 @@ function drawSprite(
     const { transform, sprite } = item;
     if (!sprite) return;
 
-    // 计算屏幕坐标
-    const screenX = transform.x - camX;
-    const screenY = transform.y - camY;
+    // 计算屏幕坐标并取整（避免亚像素抗锯齿导致的模糊）
+    const screenX = Math.round(transform.x - camX);
+    const screenY = Math.round(transform.y - camY);
 
     // 从 Sprite 获取配置
     const config = sprite.config;
@@ -422,6 +422,17 @@ function drawPlayerEffect(
     const { transform, shield, invulnerable, health } = data;
     const x = transform.x - camX;
     const y = transform.y - camY;
+
+    // 绘制引擎尾焰
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.5 + 0.2})`;
+    ctx.beginPath();
+    ctx.moveTo(-5, 25);
+    ctx.lineTo(5, 25);
+    ctx.lineTo(0, 40 + Math.random() * 10);
+    ctx.fill();
+    ctx.restore();
 
     // 绘制护盾
     if (shield && shield.value > 0) {

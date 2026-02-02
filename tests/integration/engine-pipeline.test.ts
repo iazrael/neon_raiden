@@ -27,6 +27,7 @@ class MockCanvasRenderingContext2D {
     restore = jest.fn();
     translate = jest.fn();
     rotate = jest.fn();
+    scale = jest.fn();
     fillRect = jest.fn();
     fillStyle = '';
 }
@@ -36,6 +37,7 @@ class MockCanvas {
     clientHeight = 600;
     width = 800;
     height = 600;
+    style = { width: '', height: '' } as any;
     getContext = jest.fn().mockReturnValue(new MockCanvasRenderingContext2D());
     addEventListener = jest.fn();
     removeEventListener = jest.fn();

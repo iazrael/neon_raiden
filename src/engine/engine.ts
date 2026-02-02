@@ -41,6 +41,11 @@ export class Engine {
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
 
     /**
+     * 缓存的渲染上下文（应用 DPR 缩放）
+     */
+    private renderContext: RenderContext | null = null;
+
+    /**
      * 流星生成计时器
      */
     private meteorTimer = { value: 0 };
@@ -62,14 +67,35 @@ export class Engine {
         this.canvas = canvas;
         this.world = createWorld();
 
+        // 获取设备像素比（用于高 DPI 屏幕清晰渲染）
+        const dpr = window.devicePixelRatio || 1;
+
+        // 初始化渲染上下文（应用 DPR 缩放）
+        const ctx = canvas.getContext('2d', { alpha: false })!;
+        ctx.scale(dpr, dpr);
+
         // 监听尺寸变化
         this.resizeObserver = new ResizeObserver(entries => {
             for (const entry of entries) {
                 const { width, height } = entry.contentRect;
-                canvas.width = width;
-                canvas.height = height;
+                // 设置 Canvas 内部分辨率（考虑 DPR）
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                // 设置 CSS 显示尺寸
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
                 this.world.width = width;
                 this.world.height = height;
+
+                // 重新应用 DPR 缩放（canvas resize 会重置 context）
+                const ctx = canvas.getContext('2d', { alpha: false })!;
+                ctx.scale(dpr, dpr);
+                this.renderContext = {
+                    canvas,
+                    context: ctx,
+                    width: canvas.width,
+                    height: canvas.height,
+                };
             }
         });
         this.resizeObserver.observe(canvas);
@@ -77,8 +103,18 @@ export class Engine {
         // 初始同步一次
         this.world.width = canvas.clientWidth;
         this.world.height = canvas.clientHeight;
-        canvas.width = this.world.width;
-        canvas.height = this.world.height;
+        canvas.width = this.world.width * dpr;
+        canvas.height = this.world.height * dpr;
+        canvas.style.width = `${this.world.width}px`;
+        canvas.style.height = `${this.world.height}px`;
+
+        // 初始化渲染上下文
+        this.renderContext = {
+            canvas,
+            context: ctx,
+            width: canvas.width,
+            height: canvas.height,
+        };
 
         // 初始化输入管理器
         inputManager.init(canvas);
@@ -87,7 +123,7 @@ export class Engine {
         this.world.visualEffectId = generateId();
         addComponent(this.world, this.world.visualEffectId, new VisualEffect());
 
-        spawnPlayer(this.world, bp, canvas.width / 2, canvas.height - 80, 0);
+        spawnPlayer(this.world, bp, this.world.width / 2, this.world.height - 80, 0);
 
         // 初始化 timeScale
         this.world.timeScale = 1.0;
@@ -182,15 +218,13 @@ export class Engine {
     }
 
     /**
-     * 获取渲染上下文
+     * 获取渲染上下文（返回已应用 DPR 缩放的缓存上下文）
      */
     private getRenderContext(): RenderContext {
-        return {
-            canvas: this.canvas,
-            context: this.canvas.getContext('2d')!,
-            width: this.canvas.width,
-            height: this.canvas.height,
-        };
+        if (!this.renderContext) {
+            throw new Error('[Engine] RenderContext not initialized. Call start() first.');
+        }
+        return this.renderContext;
     }
 
     /**
