@@ -23,7 +23,7 @@ export const COLLISION_DAMAGE = 10;
 /**
  * Boss 出现时间（毫秒）
  */
-export const BOSS_SPAWN_TIME = 60 * 1000; // 60秒后Boss出现
+export const BOSS_SPAWN_TIME = 1 * 1000; // 60秒后Boss出现
 
 // 资源路径根目录
 export const BASE_ASSET_PATH = './assets/sprites/';

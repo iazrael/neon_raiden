@@ -1,5 +1,25 @@
 import { Component } from '../types';
 
+/**
+ * 闪烁模式枚举
+ */
+export enum BlinkMode {
+    /** 硬切换：完全可见/完全不可见交替 */
+    HARD = 'hard',
+    /** 软渐变：透明度在两个值之间平滑过渡 */
+    SOFT = 'soft',
+}
+
+/**
+ * 闪烁颜色配置
+ */
+export interface BlinkColors {
+    /** 闪烁时显示的颜色 */
+    visible: string;
+    /** 隐藏时的颜色 */
+    hidden: string;
+}
+
 /** 视觉粒子 - 单个粒子效果（爆炸火花等） */
 export interface VisualParticle {
     /** X坐标 */
@@ -93,4 +113,59 @@ export class VisualEffect extends Component {
     static check(c: any): c is VisualEffect {
         return c instanceof VisualEffect;
     }
+}
+
+/**
+ * 闪烁组件 - 控制实体的明暗闪烁效果
+ *
+ * 纯数据组件，逻辑由 BlinkSystem 处理
+ *
+ * @example
+ * // 受伤闪烁
+ * addComponent(world, playerId, new Blink({
+ *     durationMs: 500,
+ *     intervalMs: 100,
+ *     colors: { visible: '#ffffff', hidden: 'transparent' },
+ *     mode: BlinkMode.HARD
+ * }));
+ */
+export class Blink extends Component {
+    /**
+     * 构造函数
+     * @param cfg 闪烁配置
+     */
+    constructor(cfg: {
+        /** 闪烁持续时间（毫秒） */
+        durationMs: number;
+        /** 闪烁间隔（毫秒）- 每次完整可见+隐藏的周期 */
+        intervalMs: number;
+        /** 颜色配置 */
+        colors?: BlinkColors;
+        /** 闪烁模式 */
+        mode?: BlinkMode;
+    }) {
+        super();
+        this.durationMs = cfg.durationMs;
+        this.intervalMs = cfg.intervalMs;
+        this.colors = cfg.colors ?? { visible: '#ffffff', hidden: 'transparent' };
+        this.mode = cfg.mode ?? BlinkMode.HARD;
+        this.elapsedMs = 0;
+    }
+
+    /** 闪烁持续时间（毫秒） */
+    public durationMs: number;
+
+    /** 闪烁间隔（毫秒） */
+    public intervalMs: number;
+
+    /** 颜色配置 */
+    public colors: BlinkColors;
+
+    /** 闪烁模式 */
+    public mode: BlinkMode;
+
+    /** 已经过的时间（毫秒）- 由 BlinkSystem 更新 */
+    public elapsedMs: number;
+
+    static check(c: any): c is Blink { return c instanceof Blink; }
 }

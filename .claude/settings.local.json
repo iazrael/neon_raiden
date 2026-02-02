@@ -32,7 +32,8 @@
       "Bash(find:*)"
     ],
     "additionalDirectories": [
-      "/Users/azraellong/workspaces/neon_raiden/"
+      "/Users/azraellong/workspaces/neon_raiden/",
+      "/Users/azrael/Code/neon_raiden/docs/plans"
     ]
   }
 }
