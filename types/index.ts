@@ -112,6 +112,10 @@ export interface Entity {
   lifetime?: number; // Time in milliseconds before entity expires
   incomingMissiles?: number; // Track number of missiles targeting this entity
   attenuation?: number; // Damage attenuation per hit (0-1)
+  // Slow field mechanics
+  wasSlowed?: boolean; // Track if entity has been slowed by a slow field
+  originalVx?: number; // Store original velocity X before slow
+  originalVy?: number; // Store original velocity Y before slow
 }
 
 

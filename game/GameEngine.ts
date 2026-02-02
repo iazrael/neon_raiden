@@ -598,15 +598,42 @@ export class GameEngine {
 
         this.enemySys.update(dt, timeScale, this.enemies, this.player, this.enemyBullets);
 
-        // Apply slow fields to enemies
+        // Apply slow fields to enemies - 只在进入减速场时减速一次
         if (this.slowFields.length > 0) {
             this.enemies.forEach(e => {
                 const inSlow = this.slowFields.some(s => Math.hypot(e.x - s.x, e.y - s.y) < s.range);
+
                 if (inSlow) {
-                    e.vx *= 0.8;
-                    e.vy *= 0.8;
-                    e.slowed = true;
+                    // 第一次进入减速场：保存原始速度并减速一次
+                    if (!e.wasSlowed) {
+                        e.originalVx = e.vx;
+                        e.originalVy = e.vy;
+                        e.vx *= 0.5;  // 减速到50%
+                        e.vy *= 0.5;
+                        e.wasSlowed = true;
+                        e.slowed = true;
+                    }
                 } else {
+                    // 离开减速场：恢复原始速度
+                    if (e.wasSlowed && e.originalVx !== undefined) {
+                        e.vx = e.originalVx;
+                        e.vy = e.originalVy;
+                        e.wasSlowed = false;
+                        e.originalVx = undefined;
+                        e.originalVy = undefined;
+                        e.slowed = false;
+                    }
+                }
+            });
+        } else {
+            // 减速场消失：恢复所有敌人的原始速度
+            this.enemies.forEach(e => {
+                if (e.wasSlowed && e.originalVx !== undefined) {
+                    e.vx = e.originalVx;
+                    e.vy = e.originalVy;
+                    e.wasSlowed = false;
+                    e.originalVx = undefined;
+                    e.originalVy = undefined;
                     e.slowed = false;
                 }
             });
@@ -708,6 +735,19 @@ export class GameEngine {
             b.x += b.vx * timeScale;
             b.y += b.vy * timeScale;
 
+            // 生命周期管理：为所有敌人子弹添加生命周期（除了有timer的激光束）
+            // 初始化lifetime为3秒，之后每帧递减
+            if (b.timer === undefined) {
+                if (b.lifetime === undefined) {
+                    b.lifetime = 3000; // 3秒生命周期
+                } else {
+                    b.lifetime -= dt;
+                    if (b.lifetime <= 0) {
+                        b.markedForDeletion = true;
+                    }
+                }
+            }
+
             // Homing missile AI - only for bullets marked with isHoming flag
             if (b.isHoming) {
                 const dx = this.player.x - b.x;
@@ -744,12 +784,37 @@ export class GameEngine {
                 }
             }
 
-            // Apply slow fields to enemy bullets
+            // Apply slow fields to enemy bullets - 只在进入减速场时减速一次
             if (this.slowFields.length > 0) {
                 const inSlow = this.slowFields.some(s => Math.hypot(b.x - s.x, b.y - s.y) < s.range);
+
                 if (inSlow) {
-                    b.vx *= 0.75;
-                    b.vy *= 0.75;
+                    // 第一次进入减速场：保存原始速度并减速一次
+                    if (!b.wasSlowed) {
+                        b.originalVx = b.vx;
+                        b.originalVy = b.vy;
+                        b.vx *= 0.5;  // 减速到50%
+                        b.vy *= 0.5;
+                        b.wasSlowed = true;
+                    }
+                } else {
+                    // 离开减速场：恢复原始速度
+                    if (b.wasSlowed && b.originalVx !== undefined) {
+                        b.vx = b.originalVx;
+                        b.vy = b.originalVy;
+                        b.wasSlowed = false;
+                        b.originalVx = undefined;
+                        b.originalVy = undefined;
+                    }
+                }
+            } else {
+                // 减速场消失：恢复所有子弹的原始速度
+                if (b.wasSlowed && b.originalVx !== undefined) {
+                    b.vx = b.originalVx;
+                    b.vy = b.originalVy;
+                    b.wasSlowed = false;
+                    b.originalVx = undefined;
+                    b.originalVy = undefined;
                 }
             }
         });
