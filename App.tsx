@@ -29,6 +29,7 @@ function App() {
     const [weaponType, setWeaponType] = useState<WeaponType>(WeaponType.VULCAN); // P2 Current weapon
     const [secondaryWeapon, setSecondaryWeapon] = useState<WeaponType | null>(null); // P2 Secondary weapon
     const [weaponLevel, setWeaponLevel] = useState<number>(1);
+    const [boss, setBoss] = useState<{ hp: number; maxHp: number } | null>(null); // Boss 血条数据
 
     useEffect(() => {
         // Preload assets - both old and new systems
@@ -68,7 +69,8 @@ function App() {
             (newBombs) => setBombs(newBombs),
             (maxLevel) => setMaxLevelReached(maxLevel),
             (show) => setShowBossWarning(show),
-            (newComboState) => setComboState(newComboState)
+            (newComboState) => setComboState(newComboState),
+            (newBoss) => setBoss(newBoss)
         );
         engineRef.current = engine;
 
@@ -125,6 +127,7 @@ function App() {
                 secondaryWeapon={secondaryWeapon}
                 weaponLevel={weaponLevel}
                 shieldPercent={shieldPercent}
+                boss={boss}
                 onOpenGallery={() => {
                     setStateBeforeGallery(gameState);
                     if (gameState === GameState.PLAYING) {

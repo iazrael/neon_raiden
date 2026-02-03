@@ -1,6 +1,6 @@
 import React from "react";
 import { GameState, WeaponType, ClickType } from "@/types";
-import { WeaponConfig, ASSETS_BASE_PATH, PowerupEffects, GameConfig } from "@/game/config";
+import { WeaponConfig, PowerupEffects, GameConfig } from "@/game/config";
 import { capitalize } from "@/utils/string";
 import { getVersion } from "@/game/version";
 import { Gallery } from "./Gallery";
@@ -35,6 +35,7 @@ interface GameUIProps {
   secondaryWeapon?: WeaponType | null; // P2 Secondary weapon
   weaponLevel?: number;
   shieldPercent?: number;
+  boss?: { hp: number; maxHp: number } | null; // Boss 血条数据
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -62,6 +63,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   secondaryWeapon,
   weaponLevel,
   shieldPercent = 0,
+  boss = null,
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
@@ -81,6 +83,25 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="flex items-center gap-3">
             <div className="text-sm text-gray-300">STAGE: <span className="inline-block min-w-[1.5em]">{intToRoman(level)}</span></div>
           </div>
+
+          {/* Boss Health Bar */}
+          {state === GameState.PLAYING && boss && (
+            <div className="mt-2 flex flex-col gap-1">
+              <div className="text-xs font-bold text-red-400 tracking-widest uppercase">
+                BOSS
+              </div>
+              <div className="w-56 bg-gray-900/80 h-3 rounded-full border-2 border-red-500/70 overflow-hidden shadow-lg shadow-red-900/30">
+                <div
+                  className="h-full transition-all duration-300 ease-out"
+                  style={{
+                    width: `${(boss.hp / boss.maxHp) * 100}%`,
+                    backgroundImage: 'linear-gradient(to right, #ef4444, #dc2626)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)'
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Weapon Status & Synergy */}
           {state === GameState.PLAYING && weaponType && (

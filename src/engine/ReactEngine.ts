@@ -51,6 +51,9 @@ export class ReactEngine {
     // P2 Combo & Synergy
     public comboState: ComboState = { count: 0, timer: 0, level: 0, maxCombo: 0, hasBerserk: false };
 
+    // Boss 状态
+    public boss: { hp: number; maxHp: number } | null = null;
+
     // ========== 订阅 cleanup ==========
     private snapshotSubscription: any = null;
 
@@ -63,6 +66,7 @@ export class ReactEngine {
     private onMaxLevelChange: (level: number) => void = () => {};
     private onBossWarning: (show: boolean) => void = () => {};
     private onComboChange: (state: ComboState) => void = () => {};
+    private onBossChange: (boss: { hp: number; maxHp: number } | null) => void = () => {};
 
     constructor(
         canvas: HTMLCanvasElement | null = null,
@@ -73,7 +77,8 @@ export class ReactEngine {
         onBombChange?: (bombs: number) => void,
         onMaxLevelChange?: (level: number) => void,
         onBossWarning?: (show: boolean) => void,
-        onComboChange?: (state: ComboState) => void
+        onComboChange?: (state: ComboState) => void,
+        onBossChange?: (boss: { hp: number; maxHp: number } | null) => void
     ) {
         this.engine = new Engine();
         this.canvas = canvas ?? null;
@@ -87,6 +92,7 @@ export class ReactEngine {
         if (onMaxLevelChange) this.onMaxLevelChange = onMaxLevelChange;
         if (onBossWarning) this.onBossWarning = onBossWarning;
         if (onComboChange) this.onComboChange = onComboChange;
+        if (onBossChange) this.onBossChange = onBossChange;
     }
 
     /**
@@ -246,5 +252,16 @@ export class ReactEngine {
         this.showLevelTransition = snapshot.showLevelTransition;
         this.levelTransitionTimer = snapshot.levelTransitionTimer;
         this.showBossWarning = snapshot.showBossWarning;
+
+        // 同步 Boss 状态
+        if (snapshot.boss) {
+            this.boss = {
+                hp: snapshot.boss.hp,
+                maxHp: snapshot.boss.maxHp
+            };
+        } else {
+            this.boss = null;
+        }
+        this.onBossChange(this.boss);
     }
 }

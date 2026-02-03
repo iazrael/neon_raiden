@@ -6,7 +6,6 @@
  * - 处理粒子渲染
  * - 绘制背景星空效果
  * - 绘制护盾、无敌状态等特效
- * - 绘制 Boss 血条
  * - 根据 Camera 偏移调整绘制位置（仅震屏，相机固定）
  * - 按固定顺序渲染（背景 < 精灵 < 玩家特效 < 粒子 < 冲击波 < UI）
  *
@@ -31,7 +30,6 @@ import {
     Shield,
     InvulnerableState,
     Health,
-    BossTag,
     Shockwave,
     Lifetime,
     VisualEffect,
@@ -71,20 +69,11 @@ interface PlayerEffectData {
 }
 
 /**
- * Boss 信息
- */
-interface BossInfo {
-    transform: Transform;
-    health: Health;
-}
-
-/**
  * 收集结果
  */
 interface RenderQueue {
     sprites: RenderItem[];
     playerEffect: PlayerEffectData | null;
-    bossInfo: BossInfo | null;
     visualEffect: VisualEffect;
     meteors: VisualMeteor[];
 }
@@ -109,7 +98,6 @@ function collectRenderItems(world: World): RenderQueue {
     const queue: RenderQueue = {
         sprites: [],
         playerEffect: null,
-        bossInfo: null,
         visualEffect: null,
         meteors: [],
     };
@@ -135,16 +123,6 @@ function collectRenderItems(world: World): RenderQueue {
                 health,
             };
         }
-    }
-
-    // 收集 boss 信息
-    const boss = getEntity(world, world.bossState.bossId);
-    if (boss) {
-        const [transform, health] = getComponentsFromComps(boss, [
-            Transform,
-            Health,
-        ]);
-        queue.bossInfo = { transform, health };
     }
 
     // 收集所有可以绘制的精灵
@@ -471,46 +449,6 @@ function drawPlayerEffect(
 }
 
 /**
- * 绘制 Boss 血条
- */
-function drawBossHealthBar(
-    ctx: CanvasRenderingContext2D,
-    bossInfo: BossInfo,
-    screenWidth: number,
-    screenHeight: number,
-): void {
-    const { health } = bossInfo;
-    const hpPercent = health.hp / health.max;
-
-    const barWidth = Math.min(400, screenWidth * 0.8);
-    const barHeight = 12;
-    const barX = (screenWidth - barWidth) / 2;
-    const barY = 20;
-
-    // 背景条
-    ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
-    ctx.fillRect(barX, barY, barWidth, barHeight);
-
-    // 当前血量
-    let barColor: string;
-    if (hpPercent > 0.6) {
-        barColor = "#00ff00";
-    } else if (hpPercent > 0.3) {
-        barColor = "#ffff00";
-    } else {
-        barColor = "#ff0000";
-    }
-
-    ctx.fillStyle = barColor;
-    ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
-
-    // 边框
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(barX, barY, barWidth, barHeight);
-}
-
-/**
  * 绘制 VisualEffect 圆环（冲击波等）
  */
 function drawVisualEffectCircles(
@@ -657,10 +595,5 @@ export function RenderSystem(world: World, dt: number): void {
 
         // 8. 绘制时间减速特效
         drawTimeSlowEffect(context, queue.visualEffect.lines, width, height);
-    }
-
-    // 9. 绘制 Boss 血条
-    if (queue.bossInfo) {
-        drawBossHealthBar(context, queue.bossInfo, width, height);
     }
 }
