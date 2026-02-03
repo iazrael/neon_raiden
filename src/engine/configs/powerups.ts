@@ -8,7 +8,7 @@ import { BuffType } from '../types';
 import { Blueprint } from '../blueprints/base';
 import { BLUEPRINT_OPTION_VULCAN } from '../blueprints/fighters';
 // 从武器升级配置表派生限制值，确保数据一致性
-import { WEAPON_LIMITS } from './weapon-upgrades';
+import { WEAPON_LIMITS } from './weaponGrowth';
 
 /**
  * Buff 分类枚举

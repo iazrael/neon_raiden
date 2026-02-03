@@ -81,6 +81,9 @@ export function HomingSystem(world: World, dt: number): void {
             const speed = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);
             velocity.vx = Math.cos(newAngle) * speed;
             velocity.vy = Math.sin(newAngle) * speed;
+
+            // 同步更新旋转角度，让导弹头朝向飞行方向
+            transform.rot = newAngle;
         }
     }
 }

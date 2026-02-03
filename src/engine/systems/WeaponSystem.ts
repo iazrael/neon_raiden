@@ -24,7 +24,7 @@ import { Blueprint, WeaponSpec, AmmoSpec, WeaponLevelSpec } from '../blueprints'
 import { pushEvent, removeComponent, view } from '../world';
 import { WeaponFiredEvent } from '../events';
 import { BULLET_SPRITE_CONFIG } from '../configs/sprites/bullets';
-import { getWeaponUpgrade } from '../configs/weapon-upgrades';
+import { getWeaponUpgrade } from '../configs/weaponGrowth';
 import { BulletSpriteSpec } from '../configs/sprites/bullets';
 import { getEffectiveTimeScale } from '../utils/timeUtils';
 

@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from '@jest/globals';
 import { WeaponId } from '../../src/engine/types';
-import { getWeaponUpgrade, WEAPON_UPGRADE_TABLE } from '../../src/engine/configs/weapon-upgrades';
+import { getWeaponUpgrade, WEAPON_UPGRADE_TABLE } from '../../src/engine/configs/weaponGrowth';
 
 describe('getWeaponUpgrade', () => {
     describe('VULCAN 升级配置', () => {
