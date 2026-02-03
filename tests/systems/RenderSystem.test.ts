@@ -37,9 +37,7 @@ const mockContext = {
 
 const mockRenderContext: RenderContext = {
     canvas: mockCanvas,
-    context: mockContext,
-    width: 800,
-    height: 600
+    context: mockContext
 };
 
 const createMockWorld = (): World => ({

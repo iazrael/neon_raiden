@@ -227,8 +227,8 @@ describe('Engine Pipeline 集成测试', () => {
             expect(engineContent).toMatch(/InputSystem\(world, dt\)/);
             expect(engineContent).toMatch(/MovementSystem\(world, dt\)/);
             expect(engineContent).toMatch(/CollisionSystem\(world, dt\)/);
-            // RenderSystem 现在需要 RenderContext 参数
-            expect(engineContent).toMatch(/RenderSystem\(world, this\.getRenderContext\(\), dt\)/);
+            // RenderSystem 从 World 获取 renderContext
+            expect(engineContent).toMatch(/RenderSystem\(world, dt\)/);
             expect(engineContent).toMatch(/CleanupSystem\(world, dt\)/);
         });
     });

@@ -4,12 +4,14 @@ import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
 
 /**
  * 渲染上下文
+ *
+ * 注意：context 已应用 DPR 缩放 (ctx.scale(dpr, dpr))，
+ * 外部使用逻辑坐标（CSS 像素）即可，无需关心物理像素。
+ * 逻辑尺寸通过 world.width / world.height 获取。
  */
 export interface RenderContext {
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
-    width: number;
-    height: number;
 }
 
 // 世界接口

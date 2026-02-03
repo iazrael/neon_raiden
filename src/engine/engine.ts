@@ -26,7 +26,7 @@ import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
 import { MovementSystem } from './systems/MovementSystem';
 import { PickupSystem } from './systems/PickupSystem';
-import { RenderSystem, type RenderContext } from './systems/RenderSystem';
+import { RenderSystem } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { VisualEffectSystem } from './systems/VisualEffectSystem';
@@ -44,11 +44,6 @@ export class Engine {
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
 
     /**
-     * 缓存的渲染上下文（应用 DPR 缩放）
-     */
-    private renderContext: RenderContext | null = null;
-
-    /**
      * 流星生成计时器
      */
     private meteorTimer = { value: 0 };
@@ -61,6 +56,40 @@ export class Engine {
      */
     private static readonly MAX_DT = 100;
 
+    /**
+     * 初始化或更新渲染上下文
+     * @param canvas Canvas 元素
+     * @param logicalWidth 逻辑宽度（CSS 像素）
+     * @param logicalHeight 逻辑高度（CSS 像素）
+     *
+     * 说明：
+     * - 设置 Canvas 物理像素尺寸 = 逻辑尺寸 × DPR
+     * - 应用 ctx.scale(dpr, dpr) 使后续绘图使用逻辑坐标
+     * - 将 RenderContext 存入 World（而非 Engine 私有属性）
+     */
+    private initRenderContext(canvas: HTMLCanvasElement, logicalWidth: number, logicalHeight: number): void {
+        const dpr = window.devicePixelRatio || 1;
+
+        // 设置物理像素尺寸
+        canvas.width = logicalWidth * dpr;
+        canvas.height = logicalHeight * dpr;
+
+        // 设置 CSS 显示尺寸
+        canvas.style.width = `${logicalWidth}px`;
+        canvas.style.height = `${logicalHeight}px`;
+
+        // 获取 context 并应用 DPR 缩放
+        const ctx = canvas.getContext('2d', { alpha: false })!;
+        ctx.scale(dpr, dpr);
+
+        // 更新 World（逻辑像素）
+        this.world.width = logicalWidth;
+        this.world.height = logicalHeight;
+
+        // 存储 RenderContext 到 World
+        this.world.renderContext = { canvas, context: ctx };
+    }
+
     // ========== 调试模式：只测试渲染 ==========
     // 设为 true 时只运行渲染系统，用于调试渲染问题
     private static DEBUG_RENDER_ONLY = false;
@@ -70,57 +99,14 @@ export class Engine {
         this.canvas = canvas;
         this.world = createWorld();
 
-        // 获取设备像素比（用于高 DPI 屏幕清晰渲染）
-        const dpr = window.devicePixelRatio || 1;
-
-        // 初始化渲染上下文（应用 DPR 缩放）
-        const ctx = canvas.getContext('2d', { alpha: false })!;
-        ctx.scale(dpr, dpr);
-
-        // 监听尺寸变化
-        this.resizeObserver = new ResizeObserver(entries => {
-            for (const entry of entries) {
-                const { width, height } = entry.contentRect;
-                // 设置 Canvas 内部分辨率（考虑 DPR）
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                // 设置 CSS 显示尺寸
-                canvas.style.width = `${width}px`;
-                canvas.style.height = `${height}px`;
-                this.world.width = width;
-                this.world.height = height;
-
-                // 重新应用 DPR 缩放（canvas resize 会重置 context）
-                const ctx = canvas.getContext('2d', { alpha: false })!;
-                ctx.scale(dpr, dpr);
-                this.renderContext = {
-                    canvas,
-                    context: ctx,
-                    width: canvas.width,
-                    height: canvas.height,
-                };
-            }
-        });
-        this.resizeObserver.observe(canvas);
-
-        // 初始同步一次
-        this.world.width = canvas.clientWidth;
-        this.world.height = canvas.clientHeight;
-        canvas.width = this.world.width * dpr;
-        canvas.height = this.world.height * dpr;
-        canvas.style.width = `${this.world.width}px`;
-        canvas.style.height = `${this.world.height}px`;
-
-        // 初始化渲染上下文
-        this.renderContext = {
-            canvas,
-            context: ctx,
-            width: canvas.width,
-            height: canvas.height,
-        };
-
         // 初始化输入管理器
         inputManager.init(canvas);
+
+
+        // 初始化渲染上下文（使用统一方法）
+        const initialWidth = canvas.clientWidth;
+        const initialHeight = canvas.clientHeight;
+        this.initRenderContext(canvas, initialWidth, initialHeight);
 
         // 创建视觉特效实体
         this.world.visualEffectId = generateId();
@@ -130,6 +116,15 @@ export class Engine {
 
         // 初始化 timeScale
         this.world.timeScale = 1.0;
+
+        // 监听尺寸变化
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+                this.initRenderContext(this.canvas, width, height);
+            }
+        });
+        this.resizeObserver.observe(canvas);
 
         this.loop();
     }
@@ -167,7 +162,7 @@ export class Engine {
         // ========== 调试模式：只测试渲染 ==========
         if (Engine.DEBUG_RENDER_ONLY) {
             // 只运行渲染相关的系统
-            RenderSystem(world, this.getRenderContext(), dt);
+            RenderSystem(world, dt);
             return;
         }
         // ==========================================
@@ -220,17 +215,7 @@ export class Engine {
         CleanupSystem(world, dt);                       // 22. 清理系统
 
         // 渲染系统（最后执行）
-        RenderSystem(world, this.getRenderContext(), dt);  // 23. 渲染系统
-    }
-
-    /**
-     * 获取渲染上下文（返回已应用 DPR 缩放的缓存上下文）
-     */
-    private getRenderContext(): RenderContext {
-        if (!this.renderContext) {
-            throw new Error('[Engine] RenderContext not initialized. Call start() first.');
-        }
-        return this.renderContext;
+        RenderSystem(world, dt);  // 23. 渲染系统
     }
 
     /**

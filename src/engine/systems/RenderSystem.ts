@@ -21,7 +21,6 @@ import {
     getComponentsFromComps,
     getEntity,
     view,
-    type RenderContext,
 } from "../world";
 import {
     Transform,
@@ -605,16 +604,21 @@ function drawTimeSlowEffect(
 /**
  * 渲染系统主函数
  *
- * @param world World 对象，包含 renderContext
+ * 使用 world.renderContext 获取 Canvas 上下文
+ * 使用 world.width/height 获取逻辑像素尺寸
+ *
+ * @param world World 对象
  * @param dt 增量时间（毫秒）
  */
 export function RenderSystem(world: World, dt: number): void {
     const renderCtx = world.renderContext;
     if (!renderCtx) {
-        return; // 渲染上下文未初始化，跳过渲染
+        console.warn('[RenderSystem] RenderContext not initialized, skipping render');
+        return;
     }
 
-    const { canvas, context, width, height } = renderCtx;
+    const { context } = renderCtx;
+    const { width, height } = world;  // 逻辑像素
     const { camera } = world.renderState;
 
     // 调试日志
