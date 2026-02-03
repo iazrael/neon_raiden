@@ -60,7 +60,7 @@ export {
 
 // P7: 表现层
 export * from "./CameraSystem";
-export { EffectPlayer } from "./EffectPlayer";
+export { EffectSystem } from "./EffectSystem";
 export { AudioSystem } from "./AudioSystem";
 export * from "./RenderSystem";
 

@@ -48,7 +48,7 @@ import { PARTICLE_EFFECTS, ParticleId, ParticleEffectConfig } from "../blueprint
  * @param world 世界对象
  * @param dt 时间增量（毫秒）
  */
-export function EffectPlayer(world: World, dt: number): void {
+export function EffectSystem(world: World, dt: number): void {
     // 处理相关事件
     processEvents(world, world.events);
 
@@ -513,3 +513,4 @@ function spawnMeteor(world: World, dt: number, meteor: Meteor): void {
         vy: Math.random() * 10 + 10, // 10-20
     });
 }
+

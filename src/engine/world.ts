@@ -1,6 +1,7 @@
 import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
 import { GameEvent, EventType } from './events';
-import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
+import {  STARTING_CREDITS } from './configs';
+import { BOSS_SPAWN_TIME } from './configs/bossConstants';
 
 /**
  * 渲染上下文

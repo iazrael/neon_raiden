@@ -10,7 +10,7 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createWorld, generateId, World, addComponent, pushEvent } from '../../src/engine/world';
-import { EffectPlayer } from '../../src/engine/systems/EffectPlayer';
+import { EffectSystem } from '../../src/engine/systems/EffectSystem';
 import { Transform, Particle, Lifetime, Sprite, Shockwave, EnemyTag } from '../../src/engine/components';
 import { HitEvent, KillEvent, ComboUpgradeEvent, BloodFogEvent } from '../../src/engine/events';
 import { view } from '../../src/engine/world';
@@ -35,7 +35,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, hitEvent);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // HitEvent 不应该直接生成粒子（现在通过 BloodFogEvent 处理）
             const particleCount = Array.from(view(world, [Particle])).length;
@@ -54,7 +54,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, smallHit);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // HitEvent 不会生成爆炸粒子（现在通过 BloodFogEvent 处理）
             const particleCount = Array.from(view(world, [Particle])).length;
@@ -73,7 +73,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, bloodFogEvent as BloodFogEvent);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // 应该生成飙血粒子（使用 Particle 组件）
             const particles = Array.from(view(world, [Particle]));
@@ -102,7 +102,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, killEvent);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // 验证大型爆炸粒子被创建（现在使用 Particle 组件）
             const particles = Array.from(view(world, [Particle]));
@@ -130,7 +130,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, killEvent);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // 验证冲击波被创建（通过 Shockwave 组件）
             // 注意：当前 handleKillEvent 只生成粒子，不生成冲击波
@@ -161,7 +161,7 @@ describe('EffectPlayer', () => {
             addComponent(world, id, particle);
             addComponent(world, id, new Lifetime({ timer: 1000 }));
 
-            EffectPlayer(world, 100); // 100ms
+            EffectSystem(world, 100); // 100ms
 
             // 粒子位置应该变化
             const p = particle.particles[0];
@@ -189,7 +189,7 @@ describe('EffectPlayer', () => {
             addComponent(world, id, particle);
             addComponent(world, id, new Lifetime({ timer: 1000 }));
 
-            EffectPlayer(world, 100); // 超过粒子生命周期
+            EffectSystem(world, 100); // 超过粒子生命周期
 
             // 粒子应该被清理
             expect(particle.particles.length).toBe(0);
@@ -215,7 +215,7 @@ describe('EffectPlayer', () => {
             addComponent(world, id, particle);
             addComponent(world, id, new Lifetime({ timer: 1000 }));
 
-            EffectPlayer(world, 100); // 粒子过期
+            EffectSystem(world, 100); // 粒子过期
 
             // 实体应该被移除
             expect(world.entities.has(id)).toBe(false);
@@ -229,7 +229,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, bombEvent as any);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // 验证 Shockwave 组件
             const shockwaves = Array.from(view(world, [Shockwave]));
@@ -253,7 +253,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, comboEvent);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // 注意：当前 handleComboUpgradeEvent 实现为空，所以这个测试预期不会有粒子
             // 如果未来实现该功能，需要取消注释 handleComboUpgradeEvent 中的代码
@@ -273,7 +273,7 @@ describe('EffectPlayer', () => {
             };
 
             pushEvent(world, comboEvent);
-            EffectPlayer(world, 16);
+            EffectSystem(world, 16);
 
             // 验证冲击波被创建（通过 Shockwave 组件）
             // 注意：当前 handleComboUpgradeEvent 实现为空，所以这个测试预期不会有冲击波

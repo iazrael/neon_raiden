@@ -5,6 +5,11 @@
  */
 
 /**
+ * Boss 出现时间（毫秒）
+ */
+export const BOSS_SPAWN_TIME = 10 * 1000; // 60秒后Boss出现
+
+/**
  * 基础移动速度（像素/秒）
  */
 export const BASE_MOVE_SPEED = 100;

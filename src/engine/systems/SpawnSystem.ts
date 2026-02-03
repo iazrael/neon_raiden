@@ -20,7 +20,7 @@ import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
 import { pushEvent, view, World } from '../world';
 import { getEnemyStats } from '../configs/enemyGrowth';
-import { BOSS_SPAWN_TIME } from '../configs';
+import { BOSS_SPAWN_TIME } from '../configs/bossConstants';
 
 
 /**

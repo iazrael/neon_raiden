@@ -19,7 +19,7 @@ import { CollisionSystem } from './systems/CollisionSystem';
 import { ComboSystem } from './systems/ComboSystem';
 import { DamageResolutionSystem } from './systems/DamageResolutionSystem';
 import { DifficultySystem } from './systems/DifficultySystem';
-import { EffectPlayer } from './systems/EffectPlayer';
+import { EffectSystem } from './systems/EffectSystem';
 import { InputSystem } from './systems/InputSystem';
 import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
@@ -196,7 +196,7 @@ export class Engine {
 
         // P7. 表现层 (视听反馈)
         CameraSystem(world, dt);                        // 17. 相机系统
-        EffectPlayer(world, dt);                        // 18. 效果播放系统
+        EffectSystem(world, dt);                        // 18. 效果播放系统
 
         BlinkSystem(world, dt);                         // 19. 闪烁系统（更新闪烁状态）
         AudioSystem(world, dt);                         // 21. 音频系统
