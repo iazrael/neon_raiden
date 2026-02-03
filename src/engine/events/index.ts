@@ -20,8 +20,9 @@ import {
   ChainLightningEvent,
   VictoryEvent,
   DefeatEvent,
-  BossSpawnEvent,
   BossDefeatEvent,
+  BossEntranceStartEvent,
+  BossEntranceCompleteEvent,
 } from './events';
 
 // 重新导出所有事件类型
@@ -56,7 +57,8 @@ export type GameEvent =
   | ChainLightningEvent
   | VictoryEvent
   | DefeatEvent
-  | BossSpawnEvent
+  | BossEntranceStartEvent
+  | BossEntranceCompleteEvent
   | BossDefeatEvent;
 
 /**

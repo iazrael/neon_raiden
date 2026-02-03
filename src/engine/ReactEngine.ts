@@ -54,6 +54,9 @@ export class ReactEngine {
     // Boss 状态
     public boss: { hp: number; maxHp: number } | null = null;
 
+    // Boss Warning 计时器引用
+    private bossWarningTimer: ReturnType<typeof setTimeout> | null = null;
+
     // ========== 订阅 cleanup ==========
     private snapshotSubscription: any = null;
 
@@ -176,6 +179,12 @@ export class ReactEngine {
             this.snapshotSubscription.unsubscribe();
             this.snapshotSubscription = null;
         }
+
+        // 清理计时器
+        if (this.bossWarningTimer) {
+            clearTimeout(this.bossWarningTimer);
+            this.bossWarningTimer = null;
+        }
     }
 
     /**
@@ -226,10 +235,36 @@ export class ReactEngine {
 
         // 处理 Boss 事件
         if (snapshot.bossEvent) {
-            if (snapshot.bossEvent.type === 'spawn') {
+            if (snapshot.bossEvent.type === 'entranceStart') {
+                // Boss 开始进场
                 this.showBossWarning = true;
                 this.onBossWarning(true);
+
+                // 启动 3 秒自动隐藏计时器
+                if (this.bossWarningTimer) {
+                    clearTimeout(this.bossWarningTimer);
+                }
+                this.bossWarningTimer = setTimeout(() => {
+                    this.showBossWarning = false;
+                    this.onBossWarning(false);
+                    this.bossWarningTimer = null;
+                }, 3000);
+
+            } else if (snapshot.bossEvent.type === 'entranceComplete') {
+                // Boss 进场完成，确保隐藏 warning
+                if (this.bossWarningTimer) {
+                    clearTimeout(this.bossWarningTimer);
+                    this.bossWarningTimer = null;
+                }
+                this.showBossWarning = false;
+                this.onBossWarning(false);
+
             } else if (snapshot.bossEvent.type === 'defeat') {
+                // Boss 被击败
+                if (this.bossWarningTimer) {
+                    clearTimeout(this.bossWarningTimer);
+                    this.bossWarningTimer = null;
+                }
                 this.showBossWarning = false;
                 this.onBossWarning(false);
             }

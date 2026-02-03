@@ -149,11 +149,14 @@ export class BossEntrance extends Component {
         super();
         this.targetY = cfg.targetY;
         this.entranceSpeed = cfg.entranceSpeed;
+        this.hasNotifiedStart = false; // 初始化为未通知
     }
     /** 目标Y坐标 */
     public targetY: number;
     /** 入场速度（像素/秒） */
     public entranceSpeed: number;
+    /** 是否已发送入场开始事件（内部状态，避免重复发送） */
+    public hasNotifiedStart: boolean;
     static check(c: any): c is BossEntrance { return c instanceof BossEntrance; }
 }
 

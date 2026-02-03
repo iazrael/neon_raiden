@@ -10,7 +10,7 @@ import {
     BossTag,
     Bomb,
 } from "./components";
-import { World, getComponents, getEntity, view } from "./world";
+import { World, getComponents, getComponentsFromComps, getEntity, view } from "./world";
 
 // ========== 游戏快照接口 ==========
 export interface GameSnapshot {
@@ -24,8 +24,8 @@ export interface GameSnapshot {
 
     /** 游戏状态事件：失败或胜利 */
     gameStateEvent: 'defeat' | 'victory' | null;
-    /** Boss 事件：出场或击杀 */
-    bossEvent: { type: 'spawn' | 'defeat'; bossId: BossId } | null;
+    /** Boss 事件：出场、完成或击杀 */
+    bossEvent: { type: 'entranceStart' | 'entranceComplete' | 'defeat'; bossId: BossId } | null;
 
     player: {
         hp: number;
@@ -125,14 +125,15 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
     );
 
     // 获取boss数据
-    let boss = null;
-    if (world.bossState.bossId > 0) {
-        const [t, h, tag] = getComponents(world, world.bossState.bossId, [
+    let bossInfo = null;
+    const boss = getEntity(world, world.bossState.bossId)
+    if (boss) {
+        const [t, h, tag] = getComponentsFromComps(boss, [
             Transform,
             Health,
             BossTag,
         ]);
-        boss = {
+        bossInfo = {
             hp: h.hp,
             maxHp: h.max,
             x: t.x,
@@ -143,15 +144,17 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
 
     // 收集游戏状态事件
     let gameStateEvent: 'defeat' | 'victory' | null = null;
-    let bossEvent: { type: 'spawn' | 'defeat'; bossId: BossId } | null = null;
+    let bossEvent: { type: 'entranceStart' | 'entranceComplete' | 'defeat'; bossId: BossId } | null = null;
 
     for (const event of world.events) {
         if (event.type === 'Defeat') {
             gameStateEvent = 'defeat';
         } else if (event.type === 'Victory') {
             gameStateEvent = 'victory';
-        } else if (event.type === 'BossSpawn') {
-            bossEvent = { type: 'spawn', bossId: event.bossId };
+        } else if (event.type === 'BossEntranceStart') {
+            bossEvent = { type: 'entranceStart', bossId: event.bossId };
+        } else if (event.type === 'BossEntranceComplete') {
+            bossEvent = { type: 'entranceComplete', bossId: event.bossId };
         } else if (event.type === 'BossDefeat') {
             bossEvent = { type: 'defeat', bossId: event.bossId };
         }
@@ -168,7 +171,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         gameStateEvent,
         bossEvent,
         player,
-        boss,
+        boss:bossInfo,
         bullets,
         enemies,
     };

@@ -6,22 +6,25 @@
  * - 创建MoveIntent组件供MovementSystem使用
  * - 管理入场期间的临时速度修正
  * - 入场完成后清理相关组件
+ * - 发送Boss入场开始和完成事件
  *
  * 系统类型：决策层
  * 执行顺序：P1.5 - 在InputSystem之后，MovementSystem之前
  *
  * 依赖组件：
  * - Input: BossTag, BossEntrance, Transform
- * - Output: MoveIntent, SpeedModifier
+ * - Output: MoveIntent, SpeedModifier, InvulnerableState
  *
  * 与其他系统的关系：
  * - BossMovementSystem: 通过BossEntrance组件的存在性互斥
  * - MovementSystem: 消费MoveIntent，应用实际位移
+ * - ReactEngine: 接收BossEntranceStart和BossEntranceComplete事件
  */
 
-import { Transform, BossEntrance, MoveIntent, SpeedModifier, InvulnerableState } from '../../components';
-import { view, addComponent, removeTypes, World } from '../../world';
+import { Transform, BossEntrance, MoveIntent, SpeedModifier, InvulnerableState, BossTag } from '../../components';
+import { view, addComponent, removeTypes, World, pushEvent } from '../../world';
 import { BOSS_ARENA } from '../../configs/bossConstants';
+import { BossEntranceStartEvent, BossEntranceCompleteEvent, CamShakeEvent, PlaySoundEvent } from '../../events';
 
 /**
  * Boss入场系统主函数
@@ -30,7 +33,33 @@ import { BOSS_ARENA } from '../../configs/bossConstants';
  */
 export function BossEntranceSystem(world: World, dt: number): void {
     // 只查询有 BossEntrance 组件的Boss
-    for (const [id, [entrance, transform], comps] of view(world, [BossEntrance, Transform])) {
+    for (const [id, [entrance, transform, bossTag], comps] of view(world, [BossEntrance, Transform, BossTag])) {
+
+        // === Boss 入场开始 ===
+        if (!entrance.hasNotifiedStart) {
+            // 1. 发送 Boss 入场开始事件
+            pushEvent(world, {
+                type: 'BossEntranceStart',
+                bossId: bossTag.id,
+                entityId: id
+            } satisfies BossEntranceStartEvent);
+
+            // 2. 添加 InvulnerableState 组件（无敌）
+            if (!comps.some(InvulnerableState.check)) {
+                // 给最多 10s 无敌
+                addComponent(world, id, new InvulnerableState({duration: 10*1000}));
+            }
+
+            // 3. 触发屏幕震动
+            pushEvent(world, {
+                type: 'CamShake',
+                intensity: 20,
+                duration: 300
+            } );
+
+            // 5. 标记已通知（存储在组件中）
+            entrance.hasNotifiedStart = true;
+        }
 
         // 使用浮点数安全比较
         if (transform.y < entrance.targetY - BOSS_ARENA.POSITION_EPSILON) {
@@ -60,6 +89,14 @@ export function BossEntranceSystem(world: World, dt: number): void {
         } else {
             // === 入场完成 ===
 
+            // 1. 发送 Boss 入场完成事件
+            pushEvent(world, {
+                type: 'BossEntranceComplete',
+                bossId: bossTag.id,
+                entityId: id
+            } );
+
+            // 2. 清理入场相关组件（包括 InvulnerableState，此时Boss可以受到伤害）
             removeTypes(world, id, [BossEntrance, SpeedModifier, InvulnerableState]);
         }
     }

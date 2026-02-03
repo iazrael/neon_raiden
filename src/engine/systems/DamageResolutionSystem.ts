@@ -197,12 +197,6 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
         pushEvent(world, bossDefeatEvent);
     }
 
-    // 播放死亡音效
-    const soundEvent: PlaySoundEvent = {
-        type: "PlaySound",
-        name: "explosion",
-    };
-    pushEvent(world, soundEvent);
 
     // 添加销毁标记
     const hasDestroyTag = victimComps.some(DestroyTag.check);

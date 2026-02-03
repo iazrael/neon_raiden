@@ -23,6 +23,8 @@ import {
     BombExplodedEvent,
     ShieldBrokenEvent,
     TimeSlowEvent,
+    BossEntranceStartEvent,
+    BossDefeatEvent,
 } from "../events";
 import { audioPlayer } from "../audio";
 import { ExplosionSize } from "../audio/AudioEngine";
@@ -72,6 +74,11 @@ export function AudioSystem(world: World, dt: number): void {
             case "TimeSlow":
                 handleTimeSlowEvent(world, event);
                 break;
+            case "BossEntranceStart":
+                handleBossEntranceStart(world, event);
+                break;
+            case "BossDefeat":
+                handleBossDefeatEvent(world, event);
         }
     }
 }
@@ -181,6 +188,25 @@ function handleTimeSlowEvent(world: World, event: TimeSlowEvent): void {
         audioPlayer.playSlowMotionEnter();
     }
 }
+
+/**
+ * 播放 boss 进场音效
+ */
+function handleBossEntranceStart(world: World, event: BossEntranceStartEvent){
+    audioPlayer.playWarning()
+}
+
+/**
+ * 击败 boss
+ * @param world 
+ * @param event 
+ */
+function handleBossDefeatEvent(world: World, event: BossDefeatEvent){
+    audioPlayer.playBossDefeat()
+}
+
+
+
 
 /**
  * 播放音效

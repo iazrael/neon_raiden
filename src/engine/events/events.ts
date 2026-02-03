@@ -141,12 +141,19 @@ export interface DefeatEvent extends BaseEvent<'Defeat'> {
   // 无额外字段
 }
 
-// ㉑ Boss 出场事件
-export interface BossSpawnEvent extends BaseEvent<'BossSpawn'> {
-  bossId: BossId;  // Boss 类型
-}
-
 // ㉒ Boss 击杀事件
 export interface BossDefeatEvent extends BaseEvent<'BossDefeat'> {
   bossId: BossId;  // Boss 类型
+}
+
+// ㉓ Boss 进场开始事件
+export interface BossEntranceStartEvent extends BaseEvent<'BossEntranceStart'> {
+  bossId: BossId;      // Boss 类型
+  entityId: EntityId;  // Boss 实体 ID
+}
+
+// ㉔ Boss 进场完成事件
+export interface BossEntranceCompleteEvent extends BaseEvent<'BossEntranceComplete'> {
+  bossId: BossId;      // Boss 类型
+  entityId: EntityId;  // Boss 实体 ID
 }
