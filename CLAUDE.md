@@ -48,5 +48,5 @@ export function MovementSystem(world: World, deltaTimeMs: number) { ... }
 ### 4. 测试要求
 
 * **测试目录**：所有测试用例统一存放于 `./tests` 目录。
-* **强制通过**：需求完成后，必须执行并确保 `pnpm test` **全部通过**。若引入新功能，需在 `./tests` 下增加相应的单元测试。
+* **强制通过**：需求完成后，必须执行并确保 `pnpm test` 和 `pnpm build` **全部通过**。若引入新功能，需在 `./tests` 下增加相应的单元测试。
 
