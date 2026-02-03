@@ -3,7 +3,7 @@
  */
 
 import { RenderSystem } from '../../src/engine/systems/RenderSystem';
-import { World } from '../../src/engine/world';
+import { World, type RenderContext } from '../../src/engine/world';
 import { Transform, Sprite, PlayerTag, EnemyTag } from '../../src/engine/components';
 import { SpriteKey } from '../../src/engine/configs/sprites';
 
@@ -35,7 +35,7 @@ const mockContext = {
     globalCompositeOperation: 'source-over',
 } as any as CanvasRenderingContext2D;
 
-const mockRenderContext = {
+const mockRenderContext: RenderContext = {
     canvas: mockCanvas,
     context: mockContext,
     width: 800,
@@ -81,7 +81,8 @@ const createMockWorld = (): World => ({
         timer: 60000,
         spawned: false,
     },
-    timeSlowActive: false
+    timeSlowActive: false,
+    renderContext: mockRenderContext,
 });
 
 describe('RenderSystem', () => {
@@ -94,14 +95,21 @@ describe('RenderSystem', () => {
 
     describe('基础渲染', () => {
         it('没有实体时不应该崩溃', () => {
-            expect(() => RenderSystem(mockWorld, mockRenderContext, 16)).not.toThrow();
+            expect(() => RenderSystem(mockWorld, 16)).not.toThrow();
         });
 
         it('应该绘制背景', () => {
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // RenderSystem 使用 fillRect 绘制黑色背景
             expect(mockContext.fillRect).toHaveBeenCalledWith(0, 0, 800, 600);
+        });
+
+        it('没有 renderContext 时应该提前返回', () => {
+            mockWorld.renderContext = undefined;
+            expect(() => RenderSystem(mockWorld, 16)).not.toThrow();
+            // 不应该调用任何绘制方法
+            expect(mockContext.fillRect).not.toHaveBeenCalled();
         });
     });
 
@@ -113,7 +121,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 应该调用 save/restore 和绘制方法
             expect(mockContext.save).toHaveBeenCalled();
@@ -136,7 +144,7 @@ describe('RenderSystem', () => {
                 new EnemyTag({ id: 'NORMAL' as any })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 应该渲染两个实体（save/restore 被调用至少 2 次：背景 + 2 个实体）
             expect(mockContext.save).toHaveBeenCalled();
@@ -147,7 +155,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 只绘制背景，不绘制实体
             expect(mockContext.fillRect).toHaveBeenCalled();
@@ -160,7 +168,7 @@ describe('RenderSystem', () => {
                 new Transform({ x: 400, y: 300, rot: 0 })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 只绘制背景
             expect(mockContext.fillRect).toHaveBeenCalled();
@@ -177,7 +185,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 应该调用 translate 应用相机偏移
             expect(mockContext.translate).toHaveBeenCalled();
@@ -194,7 +202,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 应该调用 translate
             expect(mockContext.translate).toHaveBeenCalled();
@@ -205,7 +213,7 @@ describe('RenderSystem', () => {
         it('空实体列表不应该崩溃', () => {
             mockWorld.entities.clear();
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 至少应该绘制背景
             expect(mockContext.fillRect).toHaveBeenCalled();
@@ -220,7 +228,7 @@ describe('RenderSystem', () => {
                 new Sprite({ spriteKey: SpriteKey.PLAYER, color: '#ff0000' })
             ]);
 
-            RenderSystem(mockWorld, mockRenderContext, 16);
+            RenderSystem(mockWorld, 16);
 
             // 只绘制背景
             expect(mockContext.fillRect).toHaveBeenCalled();

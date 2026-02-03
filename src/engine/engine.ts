@@ -32,6 +32,8 @@ import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
 import { VisualEffectSystem } from './systems/VisualEffectSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
+import { HomingSystem } from './systems/HomingSystem';
+import { ChainSystem } from './systems/ChainSystem';
 // ==============
 
 export class Engine {
@@ -193,12 +195,14 @@ export class Engine {
         // P4. 交互层 (核心碰撞)
         BombSystem(world, dt);                          // 12. 炸弹系统（救命神器，先生效）
         CollisionSystem(world, dt);                     // 13. 碰撞系统
+        HomingSystem(world, dt);                         // 14. 导弹索敌系统
 
         // P5. 结算层 (事件处理)
         PickupSystem(world, dt);                        // 13. 拾取系统
         DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
-        LootSystem(world, dt);                          // 15. 掉落系统
-        ComboSystem(world, dt);                             // 16. 连击系统
+        ChainSystem(world, dt);                         // 15. 特斯拉连锁系统
+        LootSystem(world, dt);                          // 16. 掉落系统
+        ComboSystem(world, dt);                         // 17. 连击系统
 
         // P7. 表现层 (视听反馈)
         CameraSystem(world, dt);                        // 17. 相机系统

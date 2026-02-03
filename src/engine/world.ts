@@ -2,6 +2,16 @@ import { EntityId, Component, ComboState, RenderState, BossState, BossId } from 
 import { GameEvent, EventType } from './events';
 import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
 
+/**
+ * 渲染上下文
+ */
+export interface RenderContext {
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    width: number;
+    height: number;
+}
+
 // 世界接口
 export interface World {
     // 实体集合
@@ -46,6 +56,9 @@ export interface World {
 
     // Boss 刷怪状态
     bossState: BossState;
+
+    // 渲染上下文（由 RenderSystem 使用）
+    renderContext?: RenderContext;
 }
 
 

@@ -21,6 +21,7 @@ import {
     getComponentsFromComps,
     getEntity,
     view,
+    type RenderContext,
 } from "../world";
 import {
     Transform,
@@ -41,16 +42,6 @@ import {
     VisualCircle,
 } from "../components";
 import { DebugConfig } from "../config/DebugConfig";
-
-/**
- * 渲染上下文
- */
-export interface RenderContext {
-    canvas: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
-    width: number;
-    height: number;
-}
 
 /**
  * 渲染层级
@@ -613,12 +604,16 @@ function drawTimeSlowEffect(
 
 /**
  * 渲染系统主函数
+ *
+ * @param world World 对象，包含 renderContext
+ * @param dt 增量时间（毫秒）
  */
-export function RenderSystem(
-    world: World,
-    renderCtx: RenderContext,
-    dt: number,
-): void {
+export function RenderSystem(world: World, dt: number): void {
+    const renderCtx = world.renderContext;
+    if (!renderCtx) {
+        return; // 渲染上下文未初始化，跳过渲染
+    }
+
     const { canvas, context, width, height } = renderCtx;
     const { camera } = world.renderState;
 
