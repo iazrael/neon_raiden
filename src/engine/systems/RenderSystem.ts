@@ -54,24 +54,6 @@ interface RenderItem {
 }
 
 /**
- * 玩家特效数据
- */
-interface PlayerEffectData {
-    transform: Transform;
-    shield?: Shield;
-    invulnerable?: InvulnerableState;
-    health?: Health;
-}
-
-/**
- * 收集结果
- */
-interface RenderQueue {
-    sprites: RenderItem[];
-    playerEffect: PlayerEffectData | null;
-}
-
-/**
  * 确定实体的渲染层级
  */
 function determineLayer(comps: Component[]): number {
@@ -84,45 +66,6 @@ function determineLayer(comps: Component[]): number {
     return RenderLayer.PICKUP;
 }
 
-/**
- * 单次遍历收集所有渲染项
- */
-function collectRenderItems(world: World): RenderQueue {
-    const queue: RenderQueue = {
-        sprites: [],
-        playerEffect: null,
-    };
-
-    // 收集玩家信息, 绘制额外的护盾\血条等
-    const player = getEntity(world, world.playerId);
-    if (player) {
-        const [shield, invulnerable, health, transform] = getComponentsFromComps(player, [
-            Shield,
-            InvulnerableState,
-            Health,
-            Transform,
-        ]);
-        if (shield || invulnerable) {
-            queue.playerEffect = {
-                transform,
-                shield,
-                invulnerable,
-                health,
-            };
-        }
-    }
-
-    // 收集所有可以绘制的精灵
-    for (const [id, [transform, sprite], comps] of view(world, [Transform, Sprite])) {
-        queue.sprites.push({
-            layer: determineLayer(comps),
-            transform,
-            sprite,
-        });
-    }
-
-    return queue;
-}
 
 /**
  * 绘制背景星空效果
@@ -329,10 +272,9 @@ function drawSprite(ctx: CanvasRenderingContext2D, item: RenderItem, camX: numbe
 // }
 
 /**
- * 绘制玩家特效（护盾、无敌状态）
+ * 绘制玩家特效
  */
-function drawPlayerEffect(ctx: CanvasRenderingContext2D, data: PlayerEffectData, camX: number, camY: number): void {
-    const { transform, shield, invulnerable, health } = data;
+function drawPlayerEffect(ctx: CanvasRenderingContext2D, transform: Transform, camX: number, camY: number): void {
     const x = transform.x - camX;
     const y = transform.y - camY;
 
@@ -347,8 +289,16 @@ function drawPlayerEffect(ctx: CanvasRenderingContext2D, data: PlayerEffectData,
     ctx.fill();
     ctx.restore();
 
+}
+
+/**
+ * 绘制护盾
+ */
+function drawShield(ctx: CanvasRenderingContext2D, shield: Shield, transform: Transform, camX: number, camY: number) {
     // 绘制护盾
     if (shield && shield.value > 0) {
+        const x = transform.x - camX;
+        const y = transform.y - camY;
         ctx.save();
         ctx.translate(x, y);
 
@@ -365,9 +315,17 @@ function drawPlayerEffect(ctx: CanvasRenderingContext2D, data: PlayerEffectData,
 
         ctx.restore();
     }
+}
 
-    // 绘制无敌状态
+
+/**
+ * 绘制无敌状态
+ */
+
+function drawInvulnerableEffect(ctx: CanvasRenderingContext2D, invulnerable: InvulnerableState, transform: Transform, camX: number, camY: number) {
     if (invulnerable && invulnerable.duration > 0) {
+        const x = transform.x - camX;
+        const y = transform.y - camY;
         ctx.save();
         ctx.translate(x, y);
 
@@ -398,6 +356,7 @@ function drawPlayerEffect(ctx: CanvasRenderingContext2D, data: PlayerEffectData,
         ctx.restore();
     }
 }
+
 
 /**
  * 绘制 VisualEffect 圆环（冲击波等）
@@ -504,9 +463,6 @@ export function RenderSystem(world: World, dt: number): void {
         console.log("[RenderSystem] Entities:", world.entities.size);
     }
 
-    // 1. 单次收集所有渲染项
-    const queue = collectRenderItems(world);
-
     // 2. 绘制背景（传递流星数据）
     drawBackground(context, width, height, world.timeScale);
 
@@ -519,16 +475,38 @@ export function RenderSystem(world: World, dt: number): void {
     const camX = camera.shakeX;
     const camY = camera.shakeY;
 
+    // 收集精灵做排序
+    const sprites = []
+    for (const [id, [transform, sprite], comps] of view(world, [Transform, Sprite])) {
+        sprites.push({
+            layer: determineLayer(comps),
+            transform,
+            sprite,
+        });
+    }
+
     // 4. 绘制精灵（按 layer 排序）
-    queue.sprites.sort((a, b) => a.layer - b.layer);
-    for (const item of queue.sprites) {
+    sprites.sort((a, b) => a.layer - b.layer);
+    for (const item of sprites) {
         drawSprite(context, item, camX, camY, camera.zoom);
     }
 
-    // 5. 绘制玩家特效
-    if (queue.playerEffect) {
-        drawPlayerEffect(context, queue.playerEffect, camX, camY);
+    // 绘制玩家效果
+    const [playerTransform] = getComponents(world, world.playerId, [Transform]);
+    if (playerTransform) {
+        drawPlayerEffect(context, playerTransform, camX, camY);
     }
+
+    // 绘制护盾
+    for (const [id, [transform, shield], comps] of view(world, [Transform, Shield])) {
+        drawShield(context, shield, transform, camX, camY);
+    }
+
+    // 5. 绘制无敌效果
+    for (const [id, [transform, inv], comps] of view(world, [Transform, InvulnerableState])) {
+        drawInvulnerableEffect(context, inv, transform, camX, camY);
+    }
+
 
     // 6. 绘制粒子特效
     for (const [id, [particle]] of view(world, [Particle])) {
