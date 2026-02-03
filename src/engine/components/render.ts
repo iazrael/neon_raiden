@@ -99,12 +99,10 @@ export class Particle extends Component {
     constructor(cfg: {
         /** 产生效果的原始位置 */
         position: { x: number; y: number };
-        /** 初始粒子数组 */
-        particles?: VisualParticle[];
     }) {
         super();
         this.position = cfg.position;
-        this.particles = cfg.particles ?? [];
+        this.particles = [];
     }
     /** 产生效果的原始位置 */
     public position: { x: number; y: number };
@@ -125,12 +123,10 @@ export class Shockwave extends Component {
     constructor(cfg: {
         /** 产生效果的原始位置 */
         position: { x: number; y: number };
-        /** 初始圆环数组 */
-        circles?: VisualCircle[];
     }) {
         super();
         this.position = cfg.position;
-        this.circles = cfg.circles ?? [];
+        this.circles = [];
     }
 
     /** 产生效果的原始位置 */
@@ -152,12 +148,10 @@ export class BulletTimeLine extends Component {
     constructor(cfg: {
         /** 最大线条数量 */
         maxLines: number;
-        /** 初始线条数组 */
-        lines?: VisualLine[];
     }) {
         super();
         this.maxLines = cfg.maxLines;
-        this.lines = cfg.lines ?? [];
+        this.lines = [];
     }
     /** 最大线条数量 */
     public maxLines: number;
@@ -322,10 +316,28 @@ export class Meteor extends Component {
      * 构造函数
      * @param cfg 流星配置
      */
-    constructor(cfg: { meteors?: VisualMeteor[] }) {
+    constructor(cfg: {
+        /** 生成流星的间隔 */
+        spawnInterval: number,
+        /** 生成概率 */
+        spawnChance: number,
+    }) {
         super();
-        this.meteors = cfg.meteors ?? []
+        this.spawnInterval = cfg.spawnInterval;
+        this.spawnChance = cfg.spawnChance;
+        this.timer = 0;
+        this.meteors = []
     }
+
+
+    /** 生成流星的间隔 */
+    public spawnInterval: number;
+
+    /** 生成概率 */
+    public spawnChance: number;
+
+    /** 累积计时器，记录下一次检查是否生成流星的时间 */
+    public timer: number;
 
     /** 流星数组 */
     public meteors: VisualMeteor[];

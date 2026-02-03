@@ -3,7 +3,7 @@
  */
 
 import { RenderSystem } from '../../src/engine/systems/RenderSystem';
-import { World, type RenderContext } from '../../src/engine/world';
+import { createWorld, World, type RenderContext } from '../../src/engine/world';
 import { Transform, Sprite, PlayerTag, EnemyTag } from '../../src/engine/components';
 import { SpriteKey } from '../../src/engine/configs/sprites';
 
@@ -40,48 +40,13 @@ const mockRenderContext: RenderContext = {
     context: mockContext
 };
 
-const createMockWorld = (): World => ({
-    entities: new Map(),
-    playerId: 1,
-    visualEffectId: 0,
-    width: 800,
-    height: 600,
-    time: 0,
-    score: 0,
-    level: 0,
-    playerLevel: 1,
-    difficulty: 1.0,
-    spawnCredits: 100,
-    spawnTimer: 0,
-    enemyCount: 0,
-    events: [],
-    timeScale: 1,
-    comboState: {
-        count: 0,
-        timer: 0,
-        level: 0,
-        maxCombo: 0,
-        hasBerserk: false,
-    },
-    renderState: {
-        camera: {
-            x: 0,
-            y: 0,
-            shakeX: 0,
-            shakeY: 0,
-            zoom: 1,
-            shakeTimer: 0,
-            shakeIntensity: 0,
-        },
-    },
-    bossState: {
-        bossId: 0,
-        timer: 60000,
-        spawned: false,
-    },
-    timeSlowActive: false,
-    renderContext: mockRenderContext,
-});
+const createMockWorld = (): World => {
+    const world = createWorld();
+    world.renderContext = mockRenderContext;
+    world.width = 800;
+    world.height = 600;
+    return world;
+};
 
 describe('RenderSystem', () => {
     let mockWorld: World;

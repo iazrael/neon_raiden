@@ -3,50 +3,10 @@
  */
 
 import { CameraSystem, setCameraConfig, resetCameraConfig, setCameraPosition, getCameraPosition, worldToScreen, screenToWorld } from '../../src/engine/systems/CameraSystem';
-import { World } from '../../src/engine/world';
+import { createWorld, World } from '../../src/engine/world';
 import { Transform, PlayerTag } from '../../src/engine/components';
 
-const createMockWorld = (): World => ({
-    entities: new Map(),
-    playerId: 1,
-    visualEffectId: 0,
-    width: 800,
-    height: 600,
-    time: 0,
-    score: 0,
-    level: 0,
-    playerLevel: 1,
-    difficulty: 1.0,
-    spawnCredits: 100,
-    spawnTimer: 0,
-    enemyCount: 0,
-    events: [],
-    timeScale: 1,
-    timeSlowActive: false,
-    comboState: {
-        count: 0,
-        timer: 0,
-        level: 0,
-        maxCombo: 0,
-        hasBerserk: false,
-    },
-    renderState: {
-        camera: {
-            x: 0,
-            y: 0,
-            shakeX: 0,
-            shakeY: 0,
-            zoom: 1,
-            shakeTimer: 0,
-            shakeIntensity: 0,
-        },
-    },
-    bossState: {
-        bossId: 0,
-        timer: 60000,
-        spawned: false,
-    },
-});
+const createMockWorld = (): World => createWorld();
 
 describe('CameraSystem', () => {
     let mockWorld: World;

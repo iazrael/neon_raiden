@@ -55,8 +55,6 @@ export function EffectPlayer(world: World, dt: number): void {
     // 处理特效更新
     updateEffects(world, dt);
 
-    // 生成流星
-    spawnMeteor(world, dt);
 }
 
 /**
@@ -317,6 +315,9 @@ function updateEffects(world: World, dt: number): void {
 
     // 更新流星位置
     for (const [id, [meteor]] of view(world, [Meteor])) {
+        // 生成流星
+        spawnMeteor(world, dt, meteor);
+        // 更新位置
         updateMeteors(world, dt, meteor);
     }
 }
@@ -495,26 +496,20 @@ function spawnBulletTimeLines(world: World, bt: BulletTimeLine): void {
  * @param dt 距离上次调用的时间（毫秒）
  * @param timer 累积计时器（引用传递）
  */
-function spawnMeteor(world: World, dt: number): void {
+function spawnMeteor(world: World, dt: number, meteor: Meteor): void {
     // 累加计时器
-    world.meteorState.timer += dt;
+    meteor.timer += dt;
 
     // 每 200ms 检查一次
-    const SPAWN_INTERVAL = 200;
-    if (world.meteorState.timer < SPAWN_INTERVAL) {
+    if (meteor.timer < meteor.spawnInterval) {
         return;
     }
-    world.meteorState.timer = 0;
+    meteor.timer = 0;
 
     // 10% 概率生成
-    const SPAWN_CHANCE = 0.1;
-    if (Math.random() >= SPAWN_CHANCE) {
+    if (Math.random() >= meteor.spawnChance) {
         return;
     }
-    if (!world.meteorState.meteorId) {
-        world.meteorState.meteorId = spawnEntity(world, []);
-    }
-    const meteor = ensureComponent(world, world.meteorState.meteorId, Meteor, {meteors: []});
 
     // 生成流星
     meteor.meteors.push({

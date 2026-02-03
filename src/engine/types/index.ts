@@ -53,11 +53,3 @@ export interface BossState {
     /** Boss 是否已刷出 */
     spawned: boolean;
 }
-
-/** 流星生成状态 */
-export interface MeteorState {
-    /** 流星生成计时器(ms),超过300ms生成一个 */
-    timer: number;
-    /** 流星的实体 ID */
-    meteorId: number;
-}

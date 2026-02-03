@@ -1,4 +1,4 @@
-import { EntityId, Component, ComboState, RenderState, BossState, BossId, MeteorState } from './types';
+import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
 import { GameEvent, EventType } from './events';
 import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
 
@@ -18,6 +18,9 @@ export interface RenderContext {
 export interface World {
     // 实体集合
     entities: Map<EntityId, Component[]>;
+    // 世界实体的ID
+    worldId: EntityId;
+
     // 玩家ID
     playerId: EntityId;
 
@@ -49,9 +52,6 @@ export interface World {
     timeScale: number;
     timeSlowActive: boolean;
 
-    // 流星生成状态
-    meteorState: MeteorState;
-
     // 连击状态
     comboState: ComboState;
 
@@ -75,6 +75,7 @@ export function createWorld(): World {
         events: [],
         score: 0,
         level: 1,
+        worldId: 0,
         playerId: 0,
         playerLevel: 1,
         difficulty: 1,
@@ -83,10 +84,6 @@ export function createWorld(): World {
         enemyCount: 0,
         timeScale: 1,
         timeSlowActive: false,
-        meteorState: {
-            timer: 0,
-            meteorId: 0,
-        },
         width: 0,
         height: 0,
         renderState: {

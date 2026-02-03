@@ -1,8 +1,9 @@
+import * as Components from './components';
 import { Blueprint } from './blueprints';
-import { BossAI, BossTag, BossEntrance, EnemyTag, Transform, FireIntent, MoveIntent, SpeedStat, Sprite, Weapon, Option } from './components';
+import { Meteor, EnemyTag, Transform, Sprite, Option } from './components';
 import { EntityId, Component } from './types';
 import { World, generateId, getFromPool } from './world';
-import * as Components from './components';
+
 
 /** 根据蓝图生成实体，支持对象池 */
 export function spawnFromBlueprint(world: World, bp: Blueprint,
@@ -54,11 +55,21 @@ export function spawnEntity(world: World, comps: Component[]): EntityId {
     return id;
 }
 
+/**
+ * 创建世界实体，用于挂载系统级组件
+ * @param world World 实例
+ * @returns 世界实体 ID
+ */
+export function spawnWorld(world: World): EntityId {
+    return spawnEntity(world, [
+        new Meteor({ spawnInterval: 200, spawnChance: 0.1})
+    ])
 
+}
 
+// 创建玩家战机
 export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot);
-    world.playerId = id;
     return id;
 }
 

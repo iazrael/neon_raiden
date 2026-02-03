@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { createWorld, World, generateId, addComponent } from './world';
 import { Blueprint } from './blueprints';
-import { spawnPlayer } from './factory';
+import { spawnPlayer, spawnWorld } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
 import { inputManager } from './input/InputManager';
 
@@ -106,7 +106,8 @@ export class Engine {
         const initialHeight = canvas.clientHeight;
         this.initRenderContext(canvas, initialWidth, initialHeight);
 
-        spawnPlayer(this.world, bp, this.world.width / 2, this.world.height - 80, 0);
+        this.world.worldId = spawnWorld(this.world);
+        this.world.playerId = spawnPlayer(this.world, bp, this.world.width / 2, this.world.height - 80, 0);
 
         // 初始化 timeScale
         this.world.timeScale = 1.0;
