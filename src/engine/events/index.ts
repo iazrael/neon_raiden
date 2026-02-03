@@ -17,6 +17,7 @@ import {
   WeaponEffectEvent,
   ShieldBrokenEvent,
   TimeSlowEvent,
+  ChainLightningEvent,
 } from './events';
 
 // 重新导出所有事件类型
@@ -47,7 +48,8 @@ export type GameEvent =
   | BombExplodedEvent
   | WeaponEffectEvent
   | ShieldBrokenEvent
-  | TimeSlowEvent;
+  | TimeSlowEvent
+  | ChainLightningEvent;
 
 /**
  * EventType 事件类型标签联合

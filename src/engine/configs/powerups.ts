@@ -7,6 +7,8 @@
 import { BuffType } from '../types';
 import { Blueprint } from '../blueprints/base';
 import { BLUEPRINT_OPTION_VULCAN } from '../blueprints/fighters';
+// 从武器升级配置表派生限制值，确保数据一致性
+import { WEAPON_LIMITS } from './weapon-upgrades';
 
 /**
  * Buff 分类枚举
@@ -42,13 +44,16 @@ export const BUFF_CATEGORY_CONFIG: Record<BuffType, BuffCategory> = {
 
 /**
  * 道具限制常量
+ *
+ * 注意：武器限制值（MAX_WEAPON_LEVEL, MAX_BULLET_COUNT）
+ * 从 WEAPON_UPGRADE_TABLE 动态计算，确保配置一致性
  */
 export const POWERUP_LIMITS = {
-    /** 武器最大等级 */
-    MAX_WEAPON_LEVEL: 5,
+    /** 武器最大等级（从 WEAPON_UPGRADE_TABLE 计算） */
+    MAX_WEAPON_LEVEL: WEAPON_LIMITS.MAX_WEAPON_LEVEL,
 
-    /** 武器最大子弹数量 */
-    MAX_BULLET_COUNT: 7,
+    /** 武器最大子弹数量（从 WEAPON_UPGRADE_TABLE 计算） */
+    MAX_BULLET_COUNT: WEAPON_LIMITS.MAX_BULLET_COUNT,
 } as const;
 
 /**
@@ -58,8 +63,8 @@ export const BUFF_CONFIG = {
     [BuffType.POWER]: {
         /** 升级时增加的等级 */
         levelIncrease: 1,
-        /** 最大等级 */
-        maxLevel: 5,
+        /** 最大等级（与 WEAPON_LIMITS.MAX_WEAPON_LEVEL 保持一致） */
+        maxLevel: WEAPON_LIMITS.MAX_WEAPON_LEVEL,
     },
 
     [BuffType.HP]: {

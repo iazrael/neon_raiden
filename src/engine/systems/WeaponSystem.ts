@@ -15,11 +15,12 @@
 
 import { World } from '../world';
 import { Transform, Weapon, FireIntent, PlayerTag } from '../components';
+import { Homing, Chain } from '../components';
 import { spawnBullet } from '../factory';
 import { CollisionLayer } from '../types/collision';
 import { AMMO_TABLE } from '../blueprints/ammo';
 import { ALL_WEAPONS_TABLE } from '../blueprints/weapons';
-import { Blueprint, WeaponSpec, AmmoSpec } from '../blueprints';
+import { Blueprint, WeaponSpec, AmmoSpec, WeaponLevelSpec } from '../blueprints';
 import { pushEvent, removeComponent, view } from '../world';
 import { WeaponFiredEvent } from '../events';
 import { BULLET_SPRITE_CONFIG } from '../configs/sprites/bullets';
@@ -89,18 +90,39 @@ function fireWeapon(
     const spriteSpec = BULLET_SPRITE_CONFIG[weapon.ammoType];
     if (!spriteSpec) return;
 
-    // 获取升级配置（敌人使用 weapon 自身的倍率）
-    // 玩家优先使用实例上的倍率，否则使用升级表
-    // FIXME: 后续记得玩家升级后, 要先修改 Weapon 组件的倍率字段
-    const upgradeSpec = entity.isPlayer
-        ? {
-            damageMultiplier: weapon.damageMultiplier ?? getWeaponUpgrade(weapon.id as any, weapon.level || 1).damageMultiplier,
-            fireRateMultiplier: weapon.fireRateMultiplier ?? getWeaponUpgrade(weapon.id as any, weapon.level || 1).fireRateMultiplier
-        }
+    // 获取升级配置（玩家使用升级表，敌人使用 weapon 自身的倍率）
+    const upgradeConfig: WeaponLevelSpec = entity.isPlayer
+        ? getWeaponUpgrade(weapon.id as any, weapon.level || 1)
         : {
+            level: 1,
             damageMultiplier: weapon.damageMultiplier || 1.0,
-            fireRateMultiplier: weapon.fireRateMultiplier || 1.0
+            fireRateMultiplier: weapon.fireRateMultiplier || 1.0,
         };
+
+    // === 合并组件级别的倍率（仅玩家） ===
+    // 玩家可通过 Weapon 组件的 damageMultiplier/fireRateMultiplier 进一步调整升级表配置
+    let finalDamageMultiplier = upgradeConfig.damageMultiplier;
+    let finalFireRateMultiplier = upgradeConfig.fireRateMultiplier;
+
+    if (entity.isPlayer) {
+        const componentDamageMultiplier = weapon.damageMultiplier ?? 1.0;
+        const componentFireRateMultiplier = weapon.fireRateMultiplier ?? 1.0;
+        finalDamageMultiplier *= componentDamageMultiplier;
+        finalFireRateMultiplier *= componentFireRateMultiplier;
+    }
+
+    // 创建合并后的升级配置用于后续逻辑
+    const mergedUpgradeConfig: WeaponLevelSpec = {
+        ...upgradeConfig,
+        damageMultiplier: finalDamageMultiplier,
+        fireRateMultiplier: finalFireRateMultiplier,
+    };
+
+    // === 应用扩展属性 ===
+    // 优先使用升级配置，否则使用武器基础配置
+    const bulletCount = upgradeConfig.bulletCount ?? weaponSpec.bulletCount ?? 1;
+    const spread = upgradeConfig.spread ?? weaponSpec.spread ?? 0;
+    const sizeMultiplier = upgradeConfig.sizeMultiplier ?? 1.0;
 
     // 计算发射角度
     let baseAngle = intent.angle ?? -Math.PI / 2; // 默认向上
@@ -110,10 +132,6 @@ function fireWeapon(
         baseAngle = Math.PI / 2; // 敌人默认向下
     }
 
-    // 根据弹幕模式生成子弹
-    const bulletCount = weaponSpec.bulletCount || 1;
-    const spread = weaponSpec.spread || 0;
-
     const fireContext = {
         world,
         transform,
@@ -121,11 +139,13 @@ function fireWeapon(
         weaponSpec,
         ammoSpec,
         spriteSpec,
-        upgradeSpec,
+        upgradeConfig: mergedUpgradeConfig,
+        sizeMultiplier,
         ownerId: id,
         isPlayer: entity.isPlayer,
     };
 
+    // 根据弹幕模式生成子弹
     if (weaponSpec.pattern === 'radial') {
         // 径向发射 - 360度均匀分布
         fireRadial(fireContext, bulletCount);
@@ -141,7 +161,7 @@ function fireWeapon(
     }
 
     // 重置冷却：实际冷却 = 武器冷却 / 射速倍率
-    weapon.curCD = weapon.cooldown / upgradeSpec.fireRateMultiplier;
+    weapon.curCD = weapon.cooldown / finalFireRateMultiplier;
 
     // 生成武器发射事件
     const firedEvent: WeaponFiredEvent = {
@@ -160,7 +180,8 @@ interface FireContext {
     weaponSpec: WeaponSpec;
     ammoSpec: AmmoSpec;
     spriteSpec: BulletSpriteSpec;
-    upgradeSpec: { damageMultiplier: number; fireRateMultiplier: number };
+    upgradeConfig: WeaponLevelSpec;
+    sizeMultiplier: number;
     ownerId: number;
     isPlayer: boolean;
 }
@@ -218,10 +239,10 @@ function fireRandom(ctx: FireContext, count: number, spread: number, baseAngle: 
  * - 最终反弹 = 弹药基础反弹 + 武器反弹加成
  */
 function createBullet(ctx: FireContext, angle: number): void {
-    const { world, transform, weapon, weaponSpec, ammoSpec, spriteSpec, upgradeSpec, ownerId } = ctx;
+    const { world, transform, weapon, weaponSpec, ammoSpec, spriteSpec, upgradeConfig, sizeMultiplier, ownerId } = ctx;
 
     // 计算最终属性
-    const finalDamage = ammoSpec.damage * upgradeSpec.damageMultiplier;
+    const finalDamage = ammoSpec.damage * upgradeConfig.damageMultiplier;
     const finalPierce = ammoSpec.pierce + (weaponSpec.pierceBonus ?? 0);
     const finalBounces = ammoSpec.bounces + (weaponSpec.bouncesBonus ?? 0);
 
@@ -236,24 +257,42 @@ function createBullet(ctx: FireContext, angle: number): void {
         Sprite: {
             spriteKey: spriteSpec.spriteKey,
             color: spriteSpec.color,
-            scale: 1
+            scale: sizeMultiplier,
         },
         Bullet: {
             owner: ownerId,
             ammoType: weapon.ammoType,
             damage: finalDamage,
             pierceLeft: finalPierce,
-            bouncesLeft: finalBounces
+            bouncesLeft: finalBounces,
         },
         HitBox: {
             shape: 'circle',
-            radius: ammoSpec.radius,
-            layer: ctx.isPlayer ? CollisionLayer.PlayerBullet : CollisionLayer.EnemyBullet
+            radius: ammoSpec.radius * sizeMultiplier,
+            layer: ctx.isPlayer ? CollisionLayer.PlayerBullet : CollisionLayer.EnemyBullet,
         },
         Lifetime: {
-            timer: 3000 // 3秒后销毁
-        }
+            timer: 3000, // 3秒后销毁
+        },
     };
+
+    // === 添加专属组件 ===
+    // 注意：这里传递配置对象，而不是组件实例
+    // spawnFromBlueprint 会用 new ComponentCtor(args) 创建实例
+    if (upgradeConfig.homing) {
+        bulletBlueprint.Homing = {
+            searchRange: upgradeConfig.homing.searchRange,
+            turnSpeed: upgradeConfig.homing.turnSpeed,
+        };
+    }
+
+    if (upgradeConfig.chain) {
+        bulletBlueprint.Chain = {
+            count: upgradeConfig.chain.count,
+            range: upgradeConfig.chain.range,
+            chainedIds: new Set(),
+        };
+    }
 
     spawnBullet(world, bulletBlueprint, transform.x, transform.y, angle);
 }

@@ -28,11 +28,13 @@ import {
     PickupItem,
     InvulnerableState,
     DestroyTag,
+    Chain,
 } from "../components";
 import { CollisionLayer, shouldCheckCollision } from "../types/collision";
 import { pushEvent, view, World } from "../world";
 import { HitEvent, PickupEvent } from "../events";
 import { COLLISION_DAMAGE, ULTIMATE_DAMAGE } from "../configs";
+import { triggerChainLightning } from "./ChainSystem";
 
 // ==================== 空间哈希网格 ====================
 
@@ -535,6 +537,7 @@ function handleBulletHit(
     let bullet: Bullet | undefined;
     let victimComps: Component[];
     let bulletComps: Component[];
+    let bulletTransform: Transform | undefined;
 
     if (bullet1) {
         attackerId = bullet1.owner;
@@ -542,12 +545,14 @@ function handleBulletHit(
         bullet = bullet1;
         victimComps = comps2;
         bulletComps = comps1;
+        bulletTransform = comps1.find(Transform.check);
     } else {
         attackerId = bullet2!.owner;
         victimId = id1;
         bullet = bullet2;
         victimComps = comps1;
         bulletComps = comps2;
+        bulletTransform = comps2.find(Transform.check);
     }
 
     // 从子弹组件获取伤害值
@@ -568,6 +573,20 @@ function handleBulletHit(
             victim: victimId,
         };
         pushEvent(world, hitEvent);
+
+        // === 处理特斯拉连锁 ===
+        const chainComp = bulletComps.find(Chain.check);
+        if (chainComp && bulletTransform) {
+            triggerChainLightning(
+                world,
+                bulletTransform.x,
+                bulletTransform.y,
+                chainComp.count,
+                chainComp.range,
+                damage,
+                victimId,
+            );
+        }
     }
 
     // 处理子弹穿透和销毁

@@ -72,13 +72,35 @@ export interface WeaponSpec {
     bouncesBonus?: number;
 }
 
-// ============== 武器升级配置 =================
-export interface WeaponUpgradeSpec {
-    id: WeaponId;
-    /** 每个等级的加成配置 */
-    levels: WeaponLevelSpec[];
+// ============== 导弹索敌属性 =================
+/** 导弹索敌升级属性 */
+export interface HomingUpgrade {
+    /** 索敌范围（像素） */
+    searchRange: number;
+    /** 转向速度（弧度/帧） */
+    turnSpeed: number;
 }
 
+// ============== 特斯拉连锁属性 =================
+/** 特斯拉连锁升级属性 */
+export interface ChainUpgrade {
+    /** 连锁次数 */
+    count: number;
+    /** 连锁范围（像素） */
+    range: number;
+}
+
+// ============== 激光光束属性 =================
+/** 激光光束升级属性 */
+export interface LaserUpgrade {
+    /** 光束数量 */
+    beamCount: number;
+    /** 宽度倍率 */
+    widthMultiplier: number;
+}
+
+// ============== 武器升级配置 =================
+/** 扩展的单级升级配置 */
 export interface WeaponLevelSpec {
     /** 等级（从 1 开始） */
     level: number;
@@ -86,6 +108,28 @@ export interface WeaponLevelSpec {
     damageMultiplier: number;
     /** 射速倍率（如 1.0, 1.2, 1.5...） */
     fireRateMultiplier: number;
+
+    // === 核心属性（可选） ===
+    /** 发射子弹数量（覆盖 WeaponSpec.bulletCount） */
+    bulletCount?: number;
+    /** 散射角度（度数，覆盖 WeaponSpec.spread） */
+    spread?: number;
+    /** 尺寸倍率（影响 Sprite.scale 和 HitBox.radius） */
+    sizeMultiplier?: number;
+
+    // === 专属属性（可选） ===
+    /** 导弹索敌配置 */
+    homing?: HomingUpgrade;
+    /** 特斯拉连锁配置 */
+    chain?: ChainUpgrade;
+    /** 激光光束配置 */
+    laser?: LaserUpgrade;
+}
+
+export interface WeaponUpgradeSpec {
+    id: WeaponId;
+    /** 每个等级的加成配置 */
+    levels: WeaponLevelSpec[];
 }
 
 // ============== 效果配置 =================

@@ -85,11 +85,11 @@ export class Health extends Component {
         /** 当前生命值 */
         hp: number; 
         /** 最大生命值 */
-        max: number; 
+        max?: number; 
     }) { 
         super(); 
         this.hp = cfg.hp;
-        this.max = cfg.max;
+        this.max = cfg.max ?? cfg.hp;
     }
     public hp: number;
     public max: number;

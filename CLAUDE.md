@@ -12,7 +12,7 @@
 | **Components** | `src/engine/components` | **组件**: 仅存放数据结构（Interfaces/Types），禁止包含逻辑。 |
 | **Systems** | `src/engine/systems` | **系统**: **纯函数**，负责处理逻辑与状态变更，输入通常为组件数据。 |
 | **Configs** | `src/engine/configs` | **配置**: 存放游戏数值、常量与静态配置表。 |
-| **World/Utils** | `src/engine/world.ts` | **世界/工具**: 包含 `view` 函数、实体查询及其他公共工具方法。 |
+| **World/Utils** | `src/engine/world.ts` | **世界/工具**: 包含 `view` 、`getEvents`、`getComponents` 等函数、实体查询及其他公共工具方法。 |
 
 
 ## 🛠 开发与质量约束

@@ -119,3 +119,14 @@ export interface TimeSlowEvent extends BaseEvent<'TimeSlow'> {
   duration: number;              // 持续毫秒
   action: 'start' | 'end';       // 开始或结束
 }
+
+// ⑱ 连锁闪电事件
+export interface ChainLightningEvent extends BaseEvent<'ChainLightning'> {
+  fromX: number;                 // 起点 X 坐标
+  fromY: number;                 // 起点 Y 坐标
+  toId: number;                  // 目标实体 ID
+  count: number;                 // 剩余连锁次数
+  range: number;                 // 连锁搜索范围
+  damage: number;                // 伤害值
+  chainedIds: Set<number>;       // 已连锁的实体 ID 集合（避免重复）
+}

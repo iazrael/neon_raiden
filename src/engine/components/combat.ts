@@ -368,3 +368,73 @@ export class OptionCount extends Component {
     }
 }
 
+// ==================== 导弹索敌组件 =================
+
+/**
+ * Homing 组件 - 导弹索敌功能
+ * 用于自动追踪敌人的子弹
+ */
+export class Homing extends Component {
+    static check = (comp: Component): comp is Homing => comp instanceof Homing;
+
+    /**
+     * 构造函数
+     * @param cfg 索敌配置
+     */
+    constructor(cfg: {
+        /** 索敌范围（像素） */
+        searchRange: number;
+        /** 转向速度（弧度/帧） */
+        turnSpeed: number;
+        /** 当前锁定目标（运行时动态更新） */
+        targetId?: EntityId;
+    }) {
+        super();
+        this.searchRange = cfg.searchRange;
+        this.turnSpeed = cfg.turnSpeed;
+        this.targetId = cfg.targetId;
+    }
+
+    /** 索敌范围（像素） */
+    searchRange: number;
+    /** 转向速度（弧度/帧） */
+    turnSpeed: number;
+    /** 当前锁定目标的实体 ID（运行时动态更新） */
+    targetId?: EntityId;
+}
+
+// ==================== 特斯拉连锁组件 =================
+
+/**
+ * Chain 组件 - 特斯拉连锁功能
+ * 用于命中后在敌人间跳跃的子弹
+ */
+export class Chain extends Component {
+    static check = (comp: Component): comp is Chain => comp instanceof Chain;
+
+    /**
+     * 构造函数
+     * @param cfg 连锁配置
+     */
+    constructor(cfg: {
+        /** 剩余连锁次数 */
+        count: number;
+        /** 连锁范围（像素） */
+        range: number;
+        /** 已连锁过的实体 ID 列表（防重复） */
+        chainedIds?: Set<EntityId>;
+    }) {
+        super();
+        this.count = cfg.count;
+        this.range = cfg.range;
+        this.chainedIds = cfg.chainedIds ?? new Set();
+    }
+
+    /** 剩余连锁次数 */
+    count: number;
+    /** 连锁范围（像素） */
+    range: number;
+    /** 已连锁过的实体 ID 列表（防重复） */
+    chainedIds: Set<EntityId>;
+}
+
