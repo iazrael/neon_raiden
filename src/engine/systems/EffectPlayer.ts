@@ -272,19 +272,11 @@ function handleTimeSlowEvent(world: World, event: TimeSlowEvent): void {
             new BulletTimeLine({
                 maxLines: 20,
             }),
-            new Lifetime({
-                timer: event.duration,
-            }),
         ]);
     } else if (event.action === "end") {
         // 移除 包含 BulletTimeLine 的实体
         for (const [id, []] of view(world, [BulletTimeLine])) {
             removeEntity(world, id);
-        }
-    } else if (event.action === "update") {
-        // 更新剩余时间
-        for (const [id, [bt, lifetime]] of view(world, [BulletTimeLine, Lifetime])) {
-            lifetime.timer = event.duration;
         }
     }
 }
@@ -298,6 +290,7 @@ function handleTimeSlowEvent(world: World, event: TimeSlowEvent): void {
 function updateEffects(world: World, dt: number): void {
     // 更新包含 BulletTimeLine 的实体
     for (const [id, [bt]] of view(world, [BulletTimeLine])) {
+        // 检查是否要生成新的光线
         spawnBulletTimeLines(world, bt);
         // 更新每条光线的位置
         updateBulletTimeLines(world, dt, bt);

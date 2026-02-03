@@ -84,8 +84,8 @@ export function createWorld(): World {
         enemyCount: 0,
         timeScale: 1,
         timeSlowActive: false,
-        width: 0,
-        height: 0,
+        width: 800,
+        height: 600,
         renderState: {
             camera: {
                 x: 0,
