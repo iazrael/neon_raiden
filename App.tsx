@@ -8,6 +8,7 @@ import { SpriteManager } from './src/engine/SpriteManager';
 import { ComboState, GameState } from './src/engine';
 import { GAME_CONFIG } from './src/engine/configs';
 import { audioPlayer } from './src/engine/audio';
+import { DebugConfig } from './src/engine/config/DebugConfig';
 
 function App() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,6 +31,10 @@ function App() {
     const [secondaryWeapon, setSecondaryWeapon] = useState<WeaponType | null>(null); // P2 Secondary weapon
     const [weaponLevel, setWeaponLevel] = useState<number>(1);
     const [boss, setBoss] = useState<{ hp: number; maxHp: number } | null>(null); // Boss 血条数据
+    const [performanceData, setPerformanceData] = useState<{ fps: number; frameTime: number } | null>(null); // 性能监控数据
+
+    // 性能监控滑动窗口（保存最近 60 帧的数据）
+    const frameTimesRef = useRef<number[]>([]);
 
     useEffect(() => {
         // Preload assets - both old and new systems
@@ -91,6 +96,65 @@ function App() {
         };
     }, []);
 
+    // 性能监控流订阅
+    useEffect(() => {
+        const engine = engineRef.current;
+        if (!engine) return;
+
+        const performanceSubscription = engine.performanceStream?.subscribe((snapshot) => {
+            if (!snapshot) return;
+
+            const frameTimes = frameTimesRef.current;
+
+            if (DebugConfig.performance.enabled) {
+                // 添加当前帧时间
+                frameTimes.push(snapshot.frameTime);
+
+                // 只保留最近 60 帧（约 1 秒）
+                if (frameTimes.length > 60) {
+                    frameTimes.shift();
+                }
+
+                // 计算平均帧时间
+                const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+                const avgFps = 1000 / avgFrameTime;
+
+                setPerformanceData({ fps: avgFps, frameTime: avgFrameTime });
+            } else {
+                // 清空数据
+                frameTimes.length = 0;
+                setPerformanceData(null);
+            }
+        });
+
+        return () => {
+            performanceSubscription?.unsubscribe();
+        };
+    }, []);
+
+    // P 键切换性能监控
+    useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+            if (e.key === 'p' || e.key === 'P') {
+                const newState = !DebugConfig.performance.enabled;
+                DebugConfig.performance.enabled = newState;
+
+                // 同步更新 PerformanceMonitor 的配置
+                const engine = engineRef.current;
+                if (engine) {
+                    const monitor = (engine as any).engine?.performanceMonitor;
+                    if (monitor?.updateConfig) {
+                        monitor.updateConfig({ enabled: newState });
+                    }
+                }
+
+                console.log('[Debug] Performance Monitor:', newState ? 'ON' : 'OFF');
+            }
+        };
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, []);
+
     const handleStart = () => {
         engineRef.current?.startGame();
     };
@@ -128,6 +192,7 @@ function App() {
                 weaponLevel={weaponLevel}
                 shieldPercent={shieldPercent}
                 boss={boss}
+                performanceData={performanceData}
                 onOpenGallery={() => {
                     setStateBeforeGallery(gameState);
                     if (gameState === GameState.PLAYING) {

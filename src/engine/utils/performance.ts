@@ -90,16 +90,19 @@ export class PerformanceMonitor {
    * @param frameTime 总帧时间（ms）
    */
   endFrame(frameTime: number): void {
-    if (!this.config.enabled) return;
+    if (this.config.enabled) {
+      const exceeded = frameTime > this.config.frameTimeThreshold;
+      const layers = this.aggregateByLayer(this.currentFrameSystems);
 
-    const exceeded = frameTime > this.config.frameTimeThreshold;
-    const layers = this.aggregateByLayer(this.currentFrameSystems);
+      const snapshot: FrameSnapshot = { frameTime, thresholdExceeded: exceeded, layers };
+      this.performance$.next(snapshot);
 
-    const snapshot: FrameSnapshot = { frameTime, thresholdExceeded: exceeded, layers };
-    this.performance$.next(snapshot);
-
-    if (exceeded && this.config.reportToConsole) {
-      this.reportWarning(frameTime, layers);
+      if (exceeded && this.config.reportToConsole) {
+        this.reportWarning(frameTime, layers);
+      }
+    } else {
+      // 禁用时只输出基本帧时间，不记录系统耗时
+      this.performance$.next({ frameTime, thresholdExceeded: false, layers: {} });
     }
   }
 

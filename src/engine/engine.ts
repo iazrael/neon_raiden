@@ -4,6 +4,8 @@ import { Blueprint } from './blueprints';
 import { spawnPlayer, spawnWorld } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
 import { inputManager } from './input/InputManager';
+import { PerformanceMonitor, FrameSnapshot } from './utils/performance';
+import { DebugConfig } from './config/DebugConfig';
 
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
@@ -40,6 +42,11 @@ export class Engine {
     private canvas: HTMLCanvasElement;
     private resizeObserver: ResizeObserver;
     public snapshot$ = new BehaviorSubject<GameSnapshot | null>(null);
+
+    /**
+     * 性能监控器
+     */
+    private performanceMonitor = new PerformanceMonitor(DebugConfig.performance);
 
     /**
      * 流星生成计时器
@@ -162,54 +169,63 @@ export class Engine {
         }
         // ==========================================
 
+        // 性能监控：帧开始
+        const frameStartMs = performance.now();
+        this.performanceMonitor.startFrame();
+
+        // 辅助函数：记录系统耗时
+        const recordSys = (name: string, layer: string, fn: () => void) => {
+            const startMs = performance.now();
+            fn();
+            this.performanceMonitor.recordSystem(name, layer, performance.now() - startMs);
+        };
+
         // 按顺序执行所有系统（P0-P8）
 
         // P1. 决策层 (输入与AI)
-        InputSystem(world, dt);                         // 1. 输入系统
-        // DifficultySystem(world, dt);                    // 2. 难度系统
-        SpawnSystem(world, dt);                         // 3. 生成系统
-
-        BossSystem(world, dt);                          // 5. Boss阶段系统 / Boss系统
-        EnemySystem(world, dt);                         // 6. 敌人系统
-        // AISteerSystem(world, dt);                       // 7. AI转向系统
+        recordSys('InputSystem', 'P1', () => InputSystem(world, dt));
+        recordSys('SpawnSystem', 'P1', () => SpawnSystem(world, dt));
+        recordSys('BossSystem', 'P1', () => BossSystem(world, dt));
+        recordSys('EnemySystem', 'P1', () => EnemySystem(world, dt));
 
         // P2. 状态层 (数值更新)
-        BuffSystem(world, dt);                          // 8. 增益系统
-        // WeaponSynergySystem(world, dt);                 // 9. 武器协同系统
-        WeaponSystem(world, dt);                        // 10. 武器系统
-        // SpecialWeaponSystem(world, dt);                 // 11. 特殊武器效果 (追踪、链式等)
+        recordSys('BuffSystem', 'P2', () => BuffSystem(world, dt));
+        recordSys('WeaponSystem', 'P2', () => WeaponSystem(world, dt));
 
         // P3. 物理层 (位移)
-        MovementSystem(world, dt);                      // 11. 移动系统
+        recordSys('MovementSystem', 'P3', () => MovementSystem(world, dt));
 
         // P4. 交互层 (核心碰撞)
-        BombSystem(world, dt);                          // 12. 炸弹系统（救命神器，先生效）
-        CollisionSystem(world, dt);                     // 13. 碰撞系统
-        HomingSystem(world, dt);                         // 14. 导弹索敌系统
+        recordSys('BombSystem', 'P4', () => BombSystem(world, dt));
+        recordSys('CollisionSystem', 'P4', () => CollisionSystem(world, dt));
+        recordSys('HomingSystem', 'P4', () => HomingSystem(world, dt));
 
         // P5. 结算层 (事件处理)
-        PickupSystem(world, dt);                        // 13. 拾取系统
-        DamageResolutionSystem(world, dt);              // 14. 伤害结算系统
-        ChainSystem(world, dt);                         // 15. 特斯拉连锁系统
-        LootSystem(world, dt);                          // 16. 掉落系统
-        ComboSystem(world, dt);                         // 17. 连击系统
+        recordSys('PickupSystem', 'P5', () => PickupSystem(world, dt));
+        recordSys('DamageResolutionSystem', 'P5', () => DamageResolutionSystem(world, dt));
+        recordSys('ChainSystem', 'P5', () => ChainSystem(world, dt));
+        recordSys('LootSystem', 'P5', () => LootSystem(world, dt));
+        recordSys('ComboSystem', 'P5', () => ComboSystem(world, dt));
 
         // P7. 表现层 (视听反馈)
-        CameraSystem(world, dt);                        // 17. 相机系统
-        EffectSystem(world, dt);                        // 18. 效果播放系统
-
-        BlinkSystem(world, dt);                         // 19. 闪烁系统（更新闪烁状态）
-        AudioSystem(world, dt);                         // 21. 音频系统
+        recordSys('CameraSystem', 'P7', () => CameraSystem(world, dt));
+        recordSys('EffectSystem', 'P7', () => EffectSystem(world, dt));
+        recordSys('BlinkSystem', 'P7', () => BlinkSystem(world, dt));
+        recordSys('AudioSystem', 'P7', () => AudioSystem(world, dt));
 
         // 拍快照（**必须在清理前**）
-        this.snapshot$.next(buildSnapshot(world, dt));
+        recordSys('buildSnapshot', 'snapshot', () => this.snapshot$.next(buildSnapshot(world, dt)));
 
         // P8. 清理层 (生命周期)
-        LifetimeSystem(world, dt);                      // 21. 生命周期系统
-        CleanupSystem(world, dt);                       // 22. 清理系统
+        recordSys('LifetimeSystem', 'P8', () => LifetimeSystem(world, dt));
+        recordSys('CleanupSystem', 'P8', () => CleanupSystem(world, dt));
 
         // 渲染系统（最后执行）
-        RenderSystem(world, dt);  // 23. 渲染系统
+        recordSys('RenderSystem', 'Render', () => RenderSystem(world, dt));
+
+        // 性能监控：帧结束
+        const frameTimeMs = performance.now() - frameStartMs;
+        this.performanceMonitor.endFrame(frameTimeMs);
     }
 
     /**
@@ -219,5 +235,12 @@ export class Engine {
     public static setDebugRenderOnly(enabled: boolean): void {
         Engine.DEBUG_RENDER_ONLY = enabled;
         console.log('[Engine] Debug Render Only:', enabled ? 'ENABLED' : 'DISABLED');
+    }
+
+    /**
+     * 获取性能监控流
+     */
+    get performanceStream(): BehaviorSubject<FrameSnapshot | null> {
+        return this.performanceMonitor.stream;
     }
 }

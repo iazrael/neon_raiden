@@ -223,6 +223,13 @@ export class ReactEngine {
     }
 
     /**
+     * 获取性能监控流
+     */
+    get performanceStream() {
+        return this.engine.performanceStream;
+    }
+
+    /**
      * 从快照同步状态到 UI
      */
     private syncFromSnapshot(snapshot: GameSnapshot): void {

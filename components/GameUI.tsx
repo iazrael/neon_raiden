@@ -36,6 +36,8 @@ interface GameUIProps {
   weaponLevel?: number;
   shieldPercent?: number;
   boss?: { hp: number; maxHp: number } | null; // Boss 血条数据
+  /** 性能监控数据 */
+  performanceData?: { fps: number; frameTime: number } | null;
 }
 
 export const GameUI: React.FC<GameUIProps> = ({
@@ -64,6 +66,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   weaponLevel,
   shieldPercent = 0,
   boss = null,
+  performanceData,
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
@@ -348,6 +351,20 @@ export const GameUI: React.FC<GameUIProps> = ({
               />
             </svg>
           </button>
+
+          {/* 性能监控 - PAUSE 按钮下方 */}
+          {performanceData && (
+            <div className="mt-2 pointer-events-none">
+              <div
+                className={`text-xs font-mono font-bold tracking-wider drop-shadow-md ${
+                  performanceData.fps >= 55 ? 'text-green-400' :
+                  performanceData.fps >= 30 ? 'text-yellow-400' : 'text-red-400'
+                }`}
+              >
+                {Math.round(performanceData.fps)} FPS • {performanceData.frameTime.toFixed(1)}ms
+              </div>
+            </div>
+          )}
         </div>
       )}
 

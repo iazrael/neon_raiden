@@ -13,4 +13,10 @@ export const DebugConfig = {
     physics: {
         enabled: false,
     },
+    /** 性能监控 */
+    performance: {
+        enabled: true,
+        frameTimeThreshold: 16.67,
+        reportToConsole: true,
+    },
 };
