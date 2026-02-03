@@ -67,6 +67,16 @@ export const GameUI: React.FC<GameUIProps> = ({
 }) => {
   const [showExitDialog, setShowExitDialog] = React.useState(false);
 
+  // 当游戏状态变为 PAUSED 时自动显示暂停对话框
+  React.useEffect(() => {
+    if (state === GameState.PAUSED) {
+      setShowExitDialog(true);
+    } else if (state === GameState.PLAYING || state === GameState.MENU) {
+      // 恢复游戏或返回菜单时隐藏对话框
+      setShowExitDialog(false);
+    }
+  }, [state]);
+
   const handleBombClick = () => {
     // Bomb triggers at player's current position, not button position
     onUseBomb?.();
@@ -234,8 +244,8 @@ export const GameUI: React.FC<GameUIProps> = ({
 
 
 
-      {/* Exit Confirmation Dialog */}
-      {showExitDialog && state === GameState.PLAYING && (
+      {/* Exit Confirmation Dialog - 游戏中点击暂停时显示 */}
+      {showExitDialog && (
         <>
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40 pointer-events-auto" onClick={() => {
@@ -308,7 +318,7 @@ export const GameUI: React.FC<GameUIProps> = ({
             onClick={() => {
               playClick?.(ClickType.CANCEL);
               onPause?.();
-              setShowExitDialog(true);
+              // setShowExitDialog(true); // 由 useEffect 根据 state 自动处理
             }}
             className="w-20 h-20 rounded-full border-4 border-cyan-500/70 bg-gray-900/80 hover:bg-cyan-900/60 hover:border-cyan-400 flex items-center justify-center transition-all shadow-lg"
             title="Pause / Abort"
