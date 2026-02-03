@@ -57,6 +57,7 @@ function handleTimeSlow(world: World, dt: number, comps: Component[], timeSlow: 
     // 应用时间缩放
     // 限制范围防止异常值
     const safeScale = Math.max(0.1, Math.min(2.0, timeSlow.scale));
+    const oldScale = world.timeScale;
     world.timeScale = safeScale;
 
     // 如果之前没有减速, 那就抛出一个 Start 事件

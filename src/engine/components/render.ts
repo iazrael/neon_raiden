@@ -322,8 +322,9 @@ export class Meteor extends Component {
      * 构造函数
      * @param cfg 流星配置
      */
-    constructor(cfg: { meteors: VisualMeteor[] }) {
+    constructor(cfg: { meteors?: VisualMeteor[] }) {
         super();
+        this.meteors = cfg.meteors ?? []
     }
 
     /** 流星数组 */

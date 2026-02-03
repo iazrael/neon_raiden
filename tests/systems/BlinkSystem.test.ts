@@ -8,7 +8,7 @@
 
 import { createWorld, generateId, World, addComponent, hasComponent } from '../../src/engine/world';
 import { BlinkSystem } from '../../src/engine/systems/BlinkSystem';
-import { Blink, BlinkMode } from '../../src/engine/components/visual';
+import { Blink, BlinkMode } from '../../src/engine/components/render';
 
 describe('BlinkSystem', () => {
     let world: World;

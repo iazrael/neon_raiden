@@ -10,9 +10,10 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { createWorld, generateId, World, addComponent, pushEvent } from '../../src/engine/world';
-import { EffectPlayer, updateParticles, spawnShockwave } from '../../src/engine/systems/EffectPlayer';
-import { Transform, Particle, Lifetime, Sprite, Shockwave, VisualEffect, EnemyTag } from '../../src/engine/components';
+import { EffectPlayer } from '../../src/engine/systems/EffectPlayer';
+import { Transform, Particle, Lifetime, Sprite, Shockwave, EnemyTag } from '../../src/engine/components';
 import { HitEvent, KillEvent, ComboUpgradeEvent, BloodFogEvent } from '../../src/engine/events';
+import { view } from '../../src/engine/world';
 
 describe('EffectPlayer', () => {
     let world: World;
@@ -21,10 +22,6 @@ describe('EffectPlayer', () => {
         world = createWorld();
         world.width = 800;
         world.height = 600;
-        // 创建 VisualEffect 实体（测试需要）
-        const visualEffectId = generateId();
-        world.visualEffectId = visualEffectId;
-        addComponent(world, visualEffectId, new VisualEffect());
     });
 
     describe('HitEvent 处理', () => {
@@ -41,13 +38,7 @@ describe('EffectPlayer', () => {
             EffectPlayer(world, 16);
 
             // HitEvent 不应该直接生成粒子（现在通过 BloodFogEvent 处理）
-            let particleCount = 0;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.particles.length > 0) {
-                    particleCount += effect.particles.length;
-                }
-            }
+            const particleCount = Array.from(view(world, [Particle])).length;
 
             expect(particleCount).toBe(0);
         });
@@ -66,16 +57,9 @@ describe('EffectPlayer', () => {
             EffectPlayer(world, 16);
 
             // HitEvent 不会生成爆炸粒子（现在通过 BloodFogEvent 处理）
-            let hasExplosion = false;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.particles.some(p => p.color === '#ffffff')) {
-                    hasExplosion = true;
-                    break;
-                }
-            }
+            const particleCount = Array.from(view(world, [Particle])).length;
 
-            expect(hasExplosion).toBe(false);
+            expect(particleCount).toBe(0);
         });
 
         it('应该生成飙血特效', () => {
@@ -91,18 +75,13 @@ describe('EffectPlayer', () => {
             pushEvent(world, bloodFogEvent as BloodFogEvent);
             EffectPlayer(world, 16);
 
-            // 应该生成飙血粒子（使用 VisualEffect 组件）
-            let hasBlood = false;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                // blood_medium 的颜色是 '#ff7332'
-                if (effect && effect.particles.some(p => p.color === '#ff7332')) {
-                    hasBlood = true;
-                    break;
-                }
-            }
+            // 应该生成飙血粒子（使用 Particle 组件）
+            const particles = Array.from(view(world, [Particle]));
+            expect(particles.length).toBeGreaterThan(0);
 
-            expect(hasBlood).toBe(true);
+            // blood_medium 的颜色是 '#ff7332'
+            const particle = particles[0][1][0] as Particle;
+            expect(particle.particles.some(p => p.color === '#ff7332')).toBe(true);
         });
     });
 
@@ -125,13 +104,11 @@ describe('EffectPlayer', () => {
             pushEvent(world, killEvent);
             EffectPlayer(world, 16);
 
-            // 验证大型爆炸粒子被创建（现在使用 VisualEffect 组件）
+            // 验证大型爆炸粒子被创建（现在使用 Particle 组件）
+            const particles = Array.from(view(world, [Particle]));
             let particleCount = 0;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.particles.length > 0) {
-                    particleCount += effect.particles.length;
-                }
+            for (const [id, [pt]] of particles) {
+                particleCount += pt.particles.length;
             }
 
             expect(particleCount).toBeGreaterThan(0);
@@ -155,136 +132,113 @@ describe('EffectPlayer', () => {
             pushEvent(world, killEvent);
             EffectPlayer(world, 16);
 
-            // 验证冲击波被创建（通过 VisualEffect 组件）
+            // 验证冲击波被创建（通过 Shockwave 组件）
             // 注意：当前 handleKillEvent 只生成粒子，不生成冲击波
-            // 如果需要冲击波效果，应该在 handleKillEvent 中调用 spawnShockwave
-            let circleCount = 0;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.circles.length > 0) {
-                    circleCount += effect.circles.length;
-                }
-            }
+            const shockwaves = Array.from(view(world, [Shockwave]));
 
             // 当前实现不会生成冲击波
-            expect(circleCount).toBe(0);
+            expect(shockwaves.length).toBe(0);
         });
     });
 
     describe('粒子动画', () => {
-        it('应该正确更新粒子帧', () => {
+        it('应该正确更新粒子位置', () => {
+            const particle = new Particle({
+                position: { x: 100, y: 200 },
+            });
+            particle.particles.push({
+                x: 100,
+                y: 200,
+                vx: 10,
+                vy: 5,
+                life: 1000,
+                maxLife: 1000,
+                color: '#ff0000',
+                size: 5,
+            });
+
             const id = generateId();
-            const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            const particle = new Particle({ frame: 0, maxFrame: 10, fps: 10 });
-            const sprite = new Sprite({ spriteKey: 'particle' as any, color: '#ff0000' });
-            const lifetime = new Lifetime({ timer: 1000 });
+            addComponent(world, id, particle);
+            addComponent(world, id, new Lifetime({ timer: 1000 }));
 
-            world.entities.set(id, [transform, sprite, particle, lifetime]);
+            EffectPlayer(world, 100); // 100ms
 
-            updateParticles(world, 100); // 100ms
-
-            // 帧应该增加
-            expect(particle.frame).toBeGreaterThan(0);
+            // 粒子位置应该变化
+            const p = particle.particles[0];
+            expect(p.x).not.toBe(100);
+            expect(p.y).not.toBe(200);
         });
 
-        it('应该在动画结束时标记粒子为销毁', () => {
+        it('应该在粒子生命周期结束时清理实体', () => {
+            const particle = new Particle({
+                position: { x: 100, y: 200 },
+            });
+            // 添加一个即将过期的粒子
+            particle.particles.push({
+                x: 100,
+                y: 200,
+                vx: 10,
+                vy: 5,
+                life: 10, // 即将过期
+                maxLife: 1000,
+                color: '#ff0000',
+                size: 5,
+            });
+
             const id = generateId();
-            const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            const particle = new Particle({ frame: 9, maxFrame: 10, fps: 10 });
-            const sprite = new Sprite({ spriteKey: 'particle' as any, color: '#ff0000' });
-            const lifetime = new Lifetime({ timer: 1000 });
+            addComponent(world, id, particle);
+            addComponent(world, id, new Lifetime({ timer: 1000 }));
 
-            world.entities.set(id, [transform, sprite, particle, lifetime]);
+            EffectPlayer(world, 100); // 超过粒子生命周期
 
-            updateParticles(world, 200); // 超过动画结束时间
-
-            // lifetime.timer 应该被设置为 0
-            expect(lifetime.timer).toBe(0);
+            // 粒子应该被清理
+            expect(particle.particles.length).toBe(0);
         });
 
-        it('应该在动画播放完成后不增加帧', () => {
+        it('应该在所有粒子过期后清理实体', () => {
+            const particle = new Particle({
+                position: { x: 100, y: 200 },
+            });
+            // 添加一个即将过期的粒子
+            particle.particles.push({
+                x: 100,
+                y: 200,
+                vx: 10,
+                vy: 5,
+                life: 10,
+                maxLife: 1000,
+                color: '#ff0000',
+                size: 5,
+            });
+
             const id = generateId();
-            const transform = new Transform({ x: 100, y: 200, rot: 0 });
-            const particle = new Particle({ frame: 15, maxFrame: 10, fps: 10 });
-            const sprite = new Sprite({ spriteKey: 'particle' as any, color: '#ff0000' });
-            const lifetime = new Lifetime({ timer: 1000 });
+            addComponent(world, id, particle);
+            addComponent(world, id, new Lifetime({ timer: 1000 }));
 
-            world.entities.set(id, [transform, sprite, particle, lifetime]);
+            EffectPlayer(world, 100); // 粒子过期
 
-            updateParticles(world, 100);
-
-            // lifetime 应该被标记为过期
-            expect(lifetime.timer).toBe(0);
+            // 实体应该被移除
+            expect(world.entities.has(id)).toBe(false);
         });
     });
 
     describe('冲击波', () => {
-        it('应该生成正确的冲击波圆环', () => {
-            spawnShockwave(world, 100, 200, '#ff0000', 150, 5);
-
-            // 验证 VisualEffect 组件中的圆环
-            let circle = null;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.circles.length > 0) {
-                    circle = effect.circles[0];
-                    break;
-                }
-            }
-
-            expect(circle).toBeDefined();
-            expect(circle?.x).toBe(100);
-            expect(circle?.y).toBe(200);
-            expect(circle?.color).toBe('#ff0000');
-            expect(circle?.maxRadius).toBe(150);
-            expect(circle?.width).toBe(5);
-            expect(circle?.radius).toBe(10); // 初始半径
-            expect(circle?.life).toBe(1.0); // 初始生命周期
-        });
-
-        it('应该在连击升级时生成冲击波', () => {
-            const comboEvent: ComboUpgradeEvent = {
-                type: 'ComboUpgrade',
-                pos: { x: 100, y: 200 },
-                level: 2,
-                name: 'Double',
-                color: '#00ffff'
+        it('应该生成炸弹爆炸冲击波', () => {
+            const bombEvent = {
+                type: 'BombExploded',
             };
 
-            pushEvent(world, comboEvent);
+            pushEvent(world, bombEvent as any);
             EffectPlayer(world, 16);
 
-            // 验证冲击波被创建（通过 VisualEffect 组件）
-            // 注意：当前 handleComboUpgradeEvent 实现为空，所以这个测试预期不会有冲击波
-            // 如果未来实现该功能，需要取消注释 handleComboUpgradeEvent 中的代码
-            let circleCount = 0;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.circles.length > 0) {
-                    circleCount += effect.circles.length;
-                }
-            }
+            // 验证 Shockwave 组件
+            const shockwaves = Array.from(view(world, [Shockwave]));
+            expect(shockwaves.length).toBeGreaterThan(0);
 
-            // 当前实现不会生成冲击波
-            expect(circleCount).toBe(0);
-        });
-
-        it('应该生成带默认参数的冲击波', () => {
-            spawnShockwave(world, 100, 200);
-
-            // 验证 VisualEffect 组件中的圆环
-            let circle = null;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.circles.length > 0) {
-                    circle = effect.circles[0];
-                    break;
-                }
-            }
-
-            expect(circle?.color).toBe('#ffffff'); // 默认白色
-            expect(circle?.maxRadius).toBe(150); // 默认最大半径
-            expect(circle?.width).toBe(5); // 默认线宽
+            const [id, [sw]] = shockwaves[0];
+            expect(sw.circles.length).toBeGreaterThan(0);
+            expect(sw.circles[0].x).toBe(400); // world.width / 2
+            expect(sw.circles[0].y).toBe(300); // world.height / 2
         });
     });
 
@@ -303,16 +257,10 @@ describe('EffectPlayer', () => {
 
             // 注意：当前 handleComboUpgradeEvent 实现为空，所以这个测试预期不会有粒子
             // 如果未来实现该功能，需要取消注释 handleComboUpgradeEvent 中的代码
-            let hasComboParticle = false;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.particles.some(p => p.color === '#00ffff')) {
-                    hasComboParticle = true;
-                }
-            }
+            const particles = Array.from(view(world, [Particle]));
 
             // 当前实现不会生成粒子
-            expect(hasComboParticle).toBe(false);
+            expect(particles.length).toBe(0);
         });
 
         it('应该在连击升级时生成冲击波', () => {
@@ -327,19 +275,12 @@ describe('EffectPlayer', () => {
             pushEvent(world, comboEvent);
             EffectPlayer(world, 16);
 
-            // 验证冲击波被创建（通过 VisualEffect 组件）
+            // 验证冲击波被创建（通过 Shockwave 组件）
             // 注意：当前 handleComboUpgradeEvent 实现为空，所以这个测试预期不会有冲击波
-            // 如果未来实现该功能，需要取消注释 handleComboUpgradeEvent 中的代码
-            let circleCount = 0;
-            for (const [id, comps] of world.entities) {
-                const effect = comps.find(VisualEffect.check);
-                if (effect && effect.circles.length > 0) {
-                    circleCount += effect.circles.length;
-                }
-            }
+            const shockwaves = Array.from(view(world, [Shockwave]));
 
             // 当前实现不会生成冲击波
-            expect(circleCount).toBe(0);
+            expect(shockwaves.length).toBe(0);
         });
     });
 });

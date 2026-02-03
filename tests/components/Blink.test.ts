@@ -6,8 +6,7 @@
  * 测试闪烁组件的功能
  */
 
-import { Blink, BlinkMode, BlinkColors } from '../../src/engine/components/visual';
-import { VisualEffect } from '../../src/engine/components/visual';
+import { Blink, BlinkMode, BlinkColors } from '../../src/engine/components/render';
 
 describe('Blink组件', () => {
     describe('基本功能', () => {
@@ -143,7 +142,6 @@ describe('Blink组件', () => {
 
             // Act & Assert
             expect(Blink.check(blink)).toBe(true);
-            expect(Blink.check(new VisualEffect())).toBe(false);
             expect(Blink.check(null)).toBe(false);
             expect(Blink.check(undefined)).toBe(false);
         });

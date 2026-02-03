@@ -514,7 +514,7 @@ function spawnMeteor(world: World, dt: number): void {
     if (!world.meteorState.meteorId) {
         world.meteorState.meteorId = spawnEntity(world, []);
     }
-    const meteor = ensureComponent(world, world.meteorState.meteorId, Meteor, {});
+    const meteor = ensureComponent(world, world.meteorState.meteorId, Meteor, {meteors: []});
 
     // 生成流星
     meteor.meteors.push({
