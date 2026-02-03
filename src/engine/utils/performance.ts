@@ -100,9 +100,6 @@ export class PerformanceMonitor {
       if (exceeded && this.config.reportToConsole) {
         this.reportWarning(frameTime, layers);
       }
-    } else {
-      // 禁用时只输出基本帧时间，不记录系统耗时
-      this.performance$.next({ frameTime, thresholdExceeded: false, layers: {} });
     }
   }
 

@@ -22,6 +22,8 @@ const mockContext = {
     fillRect: jest.fn(),
     fillStyle: '',
     beginPath: jest.fn(),
+    moveTo: jest.fn(),
+    lineTo: jest.fn(),
     arc: jest.fn(),
     fill: jest.fn(),
     strokeRect: jest.fn(),

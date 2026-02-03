@@ -15,7 +15,7 @@ export const DebugConfig = {
     },
     /** 性能监控 */
     performance: {
-        enabled: true,
+        enabled: false,
         frameTimeThreshold: 16.67,
         reportToConsole: true,
     },

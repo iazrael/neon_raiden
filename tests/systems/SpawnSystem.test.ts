@@ -3,7 +3,7 @@
  */
 
 import { SpawnSystem, resetBossSpawnState, setBossSpawnTime } from '../../src/engine/systems/SpawnSystem';
-import { Transform, Health, BossTag, BossAI, SpeedStat } from '../../src/engine/components';
+import { Transform, Health, BossTag, BossAI, SpeedStat, EnemyTag } from '../../src/engine/components';
 import { EnemyId } from '../../src/engine/types/ids';
 import { World } from '../../src/engine/world';
 
@@ -24,7 +24,6 @@ describe('SpawnSystem', () => {
             difficulty: 1.0,
             spawnCredits: 100,
             spawnTimer: 0,
-            enemyCount: 0,
             events: [],
             comboState: { count: 0, timer: 0, multiplier: 1 },
             removedEntities: [],
@@ -120,11 +119,20 @@ describe('SpawnSystem', () => {
         it('同屏敌人数量不应超过上限', () => {
             mockWorld.spawnCredits = 1000;
             mockWorld.spawnTimer = 0.3;
-            mockWorld.enemyCount = 50; // 达到上限
+
+            // 创建 50 个敌人实体，达到上限
+            for (let i = 0; i < 50; i++) {
+                const enemyId = 100 + i;
+                mockWorld.entities.set(enemyId, [
+                    new Transform({ x: 100, y: 100 }),
+                    new Health({ hp: 100, max: 100 }),
+                    new EnemyTag({ id: EnemyId.NORMAL })
+                ]);
+            }
 
             SpawnSystem(mockWorld, 0.1);
 
-            // 不应该继续刷怪
+            // 不应该继续刷怪（因为已经有 50 个敌人）
             // 由于模拟限制，这里测试不会崩溃
             expect(true).toBe(true);
         });

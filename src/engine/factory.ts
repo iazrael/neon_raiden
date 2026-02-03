@@ -75,7 +75,6 @@ export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number, r
 
 export function spawnEnemy(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot, 'enemy');
-    world.enemyCount++;
 
     // 给敌人的移动添加随机相位偏移，避免同步摆动
     const enemyComps = world.entities.get(id);

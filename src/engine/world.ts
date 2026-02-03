@@ -42,8 +42,6 @@ export interface World {
     // 刷怪检测频率
     spawnTimer: number;
 
-    // 当前敌人数量
-    enemyCount: number;
     // 画布宽
     width: number;
     // 画布高
@@ -82,7 +80,6 @@ export function createWorld(): World {
         difficulty: 1,
         spawnCredits: STARTING_CREDITS,
         spawnTimer: 0,
-        enemyCount: 0,
         timeScale: 1,
         timeSlowActive: false,
         width: 800,

@@ -14,7 +14,7 @@
 import { BossId, EntityId } from '../types';
 import { EnemyPoolItem, LEVEL_CONFIGS } from '../configs/levels';
 import { spawnEnemy, spawnBoss } from '../factory';
-import { BossTag, Health, ScoreValue, Weapon } from '../components';
+import { BossTag, Health, ScoreValue, Weapon, EnemyTag } from '../components';
 import { EnemyId } from '../types';
 import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
@@ -179,8 +179,12 @@ export function SpawnSystem(world: World, dt: number): void {
     const maxAttempts = 5; // 限制单帧最大刷怪数
     const maxEnemies = 50; // 性能保护：同屏最大敌人数量
 
+    // 动态统计当前敌人数量（不包括 Boss）
+    const enemies = [...view(world, [EnemyTag])]
+    const currentEnemyCount = enemies.length;
+
     let attempts = 0;
-    while (attempts < maxAttempts && world.enemyCount < maxEnemies) {
+    while (attempts < maxAttempts && currentEnemyCount < maxEnemies) {
         attempts++;
 
         // A. 从所有怪物池中按权重随机选择
