@@ -1,4 +1,4 @@
-import { GameState, ComboState, WeaponId, EnemyId, BossId } from "./types";
+import { ComboState, WeaponId, EnemyId, BossId } from "./types";
 import {
     Health,
     Transform,
@@ -6,7 +6,6 @@ import {
     Shield,
     Bullet,
     InvulnerableState,
-    PlayerTag,
     EnemyTag,
     BossTag,
     Bomb,
@@ -16,13 +15,17 @@ import { World, getComponents, getEntity, view } from "./world";
 // ========== 游戏快照接口 ==========
 export interface GameSnapshot {
     t: number;
-    state: GameState;
     score: number;
     level: number;
     showLevelTransition: boolean;
     levelTransitionTimer: number;
     showBossWarning: boolean;
     comboState: ComboState | null;
+
+    /** 游戏状态事件：失败或胜利 */
+    gameStateEvent: 'defeat' | 'victory' | null;
+    /** Boss 事件：出场或击杀 */
+    bossEvent: { type: 'spawn' | 'defeat'; bossId: BossId } | null;
 
     player: {
         hp: number;
@@ -59,13 +62,14 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
     if (!playerComps) {
         return {
             t,
-            state: GameState.GAME_OVER,
             score: 0,
             level: 1,
             showLevelTransition: false,
             levelTransitionTimer: 0,
             showBossWarning: false,
             comboState: null,
+            gameStateEvent: null,
+            bossEvent: null,
             player: {
                 hp: 100,
                 maxHp: 100,
@@ -137,15 +141,32 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         };
     }
 
+    // 收集游戏状态事件
+    let gameStateEvent: 'defeat' | 'victory' | null = null;
+    let bossEvent: { type: 'spawn' | 'defeat'; bossId: BossId } | null = null;
+
+    for (const event of world.events) {
+        if (event.type === 'Defeat') {
+            gameStateEvent = 'defeat';
+        } else if (event.type === 'Victory') {
+            gameStateEvent = 'victory';
+        } else if (event.type === 'BossSpawn') {
+            bossEvent = { type: 'spawn', bossId: event.bossId };
+        } else if (event.type === 'BossDefeat') {
+            bossEvent = { type: 'defeat', bossId: event.bossId };
+        }
+    }
+
     return {
         t,
-        state: GameState.PLAYING,
         score: world.score || 0,
         level: world.level || 1,
         showLevelTransition: false, // TODO: 从LevelingSystem获取
         levelTransitionTimer: 0,
         showBossWarning: false, // TODO: 从BossSystem获取
         comboState: world.comboState,
+        gameStateEvent,
+        bossEvent,
         player,
         boss,
         bullets,

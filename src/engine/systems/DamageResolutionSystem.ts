@@ -13,8 +13,8 @@
  */
 
 import { EntityId } from "../types";
-import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform } from "../components";
-import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, ShieldBrokenEvent } from "../events";
+import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform, PlayerTag, BossTag } from "../components";
+import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, ShieldBrokenEvent, DefeatEvent, BossDefeatEvent } from "../events";
 import { removeComponent, view, getEvents, World, pushEvent } from "../world";
 
 /**
@@ -177,6 +177,25 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
         score,
     };
     pushEvent(world, killEvent);
+
+    // 检查是否是玩家死亡
+    const isPlayer = victimComps.some(PlayerTag.check);
+    if (isPlayer && victimId === world.playerId) {
+        const defeatEvent: DefeatEvent = {
+            type: "Defeat",
+        };
+        pushEvent(world, defeatEvent);
+    }
+
+    // 检查是否是 Boss 死亡
+    const bossTag = victimComps.find(BossTag.check);
+    if (bossTag) {
+        const bossDefeatEvent: BossDefeatEvent = {
+            type: "BossDefeat",
+            bossId: bossTag.id,
+        };
+        pushEvent(world, bossDefeatEvent);
+    }
 
     // 播放死亡音效
     const soundEvent: PlaySoundEvent = {

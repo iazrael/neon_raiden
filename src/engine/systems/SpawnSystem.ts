@@ -18,7 +18,7 @@ import { BossTag, Health, ScoreValue, Weapon } from '../components';
 import { EnemyId } from '../types';
 import { ENEMIES_TABLE } from '../blueprints/enemies';
 import { BOSSES_TABLE } from '../blueprints/bosses';
-import { view, World } from '../world';
+import { pushEvent, view, World } from '../world';
 import { getEnemyStats } from '../configs/enemyGrowth';
 import { BOSS_SPAWN_TIME } from '../configs';
 
@@ -243,6 +243,12 @@ function doSpawnBoss(world: World, bossId: BossId): void {
     const y = -150;
     const id = spawnBoss(world, blueprint, x, y, 0);
     world.bossState.bossId = id;
+
+    // 发出 Boss 出场事件
+    pushEvent(world, {
+        type: 'BossSpawn',
+        bossId
+    })
     console.log(`Spawned Boss '${bossId}' at (${x}, ${y})`);
 }
 

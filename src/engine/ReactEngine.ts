@@ -106,8 +106,6 @@ export class ReactEngine {
         // 订阅快照流以同步状态
         this.snapshotSubscription = this.engine.snapshot$.subscribe((snapshot: GameSnapshot | null) => {
             if (snapshot) {
-                // 更新一下状态
-                snapshot.state = this.state;
                 this.syncFromSnapshot(snapshot);
             }
         });
@@ -116,8 +114,7 @@ export class ReactEngine {
         this.engine.start(canvas, blueprint);
 
         // 更新状态
-        this.state = GameState.PLAYING;
-        this.onStateChange(this.state);
+        this.setState(GameState.PLAYING);
     }
 
     /**
@@ -153,8 +150,7 @@ export class ReactEngine {
     pause(): void {
         this.engine.pause();
         if (this.state === GameState.PLAYING) {
-            this.state = GameState.PAUSED;
-            this.onStateChange(this.state);
+            this.setState(GameState.PAUSED);
         }
     }
 
@@ -164,8 +160,7 @@ export class ReactEngine {
     resume(): void {
         this.engine.resume();
         if (this.state === GameState.PAUSED) {
-            this.state = GameState.PLAYING;
-            this.onStateChange(this.state);
+            this.setState(GameState.PLAYING);
         }
     }
 
@@ -174,13 +169,22 @@ export class ReactEngine {
      */
     stop(): void {
         this.engine.stop();
-        this.state = GameState.MENU;
-        this.onStateChange(this.state);
+        this.setState(GameState.MENU);
 
         // 清理订阅
         if (this.snapshotSubscription) {
             this.snapshotSubscription.unsubscribe();
             this.snapshotSubscription = null;
+        }
+    }
+
+    /**
+     * 设置游戏状态（内部辅助方法）
+     */
+    private setState(newState: GameState): void {
+        if (this.state !== newState) {
+            this.state = newState;
+            this.onStateChange(this.state);
         }
     }
 
@@ -213,10 +217,22 @@ export class ReactEngine {
      * 从快照同步状态到 UI
      */
     private syncFromSnapshot(snapshot: GameSnapshot): void {
-        // 同步游戏状态
-        if (snapshot.state !== this.state) {
-            this.state = snapshot.state;
-            this.onStateChange(this.state);
+        // 处理游戏状态事件（失败/胜利）
+        if (snapshot.gameStateEvent === 'defeat') {
+            this.setState(GameState.GAME_OVER);
+        } else if (snapshot.gameStateEvent === 'victory') {
+            this.setState(GameState.VICTORY);
+        }
+
+        // 处理 Boss 事件
+        if (snapshot.bossEvent) {
+            if (snapshot.bossEvent.type === 'spawn') {
+                this.showBossWarning = true;
+                this.onBossWarning(true);
+            } else if (snapshot.bossEvent.type === 'defeat') {
+                this.showBossWarning = false;
+                this.onBossWarning(false);
+            }
         }
 
         // 同步分数
@@ -251,7 +267,6 @@ export class ReactEngine {
         // 同步 UI 状态
         this.showLevelTransition = snapshot.showLevelTransition;
         this.levelTransitionTimer = snapshot.levelTransitionTimer;
-        this.showBossWarning = snapshot.showBossWarning;
 
         // 同步 Boss 状态
         if (snapshot.boss) {

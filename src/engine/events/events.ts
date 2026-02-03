@@ -1,4 +1,4 @@
-import { EntityId } from "../types";
+import { BossId, EntityId } from "../types";
 import { BaseEvent } from "./base";
 
 
@@ -129,4 +129,24 @@ export interface ChainLightningEvent extends BaseEvent<'ChainLightning'> {
   range: number;                 // 连锁搜索范围
   damage: number;                // 伤害值
   chainedIds: Set<number>;       // 已连锁的实体 ID 集合（避免重复）
+}
+
+// ⑲ 游戏胜利事件
+export interface VictoryEvent extends BaseEvent<'Victory'> {
+  // 无额外字段
+}
+
+// ⑳ 游戏失败事件
+export interface DefeatEvent extends BaseEvent<'Defeat'> {
+  // 无额外字段
+}
+
+// ㉑ Boss 出场事件
+export interface BossSpawnEvent extends BaseEvent<'BossSpawn'> {
+  bossId: BossId;  // Boss 类型
+}
+
+// ㉒ Boss 击杀事件
+export interface BossDefeatEvent extends BaseEvent<'BossDefeat'> {
+  bossId: BossId;  // Boss 类型
 }
