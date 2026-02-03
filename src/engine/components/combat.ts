@@ -436,5 +436,6 @@ export class Chain extends Component {
     range: number;
     /** 已连锁过的实体 ID 列表（防重复） */
     chainedIds: Set<EntityId>;
+
 }
 

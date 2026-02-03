@@ -47,6 +47,14 @@ export function spawnFromBlueprint(world: World, bp: Blueprint,
     return id;
 }
 
+// 直接用输入的 组件, 创建实体
+export function spawnEntity(world: World, comps: Component[]): EntityId {
+    const id = generateId();
+    world.entities.set(id, comps);
+    return id;
+}
+
+
 
 export function spawnPlayer(world: World, bp: Blueprint, x: number, y: number, rot: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, rot);

@@ -14,13 +14,7 @@
  */
 
 import { Component } from "../types/base";
-import {
-    World,
-    getComponents,
-    getComponentsFromComps,
-    getEntity,
-    view,
-} from "../world";
+import { World, getComponents, getComponentsFromComps, getEntity, view } from "../world";
 import {
     Transform,
     Sprite,
@@ -32,11 +26,12 @@ import {
     Health,
     Shockwave,
     Lifetime,
-    VisualEffect,
     VisualLine,
     VisualMeteor,
     VisualParticle,
     VisualCircle,
+    BulletTimeLine,
+    Meteor,
 } from "../components";
 import { DebugConfig } from "../config/DebugConfig";
 
@@ -74,8 +69,6 @@ interface PlayerEffectData {
 interface RenderQueue {
     sprites: RenderItem[];
     playerEffect: PlayerEffectData | null;
-    visualEffect: VisualEffect;
-    meteors: VisualMeteor[];
 }
 
 /**
@@ -98,23 +91,17 @@ function collectRenderItems(world: World): RenderQueue {
     const queue: RenderQueue = {
         sprites: [],
         playerEffect: null,
-        visualEffect: null,
-        meteors: [],
     };
-    const [effect] = getComponents(world, world.visualEffectId, [VisualEffect]);
-    queue.visualEffect = effect;
-    queue.meteors = effect?.meteors ?? [];
 
     // 收集玩家信息, 绘制额外的护盾\血条等
     const player = getEntity(world, world.playerId);
     if (player) {
-        const [shield, invulnerable, health, transform] =
-            getComponentsFromComps(player, [
-                Shield,
-                InvulnerableState,
-                Health,
-                Transform,
-            ]);
+        const [shield, invulnerable, health, transform] = getComponentsFromComps(player, [
+            Shield,
+            InvulnerableState,
+            Health,
+            Transform,
+        ]);
         if (shield || invulnerable) {
             queue.playerEffect = {
                 transform,
@@ -126,10 +113,7 @@ function collectRenderItems(world: World): RenderQueue {
     }
 
     // 收集所有可以绘制的精灵
-    for (const [id, [transform, sprite], comps] of view(world, [
-        Transform,
-        Sprite,
-    ])) {
+    for (const [id, [transform, sprite], comps] of view(world, [Transform, Sprite])) {
         queue.sprites.push({
             layer: determineLayer(comps),
             transform,
@@ -143,13 +127,7 @@ function collectRenderItems(world: World): RenderQueue {
 /**
  * 绘制背景星空效果
  */
-function drawBackground(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    timeScale: number,
-    meteors: VisualMeteor[],
-): void {
+function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number, timeScale: number): void {
     // 黑色背景
     ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, width, height);
@@ -174,19 +152,12 @@ function drawBackground(
         ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
         ctx.fill();
     }
-
-    // 绘制流星
-    drawMeteors(ctx, meteors, timeScale);
 }
 
 /**
  * 绘制流星背景效果
  */
-function drawMeteors(
-    ctx: CanvasRenderingContext2D,
-    meteors: VisualMeteor[],
-    timeScale: number,
-): void {
+function drawMeteors(ctx: CanvasRenderingContext2D, meteors: VisualMeteor[], timeScale: number): void {
     if (meteors.length === 0) {
         return;
     }
@@ -241,13 +212,7 @@ function drawRoundedRectPath(
 /**
  * 绘制单个精灵
  */
-function drawSprite(
-    ctx: CanvasRenderingContext2D,
-    item: RenderItem,
-    camX: number,
-    camY: number,
-    zoom: number,
-): void {
+function drawSprite(ctx: CanvasRenderingContext2D, item: RenderItem, camX: number, camY: number, zoom: number): void {
     const { transform, sprite } = item;
     if (!sprite) return;
 
@@ -276,9 +241,7 @@ function drawSprite(
 
     // 绘制边框（如果有配置）
     if (sprite.border) {
-        const borderSize = sprite.border.size
-            ? sprite.border.size * zoom
-            : Math.max(itemWidth, itemHeight); // 使用精灵尺寸
+        const borderSize = sprite.border.size ? sprite.border.size * zoom : Math.max(itemWidth, itemHeight); // 使用精灵尺寸
 
         ctx.save();
         ctx.strokeStyle = sprite.border.color;
@@ -286,14 +249,7 @@ function drawSprite(
         ctx.shadowColor = sprite.border.color;
         ctx.shadowBlur = sprite.border.glow ?? 10;
 
-        drawRoundedRectPath(
-            ctx,
-            -borderSize / 2,
-            -borderSize / 2,
-            borderSize,
-            borderSize,
-            sprite.border.radius ?? 5
-        );
+        drawRoundedRectPath(ctx, -borderSize / 2, -borderSize / 2, borderSize, borderSize, sprite.border.radius ?? 5);
         ctx.stroke();
         ctx.restore();
     }
@@ -375,12 +331,7 @@ function drawSprite(
 /**
  * 绘制玩家特效（护盾、无敌状态）
  */
-function drawPlayerEffect(
-    ctx: CanvasRenderingContext2D,
-    data: PlayerEffectData,
-    camX: number,
-    camY: number,
-): void {
+function drawPlayerEffect(ctx: CanvasRenderingContext2D, data: PlayerEffectData, camX: number, camY: number): void {
     const { transform, shield, invulnerable, health } = data;
     const x = transform.x - camX;
     const y = transform.y - camY;
@@ -455,7 +406,7 @@ function drawVisualEffectCircles(
     ctx: CanvasRenderingContext2D,
     circles: VisualCircle[],
     camX: number,
-    camY: number,
+    camY: number
 ): void {
     if (!circles || circles.length === 0) {
         return;
@@ -470,13 +421,7 @@ function drawVisualEffectCircles(
         ctx.lineWidth = circle.width;
         ctx.strokeStyle = circle.color;
         ctx.beginPath();
-        ctx.arc(
-            circle.x - camX,
-            circle.y - camY,
-            circle.radius,
-            0,
-            Math.PI * 2,
-        );
+        ctx.arc(circle.x - camX, circle.y - camY, circle.radius, 0, Math.PI * 2);
         ctx.stroke();
     }
     ctx.restore();
@@ -489,7 +434,7 @@ function drawVisualEffectParticles(
     ctx: CanvasRenderingContext2D,
     particles: VisualParticle[],
     camX: number,
-    camY: number,
+    camY: number
 ): void {
     if (!particles || particles.length === 0) {
         return;
@@ -510,12 +455,7 @@ function drawVisualEffectParticles(
 /**
  * 绘制时间减速特效
  */
-function drawTimeSlowEffect(
-    ctx: CanvasRenderingContext2D,
-    lines: VisualLine[],
-    width: number,
-    height: number,
-): void {
+function drawTimeSlowEffect(ctx: CanvasRenderingContext2D, lines: VisualLine[], width: number, height: number): void {
     // 从 VisualEffect 组件获取线条
     if (!lines || lines.length === 0) {
         return;
@@ -551,12 +491,12 @@ function drawTimeSlowEffect(
 export function RenderSystem(world: World, dt: number): void {
     const renderCtx = world.renderContext;
     if (!renderCtx) {
-        console.warn('[RenderSystem] RenderContext not initialized, skipping render');
+        console.warn("[RenderSystem] RenderContext not initialized, skipping render");
         return;
     }
 
     const { context } = renderCtx;
-    const { width, height } = world;  // 逻辑像素
+    const { width, height } = world; // 逻辑像素
     const { camera } = world.renderState;
 
     // 调试日志
@@ -568,7 +508,12 @@ export function RenderSystem(world: World, dt: number): void {
     const queue = collectRenderItems(world);
 
     // 2. 绘制背景（传递流星数据）
-    drawBackground(context, width, height, world.timeScale, queue.meteors);
+    drawBackground(context, width, height, world.timeScale);
+
+    // 绘制流星
+    for (const [id, [meteor]] of view(world, [Meteor])) {
+        drawMeteors(context, meteor.meteors, world.timeScale);
+    }
 
     // 计算相机偏移
     const camX = camera.shakeX;
@@ -585,15 +530,17 @@ export function RenderSystem(world: World, dt: number): void {
         drawPlayerEffect(context, queue.playerEffect, camX, camY);
     }
 
-    // 6. 绘制特效
-    if (queue.visualEffect) {
-        // 6. 绘制 VisualEffect 粒子（爆炸火花等）
-        drawVisualEffectParticles(context, queue.visualEffect.particles, camX, camY);
-
-        // 7. 绘制 VisualEffect 圆环（冲击波等）
-        drawVisualEffectCircles(context, queue.visualEffect.circles, camX, camY);
-
-        // 8. 绘制时间减速特效
-        drawTimeSlowEffect(context, queue.visualEffect.lines, width, height);
+    // 6. 绘制粒子特效
+    for (const [id, [particle]] of view(world, [Particle])) {
+        drawVisualEffectParticles(context, particle.particles, camX, camY);
+    }
+    // 绘制冲击波等
+    for (const [id, [circle]] of view(world, [Shockwave])) {
+        drawVisualEffectCircles(context, circle.circles, camX, camY);
+    }
+    // 绘制时间减速特效(子弹时间)
+    for (const [id, [line]] of view(world, [BulletTimeLine])) {
+        // 这个不需要跟随相机移动
+        drawTimeSlowEffect(context, line.lines, width, height);
     }
 }

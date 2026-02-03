@@ -60,14 +60,7 @@ export {
 
 // P7: 表现层
 export * from "./CameraSystem";
-export {
-    VisualEffectSystem,
-    spawnParticles,
-    spawnLines as spawnTimeSlowLines,
-    clearLines as clearTimeSlowLines,
-    spawnCircle,
-} from "./VisualEffectSystem";
-export { EffectPlayer, updateParticles } from "./EffectPlayer";
+export { EffectPlayer } from "./EffectPlayer";
 export { AudioSystem } from "./AudioSystem";
 export * from "./RenderSystem";
 

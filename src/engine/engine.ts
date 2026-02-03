@@ -4,7 +4,6 @@ import { Blueprint } from './blueprints';
 import { spawnPlayer } from './factory';
 import { buildSnapshot, GameSnapshot } from './snapshot';
 import { inputManager } from './input/InputManager';
-import { VisualEffect } from './components/visual';
 
 // ============== 导入所有系统
 import { AISteerSystem } from './systems/AISteerSystem';
@@ -29,7 +28,6 @@ import { PickupSystem } from './systems/PickupSystem';
 import { RenderSystem } from './systems/RenderSystem';
 import { SpawnSystem } from './systems/SpawnSystem';
 import { SpecialWeaponSystem } from './systems/SpecialWeaponSystem';
-import { VisualEffectSystem } from './systems/VisualEffectSystem';
 import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 import { HomingSystem } from './systems/HomingSystem';
@@ -107,10 +105,6 @@ export class Engine {
         const initialWidth = canvas.clientWidth;
         const initialHeight = canvas.clientHeight;
         this.initRenderContext(canvas, initialWidth, initialHeight);
-
-        // 创建视觉特效实体
-        this.world.visualEffectId = generateId();
-        addComponent(this.world, this.world.visualEffectId, new VisualEffect());
 
         spawnPlayer(this.world, bp, this.world.width / 2, this.world.height - 80, 0);
 
@@ -204,7 +198,6 @@ export class Engine {
         EffectPlayer(world, dt);                        // 18. 效果播放系统
 
         BlinkSystem(world, dt);                         // 19. 闪烁系统（更新闪烁状态）
-        VisualEffectSystem(world, dt);                  // 20. 视觉特效系统（更新状态）
         AudioSystem(world, dt);                         // 21. 音频系统
 
         // 拍快照（**必须在清理前**）

@@ -66,7 +66,7 @@ function handleTimeSlow(world: World, dt: number, comps: Component[], timeSlow: 
             scale: safeScale,
             duration: timeSlow.duration,
             action: "start",
-        } as TimeSlowEvent);
+        });
     }
     world.timeSlowActive = true;
 
@@ -83,9 +83,17 @@ function handleTimeSlow(world: World, dt: number, comps: Component[], timeSlow: 
                 scale: safeScale,
                 duration: timeSlow.duration,
                 action: "end",
-            } as TimeSlowEvent);
+            });
         }
         world.timeSlowActive = false;
+    }else{
+        // 抛一个 TimeSlow 的更新事件
+        pushEvent(world, {
+            type: "TimeSlow",
+            scale: safeScale,
+            duration: timeSlow.duration,
+            action: "update",
+        });
     }
 }
 

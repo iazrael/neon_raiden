@@ -117,7 +117,7 @@ export interface ShieldBrokenEvent extends BaseEvent<'ShieldBroken'> {
 export interface TimeSlowEvent extends BaseEvent<'TimeSlow'> {
   scale: number;                 // 时间缩放比例
   duration: number;              // 持续毫秒
-  action: 'start' | 'end';       // 开始或结束
+  action: 'start' | 'update' | 'end';       // 开始或结束
 }
 
 // ⑱ 连锁闪电事件

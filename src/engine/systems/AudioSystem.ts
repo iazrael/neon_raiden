@@ -40,37 +40,37 @@ export function AudioSystem(world: World, dt: number): void {
     for (const event of events) {
         switch (event.type) {
             case "Hit":
-                handleHitEvent(world, event as HitEvent);
+                handleHitEvent(world, event);
                 break;
             case "Kill":
-                handleKillEvent(world, event as KillEvent);
+                handleKillEvent(world, event);
                 break;
             case "Pickup":
-                handlePickupEvent(world, event as PickupEvent);
+                handlePickupEvent(world, event);
                 break;
             case "WeaponFired":
-                handleWeaponFiredEvent(world, event as WeaponFiredEvent);
+                handleWeaponFiredEvent(world, event);
                 break;
             case "BossPhaseChange":
-                handleBossPhaseChangeEvent(world, event as BossPhaseChangeEvent);
+                handleBossPhaseChangeEvent(world, event);
                 break;
             case "PlaySound":
-                handlePlaySoundEvent(world, event as PlaySoundEvent);
+                handlePlaySoundEvent(world, event);
                 break;
             case "ComboBreak":
-                handleComboBreakEvent(world, event as ComboBreakEvent);
+                handleComboBreakEvent(world, event);
                 break;
             case "ComboUpgrade":
-                handleComboUpgradeEvent(world, event as ComboUpgradeEvent);
+                handleComboUpgradeEvent(world, event);
                 break;
             case "BombExploded":
-                handleBombExplosionEvent(world, event as BombExplodedEvent);
+                handleBombExplosionEvent(world, event);
                 break;
             case "ShieldBroken":
-                handleShieldBrokenEvent(world, event as ShieldBrokenEvent);
+                handleShieldBrokenEvent(world, event);
                 break;
             case "TimeSlow":
-                handleTimeSlowEvent(world, event as TimeSlowEvent);
+                handleTimeSlowEvent(world, event);
                 break;
         }
     }

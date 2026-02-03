@@ -1,4 +1,4 @@
-import { EntityId, Component, ComboState, RenderState, BossState, BossId } from './types';
+import { EntityId, Component, ComboState, RenderState, BossState, BossId, MeteorState } from './types';
 import { GameEvent, EventType } from './events';
 import { BOSS_SPAWN_TIME, STARTING_CREDITS } from './configs';
 
@@ -20,8 +20,7 @@ export interface World {
     entities: Map<EntityId, Component[]>;
     // 玩家ID
     playerId: EntityId;
-    // 视觉特效实体 ID
-    visualEffectId: EntityId;
+
     // 事件队列
     events: GameEvent[];
     // 游戏时间
@@ -50,6 +49,9 @@ export interface World {
     timeScale: number;
     timeSlowActive: boolean;
 
+    // 流星生成状态
+    meteorState: MeteorState;
+
     // 连击状态
     comboState: ComboState;
 
@@ -74,7 +76,6 @@ export function createWorld(): World {
         score: 0,
         level: 1,
         playerId: 0,
-        visualEffectId: 0,
         playerLevel: 1,
         difficulty: 1,
         spawnCredits: STARTING_CREDITS,
@@ -82,6 +83,10 @@ export function createWorld(): World {
         enemyCount: 0,
         timeScale: 1,
         timeSlowActive: false,
+        meteorState: {
+            timer: 0,
+            meteorId: 0,
+        },
         width: 0,
         height: 0,
         renderState: {

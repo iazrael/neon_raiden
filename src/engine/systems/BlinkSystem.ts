@@ -8,7 +8,7 @@
 
 import type { World } from '../world';
 import { view, removeComponent } from '../world';
-import { Blink } from '../components/visual';
+import { Blink } from '../components';
 
 /**
  * 闪烁系统 - 更新闪烁状态并清理完成的组件
