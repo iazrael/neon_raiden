@@ -203,13 +203,58 @@ git commit -m "fix(homing): 修正导弹旋转角度，增加90度偏移以匹�
 
 ---
 
-### Task 3: 扩展 HomingSystem 支持 Boss 追踪
+### Task 3: 实现基于实体类型的差异化锁定限制
+
+**说明：** Boss 和普通敌人应该有不同的默认锁定限制，以匹配游戏设计需求。
+
+**设计原则：**
+- 普通敌人（100 HP）：默认1枚导弹锁定
+- Boss（5000 HP）：默认3枚导弹锁定，集中火力
+- 仍然支持通过 `maxMissilesPerTarget` 配置覆盖
 
 **文件：**
-- 修改: `src/engine/systems/HomingSystem.ts:1-13, 38-56`
+- 修改: `src/engine/systems/HomingSystem.ts:1-15, 38-56`
 - 测试: `tests/systems/HomingSystem.test.ts`
 
-**Step 1: 更新导入语句以包含 BossTag**
+**Step 1: 添加辅助函数获取默认锁定限制**
+
+在 `src/engine/systems/HomingSystem.ts` 文件顶部（导入语句之后）添加：
+
+```typescript
+/**
+ * 获取目标的默认导弹锁定限制
+ * @param targetComps 目标实体的组件列表
+ * @param userConfig 用户配置的限制（如果提供）
+ * @returns 最大锁定导弹数量
+ */
+function getDefaultMaxMissiles(
+    targetComps: Component[] | undefined,
+    userConfig?: number
+): number {
+    // 如果用户提供了明确配置，使用用户配置
+    if (userConfig !== undefined) {
+        return userConfig;
+    }
+
+    // 否则根据实体类型返回默认值
+    if (!targetComps) {
+        return 1; // 默认1枚
+    }
+
+    const hasBossTag = targetComps.some(BossTag.check);
+    const hasEnemyTag = targetComps.some(EnemyTag.check);
+
+    if (hasBossTag) {
+        return 3; // Boss 可以被3枚导弹锁定（集中火力）
+    } else if (hasEnemyTag) {
+        return 1; // 普通敌人1枚（避免火力浪费）
+    }
+
+    return 1; // 其他情况默认1枚
+}
+```
+
+**Step 2: 更新导入语句以包含 BossTag**
 
 ```typescript
 // src/engine/systems/HomingSystem.ts 第13行
@@ -220,11 +265,75 @@ import { Transform, Velocity, Homing, Health, EnemyTag } from '../components';
 import { Transform, Velocity, Homing, Health, EnemyTag, BossTag } from '../components';
 ```
 
-**Step 2: 编写失败测试 - 验证 Boss 追踪**
+**Step 3: 编写失败测试 - 验证 Boss 和普通敌人的差异化锁定**
 
 ```typescript
 // tests/systems/HomingSystem.test.ts
-describe('HomingSystem - Boss 追踪', () => {
+describe('HomingSystem - 差异化锁定限制', () => {
+    it('Boss 默认可以被3枚导弹锁定，普通敌人默认1枚', () => {
+        const world = createWorld(800, 600);
+
+        // 创建 Boss
+        const bossId = createEntity(world);
+        addComponent(world, bossId, new Transform({ x: 400, y: 200 }));
+        addComponent(world, bossId, new Velocity({ vx: 0, vy: 2 }));
+        addComponent(world, bossId, new BossTag({ id: 'guardian' as any }));
+        addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+
+        // 创建普通敌人
+        const enemyId = createEntity(world);
+        addComponent(world, enemyId, new Transform({ x: 200, y: 200 }));
+        addComponent(world, enemyId, new Velocity({ vx: 0, vy: 2 }));
+        addComponent(world, enemyId, new EnemyTag({ id: 'scout' as any }));
+        addComponent(world, enemyId, new Health({ hp: 100, maxHp: 100 }));
+
+        // 创建5枚导弹
+        const missileIds = [1, 2, 3, 4, 5].map(() => {
+            const id = createEntity(world);
+            addComponent(world, id, new Transform({ x: 400, y: 500 }));
+            addComponent(world, id, new Velocity({ vx: 0, vy: -10 }));
+            addComponent(world, id, new Homing({
+                searchRange: 1000,
+                turnSpeed: Math.PI
+                // 不设置 maxMissilesPerTarget，使用默认值
+            }));
+            return id;
+        });
+
+        // 执行系统
+        HomingSystem(world, 16);
+
+        // 统计锁定 Boss 的导弹数量（应该是3枚）
+        const bossLockedCount = missileIds.filter(id => {
+            const comps = getEntity(world, id);
+            const homing = comps?.find(Homing.check) as Homing;
+            return homing.targetId === bossId;
+        }).length;
+
+        // 统计锁定普通敌人的导弹数量（应该是1枚）
+        const enemyLockedCount = missileIds.filter(id => {
+            const comps = getEntity(world, id);
+            const homing = comps?.find(Homing.check) as Homing;
+            return homing.targetId === enemyId;
+        }).length;
+
+        // 验证：Boss 应该被3枚导弹锁定
+        expect(bossLockedCount).toBe(3);
+
+        // 验证：普通敌人应该被1枚导弹锁定
+        expect(enemyLockedCount).toBe(1);
+
+        // 验证：Boss 的 incomingMissiles 计数正确
+        const bossComps = getEntity(world, bossId);
+        const bossTag = bossComps?.find(BossTag.check) as BossTag;
+        expect(bossTag.incomingMissiles).toBe(3);
+
+        // 验证：普通敌人的 incomingMissiles 计数正确
+        const enemyComps = getEntity(world, enemyId);
+        const enemyTag = enemyComps?.find(EnemyTag.check) as EnemyTag;
+        expect(enemyTag.incomingMissiles).toBe(1);
+    });
+
     it('应该能够追踪 Boss 实体', () => {
         const world = createWorld(800, 600);
 
@@ -290,6 +399,42 @@ describe('HomingSystem - Boss 追踪', () => {
         const homing = missileComps?.find(Homing.check) as Homing;
         expect(homing.targetId).toBe(bossId);
     });
+
+    it('用户配置可以覆盖默认的锁定限制', () => {
+        const world = createWorld(800, 600);
+
+        // 创建 Boss
+        const bossId = createEntity(world);
+        addComponent(world, bossId, new Transform({ x: 400, y: 200 }));
+        addComponent(world, bossId, new BossTag({ id: 'guardian' as any }));
+        addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+
+        // 创建5枚导弹，但限制最多1枚锁定（覆盖默认的3枚）
+        const missileIds = [1, 2, 3, 4, 5].map(() => {
+            const id = createEntity(world);
+            addComponent(world, id, new Transform({ x: 400, y: 500 }));
+            addComponent(world, id, new Velocity({ vx: 0, vy: -10 }));
+            addComponent(world, id, new Homing({
+                searchRange: 1000,
+                turnSpeed: Math.PI,
+                maxMissilesPerTarget: 1  // 覆盖默认值
+            }));
+            return id;
+        });
+
+        // 执行系统
+        HomingSystem(world, 16);
+
+        // 统计锁定 Boss 的导弹数量
+        const bossLockedCount = missileIds.filter(id => {
+            const comps = getEntity(world, id);
+            const homing = comps?.find(Homing.check) as Homing;
+            return homing.targetId === bossId;
+        }).length;
+
+        // 验证：虽然 Boss 默认可以被3枚导弹锁定，但用户配置限制为1枚
+        expect(bossLockedCount).toBe(1);
+    });
 });
 ```
 
@@ -301,9 +446,9 @@ pnpm test tests/systems/HomingSystem.test.ts -t "应该能够追踪 Boss"
 
 预期：FAIL - 当前实现只搜索 EnemyTag，不包含 BossTag
 
-**Step 4: 修改 HomingSystem 同时搜索 EnemyTag 和 BossTag**
+**Step 4: 修改 HomingSystem 实现差异化锁定限制**
 
-在 `src/engine/systems/HomingSystem.ts` 第38-56行的搜索逻辑中：
+在 `src/engine/systems/HomingSystem.ts` 的搜索逻辑中，使用 `getDefaultMaxMissiles` 函数：
 
 ```typescript
 // 搜索新目标
@@ -313,14 +458,15 @@ if (homing.targetId === undefined) {
     let nearestDistSq = searchRangeSq;
     let nearestId: EntityId | undefined;
 
-    // 同时搜索带 Transform 和 EnemyTag/BossTag 的实体
+    // 同时搜索带 Transform 和 EnemyTag 的实体
     for (const [enemyId, [enemyTransform, enemyTag]] of view(world, [Transform, EnemyTag])) {
         const dx = enemyTransform.x - transform.x;
         const dy = enemyTransform.y - transform.y;
         const distSq = dx * dx + dy * dy;
 
-        // 检查是否超过锁定限制
-        const maxLocks = homing.maxMissilesPerTarget ?? 1;
+        // 使用差异化锁定限制
+        const enemyComps = getEntity(world, enemyId);
+        const maxLocks = getDefaultMaxMissiles(enemyComps, homing.maxMissilesPerTarget);
         if (enemyTag.incomingMissiles >= maxLocks) {
             continue; // 跳过已达到锁定上限的敌人
         }
@@ -337,8 +483,9 @@ if (homing.targetId === undefined) {
         const dy = bossTransform.y - transform.y;
         const distSq = dx * dx + dy * dy;
 
-        // 检查是否超过锁定限制
-        const maxLocks = homing.maxMissilesPerTarget ?? 1;
+        // 使用差异化锁定限制
+        const bossComps = getEntity(world, bossId);
+        const maxLocks = getDefaultMaxMissiles(bossComps, homing.maxMissilesPerTarget);
         if (bossTag.incomingMissiles >= maxLocks) {
             continue; // 跳过已达到锁定上限的Boss
         }
@@ -817,12 +964,23 @@ git commit -m "test(homing): 添加端到端集成测试验证旋转和锁定限
  * @remarks
  * 控制导弹的自动索敌行为，包括搜索范围、转向速度和锁定限制。
  *
+ * **差异化锁定默认值：**
+ * - 普通敌人（100 HP）：默认1枚导弹锁定，避免火力浪费
+ * - Boss（5000 HP）：默认3枚导弹锁定，集中火力输出
+ *
  * @example
  * ```typescript
+ * // 使用默认值（Boss=3，普通敌人=1）
  * const homingConfig: HomingUpgrade = {
- *     searchRange: 300,        // 300像素索敌范围
- *     turnSpeed: Math.PI,      // 180度/秒转向速度
- *     maxMissilesPerTarget: 1  // 每个敌人最多被1枚导弹锁定
+ *     searchRange: 300,
+ *     turnSpeed: Math.PI
+ * };
+ *
+ * // 覆盖默认值
+ * const customConfig: HomingUpgrade = {
+ *     searchRange: 300,
+ *     turnSpeed: Math.PI,
+ *     maxMissilesPerTarget: 5  // Boss也可以被5枚导弹锁定
  * };
  * ```
  */
@@ -839,14 +997,19 @@ export interface HomingUpgrade {
     turnSpeed: number;
 
     /**
-     * 单个敌人同时能被锁定的最大导弹数量（默认1）
+     * 单个目标同时能被锁定的最大导弹数量（可选，覆盖默认值）
      *
      * @remarks
-     * - 设置为 `1`：每个敌人最多被1枚导弹锁定（火力分散）
-     * - 设置为 `2`：每个敌人最多被2枚导弹锁定（平衡火力）
-     * - 设置为 `undefined` 或 `0`：不限制（火力集中）
+     * 如果不提供，将使用基于实体类型的默认值：
+     * - Boss：默认3枚（集中火力）
+     * - 普通敌人：默认1枚（避免火力浪费）
      *
-     * @default 1
+     * 设置此值将覆盖默认行为：
+     * - `1`：强制每个目标最多被1枚导弹锁定
+     * - `3`：允许最多3枚导弹锁定同一目标
+     * - `undefined`：使用默认的差异化限制（推荐）
+     *
+     * @default undefined（使用基于实体类型的默认值）
      */
     maxMissilesPerTarget?: number;
 }
@@ -866,10 +1029,13 @@ git commit -m "docs(homing): 更新 HomingUpgrade 接口文档，说明 maxMissi
 ### 功能验收
 1. ✅ 导弹飞行时精灵图正确朝向目标（不再竖直）
 2. ✅ 导弹能够同时追踪普通敌人（EnemyTag）和 Boss（BossTag）
-3. ✅ 每个敌人/Boss默认最多被1枚导弹锁定（可配置）
+3. ✅ **差异化锁定限制**：
+   - 普通敌人：默认最多1枚导弹锁定（100HP，1枚够用）
+   - Boss：默认最多3枚导弹锁定（5000HP，需要集中火力）
+   - 用户配置可覆盖默认值
 4. ✅ 导弹丢失目标或目标死亡时正确清理计数（EnemyTag 和 BossTag）
 5. ✅ 所有现有测试通过
-6. ✅ 新增单元测试和集成测试覆盖（包括 Boss 追踪）
+6. ✅ 新增单元测试和集成测试覆盖（包括 Boss 追踪和差异化锁定）
 
 ### 性能验收
 - HomingSystem 执行时间不超过 0.1ms（每帧）
@@ -907,9 +1073,15 @@ git commit -m "docs(homing): 更新 HomingUpgrade 接口文档，说明 maxMissi
 
 ### 风险5: Boss 可能被过多导弹锁定导致性能问题
 **缓解措施:**
-- Boss 的 incomingMissiles 限制默认也是1
+- Boss 的默认锁定限制为3枚（平衡性能和体验）
 - 可通过配置调整 Boss 的锁定限制
 - 在 HomingSystem 中优先选择距离最近的目标
+
+### 风险6: 默认值可能不匹配所有游戏场景
+**缓解措施:**
+- 提供配置覆盖机制（maxMissilesPerTarget）
+- 文档清晰说明默认值的选择理由
+- 可根据游戏难度动态调整
 
 ---
 
