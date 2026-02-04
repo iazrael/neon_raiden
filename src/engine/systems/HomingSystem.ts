@@ -96,6 +96,12 @@ export function HomingSystem(world: World, dt: number): void {
 
             // 同时搜索带 Transform 和 EnemyTag 的实体
             for (const [enemyId, [enemyTransform, enemyTag]] of view(world, [Transform, EnemyTag])) {
+                // 检查目标是否存活
+                const [enemyHealth] = getComponents(world, enemyId, [Health]);
+                if (!enemyHealth || enemyHealth.hp <= 0) {
+                    continue; // 跳过死亡目标
+                }
+
                 const dx = enemyTransform.x - transform.x;
                 const dy = enemyTransform.y - transform.y;
                 const distSq = dx * dx + dy * dy;
@@ -115,6 +121,12 @@ export function HomingSystem(world: World, dt: number): void {
 
             // 搜索 Boss（使用相同逻辑）
             for (const [bossId, [bossTransform, bossTag]] of view(world, [Transform, BossTag])) {
+                // 检查目标是否存活
+                const [bossHealth] = getComponents(world, bossId, [Health]);
+                if (!bossHealth || bossHealth.hp <= 0) {
+                    continue; // 跳过死亡目标
+                }
+
                 const dx = bossTransform.x - transform.x;
                 const dy = bossTransform.y - transform.y;
                 const distSq = dx * dx + dy * dy;
@@ -132,7 +144,7 @@ export function HomingSystem(world: World, dt: number): void {
                 }
             }
 
-            // 锁定目标后增加计数
+            // 锁定目标后增加计数（立即增加，避免同一帧多枚导弹竞态锁定）
             if (nearestId !== undefined) {
                 // 获取目标的标签组件（EnemyTag 或 BossTag）
                 const comps = getEntity(world, nearestId);

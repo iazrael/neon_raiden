@@ -388,11 +388,17 @@ export class Homing extends Component {
         turnSpeed: number;
         /** 当前锁定目标（运行时动态更新） */
         targetId?: EntityId;
+        /**
+         * 单个目标同时能被锁定的最大导弹数量（可选，覆盖默认值）
+         * @default undefined（使用基于实体类型的默认值：Boss=3，普通敌人=1）
+         */
+        maxMissilesPerTarget?: number;
     }) {
         super();
         this.searchRange = cfg.searchRange;
         this.turnSpeed = cfg.turnSpeed;
         this.targetId = cfg.targetId;
+        this.maxMissilesPerTarget = cfg.maxMissilesPerTarget;
     }
 
     /** 索敌范围（像素） */
@@ -401,6 +407,11 @@ export class Homing extends Component {
     turnSpeed: number;
     /** 当前锁定目标的实体 ID（运行时动态更新） */
     targetId?: EntityId;
+    /**
+     * 单个目标同时能被锁定的最大导弹数量（可选配置）
+     * 如果未设置，使用基于实体类型的默认值（Boss=3，普通敌人=1）
+     */
+    maxMissilesPerTarget?: number;
 }
 
 // ==================== 特斯拉连锁组件 =================
