@@ -3,9 +3,10 @@
  */
 
 import { BossSystem } from '../../src/engine/systems/BossSystem';
+import { MovementSystem } from '../../src/engine/systems/MovementSystem';
 import { WeaponSystem } from '../../src/engine/systems/WeaponSystem';
 import type { World } from '../../src/engine/world';
-import { Transform, Velocity, BossTag, BossAI, Weapon, SpeedStat, FireIntent } from '../../src/engine/components';
+import { Transform, Velocity, BossTag, BossAI, Weapon, SpeedStat, FireIntent, MoveIntent } from '../../src/engine/components';
 import { BossId } from '../../src/engine/types/ids';
 import { AmmoType } from '../../src/engine/types/ids';
 
@@ -51,6 +52,8 @@ describe('BossSystem', () => {
         it('应该处理 Boss 移动', () => {
             mockWorld.time = 1;
             BossSystem(mockWorld, 100);
+            // 调用MovementSystem来处理MoveIntent
+            MovementSystem(mockWorld, 100);
 
             const bossComps = mockWorld.entities.get(bossId);
             const velocity = bossComps?.find(Velocity.check) as Velocity;
@@ -62,13 +65,15 @@ describe('BossSystem', () => {
         it('应该根据时间改变移动', () => {
             mockWorld.time = 1;
             BossSystem(mockWorld, 100);
+            MovementSystem(mockWorld, 100);
 
             const bossComps = mockWorld.entities.get(bossId);
             const velocity1 = bossComps?.find(Velocity.check) as Velocity;
             const vx1 = velocity1!.vx;
 
-            mockWorld.time = 2;
+            mockWorld.time = 2000; // 使用更大的时间差来确保有明显变化
             BossSystem(mockWorld, 100);
+            MovementSystem(mockWorld, 100);
 
             const velocity2 = bossComps?.find(Velocity.check) as Velocity;
             const vx2 = velocity2!.vx;
@@ -80,6 +85,7 @@ describe('BossSystem', () => {
         it('应该正确设置速度值', () => {
             mockWorld.time = 2;
             BossSystem(mockWorld, 100);
+            MovementSystem(mockWorld, 100);
 
             const bossComps = mockWorld.entities.get(bossId);
             const velocity = bossComps?.find(Velocity.check) as Velocity;
@@ -169,15 +175,17 @@ describe('BossSystem', () => {
             for (let t = 0; t < 5; t += 0.5) {
                 mockWorld.time = t;
                 BossSystem(mockWorld, 100);
+                MovementSystem(mockWorld, 100);
 
                 const bossComps = mockWorld.entities.get(bossId);
                 const velocity = bossComps?.find(Velocity.check) as Velocity;
                 velocities1.push(velocity!.vx);
             }
 
-            for (let t = 10; t < 15; t += 0.5) {
+            for (let t = 10000; t < 10005; t += 0.5) {
                 mockWorld.time = t;
                 BossSystem(mockWorld, 100);
+                MovementSystem(mockWorld, 100);
 
                 const bossComps = mockWorld.entities.get(bossId);
                 const velocity = bossComps?.find(Velocity.check) as Velocity;

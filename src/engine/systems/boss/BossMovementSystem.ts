@@ -3,8 +3,8 @@
  *
  * 职责：
  * - 处理Boss战斗阶段的移动行为
- * - 更新Velocity组件（不创建MoveIntent）
- * - 支持13种移动模式
+ * - 生成MoveIntent供MovementSystem处理
+ * - 支持13种移动模式（包括瞬移）
  * - 只作用于没有BossEntrance组件的Boss
  *
  * 系统类型：决策层
@@ -12,15 +12,20 @@
  *
  * 依赖组件：
  * - Input: BossTag, BossAI, Transform, Velocity
- * - Output: Velocity（直接更新vx/vy）
+ * - Output: MoveIntent（移动意图，由MovementSystem消费）
  *
  * 与其他系统的关系：
  * - BossEntranceSystem: 通过BossEntrance组件的存在性互斥
  * - BossCombatSystem: 并行执行，各司其职
+ * - MovementSystem: 消费MoveIntent并更新位置
+ *
+ * MoveIntent类型说明：
+ * - velocity: 设置速度（dx/dy为像素/秒）
+ * - offset: 绝对位移（dx/dy为像素偏移，用于瞬移）
  */
 
-import { Transform, Velocity, BossTag, BossAI, BossEntrance } from '../../components';
-import { view, World } from '../../world';
+import { Transform, Velocity, BossTag, BossAI, BossEntrance, MoveIntent } from '../../components';
+import { view, addComponent, World } from '../../world';
 import { BOSS_DATA, BossMovementPattern, MovementConfig } from '../../configs/bossData';
 import {
     BASE_MOVE_SPEED,
@@ -96,19 +101,26 @@ function handleBossMovement(
     const baseSpeed = (modifiers.moveSpeed || 1.0) * (config.speedMultiplier || 1.0) * BASE_MOVE_SPEED;
     const time = world.time;
 
+    // 计算移动速度（dx/dy）或位移偏移
+    let dx = 0;
+    let dy = 0;
+    let intentType: 'velocity' | 'offset' = 'velocity'; // 默认使用速度类型
+
     switch (pattern) {
         case BossMovementPattern.IDLE:
             // 站桩，轻微上下浮动
-            boss.velocity.vx = 0;
-            boss.velocity.vy = Math.sin(time * BOSS_ARENA.IDLE_FLOAT_FREQUENCY) * BOSS_ARENA.IDLE_FLOAT_AMPLITUDE;
+            dx = 0;
+            dy = Math.sin(time * BOSS_ARENA.IDLE_FLOAT_FREQUENCY / 1000) * BOSS_ARENA.IDLE_FLOAT_AMPLITUDE; // 修复频率
             break;
 
         case BossMovementPattern.SINE:
             // 正弦游动（只横向移动，y不变化）
             const sineFreq = config.frequency || SINE.DEFAULT_FREQUENCY;
             const sineAmp = config.amplitude || SINE.DEFAULT_AMPLITUDE;
-            boss.velocity.vx = Math.sin(time * sineFreq) * baseSpeed * sineAmp;
-            boss.velocity.vy = 0; // 不向下移动
+            // 修复：使用类似小兵的实现，基于时间但频率要慢得多
+            // time是毫秒，frequency=2.0表示2弧度/秒，需要除以1000
+            dx = Math.sin(time * sineFreq / 1000) * baseSpeed * sineAmp;
+            dy = 0; // 不向下移动
             break;
 
         case BossMovementPattern.FIGURE_8:
@@ -120,12 +132,12 @@ function handleBossMovement(
             const fig8RadiusX = config.radiusX ?? FIGURE_8.RADIUS_X;
             const fig8RadiusY = config.radiusY ?? FIGURE_8.RADIUS_Y;
 
-            // 目标位置
-            const targetFig8X = centerX + Math.sin(time * fig8Freq) * fig8RadiusX;
-            const targetFig8Y = centerY + Math.sin(time * fig8YFreq) * fig8RadiusY;
+            // 目标位置（修复：频率也需要除以1000）
+            const targetFig8X = centerX + Math.sin(time * fig8Freq / 1000) * fig8RadiusX;
+            const targetFig8Y = centerY + Math.sin(time * fig8YFreq / 1000) * fig8RadiusY;
 
-            boss.velocity.vx = (targetFig8X - boss.transform.x) * 2;
-            boss.velocity.vy = (targetFig8Y - boss.transform.y) * 2;
+            dx = (targetFig8X - boss.transform.x) * 2;
+            dy = (targetFig8Y - boss.transform.y) * 2;
             break;
 
         case BossMovementPattern.CIRCLE:
@@ -133,19 +145,19 @@ function handleBossMovement(
             const circleCenterX = config.centerX ?? world.width * CIRCLE_MOVE.DEFAULT_CENTER_X_RATIO;
             const circleCenterY = config.centerY ?? CIRCLE_MOVE.DEFAULT_CENTER_Y;
             const radius = config.radius || CIRCLE_MOVE.DEFAULT_RADIUS;
-            const angle = time * (config.frequency || CIRCLE_MOVE.DEFAULT_FREQUENCY);
+            const angle = time * (config.frequency || CIRCLE_MOVE.DEFAULT_FREQUENCY) / 1000; // 修复频率
             const targetCircleX = circleCenterX + Math.cos(angle) * radius;
             const targetCircleY = circleCenterY + Math.sin(angle) * radius * CIRCLE_MOVE.Y_RADIUS_RATIO;
-            boss.velocity.vx = (targetCircleX - boss.transform.x) * 2;
-            boss.velocity.vy = (targetCircleY - boss.transform.y) * 2;
+            dx = (targetCircleX - boss.transform.x) * 2;
+            dy = (targetCircleY - boss.transform.y) * 2;
             break;
 
         case BossMovementPattern.ZIGZAG:
             // 之字形（横向快速移动，y轻微波动）
             const zigzagInterval = config.zigzagInterval || ZIGZAG.DEFAULT_SWITCH_INTERVAL;
             const zigzagPhase = Math.floor(time / zigzagInterval) % 2;
-            boss.velocity.vx = zigzagPhase === 0 ? baseSpeed : -baseSpeed;
-            boss.velocity.vy = Math.sin(time * ZIGZAG.Y_WOBBLE_FREQUENCY) * ZIGZAG.Y_WOBBLE_AMPLITUDE;
+            dx = zigzagPhase === 0 ? baseSpeed : -baseSpeed;
+            dy = Math.sin(time * ZIGZAG.Y_WOBBLE_FREQUENCY / 1000) * ZIGZAG.Y_WOBBLE_AMPLITUDE; // 修复频率
             break;
 
         case BossMovementPattern.FOLLOW:
@@ -154,16 +166,16 @@ function handleBossMovement(
             if (playerComps) {
                 const playerTransform = playerComps.find(isTransform) as Transform | undefined;
                 if (playerTransform) {
-                    const dx = playerTransform.x - boss.transform.x;
-                    const distSq = dx * dx;
+                    const deltaX = playerTransform.x - boss.transform.x;
+                    const distSq = deltaX * deltaX;
                     if (distSq > 0.01) {
                         const dist = Math.sqrt(distSq);
-                        boss.velocity.vx = (dx / dist) * baseSpeed;
+                        dx = (deltaX / dist) * baseSpeed;
                     }
                 }
             }
             // y在目标位置附近轻微波动
-            boss.velocity.vy = Math.sin(time * 3) * BOSS_ARENA.IDLE_FLOAT_AMPLITUDE;
+            dy = Math.sin(time * 3 / 1000) * BOSS_ARENA.IDLE_FLOAT_AMPLITUDE; // 修复频率
             break;
 
         case BossMovementPattern.TRACKING:
@@ -172,44 +184,44 @@ function handleBossMovement(
             if (playerComps2) {
                 const playerTransform = playerComps2.find(Transform.check);
                 if (playerTransform) {
-                    const dx = playerTransform.x - boss.transform.x;
-                    const distSq = dx * dx;
+                    const deltaX = playerTransform.x - boss.transform.x;
+                    const distSq = deltaX * deltaX;
                     if (distSq > 0.01) {
                         const dist = Math.sqrt(distSq);
-                        boss.velocity.vx = (dx / dist) * baseSpeed * 1.5;
+                        dx = (deltaX / dist) * baseSpeed * 1.5;
                     }
                 }
             }
             // y在目标位置附近波动
-            boss.velocity.vy = Math.sin(time * 3) * (BOSS_ARENA.IDLE_FLOAT_AMPLITUDE + 3);
+            dy = Math.sin(time * 3 / 1000) * (BOSS_ARENA.IDLE_FLOAT_AMPLITUDE + 3); // 修复频率
             break;
 
         case BossMovementPattern.DASH:
             // 冲刺（向下冲刺后回到上方）
             const dashSpeed = config.dashSpeed || baseSpeed * DASH.DEFAULT_SPEED_MULTIPLIER;
             const dashFreq = config.frequency || DASH.DEFAULT_CYCLE_FREQUENCY;
-            const dashCycle = Math.sin(time * dashFreq);
+            const dashCycle = Math.sin(time * dashFreq / 1000); // 修复频率
             if (dashCycle > DASH.DEFAULT_DASH_THRESHOLD) {
                 // 冲刺阶段：向下
-                boss.velocity.vy = dashSpeed;
-                boss.velocity.vx = 0;
+                dy = dashSpeed;
+                dx = 0;
             } else {
                 // 准备阶段：回到目标位置
                 const targetY = DASH.PREP_TARGET_Y;
-                boss.velocity.vy = (targetY - boss.transform.y) * DASH.PREP_APPROACH_FACTOR;
-                boss.velocity.vx = 0;
+                dy = (targetY - boss.transform.y) * DASH.PREP_APPROACH_FACTOR;
+                dx = 0;
             }
             break;
 
         case BossMovementPattern.SLOW_DESCENT:
             // 缓慢下沉（但有上限）
             if (boss.transform.y < SLOW_DESCENT.LOWER_BOUND_Y) {
-                boss.velocity.vx = Math.cos(time * SLOW_DESCENT.LATERAL_DRIFT_FREQUENCY) * baseSpeed * SLOW_DESCENT.LATERAL_DRIFT_AMPLITUDE;
-                boss.velocity.vy = config.verticalSpeed || VERTICAL_SPEED.SLOW;
+                dx = Math.cos(time * SLOW_DESCENT.LATERAL_DRIFT_FREQUENCY / 1000) * baseSpeed * SLOW_DESCENT.LATERAL_DRIFT_AMPLITUDE; // 修复频率
+                dy = config.verticalSpeed || VERTICAL_SPEED.SLOW;
             } else {
                 // 到达下限，保持位置并横向移动
-                boss.velocity.vx = Math.cos(time * SLOW_DESCENT.LATERAL_DRIFT_FREQUENCY) * baseSpeed * SLOW_DESCENT.LATERAL_DRIFT_AMPLITUDE;
-                boss.velocity.vy = (SLOW_DESCENT.LOWER_BOUND_Y - boss.transform.y) * SLOW_DESCENT.APPROACH_FACTOR;
+                dx = Math.cos(time * SLOW_DESCENT.LATERAL_DRIFT_FREQUENCY / 1000) * baseSpeed * SLOW_DESCENT.LATERAL_DRIFT_AMPLITUDE; // 修复频率
+                dy = (SLOW_DESCENT.LOWER_BOUND_Y - boss.transform.y) * SLOW_DESCENT.APPROACH_FACTOR;
             }
             break;
 
@@ -217,11 +229,11 @@ function handleBossMovement(
             // 激进压制（在UPPER_BOUND_Y到LOWER_BOUND_Y之间移动）
             const aggressiveFreq = config.frequency || AGGRESSIVE.DEFAULT_FREQUENCY;
             const aggressiveSpeedMult = config.speedMultiplier || AGGRESSIVE.DEFAULT_SPEED_MULTIPLIER;
-            boss.velocity.vx = Math.sin(time * aggressiveFreq) * baseSpeed * aggressiveSpeedMult;
+            dx = Math.sin(time * aggressiveFreq / 1000) * baseSpeed * aggressiveSpeedMult; // 修复频率
 
             // 根据正弦波在指定范围内移动
-            const targetAggressiveY = AGGRESSIVE.CENTER_Y + Math.sin(time * aggressiveFreq * 0.5) * AGGRESSIVE.Y_SPREAD;
-            boss.velocity.vy = (targetAggressiveY - boss.transform.y) * AGGRESSIVE.APPROACH_FACTOR;
+            const targetAggressiveY = AGGRESSIVE.CENTER_Y + Math.sin(time * aggressiveFreq * 0.5 / 1000) * AGGRESSIVE.Y_SPREAD; // 修复频率
+            dy = (targetAggressiveY - boss.transform.y) * AGGRESSIVE.APPROACH_FACTOR;
             break;
 
         case BossMovementPattern.RANDOM_TELEPORT:
@@ -231,17 +243,20 @@ function handleBossMovement(
             const timeInCycle = time % teleportInterval;
 
             if (timeInCycle < teleportWindow) {
-                // 瞬移窗口：直接设置位置
+                // 瞬移窗口：计算目标位置的偏移量
                 const marginX = TELEPORT.MARGIN_X;
                 const marginY = TELEPORT.MARGIN_Y;
-                boss.transform.x = marginX + Math.random() * (world.width - marginX * 2);
-                boss.transform.y = marginY + Math.random() * TELEPORT.MAX_Y_SPREAD;
-                boss.velocity.vx = 0;
-                boss.velocity.vy = 0;
+                const targetX = marginX + Math.random() * (world.width - marginX * 2);
+                const targetY = marginY + Math.random() * TELEPORT.MAX_Y_SPREAD;
+
+                // 使用 offset 类型直接设置位置偏移
+                dx = targetX - boss.transform.x;
+                dy = targetY - boss.transform.y;
+                intentType = 'offset';
             } else {
                 // 在当前位置轻微漂浮
-                boss.velocity.vx = Math.sin(time * TELEPORT.IDLE_DRIFT_FREQUENCY) * baseSpeed * TELEPORT.IDLE_DRIFT_SPEED_MULTIPLIER;
-                boss.velocity.vy = Math.cos(time * TELEPORT.IDLE_DRIFT_FREQUENCY) * baseSpeed * TELEPORT.IDLE_DRIFT_SPEED_MULTIPLIER;
+                dx = Math.sin(time * TELEPORT.IDLE_DRIFT_FREQUENCY / 1000) * baseSpeed * TELEPORT.IDLE_DRIFT_SPEED_MULTIPLIER;
+                dy = Math.cos(time * TELEPORT.IDLE_DRIFT_FREQUENCY / 1000) * baseSpeed * TELEPORT.IDLE_DRIFT_SPEED_MULTIPLIER;
             }
             break;
 
@@ -252,37 +267,44 @@ function handleBossMovement(
             if (playerComps3) {
                 const playerTransform = playerComps3.find(Transform.check);
                 if (playerTransform) {
-                    const dx = playerTransform.x - boss.transform.x;
-                    const dy = playerTransform.y - boss.transform.y;
-                    const distSq = dx * dx + dy * dy;
+                    const deltaX = playerTransform.x - boss.transform.x;
+                    const deltaY = playerTransform.y - boss.transform.y;
+                    const distSq = deltaX * deltaX + deltaY * deltaY;
                     const dist = Math.sqrt(distSq);
 
                     if (dist < threshold) {
                         // 近距离：闪避（8字形）
                         const dodgeSpeed = baseSpeed * ADAPTIVE.DODGE_SPEED_MULTIPLIER;
-                        boss.velocity.vx = Math.sin(time * 3) * dodgeSpeed;
-                        boss.velocity.vy = Math.cos(time * 3) * baseSpeed * 0.3;
+                        dx = Math.sin(time * 3 / 1000) * dodgeSpeed; // 修复频率
+                        dy = Math.cos(time * 3 / 1000) * baseSpeed * 0.3; // 修复频率
                     } else {
                         // 远距离：追踪（但保持在上半区）
                         const trackSpeed = baseSpeed * ADAPTIVE.TRACKING_SPEED_MULTIPLIER;
-                        boss.velocity.vx = (dx / dist) * trackSpeed;
+                        dx = (deltaX / dist) * trackSpeed;
 
                         // y不追踪玩家，保持在指定范围内
-                        const targetAdaptiveY = ADAPTIVE.TRACKING_CENTER_Y + Math.sin(time) * ADAPTIVE.TRACKING_Y_SPREAD;
-                        boss.velocity.vy = (targetAdaptiveY - boss.transform.y) * 0.3;
+                        const targetAdaptiveY = ADAPTIVE.TRACKING_CENTER_Y + Math.sin(time / 1000) * ADAPTIVE.TRACKING_Y_SPREAD; // 修复频率
+                        dy = (targetAdaptiveY - boss.transform.y) * 0.3;
                     }
                 }
             } else {
                 // 无玩家时轻微漂浮
-                boss.velocity.vx = Math.sin(time * 2) * baseSpeed * ADAPTIVE.IDLE_DRIFT_SPEED_MULTIPLIER;
-                boss.velocity.vy = Math.cos(time * 2) * baseSpeed * ADAPTIVE.IDLE_DRIFT_SPEED_MULTIPLIER;
+                dx = Math.sin(time * 2 / 1000) * baseSpeed * ADAPTIVE.IDLE_DRIFT_SPEED_MULTIPLIER; // 修复频率
+                dy = Math.cos(time * 2 / 1000) * baseSpeed * ADAPTIVE.IDLE_DRIFT_SPEED_MULTIPLIER; // 修复频率
             }
             break;
 
         default:
             // 默认轻微漂浮
-            boss.velocity.vx = Math.sin(time * 2) * baseSpeed * 0.3;
-            boss.velocity.vy = Math.cos(time * 2) * baseSpeed * 0.3;
+            dx = Math.sin(time * 2 / 1000) * baseSpeed * 0.3; // 修复频率
+            dy = Math.cos(time * 2 / 1000) * baseSpeed * 0.3; // 修复频率
             break;
     }
+
+    // 生成MoveIntent（所有模式都使用Intent）
+    addComponent(world, boss.id, new MoveIntent({
+        dx,
+        dy,
+        type: intentType
+    }));
 }
