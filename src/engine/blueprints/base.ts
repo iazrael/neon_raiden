@@ -79,6 +79,8 @@ export interface HomingUpgrade {
     searchRange: number;
     /** 转向速度（弧度/秒） */
     turnSpeed: number;
+    /** 单个敌人同时能被锁定的最大导弹数量（默认1，防止火力过度集中） */
+    maxMissilesPerTarget?: number;
 }
 
 // ============== 特斯拉连锁属性 =================
