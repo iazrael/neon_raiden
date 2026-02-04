@@ -17,6 +17,8 @@ export interface GameSnapshot {
     t: number;
     score: number;
     level: number;
+    /** 关卡进度（0-120，允许小数） */
+    progress: number;
     showLevelTransition: boolean;
     levelTransitionTimer: number;
     showBossWarning: boolean;
@@ -63,7 +65,8 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         return {
             t,
             score: 0,
-            level: 1,
+            level: world.levelState.currentLevel,
+            progress: world.levelState.progress,
             showLevelTransition: false,
             levelTransitionTimer: 0,
             showBossWarning: false,
@@ -163,7 +166,8 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
     return {
         t,
         score: world.score || 0,
-        level: world.level || 1,
+        level: world.levelState.currentLevel,
+        progress: world.levelState.progress,
         showLevelTransition: false, // TODO: 从LevelingSystem获取
         levelTransitionTimer: 0,
         showBossWarning: false, // TODO: 从BossSystem获取

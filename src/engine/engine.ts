@@ -23,6 +23,7 @@ import { DamageResolutionSystem } from './systems/DamageResolutionSystem';
 import { DifficultySystem } from './systems/DifficultySystem';
 import { EffectSystem } from './systems/EffectSystem';
 import { InputSystem } from './systems/InputSystem';
+import { LevelSystem } from './systems/LevelSystem';
 import { LifetimeSystem } from './systems/LifetimeSystem';
 import { LootSystem } from './systems/LootSystem';
 import { MovementSystem } from './systems/MovementSystem';
@@ -208,6 +209,7 @@ export class Engine {
         recordSys('ChainSystem', 'P5', () => ChainSystem(world, dt));
         recordSys('LootSystem', 'P5', () => LootSystem(world, dt));
         recordSys('ComboSystem', 'P5', () => ComboSystem(world, dt));
+        recordSys('LevelSystem', 'P5', () => LevelSystem(world, dt));
 
         // P7. 表现层 (视听反馈)
         recordSys('CameraSystem', 'P7', () => CameraSystem(world, dt));
