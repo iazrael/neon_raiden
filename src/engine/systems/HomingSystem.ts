@@ -84,8 +84,8 @@ export function HomingSystem(world: World, dt: number): void {
             velocity.vx = Math.cos(newAngle) * speed;
             velocity.vy = Math.sin(newAngle) * speed;
 
-            // 同步更新旋转角度，让导弹头朝向飞行方向
-            transform.rot = newAngle;
+            // 同步更新旋转角度，让导弹头朝向飞行方向（加上90度偏移，因为精灵图原始朝向是向上的）
+            transform.rot = newAngle + Math.PI / 2;
         }
     }
 }
