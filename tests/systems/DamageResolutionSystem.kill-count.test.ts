@@ -27,7 +27,7 @@ describe('DamageResolutionSystem - 击杀计数功能', () => {
         // 创建玩家实体
         const playerId = generateId();
         world.playerId = playerId;
-        addComponent(world, playerId, new PlayerTag({}));
+        addComponent(world, playerId, new PlayerTag());
     });
 
     describe('击杀计数累加', () => {

@@ -24,6 +24,10 @@ import {
   BossEntranceStartEvent,
   BossEntranceCompleteEvent,
   BulletBouncedEvent,
+  LevelTransitionStartEvent,
+  LevelTransitionCompleteEvent,
+  BossExitStartEvent,
+  StageOneIntroEvent,
 } from './events';
 
 // 重新导出所有事件类型
@@ -61,7 +65,11 @@ export type GameEvent =
   | BossEntranceStartEvent
   | BossEntranceCompleteEvent
   | BossDefeatEvent
-  | BulletBouncedEvent;
+  | BulletBouncedEvent
+  | LevelTransitionStartEvent
+  | LevelTransitionCompleteEvent
+  | BossExitStartEvent
+  | StageOneIntroEvent;
 
 /**
  * EventType 事件类型标签联合

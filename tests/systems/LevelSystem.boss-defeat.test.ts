@@ -6,6 +6,7 @@ import { createWorld, generateId, addComponent, view } from '../../src/engine/wo
 import { LevelSystem } from '../../src/engine/systems/LevelSystem';
 import { BossExitComponent, LevelTransitionComponent } from '../../src/engine/components/transition';
 import { BossDefeatEvent, BossExitStartEvent } from '../../src/engine/events';
+import { BossId } from '../../src/engine/types';
 import { pushEvent, getEvents } from '../../src/engine/world';
 
 describe('LevelSystem - Boss 击杀处理功能', () => {
@@ -30,7 +31,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
 
             pushEvent(world, {
                 type: 'BossDefeat',
-                bossId: 'boss1',
+                bossId: BossId.GUARDIAN,
             } as BossDefeatEvent);
 
             LevelSystem(world, 0);
@@ -51,19 +52,19 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 kind: 'BossExit',
                 timer: 500,
                 duration: 2000,
-                bossId: 'boss1',
-                bossType: 'boss1',
+                bossId: BossId.GUARDIAN,
+                bossType: 'GUARDIAN',
             }));
 
             // 推送两次 BossDefeatEvent
             pushEvent(world, {
                 type: 'BossDefeat',
-                bossId: 'boss1',
+                bossId: BossId.GUARDIAN,
             } as BossDefeatEvent);
 
             pushEvent(world, {
                 type: 'BossDefeat',
-                bossId: 'boss1',
+                bossId: BossId.GUARDIAN,
             } as BossDefeatEvent);
 
             LevelSystem(world, 0);
@@ -76,7 +77,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
         it('Boss 击杀应该推送 BossExitStartEvent', () => {
             pushEvent(world, {
                 type: 'BossDefeat',
-                bossId: 'boss2',
+                bossId: BossId.INTERCEPTOR,
             } as BossDefeatEvent);
 
             LevelSystem(world, 0);
@@ -98,8 +99,8 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 kind: 'BossExit',
                 timer: 0,
                 duration: 2000,
-                bossId: 'boss1',
-                bossType: 'boss1',
+                bossId: BossId.GUARDIAN,
+                bossType: 'GUARDIAN',
             }));
 
             LevelSystem(world, 500);
@@ -118,8 +119,8 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 kind: 'BossExit',
                 timer: 1900,
                 duration: 2000,
-                bossId: 'boss1',
-                bossType: 'boss1',
+                bossId: BossId.GUARDIAN,
+                bossType: 'GUARDIAN',
             }));
 
             // 设置当前关卡为 1
@@ -141,8 +142,8 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 kind: 'BossExit',
                 timer: 1900,
                 duration: 2000,
-                bossId: 'boss1',
-                bossType: 'boss1',
+                bossId: BossId.GUARDIAN,
+                bossType: 'GUARDIAN',
             }));
 
             LevelSystem(world, 100);

@@ -5,6 +5,7 @@
 import { SpawnSystem } from '../../src/engine/systems/SpawnSystem';
 import { BossTag } from '../../src/engine/components/meta';
 import { view } from '../../src/engine/world';
+import { BossId } from '../../src/engine/types';
 
 describe('SpawnSystem - 关卡系统集成', () => {
     let mockWorld: any;
@@ -106,7 +107,7 @@ describe('SpawnSystem - 关卡系统集成', () => {
             // 添加一个 Boss 实体到场上
             const bossId = 999;
             mockWorld.entities.set(bossId, [
-                new BossTag({ id: 'GUARDIAN' })
+                new BossTag({ id: BossId.GUARDIAN })
             ]);
 
             const initialSpawnedState = mockWorld.bossState.spawned;

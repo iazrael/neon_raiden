@@ -6,6 +6,7 @@ import { BossSystem } from '../../src/engine/systems/BossSystem';
 import { BossExitComponent } from '../../src/engine/components/transition';
 import { BossTag } from '../../src/engine/components/meta';
 import { createWorld, addComponent } from '../../src/engine/world';
+import { BossId } from '../../src/engine/types';
 
 describe('BossSystem - BossExitComponent timer 更新', () => {
     let world: ReturnType<typeof createWorld>;
@@ -27,7 +28,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
     describe('timer 更新逻辑', () => {
         it('应该更新 BossExitComponent 的 timer', () => {
             const bossId = 1;
-            addComponent(world, bossId, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, bossId, new BossTag({ id: BossId.GUARDIAN }));
             addComponent(world, bossId, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 0,
@@ -48,7 +49,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
 
         it('多次调用应该累加 timer', () => {
             const bossId = 1;
-            addComponent(world, bossId, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, bossId, new BossTag({ id: BossId.GUARDIAN }));
             addComponent(world, bossId, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 0,
@@ -75,7 +76,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
 
         it('timer 应该从初始值开始累加', () => {
             const bossId = 1;
-            addComponent(world, bossId, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, bossId, new BossTag({ id: BossId.GUARDIAN }));
             addComponent(world, bossId, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 500, // 初始值为 500
@@ -99,7 +100,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
             const boss2Id = 2;
 
             // Boss 1
-            addComponent(world, boss1Id, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, boss1Id, new BossTag({ id: BossId.GUARDIAN }));
             addComponent(world, boss1Id, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 0,
@@ -109,7 +110,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
             }));
 
             // Boss 2
-            addComponent(world, boss2Id, new BossTag({ id: 'INTERCEPTOR' }));
+            addComponent(world, boss2Id, new BossTag({ id: BossId.INTERCEPTOR }));
             addComponent(world, boss2Id, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 100,
@@ -137,7 +138,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
             const boss2Id = 2;
 
             // Boss 1: 有 BossExitComponent
-            addComponent(world, boss1Id, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, boss1Id, new BossTag({ id: BossId.GUARDIAN }));
             addComponent(world, boss1Id, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 0,
@@ -147,7 +148,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
             }));
 
             // Boss 2: 没有 BossExitComponent
-            addComponent(world, boss2Id, new BossTag({ id: 'INTERCEPTOR' }));
+            addComponent(world, boss2Id, new BossTag({ id: BossId.INTERCEPTOR }));
 
             BossSystem(world, 100);
 
@@ -166,7 +167,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
     describe('边界条件', () => {
         it('dt 为 0 时 timer 不应该更新', () => {
             const bossId = 1;
-            addComponent(world, bossId, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, bossId, new BossTag({ id: BossId.GUARDIAN }));
             addComponent(world, bossId, new BossExitComponent({
                 kind: 'BossExit',
                 timer: 100,
@@ -189,7 +190,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
 
         it('没有 BossExitComponent 的 Boss 不应该崩溃', () => {
             const bossId = 1;
-            addComponent(world, bossId, new BossTag({ id: 'GUARDIAN' }));
+            addComponent(world, bossId, new BossTag({ id: BossId.GUARDIAN }));
 
             expect(() => BossSystem(world, 100)).not.toThrow();
         });

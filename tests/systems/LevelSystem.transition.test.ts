@@ -6,7 +6,7 @@ import { createWorld, view } from '../../src/engine/world';
 import { LevelSystem, startLevelTransition } from '../../src/engine/systems/LevelSystem';
 import { LevelTransitionComponent } from '../../src/engine/components/transition';
 import { LevelTransitionStartEvent, LevelTransitionCompleteEvent, StageOneIntroEvent } from '../../src/engine/events';
-import { getEvents } from '../../src/engine/world';
+import { getEvents, pushEvent } from '../../src/engine/world';
 
 describe('LevelSystem - 关卡过渡功能', () => {
     let world: ReturnType<typeof createWorld>;
@@ -100,7 +100,7 @@ describe('LevelSystem - 关卡过渡功能', () => {
             // 检查是否推送了 StageOneIntroEvent
             const introEvents = getEvents<StageOneIntroEvent>(world, 'StageOneIntro');
             expect(introEvents.length).toBe(1);
-            expect(introEvents[0].duration).toBe(2000);
+            expect((introEvents[0] as any).duration).toBe(2000);
         });
 
         it('非第一关不应该触发进入动画', () => {

@@ -40,3 +40,8 @@ export const LEVEL_CONFIG = Object.freeze({
         MAX_ENEMY_INTERVAL: 2000,
     }),
 });
+
+/**
+ * 最大关卡数
+ */
+export const MAX_LEVEL = 10;
