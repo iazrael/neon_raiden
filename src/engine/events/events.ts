@@ -178,7 +178,6 @@ export interface LevelTransitionCompleteEvent extends BaseEvent<'LevelTransition
 // ㉘ Boss 退场开始事件（用于 ReactEngine 更新 UI）
 export interface BossExitStartEvent extends BaseEvent<'BossExitStart'> {
     bossId: string;
-    bossType: string;
 }
 
 // ㉙ 第一关进入事件（用于 ReactEngine 播放开始动画）

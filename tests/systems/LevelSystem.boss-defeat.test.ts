@@ -53,7 +53,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 timer: 500,
                 duration: 2000,
                 bossId: BossId.GUARDIAN,
-                bossType: 'GUARDIAN',
+                
             }));
 
             // 推送两次 BossDefeatEvent
@@ -86,7 +86,6 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
             const exitStartEvents = getEvents<BossExitStartEvent>(world, 'BossExitStart');
             expect(exitStartEvents.length).toBe(1);
             expect(exitStartEvents[0].bossId).toBe(BossId.INTERCEPTOR);
-            expect(exitStartEvents[0].bossType).toBe('interceptor');
         });
     });
 
@@ -100,7 +99,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 timer: 0,
                 duration: 2000,
                 bossId: BossId.GUARDIAN,
-                bossType: 'GUARDIAN',
+                
             }));
 
             LevelSystem(world, 500);
@@ -120,7 +119,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 timer: 1900,
                 duration: 2000,
                 bossId: BossId.GUARDIAN,
-                bossType: 'GUARDIAN',
+                
             }));
 
             // 设置当前关卡为 1
@@ -143,7 +142,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
                 timer: 1900,
                 duration: 2000,
                 bossId: BossId.GUARDIAN,
-                bossType: 'GUARDIAN',
+                
             }));
 
             LevelSystem(world, 100);

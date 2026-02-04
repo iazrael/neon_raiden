@@ -102,15 +102,13 @@ function processBossDefeat(world: World, event: BossDefeatEvent): void {
         timer: 0,
         duration: LEVEL_CONFIG.ANIMATION.BOSS_EXIT_DURATION,
         bossId: event.bossId,
-        bossType: event.bossId,
     }));
 
     // 推送 BossExitStartEvent 事件
     pushEvent(world, {
         type: 'BossExitStart',
         bossId: event.bossId,
-        bossType: event.bossId,
-    } as BossExitStartEvent);
+    });
 }
 
 /**
@@ -126,7 +124,7 @@ function processBossDefeat(world: World, event: BossDefeatEvent): void {
 function updateBossExit(world: World, dt: number): void {
     const exitEntities = [...view(world, [BossExitComponent])];
 
-    for (const [entityId, [exitComp], comps] of exitEntities) {
+    for (const [entityId, [exitComp]] of exitEntities) {
         // 更新计时器
         exitComp.timer += dt;
 
@@ -135,7 +133,7 @@ function updateBossExit(world: World, dt: number): void {
             // 移除退场实体
             removeEntity(world, entityId);
 
-            const currentLevel = world.levelState?.currentLevel ?? 1;
+            const currentLevel = world.levelState.currentLevel ?? 1;
 
             // 检查是否是最后一关
             if (currentLevel >= MAX_LEVEL) {
@@ -196,7 +194,7 @@ export function startLevelTransition(world: World, fromLevel: number, toLevel: n
 function updateLevelTransitions(world: World, dt: number): void {
     const transitionEntities = [...view(world, [LevelTransitionComponent])];
 
-    for (const [entityId, [transComp], comps] of transitionEntities) {
+    for (const [entityId, [transComp]] of transitionEntities) {
         // 更新计时器
         transComp.timer += dt;
 
@@ -210,14 +208,14 @@ function updateLevelTransitions(world: World, dt: number): void {
             // 检查是否通关（LEVEL_CONFIGS[11] 不存在，所以 nextLevel = 11 时触发胜利）
             if (nextLevel > MAX_LEVEL) {
                 // 通关！触发胜利事件
-                const currentLevel = world.levelState?.currentLevel ?? 1;
+                const currentLevel = world.levelState.currentLevel ?? 1;
                 pushEvent(world, {
                     type: 'Victory',
                     finalLevel: currentLevel,
                 } as VictoryEvent);
             } else {
                 // 更新当前关卡
-                world.levelState!.currentLevel = nextLevel;
+                world.levelState.currentLevel = nextLevel;
 
                 // 推送 LevelTransitionCompleteEvent 事件
                 pushEvent(world, {

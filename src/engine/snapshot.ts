@@ -39,7 +39,6 @@ export interface GameSnapshot {
         finalLevel?: number;
         level?: number;
         bossId?: string;
-        bossType?: string;
     } | null;
 
     player: {
@@ -169,7 +168,6 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         toLevel?: number;
         finalLevel?: number;
         bossId?: string;
-        bossType?: string;
     } | null;
 
     for (const event of world.events) {
@@ -194,14 +192,13 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
             };
         } else if (event.type === 'LevelTransitionComplete') {
             levelEvent = {
-                type: 'levelTransitionComplete' as const,
-                ...(event as any)
-            } as any;
+                type: 'levelTransitionComplete',
+                toLevel: event.level
+            };
         } else if (event.type === 'BossExitStart') {
             levelEvent = {
                 type: 'bossExitStart',
                 bossId: event.bossId,
-                bossType: event.bossType
             };
         } else if (event.type === 'BossEntranceStart') {
             bossEvent = { type: 'entranceStart', bossId: event.bossId };

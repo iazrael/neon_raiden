@@ -34,7 +34,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 0,
                 duration: 2000,
                 bossId: 'boss-1',
-                bossType: 'GUARDIAN',
+                
             }));
 
             const dt = 100; // 100毫秒
@@ -55,7 +55,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 0,
                 duration: 2000,
                 bossId: 'boss-1',
-                bossType: 'GUARDIAN',
+                
             }));
 
             // 第一次调用
@@ -82,7 +82,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 500, // 初始值为 500
                 duration: 2000,
                 bossId: 'boss-1',
-                bossType: 'GUARDIAN',
+                
             }));
 
             BossSystem(world, 100);
@@ -106,7 +106,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 0,
                 duration: 2000,
                 bossId: 'boss-1',
-                bossType: 'GUARDIAN',
+                
             }));
 
             // Boss 2
@@ -116,7 +116,6 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 100,
                 duration: 2000,
                 bossId: 'boss-2',
-                bossType: 'INTERCEPTOR',
             }));
 
             const dt = 50;
@@ -144,7 +143,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 0,
                 duration: 2000,
                 bossId: 'boss-1',
-                bossType: 'GUARDIAN',
+                
             }));
 
             // Boss 2: 没有 BossExitComponent
@@ -173,7 +172,7 @@ describe('BossSystem - BossExitComponent timer 更新', () => {
                 timer: 100,
                 duration: 2000,
                 bossId: 'boss-1',
-                bossType: 'GUARDIAN',
+                
             }));
 
             BossSystem(world, 0);

@@ -38,13 +38,11 @@ describe('BossExitComponent', () => {
       timer: 0,
       duration: 2000,
       bossId: 'entity123',
-      bossType: 'GUARDIAN',
     };
 
     expect(component.kind).toBe('BossExit');
     expect(component.timer).toBe(0);
     expect(component.duration).toBe(2000);
     expect(component.bossId).toBe('entity123');
-    expect(component.bossType).toBe('GUARDIAN');
   });
 });

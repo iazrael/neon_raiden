@@ -67,15 +67,12 @@ export class BossExitComponent extends Component {
         /** Boss 实体 ID */
         bossId: string;
 
-        /** Boss 类型 */
-        bossType: string;
     }) {
         super();
         this.kind = cfg.kind;
         this.timer = cfg.timer;
         this.duration = cfg.duration;
         this.bossId = cfg.bossId;
-        this.bossType = cfg.bossType;
     }
 
     /** 组件类型标识 */
@@ -89,9 +86,6 @@ export class BossExitComponent extends Component {
 
     /** Boss 实体 ID */
     bossId: string;
-
-    /** Boss 类型 */
-    bossType: string;
 
     static check(c: any): c is BossExitComponent {
         return c instanceof BossExitComponent;

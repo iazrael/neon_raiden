@@ -62,7 +62,6 @@ export class ReactEngine {
         toLevel?: number;
         finalLevel?: number;
         bossId?: string;
-        bossType?: string;
     } | null = null;
 
     // Boss Warning 计时器引用

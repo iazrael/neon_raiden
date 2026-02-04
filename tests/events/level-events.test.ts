@@ -33,12 +33,10 @@ describe('关卡事件类型', () => {
     const event: BossExitStartEvent = {
       type: 'BossExitStart',
       bossId: 'entity123',
-      bossType: 'GUARDIAN',
     };
 
     expect(event.type).toBe('BossExitStart');
     expect(event.bossId).toBe('entity123');
-    expect(event.bossType).toBe('GUARDIAN');
   });
 
   test('VictoryEvent 结构正确', () => {
