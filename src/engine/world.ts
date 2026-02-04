@@ -2,6 +2,7 @@ import { EntityId, Component, ComboState, RenderState, BossState, BossId } from 
 import { GameEvent, EventType } from './events';
 import {  STARTING_CREDITS } from './configs';
 import { BOSS_SPAWN_TIME } from './configs/bossConstants';
+import { LevelState } from './types/level';
 
 /**
  * 渲染上下文
@@ -60,6 +61,9 @@ export interface World {
     // Boss 刷怪状态
     bossState: BossState;
 
+    // 关卡状态
+    levelState: LevelState;
+
     // 渲染上下文（由 RenderSystem 使用）
     renderContext?: RenderContext;
 }
@@ -106,6 +110,12 @@ export function createWorld(): World {
             bossId: 0,
             timer: BOSS_SPAWN_TIME,
             spawned: false,
+        },
+        levelState: {
+            currentLevel: 1,
+            progress: 0,
+            elapsedTime: 0,
+            killCount: 0,
         },
     };
 }
