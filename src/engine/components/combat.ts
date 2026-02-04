@@ -384,7 +384,7 @@ export class Homing extends Component {
     constructor(cfg: {
         /** 索敌范围（像素） */
         searchRange: number;
-        /** 转向速度（弧度/帧） */
+        /** 转向速度（弧度/秒） */
         turnSpeed: number;
         /** 当前锁定目标（运行时动态更新） */
         targetId?: EntityId;
@@ -397,7 +397,7 @@ export class Homing extends Component {
 
     /** 索敌范围（像素） */
     searchRange: number;
-    /** 转向速度（弧度/帧） */
+    /** 转向速度（弧度/秒） */
     turnSpeed: number;
     /** 当前锁定目标的实体 ID（运行时动态更新） */
     targetId?: EntityId;

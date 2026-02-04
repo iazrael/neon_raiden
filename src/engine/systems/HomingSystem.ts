@@ -75,7 +75,9 @@ export function HomingSystem(world: World, dt: number): void {
             while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
             while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-            const maxTurn = homing.turnSpeed;
+            // 计算最大转向角度（turnSpeed 是弧度/秒，dt 是毫秒，需要转换为秒）
+            const dtInSeconds = dt / 1000;
+            const maxTurn = homing.turnSpeed * dtInSeconds;
             const newAngle = currentAngle + Math.max(-maxTurn, Math.min(maxTurn, angleDiff));
 
             const speed = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);

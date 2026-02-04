@@ -15,7 +15,7 @@ import { WeaponUpgradeSpec } from '../blueprints/base';
  * - bulletCount: 发射子弹数量（覆盖 WeaponSpec.bulletCount）
  * - spread: 散射角度（度数，覆盖 WeaponSpec.spread）
  * - sizeMultiplier: 尺寸倍率（影响 Sprite.scale 和 HitBox.radius）
- * - homing: 导弹索敌配置（searchRange, turnSpeed）
+ * - homing: 导弹索敌配置（searchRange: 像素, turnSpeed: 弧度/秒）
  * - chain: 特斯拉连锁配置（count, range）
  * - laser: 激光光束配置（beamCount, widthMultiplier）
  */
@@ -52,21 +52,21 @@ export const WEAPON_UPGRADE_TABLE: Record<WeaponId, WeaponUpgradeSpec> = {
                 damageMultiplier: 1.0,
                 fireRateMultiplier: 1.0,
                 bulletCount: 1,
-                homing: { searchRange: 600, turnSpeed: 0.15 },
+                homing: { searchRange: 600, turnSpeed: 9 },
             },
             {
                 level: 2,
                 damageMultiplier: 1.4,
                 fireRateMultiplier: 1.2,
                 bulletCount: 2,
-                homing: { searchRange: 600, turnSpeed: 0.15 },
+                homing: { searchRange: 600, turnSpeed: 9 },
             },
             {
                 level: 3,
                 damageMultiplier: 1.8,
                 fireRateMultiplier: 1.4,
                 bulletCount: 3,
-                homing: { searchRange: 700, turnSpeed: 0.20 },
+                homing: { searchRange: 700, turnSpeed: 12 },
             },
         ],
     },

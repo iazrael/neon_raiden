@@ -209,68 +209,6 @@ function drawSprite(ctx: CanvasRenderingContext2D, item: RenderItem, camX: numbe
     ctx.restore();
 }
 
-// /**
-//  * 绘制粒子
-//  */
-// function drawParticle(
-//     ctx: CanvasRenderingContext2D,
-//     item: RenderItem,
-//     camX: number,
-//     camY: number
-// ): void {
-//     const { transform, particle, lifetime } = item;
-//     if (!particle) return;
-
-//     // 计算透明度 - 基于 Lifetime 衰减
-//     let alpha = 1;
-//     if (lifetime) {
-//         const maxLife = particle.maxLife > 0
-//             ? particle.maxLife
-//             : particle.maxFrame * 16.66;
-//         alpha = Math.max(0, Math.min(1, lifetime.timer / maxLife));
-//     }
-
-//     const size = particle.scale;
-
-//     ctx.save();
-//     ctx.globalAlpha = alpha;
-//     ctx.fillStyle = particle.color;
-//     ctx.beginPath();
-//     ctx.arc(transform.x - camX, transform.y - camY, size, 0, Math.PI * 2);
-//     ctx.fill();
-//     ctx.restore();
-// }
-
-// /**
-//  * 绘制冲击波
-//  */
-// function drawShockwave(
-//     ctx: CanvasRenderingContext2D,
-//     item: RenderItem,
-//     camX: number,
-//     camY: number,
-//     dt: number
-// ): void {
-//     const { transform, shockwave } = item;
-//     if (!shockwave) return;
-
-//     // 更新冲击波动画
-//     const timeScale = dt / 16.66;
-//     shockwave.radius += (shockwave.maxRadius - shockwave.radius) * 0.1 * timeScale;
-//     shockwave.life -= 0.02 * timeScale;
-
-//     ctx.save();
-//     ctx.globalAlpha = Math.max(0, shockwave.life);
-//     ctx.shadowColor = shockwave.color;
-//     ctx.shadowBlur = 15;
-//     ctx.lineWidth = shockwave.width;
-//     ctx.strokeStyle = shockwave.color;
-//     ctx.beginPath();
-//     ctx.arc(transform.x - camX, transform.y - camY, shockwave.radius, 0, Math.PI * 2);
-//     ctx.stroke();
-//     ctx.restore();
-// }
-
 /**
  * 绘制玩家特效
  */

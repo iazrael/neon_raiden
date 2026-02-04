@@ -77,7 +77,7 @@ export interface WeaponSpec {
 export interface HomingUpgrade {
     /** 索敌范围（像素） */
     searchRange: number;
-    /** 转向速度（弧度/帧） */
+    /** 转向速度（弧度/秒） */
     turnSpeed: number;
 }
 
