@@ -24,6 +24,11 @@ import { getEvents } from '../world';
  * 此类需要在游戏循环中每帧调用 processEvents() 来处理当帧事件。
  */
 export class StorageEventListener {
+  /** 拾取武器 itemId 前缀 */
+  private readonly PICKUP_WEAPON_PREFIX = 'pickup_weapon_';
+  /** 拾取道具 itemId 前缀 */
+  private readonly PICKUP_BUFF_PREFIX = 'pickup_buff_';
+
   private storage: GameStorage;
   private currentFighterId: FighterId;
   private currentGameStartTime: number = 0;
@@ -36,6 +41,22 @@ export class StorageEventListener {
   constructor(storage: GameStorage) {
     this.storage = storage;
     this.currentFighterId = FighterId.NEON;
+  }
+
+  /**
+   * 验证字符串是否为有效的 WeaponId
+   * @param id 待验证的字符串
+   */
+  private isValidWeaponId(id: string): id is WeaponId {
+    return Object.values(WeaponId).includes(id as WeaponId);
+  }
+
+  /**
+   * 验证字符串是否为有效的 BuffType
+   * @param id 待验证的字符串
+   */
+  private isValidBuffType(id: string): id is BuffType {
+    return Object.values(BuffType).includes(id as BuffType);
   }
 
   /**
@@ -100,7 +121,7 @@ export class StorageEventListener {
     // 处理命中事件（记录最高伤害）
     const hitEvents = getEvents<HitEvent>(world, 'Hit');
     for (const event of hitEvents) {
-      await this.onHit(event, world);
+      await this.onHit(event);
     }
 
     // 处理击杀事件
@@ -149,7 +170,7 @@ export class StorageEventListener {
   /**
    * 处理命中事件 - 记录最高伤害
    */
-  private async onHit(event: HitEvent, world: World): Promise<void> {
+  private async onHit(event: HitEvent): Promise<void> {
     const damage = event.damage;
     this.currentSessionDamage = Math.max(this.currentSessionDamage, damage);
 
@@ -201,12 +222,16 @@ export class StorageEventListener {
     const itemId = event.itemId;
 
     // 判断是武器还是道具
-    if (itemId.startsWith('pickup_weapon_')) {
-      const weaponIdStr = itemId.replace('pickup_weapon_', '') as WeaponId;
-      await this.storage.recordWeapon(weaponIdStr, this.currentSessionDamage);
-    } else if (itemId.startsWith('pickup_buff_')) {
-      const buffTypeStr = itemId.replace('pickup_buff_', '') as BuffType;
-      await this.storage.recordItem(buffTypeStr);
+    if (itemId.startsWith(this.PICKUP_WEAPON_PREFIX)) {
+      const weaponIdStr = itemId.replace(this.PICKUP_WEAPON_PREFIX, '');
+      if (this.isValidWeaponId(weaponIdStr)) {
+        await this.storage.recordWeapon(weaponIdStr, this.currentSessionDamage);
+      }
+    } else if (itemId.startsWith(this.PICKUP_BUFF_PREFIX)) {
+      const buffTypeStr = itemId.replace(this.PICKUP_BUFF_PREFIX, '');
+      if (this.isValidBuffType(buffTypeStr)) {
+        await this.storage.recordItem(buffTypeStr);
+      }
     }
   }
 
