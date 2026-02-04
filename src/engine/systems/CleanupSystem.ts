@@ -11,8 +11,8 @@
  */
 
 import { World } from '../world';
-import { DestroyTag } from '../components';
-import { freeId, removeEntity, view } from '../world';
+import { DestroyTag, Homing, EnemyTag, BossTag } from '../components';
+import { freeId, removeEntity, view, getEntity } from '../world';
 
 /**
  * 统计信息
@@ -39,7 +39,24 @@ export function CleanupSystem(world: World, dt: number): void {
     let removedCount = 0;
 
     // 查找所有带有DestroyTag的实体并删除它们
-    for (const [id, [destroyTag]] of view(world, [DestroyTag])) {
+    for (const [id, comps] of view(world, [DestroyTag])) {
+        // 如果导弹有Homing组件且锁定了目标，减少目标的计数
+        const homing = comps.find(Homing.check);
+        if (homing && homing.targetId !== undefined) {
+            const targetComps = getEntity(world, homing.targetId);
+            if (targetComps) {
+                const enemyTag = targetComps.find(EnemyTag.check);
+                const bossTag = targetComps.find(BossTag.check);
+
+                if (enemyTag && enemyTag.incomingMissiles > 0) {
+                    enemyTag.incomingMissiles--;
+                } else if (bossTag && bossTag.incomingMissiles > 0) {
+                    bossTag.incomingMissiles--;
+                }
+            }
+        }
+
+        // 删除实体
         removeEntity(world, id);
         removedCount++;
     }
