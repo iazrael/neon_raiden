@@ -133,7 +133,7 @@ export interface ChainLightningEvent extends BaseEvent<'ChainLightning'> {
 
 // ⑲ 游戏胜利事件
 export interface VictoryEvent extends BaseEvent<'Victory'> {
-  // 无额外字段
+  finalLevel: number;
 }
 
 // ⑳ 游戏失败事件
@@ -162,4 +162,26 @@ export interface BossEntranceCompleteEvent extends BaseEvent<'BossEntranceComple
 export interface BulletBouncedEvent extends BaseEvent<'BulletBounced'> {
     pos: { x: number; y: number }; // 反弹位置
     entityId: EntityId;            // 子弹实体 ID
+}
+
+// ㉖ 关卡过渡开始事件（用于 ReactEngine 更新 UI）
+export interface LevelTransitionStartEvent extends BaseEvent<'LevelTransitionStart'> {
+    fromLevel: number;
+    toLevel: number;
+}
+
+// ㉗ 关卡过渡完成事件（用于 ReactEngine 更新 UI）
+export interface LevelTransitionCompleteEvent extends BaseEvent<'LevelTransitionComplete'> {
+    level: number;
+}
+
+// ㉘ Boss 退场开始事件（用于 ReactEngine 更新 UI）
+export interface BossExitStartEvent extends BaseEvent<'BossExitStart'> {
+    bossId: string;
+    bossType: string;
+}
+
+// ㉙ 第一关进入事件（用于 ReactEngine 播放开始动画）
+export interface StageOneIntroEvent extends BaseEvent<'StageOneIntro'> {
+    duration: number;
 }
