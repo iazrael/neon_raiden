@@ -15,7 +15,13 @@ import { World, pushEvent, getEvents, generateId, addComponent, removeEntity } f
 import { LEVEL_CONFIG } from '../configs/level-config';
 import { view } from '../world';
 import { LevelTransitionComponent, BossExitComponent } from '../components/transition';
-import { BossDefeatEvent, BossExitStartEvent } from '../events';
+import {
+    BossDefeatEvent,
+    BossExitStartEvent,
+    LevelTransitionStartEvent,
+    LevelTransitionCompleteEvent,
+    StageOneIntroEvent
+} from '../events';
 
 /**
  * 更新关卡进度
@@ -141,7 +147,6 @@ function updateBossExit(world: World, dt: number): void {
  * 功能说明：
  * 1. 创建 LevelTransitionComponent 实体
  * 2. 推送 LevelTransitionStartEvent 事件
- * 3. 如果是第一关，推送 StageOneIntroEvent 事件
  *
  * @param world 世界对象
  * @param fromLevel 来源关卡
@@ -163,7 +168,7 @@ export function startLevelTransition(world: World, fromLevel: number, toLevel: n
         type: 'LevelTransitionStart',
         fromLevel,
         toLevel,
-    });
+    } as LevelTransitionStartEvent);
 }
 
 /**
@@ -172,6 +177,7 @@ export function startLevelTransition(world: World, fromLevel: number, toLevel: n
  * 功能说明：
  * 1. 更新所有 LevelTransitionComponent 的计时器
  * 2. 当过渡完成时，更新 currentLevel 并推送事件
+ * 3. 如果是第一关，推送 StageOneIntroEvent 事件
  *
  * @param world 世界对象
  * @param dt 增量时间（毫秒）
@@ -195,7 +201,15 @@ function updateLevelTransitions(world: World, dt: number): void {
             pushEvent(world, {
                 type: 'LevelTransitionComplete',
                 level: transComp.toLevel,
-            });
+            } as LevelTransitionCompleteEvent);
+
+            // 如果是第一关，推送进入动画事件
+            if (transComp.toLevel === 1) {
+                pushEvent(world, {
+                    type: 'StageOneIntro',
+                    duration: LEVEL_CONFIG.ANIMATION.STAGE_ONE_INTRO_DURATION,
+                } as StageOneIntroEvent);
+            }
         }
     }
 }
