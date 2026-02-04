@@ -21,6 +21,7 @@ import { BOSSES_TABLE } from '../blueprints/bosses';
 import { pushEvent, view, World } from '../world';
 import { getEnemyStats } from '../configs/enemyGrowth';
 import { BOSS_SPAWN_TIME } from '../configs/bossConstants';
+import { LEVEL_CONFIG } from '../configs/level-config';
 
 
 /**
@@ -57,8 +58,14 @@ function getRandomSpawnPos(world: World): { x: number; y: number } {
  * @param enemyType 敌人类型
  */
 function applyEnemyGrowth(world: World, enemyId: EntityId, enemyType: EnemyId): void {
+    const state = world.levelState;
+    if (!state) {
+        console.error('[applyEnemyGrowth] levelState未初始化');
+        return;
+    }
+
     // 获取关卡成长后的属性
-    const stats = getEnemyStats(enemyType, world.level);
+    const stats = getEnemyStats(enemyType, state.currentLevel);
 
     // 获取敌人组件数组
     const comps = world.entities.get(enemyId);
@@ -142,8 +149,17 @@ function shouldAffordEnemy(cost: number, credits: number, cap: number): boolean 
  * @param dt 时间增量（毫秒）
  */
 export function SpawnSystem(world: World, dt: number): void {
-    const config = LEVEL_CONFIGS[world.level];
-    if (!config) return;
+    const state = world.levelState;
+    if (!state) {
+        console.error('[SpawnSystem] levelState未初始化');
+        return;
+    }
+
+    const config = LEVEL_CONFIGS[state.currentLevel];
+    if (!config) {
+        console.error(`[SpawnSystem] 关卡${state.currentLevel}配置不存在`);
+        return;
+    }
 
     // ==============================
     // 1. 发工资 (Income Phase)
@@ -171,7 +187,7 @@ export function SpawnSystem(world: World, dt: number): void {
 
     // 检查是否需要刷 Boss
     if (shouldSpawnBoss(world)) {
-        doSpawnBoss(world, config.boss);
+        spawnBossWithConfig(world, config.boss);
         return;
     }
 
@@ -215,6 +231,12 @@ export function SpawnSystem(world: World, dt: number): void {
  * 检查是否需要刷 Boss
  */
 function shouldSpawnBoss(world: World): boolean {
+    const state = world.levelState;
+    if (!state) {
+        console.error('[SpawnSystem] levelState未初始化');
+        return false;
+    }
+
     if (world.bossState.spawned) return false;
 
     // 检查场上是否已有 Boss
@@ -222,7 +244,17 @@ function shouldSpawnBoss(world: World): boolean {
         return false; // 已有 Boss，不刷新的
     }
 
-    // 时间到了，刷 Boss (使用配置的时间或默认 60 秒)
+    // 检查新的 Boss 生成条件：进度>=90% 且 时间>=60秒
+    const shouldSpawnBossByProgress =
+        state.progress >= LEVEL_CONFIG.PROGRESS.BOSS_READY_THRESHOLD &&
+        state.elapsedTime >= LEVEL_CONFIG.PROGRESS.MIN_LEVEL_DURATION;
+
+    if (shouldSpawnBossByProgress) {
+        world.bossState.spawned = true;
+        return true;
+    }
+
+    // 保留原有的时间检查逻辑（向后兼容）
     const spawnTime = world.bossState.timer > 0 ? world.bossState.timer : BOSS_SPAWN_TIME;
     if (world.time >= spawnTime) {
         world.bossState.spawned = true;
@@ -235,7 +267,7 @@ function shouldSpawnBoss(world: World): boolean {
 /**
  * 刷 Boss
  */
-function doSpawnBoss(world: World, bossId: BossId): void {
+function spawnBossWithConfig(world: World, bossId: BossId): void {
     const blueprint = BOSSES_TABLE[bossId];
     if (!blueprint) {
         console.warn(`SpawnSystem: No blueprint found for Boss ID '${bossId}'`);
