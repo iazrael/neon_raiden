@@ -13,6 +13,7 @@
 | **Systems** | `src/engine/systems` | **系统**: **纯函数**，负责处理逻辑与状态变更，输入通常为组件数据。 |
 | **Configs** | `src/engine/configs` | **配置**: 存放游戏数值、常量与静态配置表。 |
 | **World/Utils** | `src/engine/world.ts` | **世界/工具**: 包含 `view` 、`getEvents`、`getComponents` 等函数、实体查询及其他公共工具方法。 |
+| **事件系统** | `src/engine/events.ts` | **事件系统**: 定义所有游戏事件类型（如 `PlayerMoveEvent`、`BossDeathEvent`），并在 `World` 中管理事件队列，所有事件都必须在本帧生成和消费，不能跨帧传递。 |
 
 
 ## 🛠 开发与质量约束
