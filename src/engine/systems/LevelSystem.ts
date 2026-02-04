@@ -12,7 +12,7 @@
  */
 
 import { World, pushEvent, getEvents, generateId, addComponent, removeEntity } from '../world';
-import { LEVEL_CONFIG } from '../configs/level-config';
+import { LEVEL_CONFIG, MAX_LEVEL } from '../configs/level-config';
 import { view } from '../world';
 import { LevelTransitionComponent, BossExitComponent } from '../components/transition';
 import {
@@ -20,7 +20,8 @@ import {
     BossExitStartEvent,
     LevelTransitionStartEvent,
     LevelTransitionCompleteEvent,
-    StageOneIntroEvent
+    StageOneIntroEvent,
+    VictoryEvent
 } from '../events';
 
 /**
@@ -134,9 +135,19 @@ function updateBossExit(world: World, dt: number): void {
             // 移除退场实体
             removeEntity(world, entityId);
 
-            // 触发关卡过渡
             const currentLevel = world.levelState?.currentLevel ?? 1;
-            startLevelTransition(world, currentLevel, currentLevel + 1);
+
+            // 检查是否是最后一关
+            if (currentLevel >= MAX_LEVEL) {
+                // 通关！触发胜利事件
+                pushEvent(world, {
+                    type: 'Victory',
+                    finalLevel: currentLevel,
+                } as VictoryEvent);
+            } else {
+                // 触发关卡过渡到下一关
+                startLevelTransition(world, currentLevel, currentLevel + 1);
+            }
         }
     }
 }
@@ -194,21 +205,33 @@ function updateLevelTransitions(world: World, dt: number): void {
             // 移除过渡实体
             removeEntity(world, entityId);
 
-            // 更新当前关卡
-            world.levelState!.currentLevel = transComp.toLevel;
+            const nextLevel = transComp.toLevel;
 
-            // 推送 LevelTransitionCompleteEvent 事件
-            pushEvent(world, {
-                type: 'LevelTransitionComplete',
-                level: transComp.toLevel,
-            } as LevelTransitionCompleteEvent);
-
-            // 如果是第一关，推送进入动画事件
-            if (transComp.toLevel === 1) {
+            // 检查是否通关（LEVEL_CONFIGS[11] 不存在，所以 nextLevel = 11 时触发胜利）
+            if (nextLevel > MAX_LEVEL) {
+                // 通关！触发胜利事件
+                const currentLevel = world.levelState?.currentLevel ?? 1;
                 pushEvent(world, {
-                    type: 'StageOneIntro',
-                    duration: LEVEL_CONFIG.ANIMATION.STAGE_ONE_INTRO_DURATION,
-                } as StageOneIntroEvent);
+                    type: 'Victory',
+                    finalLevel: currentLevel,
+                } as VictoryEvent);
+            } else {
+                // 更新当前关卡
+                world.levelState!.currentLevel = nextLevel;
+
+                // 推送 LevelTransitionCompleteEvent 事件
+                pushEvent(world, {
+                    type: 'LevelTransitionComplete',
+                    level: nextLevel,
+                } as LevelTransitionCompleteEvent);
+
+                // 如果是第一关，推送进入动画事件
+                if (nextLevel === 1) {
+                    pushEvent(world, {
+                        type: 'StageOneIntro',
+                        duration: LEVEL_CONFIG.ANIMATION.STAGE_ONE_INTRO_DURATION,
+                    } as StageOneIntroEvent);
+                }
             }
         }
     }

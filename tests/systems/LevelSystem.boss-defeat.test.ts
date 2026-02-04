@@ -40,7 +40,7 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
             const exitEntities = [...view(world, [BossExitComponent])];
             expect(exitEntities.length).toBe(1);
             const [, [exitComp]] = exitEntities[0];
-            expect(exitComp.bossId).toBe('boss1');
+            expect(exitComp.bossId).toBe(BossId.GUARDIAN);
             expect(exitComp.timer).toBe(0);
         });
 
@@ -85,8 +85,8 @@ describe('LevelSystem - Boss 击杀处理功能', () => {
             // 检查是否推送了 BossExitStartEvent
             const exitStartEvents = getEvents<BossExitStartEvent>(world, 'BossExitStart');
             expect(exitStartEvents.length).toBe(1);
-            expect(exitStartEvents[0].bossId).toBe('boss2');
-            expect(exitStartEvents[0].bossType).toBe('boss2');
+            expect(exitStartEvents[0].bossId).toBe(BossId.INTERCEPTOR);
+            expect(exitStartEvents[0].bossType).toBe('interceptor');
         });
     });
 
