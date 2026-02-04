@@ -138,25 +138,27 @@ export const WEAPON_UPGRADE_TABLE: Record<WeaponId, WeaponUpgradeSpec> = {
  * 获取指定武器等级的升级配置
  * @param weaponId 武器 ID
  * @param level 武器等级（从 1 开始）
- * @returns 升级配置，如果未找到则返回默认值
+ * @returns 升级配置，如果等级超过最大值则返回最高等级配置
  */
 export function getWeaponUpgrade(weaponId: WeaponId, level: number) {
     const weaponUpgrades = WEAPON_UPGRADE_TABLE[weaponId];
-    if (!weaponUpgrades) {
+    if (!weaponUpgrades || weaponUpgrades.levels.length === 0) {
         return {
             level: 1,
             damageMultiplier: 1.0,
             fireRateMultiplier: 1.0,
         };
     }
+
+    // 尝试精确匹配等级
     const levelSpec = weaponUpgrades.levels.find((l) => l.level === level);
-    return (
-        levelSpec || {
-            level: 1,
-            damageMultiplier: 1.0,
-            fireRateMultiplier: 1.0,
-        }
-    );
+
+    // 如果找不到（等级超过最大值），返回最高等级配置
+    if (!levelSpec) {
+        return weaponUpgrades.levels[weaponUpgrades.levels.length - 1];
+    }
+
+    return levelSpec;
 }
 
 /**

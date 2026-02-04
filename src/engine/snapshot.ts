@@ -1,4 +1,5 @@
 import { ComboState, WeaponId, EnemyId, BossId } from "./types";
+import { LevelTransitionComponent, BossExitComponent } from "./components/transition";
 import {
     Health,
     Transform,
@@ -28,6 +29,18 @@ export interface GameSnapshot {
     gameStateEvent: 'defeat' | 'victory' | null;
     /** Boss 事件：出场、完成或击杀 */
     bossEvent: { type: 'entranceStart' | 'entranceComplete' | 'defeat'; bossId: BossId } | null;
+
+    /** 关卡事件 */
+    levelEvent: {
+        type: 'stageOneIntro' | 'levelTransitionStart' | 'levelTransitionComplete' | 'bossExitStart' | 'victory';
+        duration?: number;
+        fromLevel?: number;
+        toLevel?: number;
+        finalLevel?: number;
+        level?: number;
+        bossId?: string;
+        bossType?: string;
+    } | null;
 
     player: {
         hp: number;
@@ -73,6 +86,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
             comboState: null,
             gameStateEvent: null,
             bossEvent: null,
+            levelEvent: null,
             player: {
                 hp: 100,
                 maxHp: 100,
@@ -148,12 +162,47 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
     // 收集游戏状态事件
     let gameStateEvent: 'defeat' | 'victory' | null = null;
     let bossEvent: { type: 'entranceStart' | 'entranceComplete' | 'defeat'; bossId: BossId } | null = null;
+    let levelEvent = null as {
+        type: 'stageOneIntro' | 'levelTransitionStart' | 'levelTransitionComplete' | 'bossExitStart' | 'victory';
+        duration?: number;
+        fromLevel?: number;
+        toLevel?: number;
+        finalLevel?: number;
+        bossId?: string;
+        bossType?: string;
+    } | null;
 
     for (const event of world.events) {
         if (event.type === 'Defeat') {
             gameStateEvent = 'defeat';
         } else if (event.type === 'Victory') {
             gameStateEvent = 'victory';
+            levelEvent = {
+                type: 'victory',
+                finalLevel: event.finalLevel
+            };
+        } else if (event.type === 'StageOneIntro') {
+            levelEvent = {
+                type: 'stageOneIntro',
+                duration: event.duration
+            };
+        } else if (event.type === 'LevelTransitionStart') {
+            levelEvent = {
+                type: 'levelTransitionStart',
+                fromLevel: event.fromLevel,
+                toLevel: event.toLevel
+            };
+        } else if (event.type === 'LevelTransitionComplete') {
+            levelEvent = {
+                type: 'levelTransitionComplete' as const,
+                ...(event as any)
+            } as any;
+        } else if (event.type === 'BossExitStart') {
+            levelEvent = {
+                type: 'bossExitStart',
+                bossId: event.bossId,
+                bossType: event.bossType
+            };
         } else if (event.type === 'BossEntranceStart') {
             bossEvent = { type: 'entranceStart', bossId: event.bossId };
         } else if (event.type === 'BossEntranceComplete') {
@@ -174,6 +223,7 @@ export function buildSnapshot(world: World, t: number): GameSnapshot {
         comboState: world.comboState,
         gameStateEvent,
         bossEvent,
+        levelEvent,
         player,
         boss:bossInfo,
         bullets,

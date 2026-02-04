@@ -54,6 +54,17 @@ export class ReactEngine {
     // Boss 状态
     public boss: { hp: number; maxHp: number } | null = null;
 
+    // 关卡事件状态
+    public levelEvent: {
+        type: 'stageOneIntro' | 'levelTransitionStart' | 'levelTransitionComplete' | 'bossExitStart' | 'victory';
+        duration?: number;
+        fromLevel?: number;
+        toLevel?: number;
+        finalLevel?: number;
+        bossId?: string;
+        bossType?: string;
+    } | null = null;
+
     // Boss Warning 计时器引用
     private bossWarningTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -70,6 +81,7 @@ export class ReactEngine {
     private onBossWarning: (show: boolean) => void = () => {};
     private onComboChange: (state: ComboState) => void = () => {};
     private onBossChange: (boss: { hp: number; maxHp: number } | null) => void = () => {};
+    private onLevelEventChange: (event: typeof ReactEngine.prototype.levelEvent) => void = () => {};
 
     constructor(
         canvas: HTMLCanvasElement | null = null,
@@ -81,7 +93,8 @@ export class ReactEngine {
         onMaxLevelChange?: (level: number) => void,
         onBossWarning?: (show: boolean) => void,
         onComboChange?: (state: ComboState) => void,
-        onBossChange?: (boss: { hp: number; maxHp: number } | null) => void
+        onBossChange?: (boss: { hp: number; maxHp: number } | null) => void,
+        onLevelEventChange?: (event: typeof ReactEngine.prototype.levelEvent) => void
     ) {
         this.engine = new Engine();
         this.canvas = canvas ?? null;
@@ -96,6 +109,7 @@ export class ReactEngine {
         if (onBossWarning) this.onBossWarning = onBossWarning;
         if (onComboChange) this.onComboChange = onComboChange;
         if (onBossChange) this.onBossChange = onBossChange;
+        if (onLevelEventChange) this.onLevelEventChange = onLevelEventChange;
     }
 
     /**
@@ -185,6 +199,9 @@ export class ReactEngine {
             clearTimeout(this.bossWarningTimer);
             this.bossWarningTimer = null;
         }
+
+        // 清理关卡事件
+        this.levelEvent = null;
     }
 
     /**
@@ -320,5 +337,9 @@ export class ReactEngine {
             this.boss = null;
         }
         this.onBossChange(this.boss);
+
+        // 同步关卡事件
+        this.levelEvent = snapshot.levelEvent;
+        this.onLevelEventChange(this.levelEvent);
     }
 }
