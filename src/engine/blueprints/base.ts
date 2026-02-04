@@ -73,13 +73,59 @@ export interface WeaponSpec {
 }
 
 // ============== 导弹索敌属性 =================
-/** 导弹索敌升级属性 */
+/**
+ * 导弹索敌升级配置
+ *
+ * @remarks
+ * 控制导弹的自动索敌行为，包括搜索范围、转向速度和锁定限制。
+ *
+ * **差异化锁定默认值：**
+ * - 普通敌人（100 HP）：默认1枚导弹锁定，避免火力浪费
+ * - Boss（5000 HP）：默认3枚导弹锁定，集中火力输出
+ *
+ * @example
+ * ```typescript
+ * // 使用默认值（Boss=3，普通敌人=1）
+ * const homingConfig: HomingUpgrade = {
+ *     searchRange: 300,
+ *     turnSpeed: Math.PI
+ * };
+ *
+ * // 覆盖默认值
+ * const customConfig: HomingUpgrade = {
+ *     searchRange: 300,
+ *     turnSpeed: Math.PI,
+ *     maxMissilesPerTarget: 5  // Boss也可以被5枚导弹锁定
+ * };
+ * ```
+ */
 export interface HomingUpgrade {
     /** 索敌范围（像素） */
     searchRange: number;
-    /** 转向速度（弧度/秒） */
+
+    /**
+     * 转向速度（弧度/秒）
+     *
+     * @remarks
+     * 控制导弹每秒能转向的最大角度。例如 `Math.PI` 表示180度/秒。
+     */
     turnSpeed: number;
-    /** 单个敌人同时能被锁定的最大导弹数量（默认1，防止火力过度集中） */
+
+    /**
+     * 单个目标同时能被锁定的最大导弹数量（可选，覆盖默认值）
+     *
+     * @remarks
+     * 如果不提供，将使用基于实体类型的默认值：
+     * - Boss：默认3枚（集中火力）
+     * - 普通敌人：默认1枚（避免火力浪费）
+     *
+     * 设置此值将覆盖默认行为：
+     * - `1`：强制每个目标最多被1枚导弹锁定
+     * - `3`：允许最多3枚导弹锁定同一目标
+     * - `undefined`：使用默认的差异化限制（推荐）
+     *
+     * @default undefined（使用基于实体类型的默认值）
+     */
     maxMissilesPerTarget?: number;
 }
 
