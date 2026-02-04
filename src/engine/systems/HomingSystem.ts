@@ -10,7 +10,40 @@
  */
 
 import { World, view, getEntity, getComponents } from '../world';
-import { Transform, Velocity, Homing, Health, EnemyTag } from '../components';
+import { Transform, Velocity, Homing, Health, EnemyTag, BossTag } from '../components';
+import { Component } from '../types';
+
+/**
+ * 获取目标的默认导弹锁定限制
+ * @param targetComps 目标实体的组件列表
+ * @param userConfig 用户配置的限制（如果提供）
+ * @returns 最大锁定导弹数量
+ */
+function getDefaultMaxMissiles(
+    targetComps: Component[] | undefined,
+    userConfig?: number
+): number {
+    // 如果用户提供了明确配置，使用用户配置
+    if (userConfig !== undefined) {
+        return userConfig;
+    }
+
+    // 否则根据实体类型返回默认值
+    if (!targetComps) {
+        return 1; // 默认1枚
+    }
+
+    const hasBossTag = targetComps.some(BossTag.check);
+    const hasEnemyTag = targetComps.some(EnemyTag.check);
+
+    if (hasBossTag) {
+        return 3; // Boss 可以被3枚导弹锁定（集中火力）
+    } else if (hasEnemyTag) {
+        return 1; // 普通敌人1枚（避免火力浪费）
+    }
+
+    return 1; // 其他情况默认1枚
+}
 
 /**
  * 导弹索敌系统主函数
@@ -23,12 +56,32 @@ export function HomingSystem(world: World, dt: number): void {
         if (homing.targetId !== undefined) {
             const target = getEntity(world, homing.targetId);
             if (!target) {
-                // 目标实体不存在，清除目标ID并继续搜索新目标
+                // 目标实体不存在，清除目标ID并减少计数
+                const oldComps = getEntity(world, homing.targetId);
+                const enemyTag = oldComps?.find(EnemyTag.check);
+                const bossTag = oldComps?.find(BossTag.check);
+
+                if (enemyTag && enemyTag.incomingMissiles > 0) {
+                    enemyTag.incomingMissiles--;
+                } else if (bossTag && bossTag.incomingMissiles > 0) {
+                    bossTag.incomingMissiles--;
+                }
+
                 homing.targetId = undefined;
             } else {
                 const [targetHealth] = getComponents(world, homing.targetId, [Health]);
                 if (!targetHealth || targetHealth.hp <= 0) {
-                    // 目标死亡，清除目标ID并继续搜索新目标
+                    // 目标死亡，清除目标ID并减少计数
+                    const oldComps = getEntity(world, homing.targetId);
+                    const enemyTag = oldComps?.find(EnemyTag.check);
+                    const bossTag = oldComps?.find(BossTag.check);
+
+                    if (enemyTag && enemyTag.incomingMissiles > 0) {
+                        enemyTag.incomingMissiles--;
+                    } else if (bossTag && bossTag.incomingMissiles > 0) {
+                        bossTag.incomingMissiles--;
+                    }
+
                     homing.targetId = undefined;
                 }
             }
@@ -41,18 +94,59 @@ export function HomingSystem(world: World, dt: number): void {
             let nearestDistSq = searchRangeSq;
             let nearestId: number | undefined;
 
-            // 直接使用 view 查询带 Transform 和 EnemyTag 的实体，避免重复 getEntity 和 some 调用
-            for (const [enemyId, [enemyTransform]] of view(world, [Transform, EnemyTag])) {
+            // 同时搜索带 Transform 和 EnemyTag 的实体
+            for (const [enemyId, [enemyTransform, enemyTag]] of view(world, [Transform, EnemyTag])) {
                 const dx = enemyTransform.x - transform.x;
                 const dy = enemyTransform.y - transform.y;
                 const distSq = dx * dx + dy * dy;
+
+                // 使用差异化锁定限制
+                const enemyComps = getEntity(world, enemyId);
+                const maxLocks = getDefaultMaxMissiles(enemyComps, homing.maxMissilesPerTarget);
+                if (enemyTag.incomingMissiles >= maxLocks) {
+                    continue; // 跳过已达到锁定上限的敌人
+                }
 
                 if (distSq < nearestDistSq) {
                     nearestDistSq = distSq;
                     nearestId = enemyId;
                 }
             }
-            homing.targetId = nearestId;
+
+            // 搜索 Boss（使用相同逻辑）
+            for (const [bossId, [bossTransform, bossTag]] of view(world, [Transform, BossTag])) {
+                const dx = bossTransform.x - transform.x;
+                const dy = bossTransform.y - transform.y;
+                const distSq = dx * dx + dy * dy;
+
+                // 使用差异化锁定限制
+                const bossComps = getEntity(world, bossId);
+                const maxLocks = getDefaultMaxMissiles(bossComps, homing.maxMissilesPerTarget);
+                if (bossTag.incomingMissiles >= maxLocks) {
+                    continue; // 跳过已达到锁定上限的Boss
+                }
+
+                if (distSq < nearestDistSq) {
+                    nearestDistSq = distSq;
+                    nearestId = bossId;
+                }
+            }
+
+            // 锁定目标后增加计数
+            if (nearestId !== undefined) {
+                // 获取目标的标签组件（EnemyTag 或 BossTag）
+                const comps = getEntity(world, nearestId);
+                const enemyTag = comps?.find(EnemyTag.check);
+                const bossTag = comps?.find(BossTag.check);
+
+                if (enemyTag) {
+                    enemyTag.incomingMissiles++;
+                } else if (bossTag) {
+                    bossTag.incomingMissiles++;
+                }
+
+                homing.targetId = nearestId;
+            }
         }
 
         // 调整方向朝向目标
