@@ -39,14 +39,22 @@ export function CleanupSystem(world: World, dt: number): void {
     let removedCount = 0;
 
     // 查找所有带有DestroyTag的实体并删除它们
-    for (const [id, comps] of view(world, [DestroyTag])) {
+    for (const [id] of view(world, [DestroyTag])) {
+        // 获取实体的所有组件（不只是DestroyTag）
+        const allComps = getEntity(world, id);
+        if (!allComps) {
+            removeEntity(world, id);
+            removedCount++;
+            continue;
+        }
+
         // 如果导弹有Homing组件且锁定了目标，减少目标的计数
-        const homing = comps.find(Homing.check);
+        const homing = allComps.find((c): c is Homing => c instanceof Homing);
         if (homing && homing.targetId !== undefined) {
             const targetComps = getEntity(world, homing.targetId);
             if (targetComps) {
-                const enemyTag = targetComps.find(EnemyTag.check);
-                const bossTag = targetComps.find(BossTag.check);
+                const enemyTag = targetComps.find((c): c is EnemyTag => c instanceof EnemyTag);
+                const bossTag = targetComps.find((c): c is BossTag => c instanceof BossTag);
 
                 if (enemyTag && enemyTag.incomingMissiles > 0) {
                     enemyTag.incomingMissiles--;

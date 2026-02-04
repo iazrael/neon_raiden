@@ -34,7 +34,7 @@ describe('HomingSystem', () => {
             const enemyId = generateId();
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 0, y: -100, rot: 0 }));
-            addComponent(world, enemyId, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemyId, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemyId, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 执行系统（dt = 1000ms = 1秒）- 导弹会自动锁定并转向
@@ -76,7 +76,7 @@ describe('HomingSystem', () => {
             const enemyId = generateId();
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 0, y: -100, rot: 0 }));
-            addComponent(world, enemyId, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemyId, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemyId, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             const homing = world.entities.get(missileId)!.find(c => c instanceof Homing)! as Homing;
@@ -111,7 +111,7 @@ describe('HomingSystem', () => {
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+            addComponent(world, bossId, new Health({ hp: 5000, max: 5000 }));
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 执行系统
@@ -142,14 +142,14 @@ describe('HomingSystem', () => {
             const enemyId = generateId();
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 200, y: 0, rot: 0 }));
-            addComponent(world, enemyId, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemyId, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemyId, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 创建Boss（距离100，更近）
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+            addComponent(world, bossId, new Health({ hp: 5000, max: 5000 }));
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 执行系统
@@ -176,7 +176,7 @@ describe('HomingSystem', () => {
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 0, maxHp: 5000 })); // 已死亡
+            addComponent(world, bossId, new Health({ hp: 0, max: 5000 })); // 已死亡
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 手动锁定（模拟锁定后死亡的情况）
@@ -249,7 +249,7 @@ describe('HomingSystem', () => {
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+            addComponent(world, bossId, new Health({ hp: 5000, max: 5000 }));
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 执行系统
@@ -285,14 +285,14 @@ describe('HomingSystem', () => {
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+            addComponent(world, bossId, new Health({ hp: 5000, max: 5000 }));
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 创建普通敌人
             const enemyId = generateId();
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 150, y: 0, rot: 0 }));
-            addComponent(world, enemyId, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemyId, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemyId, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 执行系统
@@ -332,7 +332,7 @@ describe('HomingSystem', () => {
             const enemyId = generateId();
             world.entities.set(enemyId, []);
             addComponent(world, enemyId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, enemyId, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemyId, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemyId, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 执行系统
@@ -370,7 +370,7 @@ describe('HomingSystem', () => {
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+            addComponent(world, bossId, new Health({ hp: 5000, max: 5000 }));
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 第一枚导弹搜索并锁定
@@ -422,7 +422,7 @@ describe('HomingSystem', () => {
             const enemy1Id = generateId();
             world.entities.set(enemy1Id, []);
             addComponent(world, enemy1Id, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, enemy1Id, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemy1Id, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemy1Id, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 阶段1：锁定敌人1
@@ -446,7 +446,7 @@ describe('HomingSystem', () => {
             const enemy2Id = generateId();
             world.entities.set(enemy2Id, []);
             addComponent(world, enemy2Id, new Transform({ x: 150, y: 0, rot: 0 }));
-            addComponent(world, enemy2Id, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemy2Id, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemy2Id, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 阶段3：重新锁定敌人2
@@ -478,20 +478,20 @@ describe('HomingSystem', () => {
             const bossId = generateId();
             world.entities.set(bossId, []);
             addComponent(world, bossId, new Transform({ x: 100, y: 0, rot: 0 }));
-            addComponent(world, bossId, new Health({ hp: 5000, maxHp: 5000 }));
+            addComponent(world, bossId, new Health({ hp: 5000, max: 5000 }));
             addComponent(world, bossId, new BossTag({ id: 'NEON_OVERLORD' as BossId }));
 
             // 创建2个普通敌人（各可锁定1枚）
             const enemy1Id = generateId();
             world.entities.set(enemy1Id, []);
             addComponent(world, enemy1Id, new Transform({ x: 150, y: 0, rot: 0 }));
-            addComponent(world, enemy1Id, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemy1Id, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemy1Id, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             const enemy2Id = generateId();
             world.entities.set(enemy2Id, []);
             addComponent(world, enemy2Id, new Transform({ x: 200, y: 0, rot: 0 }));
-            addComponent(world, enemy2Id, new Health({ hp: 100, maxHp: 100 }));
+            addComponent(world, enemy2Id, new Health({ hp: 100, max: 100 }));
             addComponent(world, enemy2Id, new EnemyTag({ id: 'GUARDIAN' as EnemyId }));
 
             // 执行系统
