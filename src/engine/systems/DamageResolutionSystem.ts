@@ -40,6 +40,25 @@ export function DamageResolutionSystem(world: World, dt: number): void {
 
     // 处理持续伤害 (DOT)
     processDamageOverTime(world, dt);
+
+    // 处理击杀计数
+    processKillCount(world);
+}
+
+/**
+ * 处理击杀计数
+ * 累加本帧内的击杀事件到 levelState.killCount
+ */
+function processKillCount(world: World): void {
+    const state = world.levelState;
+    if (!state) {
+        console.error('[DamageResolutionSystem] levelState未初始化');
+        return;
+    }
+
+    // 累加本帧的所有击杀事件
+    const killEvents = getEvents<KillEvent>(world, 'Kill');
+    state.killCount += killEvents.length;
 }
 
 /**
