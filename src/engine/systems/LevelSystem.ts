@@ -11,10 +11,11 @@
  * @module LevelSystem
  */
 
-import { World } from '../world';
+import { World, pushEvent, getEvents, generateId, addComponent, removeEntity } from '../world';
 import { LEVEL_CONFIG } from '../configs/level-config';
 import { view } from '../world';
-import { LevelTransitionComponent } from '../components/transition';
+import { LevelTransitionComponent, BossExitComponent } from '../components/transition';
+import { BossDefeatEvent, BossExitStartEvent } from '../events';
 
 /**
  * 更新关卡进度
@@ -68,13 +69,145 @@ function updateProgress(world: World, dt: number): void {
 }
 
 /**
+ * 处理 Boss 击杀事件
+ *
+ * 功能说明：
+ * 1. 监听 BossDefeatEvent
+ * 2. 防护检查：确保没有正在进行的退场
+ * 3. 创建 BossExitComponent 实体
+ * 4. 推送 BossExitStartEvent 事件
+ *
+ * @param world 世界对象
+ * @param event Boss 击杀事件
+ */
+function processBossDefeat(world: World, event: BossDefeatEvent): void {
+    // 防护：检查是否已有退场组件
+    const hasExitComponent = [...view(world, [BossExitComponent])].length > 0;
+    if (hasExitComponent) {
+        console.warn('[LevelSystem] Boss退场已进行中，忽略重复触发');
+        return;
+    }
+
+    // 创建 BossExitComponent 实体
+    const exitEntityId = generateId();
+    addComponent(world, exitEntityId, new BossExitComponent({
+        kind: 'BossExit',
+        timer: 0,
+        duration: LEVEL_CONFIG.ANIMATION.BOSS_EXIT_DURATION,
+        bossId: event.bossId,
+        bossType: event.bossId,
+    }));
+
+    // 推送 BossExitStartEvent 事件
+    pushEvent(world, {
+        type: 'BossExitStart',
+        bossId: event.bossId,
+        bossType: event.bossId,
+    } as BossExitStartEvent);
+}
+
+/**
+ * 更新 Boss 退场状态
+ *
+ * 功能说明：
+ * 1. 更新所有 BossExitComponent 的计时器
+ * 2. 当退场完成时，移除组件并触发关卡过渡
+ *
+ * @param world 世界对象
+ * @param dt 增量时间（毫秒）
+ */
+function updateBossExit(world: World, dt: number): void {
+    const exitEntities = [...view(world, [BossExitComponent])];
+
+    for (const [entityId, [exitComp], comps] of exitEntities) {
+        // 更新计时器
+        exitComp.timer += dt;
+
+        // 检查是否完成
+        if (exitComp.timer >= exitComp.duration) {
+            // 移除退场实体
+            removeEntity(world, entityId);
+
+            // 触发关卡过渡
+            const currentLevel = world.levelState?.currentLevel ?? 1;
+            startLevelTransition(world, currentLevel, currentLevel + 1);
+        }
+    }
+}
+
+/**
+ * 开始关卡过渡
+ *
+ * 功能说明：
+ * 1. 创建 LevelTransitionComponent 实体
+ * 2. 推送 LevelTransitionStartEvent 事件
+ * 3. 如果是第一关，推送 StageOneIntroEvent 事件
+ *
+ * @param world 世界对象
+ * @param fromLevel 来源关卡
+ * @param toLevel 目标关卡
+ */
+export function startLevelTransition(world: World, fromLevel: number, toLevel: number): void {
+    // 创建 LevelTransitionComponent 实体
+    const transitionEntityId = generateId();
+    addComponent(world, transitionEntityId, new LevelTransitionComponent({
+        kind: 'LevelTransition',
+        timer: 0,
+        duration: LEVEL_CONFIG.ANIMATION.LEVEL_TRANSITION_DURATION,
+        fromLevel,
+        toLevel,
+    }));
+
+    // 推送 LevelTransitionStartEvent 事件
+    pushEvent(world, {
+        type: 'LevelTransitionStart',
+        fromLevel,
+        toLevel,
+    });
+}
+
+/**
+ * 更新关卡过渡状态
+ *
+ * 功能说明：
+ * 1. 更新所有 LevelTransitionComponent 的计时器
+ * 2. 当过渡完成时，更新 currentLevel 并推送事件
+ *
+ * @param world 世界对象
+ * @param dt 增量时间（毫秒）
+ */
+function updateLevelTransitions(world: World, dt: number): void {
+    const transitionEntities = [...view(world, [LevelTransitionComponent])];
+
+    for (const [entityId, [transComp], comps] of transitionEntities) {
+        // 更新计时器
+        transComp.timer += dt;
+
+        // 检查是否完成
+        if (transComp.timer >= transComp.duration) {
+            // 移除过渡实体
+            removeEntity(world, entityId);
+
+            // 更新当前关卡
+            world.levelState!.currentLevel = transComp.toLevel;
+
+            // 推送 LevelTransitionCompleteEvent 事件
+            pushEvent(world, {
+                type: 'LevelTransitionComplete',
+                level: transComp.toLevel,
+            });
+        }
+    }
+}
+
+/**
  * 关卡系统主函数
  *
  * 负责：
  * - 更新关卡进度
+ * - 处理 Boss 击杀
+ * - 更新 Boss 退场
  * - 处理关卡过渡
- * - 触发 Boss 生成
- * - 调整游戏难度
  *
  * @param world 世界对象
  * @param dt 增量时间（毫秒）
@@ -91,8 +224,15 @@ export function LevelSystem(world: World, dt: number): void {
     // 1. 更新关卡进度
     updateProgress(world, dt);
 
-    // TODO: Task 6-8 的其他功能将在后续实现
-    // - checkAndTriggerBoss()
-    // - handleLevelTransition()
-    // - adjustDifficulty()
+    // 2. 处理 Boss 击杀事件
+    const bossDefeatEvents = getEvents<BossDefeatEvent>(world, 'BossDefeat');
+    for (const event of bossDefeatEvents) {
+        processBossDefeat(world, event);
+    }
+
+    // 3. 更新 Boss 退场
+    updateBossExit(world, dt);
+
+    // 4. 更新关卡过渡
+    updateLevelTransitions(world, dt);
 }
