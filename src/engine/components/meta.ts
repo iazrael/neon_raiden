@@ -48,11 +48,15 @@ export class EnemyTag extends Component {
         this.state = cfg.state ?? 0;
         this.timer = cfg.timer ?? 0;
         this.phaseOffset = cfg.phaseOffset ?? 0;
+        this.incomingMissiles = 0;  // 初始化计数器
     }
     public id: EnemyId;
     public state: number;
     public timer: number; // 计时器，用于行为模式切换等, 单位毫秒
     public phaseOffset: number; // 移动相位偏移，避免同步摆动
+
+    /** 当前追踪此实体的导弹数量 */
+    public incomingMissiles: number = 0;
 
     static check(c: any): c is EnemyTag { return c instanceof EnemyTag; }
 }
@@ -62,8 +66,12 @@ export class BossTag extends Component {
     constructor(cfg: { id: BossId }) {
         super();
         this.id = cfg.id;
+        this.incomingMissiles = 0;  // 初始化计数器
     }
     public id: BossId;
+
+    /** 当前追踪此实体的导弹数量 */
+    public incomingMissiles: number = 0;
 
     static check(c: any): c is BossTag { return c instanceof BossTag; }
 }
