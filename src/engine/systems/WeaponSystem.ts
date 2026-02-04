@@ -294,5 +294,17 @@ function createBullet(ctx: FireContext, angle: number): void {
         };
     }
 
+    // 如果弹药有反弹次数，添加Bounce组件
+    if (finalBounces > 0) {
+        bulletBlueprint.Bounce = {
+            bouncesLeft: finalBounces,
+            bounds: {
+                bounceX: true,   // 左右边界反弹
+                bounceTop: true, // 顶部边界反弹
+                bounceBottom: false, // 底部不反弹（让子弹飞出屏幕）
+            },
+        };
+    }
+
     spawnBullet(world, bulletBlueprint, transform.x, transform.y, angle);
 }

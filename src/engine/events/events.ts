@@ -157,3 +157,9 @@ export interface BossEntranceCompleteEvent extends BaseEvent<'BossEntranceComple
   bossId: BossId;      // Boss 类型
   entityId: EntityId;  // Boss 实体 ID
 }
+
+// ㉕ 子弹反弹事件
+export interface BulletBouncedEvent extends BaseEvent<'BulletBounced'> {
+    pos: { x: number; y: number }; // 反弹位置
+    entityId: EntityId;            // 子弹实体 ID
+}

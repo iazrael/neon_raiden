@@ -72,3 +72,45 @@ export class FireIntent extends Component {
 export class BombIntent extends Component {
     static check(c: any): c is BombIntent { return c instanceof BombIntent; }
 }
+
+/**
+ * 反弹组件 - 标记子弹可以反弹，并追踪反弹状态
+ *
+ * 职责：
+ * - 存储剩余反弹次数
+ * - 标记是否已经反弹过（用于协同效果触发）
+ */
+export class Bounce extends Component {
+    /**
+     * 构造函数
+     * @param cfg 反弹配置
+     */
+    constructor(cfg: {
+        /** 剩余反弹次数 */
+        bouncesLeft: number;
+        /** 反弹边界配置 */
+        bounds?: {
+            /** 是否在左右边界反弹 */
+            bounceX?: boolean;
+            /** 是否在顶部边界反弹 */
+            bounceTop?: boolean;
+            /** 是否在底部边界反弹 */
+            bounceBottom?: boolean;
+        };
+    }) {
+        super();
+        this.bouncesLeft = cfg.bouncesLeft;
+        this.bounds = cfg.bounds ?? { bounceX: true, bounceTop: true, bounceBottom: false };
+    }
+    /** 剩余反弹次数 */
+    public bouncesLeft: number;
+    /** 反弹边界配置 */
+    public bounds: {
+        bounceX?: boolean;
+        bounceTop?: boolean;
+        bounceBottom?: boolean;
+    };
+    /** 是否已反弹过（用于协同效果） */
+    public hasBounced: boolean = false;
+    static check(c: any): c is Bounce { return c instanceof Bounce; }
+}

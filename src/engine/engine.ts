@@ -34,6 +34,7 @@ import { WeaponSynergySystem } from './systems/WeaponSynergySystem';
 import { WeaponSystem } from './systems/WeaponSystem';
 import { HomingSystem } from './systems/HomingSystem';
 import { ChainSystem } from './systems/ChainSystem';
+import { BounceSystem } from './systems/BounceSystem';
 // ==============
 
 export class Engine {
@@ -194,6 +195,7 @@ export class Engine {
 
         // P3. 物理层 (位移)
         recordSys('MovementSystem', 'P3', () => MovementSystem(world, dt));
+        recordSys('BounceSystem', 'P3', () => BounceSystem(world, dt));
 
         // P4. 交互层 (核心碰撞)
         recordSys('BombSystem', 'P4', () => BombSystem(world, dt));
