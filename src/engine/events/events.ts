@@ -1,4 +1,4 @@
-import { BossId, EntityId } from "../types";
+import { BossId, EntityId, EnemyId } from "../types";
 import { BaseEvent } from "./base";
 
 
@@ -16,6 +16,8 @@ export interface KillEvent extends BaseEvent<'Kill'> {
   victim: EntityId;              // 死亡实体
   killer: EntityId;              // 最后一击 owner（可为 0）
   score: number;                 // 本次击杀得分
+  enemyId?: EnemyId;             // 敌人类型 ID（如果有 EnemyTag）
+  bossId?: BossId;               // Boss 类型 ID（如果有 BossTag）
 }
 
 // ③ 拾取（玩家碰到 PickupItem）

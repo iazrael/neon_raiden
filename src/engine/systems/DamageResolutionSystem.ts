@@ -13,7 +13,7 @@
  */
 
 import { EntityId } from "../types";
-import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform, PlayerTag, BossTag } from "../components";
+import { Health, Shield, DamageOverTime, DestroyTag, ScoreValue, Transform, PlayerTag, BossTag, EnemyTag } from "../components";
 import { HitEvent, KillEvent, BloodFogEvent, CamShakeEvent, PlaySoundEvent, ShieldBrokenEvent, DefeatEvent, BossDefeatEvent } from "../events";
 import { removeComponent, view, getEvents, World, pushEvent } from "../world";
 
@@ -187,6 +187,10 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
     const scoreValue = victimComps.find(ScoreValue.check);
     const score = scoreValue?.value ?? 100;
 
+    // 获取 Tag 信息（用于存档记录）
+    const enemyTag = victimComps.find(EnemyTag.check);
+    const bossTag = victimComps.find(BossTag.check);
+
     // 生成 KillEvent
     const killEvent: KillEvent = {
         type: "Kill",
@@ -194,6 +198,8 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
         victim: victimId,
         killer: killerId,
         score,
+        enemyId: enemyTag?.id,
+        bossId: bossTag?.id,
     };
     pushEvent(world, killEvent);
 
@@ -206,8 +212,7 @@ function handleDeath(world: World, victimId: EntityId, killerId: EntityId, pos: 
         pushEvent(world, defeatEvent);
     }
 
-    // 检查是否是 Boss 死亡
-    const bossTag = victimComps.find(BossTag.check);
+    // 检查是否是 Boss 死亡（复用上面的 bossTag）
     if (bossTag) {
         const bossDefeatEvent: BossDefeatEvent = {
             type: "BossDefeat",

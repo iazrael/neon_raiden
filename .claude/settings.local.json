@@ -32,7 +32,9 @@
       "Bash(find:*)",
       "Bash(echo:*)",
       "Skill(commit-commands:commit)",
-      "Skill(commit-commands:commit:*)"
+      "Skill(commit-commands:commit:*)",
+      "Bash(npx tsx:*)",
+      "Bash(wc:*)"
     ],
     "additionalDirectories": [
       "/Users/azraellong/workspaces/neon_raiden/",

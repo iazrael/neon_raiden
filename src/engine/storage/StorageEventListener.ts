@@ -1,6 +1,7 @@
 // src/engine/storage/StorageEventListener.ts
 
 import type { GameStorage } from './GameStorage';
+import type { GameEvent } from '../events';
 import type {
   HitEvent,
   KillEvent,
@@ -12,9 +13,6 @@ import type {
   LevelTransitionCompleteEvent,
 } from '../events/events';
 import { FighterId, WeaponId, BuffType } from '../types/ids';
-import type { World } from '../world';
-import { EnemyTag, BossTag } from '../components/meta';
-import { getEvents } from '../world';
 
 /**
  * 存储事件监听器
@@ -115,55 +113,36 @@ export class StorageEventListener {
 
   /**
    * 处理当帧的所有事件（在游戏循环中每帧调用）
-   * @param world 世界对象
+   * @param events 事件数组
    */
-  async processEvents(world: World): Promise<void> {
-    // 处理命中事件（记录最高伤害）
-    const hitEvents = getEvents<HitEvent>(world, 'Hit');
-    for (const event of hitEvents) {
-      await this.onHit(event);
-    }
-
-    // 处理击杀事件
-    const killEvents = getEvents<KillEvent>(world, 'Kill');
-    for (const event of killEvents) {
-      await this.onKill(event, world);
-    }
-
-    // 处理拾取事件
-    const pickupEvents = getEvents<PickupEvent>(world, 'Pickup');
-    for (const event of pickupEvents) {
-      await this.onPickup(event);
-    }
-
-    // 处理 Boss 进场（记录遇到）
-    const bossEntranceEvents = getEvents<BossEntranceStartEvent>(world, 'BossEntranceStart');
-    for (const event of bossEntranceEvents) {
-      await this.onBossEntrance(event);
-    }
-
-    // 处理 Boss 击杀
-    const bossDefeatEvents = getEvents<BossDefeatEvent>(world, 'BossDefeat');
-    for (const event of bossDefeatEvents) {
-      await this.onBossDefeat(event);
-    }
-
-    // 处理游戏胜利
-    const victoryEvents = getEvents<VictoryEvent>(world, 'Victory');
-    for (const event of victoryEvents) {
-      await this.onVictory(event);
-    }
-
-    // 处理游戏失败
-    const defeatEvents = getEvents<DefeatEvent>(world, 'Defeat');
-    for (const _event of defeatEvents) {
-      await this.onDefeat();
-    }
-
-    // 处理关卡过渡
-    const levelTransitionEvents = getEvents<LevelTransitionCompleteEvent>(world, 'LevelTransitionComplete');
-    for (const event of levelTransitionEvents) {
-      this.setCurrentLevel(event.level);
+  async processEvents(events: GameEvent[]): Promise<void> {
+    for (const event of events) {
+      switch (event.type) {
+        case 'Hit':
+          await this.onHit(event as HitEvent);
+          break;
+        case 'Kill':
+          await this.onKill(event as KillEvent);
+          break;
+        case 'Pickup':
+          await this.onPickup(event as PickupEvent);
+          break;
+        case 'BossEntranceStart':
+          await this.onBossEntrance(event as BossEntranceStartEvent);
+          break;
+        case 'BossDefeat':
+          await this.onBossDefeat(event as BossDefeatEvent);
+          break;
+        case 'Victory':
+          await this.onVictory(event as VictoryEvent);
+          break;
+        case 'Defeat':
+          await this.onDefeat();
+          break;
+        case 'LevelTransitionComplete':
+          this.setCurrentLevel((event as LevelTransitionCompleteEvent).level);
+          break;
+      }
     }
   }
 
@@ -186,32 +165,23 @@ export class StorageEventListener {
   /**
    * 处理击杀事件
    */
-  private async onKill(event: KillEvent, world: World): Promise<void> {
+  private async onKill(event: KillEvent): Promise<void> {
     this.currentSessionKills++;
     this.currentSessionScore += event.score;
 
-    // 查询被击杀实体的类型
-    const comps = world.entities.get(event.victim);
-    if (!comps) {
-      return;
-    }
-
-    // 检查是否是敌人
-    const enemyTag = comps.find((c) => c instanceof EnemyTag) as EnemyTag | undefined;
-    if (enemyTag) {
+    // 从事件中读取 tag 信息
+    if (event.enemyId) {
       await this.storage.recordEnemy(
-        enemyTag.id,
+        event.enemyId,
         true,
         this.currentSessionDamage,
         0
       );
     }
 
-    // 检查是否是 Boss
-    const bossTag = comps.find((c) => c instanceof BossTag) as BossTag | undefined;
-    if (bossTag) {
+    if (event.bossId) {
       this.currentSessionBossKills++;
-      await this.storage.recordBoss(bossTag.id, true, this.currentSessionDamage);
+      await this.storage.recordBoss(event.bossId, true, this.currentSessionDamage);
     }
   }
 

@@ -157,7 +157,7 @@ export class ReactEngine {
                 // 处理存储事件（每帧）
                 if (this.storageListener) {
                     const world = this.engine.getWorld();
-                    this.storageListener.processEvents(world).catch(console.error);
+                    this.storageListener.processEvents(world.events).catch(console.error);
                 }
             }
         });
