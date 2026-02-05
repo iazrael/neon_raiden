@@ -9,8 +9,8 @@
  * 执行顺序：P3 - 在 MovementSystem 之前，确保旋转同帧生效
  */
 
-import { World, view, getEntity, getComponents } from '../world';
-import { Transform, Velocity, Homing, Health, EnemyTag, BossTag } from '../components';
+import { World, view, getEntity, getComponents, getComponentsFromComps } from '../world';
+import { Transform, Velocity, Homing, Health, EnemyTag, BossTag, Sprite } from '../components';
 import { Component } from '../types';
 
 /**
@@ -51,7 +51,7 @@ function getDefaultMaxMissiles(
  * @param dt 时间增量（毫秒）
  */
 export function HomingSystem(world: World, dt: number): void {
-    for (const [, [transform, velocity, homing]] of view(world, [Transform, Velocity, Homing])) {
+    for (const [, [transform, velocity, homing], comps] of view(world, [Transform, Velocity, Homing])) {
         // 验证目标有效性
         if (homing.targetId !== undefined) {
             const target = getEntity(world, homing.targetId);
@@ -190,9 +190,13 @@ export function HomingSystem(world: World, dt: number): void {
             velocity.vx = Math.cos(newAngle) * speed;
             velocity.vy = Math.sin(newAngle) * speed;
 
-            // 同步更新旋转角度，让导弹头朝向飞行方向
-            // +Math.PI/2 是因为精灵图原始朝向是向上的
-            transform.rot = newAngle + Math.PI / 2;
+            // 同步更新旋转角度，让导弹的精灵图头朝向飞行方向
+            const [sprite] = getComponentsFromComps(comps, [Sprite]);
+            if (sprite) {
+                // +Math.PI/2 是因为精灵图原始朝向是向上的
+                const spriteRotate = (newAngle + Math.PI / 2) * 180 / Math.PI;
+                sprite.rotate = spriteRotate;
+            }
         }
     }
 }

@@ -192,8 +192,8 @@ export class Sprite extends Component {
         color?: string;
         /** 视觉缩放（不影响碰撞） */
         scale?: number;
-        /** 旋转角度（度） */
-        rotate90?: number;
+        /** 旋转角度（角度） */
+        rotate?: number;
         /** 边框配置（可选） */
         border?: SpriteBorder;
     }) {
@@ -201,7 +201,7 @@ export class Sprite extends Component {
         this.spriteKey = cfg.spriteKey;
         this.color = cfg.color ?? "";
         this.scale = cfg.scale ?? 1;
-        this.rotate90 = cfg.rotate90 ?? 0;
+        this.rotate = cfg.rotate ?? 0;
         this.border = cfg.border;
     }
 
@@ -214,8 +214,8 @@ export class Sprite extends Component {
     /** 视觉缩放（不影响碰撞） */
     public scale = 1;
 
-    /** 旋转角度（度） */
-    public rotate90 = 0;
+    /** 旋转角度（角度）, 精灵图用角度方便理解, 角度换弧度: degree * Math.PI / 180 */
+    public rotate = 0;
 
     /** 边框配置（可选） */
     public border?: SpriteBorder;

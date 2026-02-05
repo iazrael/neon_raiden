@@ -42,7 +42,7 @@ function createBossBlueprint(
     const weaponSpec = phase1WeaponId ? ENEMY_WEAPON_TABLE[phase1WeaponId] : undefined;
 
     return {
-        Transform: { x: 400, y: -200, rot: 180 },
+        Transform: { x: 400, y: -200, rot: 0 },
         Health: { hp, max: hp },
         Sprite: { spriteKey: BOSS_SPRITE_MAP[bossId], scale: 1 },
         BossTag: { id: bossId },

@@ -74,7 +74,7 @@ function fireWeapon(
         id: number;
         transform: Transform;
         weapon: Weapon;
-        intent?: FireIntent;
+        intent: FireIntent;
         isPlayer: boolean;
     }
 ): void {
@@ -124,13 +124,8 @@ function fireWeapon(
     const spread = upgradeConfig.spread ?? weaponSpec.spread ?? 0;
     const sizeMultiplier = upgradeConfig.sizeMultiplier ?? 1.0;
 
-    // 计算发射角度
-    let baseAngle = intent.angle ?? -Math.PI / 2; // 默认向上
-    if (entity.isPlayer && intent.angle === undefined) {
-        baseAngle = -Math.PI / 2; // 玩家默认向上
-    } else if (!entity.isPlayer && intent.angle === undefined) {
-        baseAngle = Math.PI / 2; // 敌人默认向下
-    }
+    // 发射后的飞行方向
+    const baseAngle = intent.angle ?? -Math.PI / 2; // 默认向上
 
     const fireContext = {
         world,
@@ -256,14 +251,22 @@ function createBullet(ctx: FireContext, angle: number): void {
     const vy = Math.sin(angle) * ammoSpec.speed;
 
     // 创建子弹蓝图
-    // rot: angle + Math.PI/2 是因为精灵图原始朝向是向上的，需要校正到飞行方向
+    // 精灵图旋转角度计算：精灵图默认朝上，需要根据飞行方向调整旋转
+    // 公式：rotate = (angle + Math.PI/2) * 180 / Math.PI
+    // 验证：
+    //   - 向上发射 (angle = -π/2): rotate = (-π/2 + π/2) * 180/π = 0°
+    //   - 向下发射 (angle = π/2):  rotate = (π/2 + π/2) * 180/π = 180°
+    //   - 向右发射 (angle = 0):     rotate = (0 + π/2) * 180/π = 90°
+    //   - 向左发射 (angle = π):     rotate = (π + π/2) * 180/π = 270°
+    const spriteRotate = (angle + Math.PI / 2) * 180 / Math.PI;
     const bulletBlueprint: Blueprint = {
-        Transform: { x: spawnX, y: spawnY, rot: angle + Math.PI / 2 },
+        Transform: { x: 0, y: 0, rot: 0 }, // 子弹位置由 spawnBullet 参数设置，rot 不参与渲染
         Velocity: { vx, vy },
         Sprite: {
             spriteKey: spriteSpec.spriteKey,
             color: spriteSpec.color,
             scale: sizeMultiplier,
+            rotate: spriteRotate, // 精灵图旋转角度（度），控制子弹朝向
         },
         Bullet: {
             owner: ownerId,
@@ -312,5 +315,6 @@ function createBullet(ctx: FireContext, angle: number): void {
         };
     }
 
-    spawnBullet(world, bulletBlueprint, spawnX, spawnY, angle);
+    // 子弹旋转由 Sprite.rotate 控制，Transform.rot 保持为 0
+    spawnBullet(world, bulletBlueprint, spawnX, spawnY, 0);
 }

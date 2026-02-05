@@ -156,7 +156,8 @@ function generateFireIntent(
 
     // 生成开火意图（移除了 aggressiveness 概率判断）
     addComponent(world, enemyId, new FireIntent({
-        firing: true
+        firing: true,
+        angle: Math.PI / 2, // 敌人武器默认向下发射
     }));
 
     // 重置计时器

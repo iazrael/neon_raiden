@@ -22,7 +22,7 @@ function handleFollowMode(
     if (mousePos.x < 0 || mousePos.y < 0) {
         return;
     }
-    if(!playerTransform){
+    if (!playerTransform) {
         if (playerVel) {
             playerVel.vx = 0;
             playerVel.vy = 0;
@@ -102,7 +102,10 @@ function handlePlayerFiring(world: World, playerComps: Component[]): void {
 
     if (isFiring) {
         if (!existingFire) {
-            playerComps.push(new FireIntent());
+            playerComps.push(new FireIntent({
+                firing: true,
+                angle: -Math.PI / 2, // 玩家默认向上发射
+            }));
         }
     } else {
         if (existingFire) {
@@ -120,7 +123,10 @@ function handleOptionsFiring(world: World): void {
     for (const [id, [_option, _optionTransform], comps] of view(world, [Option, Transform])) {
         const existingFire = comps.find(FireIntent.check);
         if (isFiring) {
-            if (!existingFire) comps.push(new FireIntent());
+            if (!existingFire) comps.push(new FireIntent({
+                firing: true,
+                angle: -Math.PI / 2, // 玩家默认向上
+            }));
         } else {
             if (existingFire) removeComponent(world, id, existingFire);
         }

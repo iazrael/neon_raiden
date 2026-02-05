@@ -81,5 +81,8 @@ function handleBossFiring(
     }
 
     // 创建开火意图（WeaponSystem会在武器冷却完成后发射子弹）
-    addComponent(world, boss.id, new FireIntent({ firing: true }));
+    addComponent(world, boss.id, new FireIntent({
+        firing: true,
+        angle: Math.PI / 2, // 敌人子弹默认向下
+    }));
 }

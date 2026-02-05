@@ -335,4 +335,198 @@ describe('WeaponSystem', () => {
             expect(bullets[0].transform.y).toBe(enemyY);
         });
     });
+
+    describe('子弹精灵图旋转方向', () => {
+        /**
+         * 精灵图旋转角度计算公式：
+         * rotate = (angle + Math.PI / 2) * 180 / Math.PI
+         *
+         * 精灵图默认朝上（0°旋转时朝上）
+         *
+         * 验证：
+         *   - 向上发射 (angle = -π/2): rotate = (-π/2 + π/2) * 180/π = 0°
+         *   - 向下发射 (angle = π/2):  rotate = (π/2 + π/2) * 180/π = 180°
+         *   - 向右发射 (angle = 0):     rotate = (0 + π/2) * 180/π = 90°
+         *   - 向左发射 (angle = π):     rotate = (π + π/2) * 180/π = 270°
+         */
+
+        it('向上发射时，精灵图旋转角度应为 0°', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
+            addComponent(world, playerId, new Weapon({
+                id: WeaponId.VULCAN,
+                ammoType: AmmoType.VULCAN_SPREAD,
+                cooldown: 100,
+                bulletCount: 1,
+                pattern: WeaponPattern.SPREAD
+            }));
+            addComponent(world, playerId, new PlayerTag());
+            // 向上发射，angle = -Math.PI / 2
+            addComponent(world, playerId, new FireIntent({
+                firing: true,
+                angle: -Math.PI / 2
+            }));
+
+            WeaponSystem(world, 0.016);
+
+            // 查找生成的子弹
+            const bullets: Array<{ id: number; sprite: any }> = [];
+            for (const [id, comps] of world.entities.entries()) {
+                const sprite = comps.find(c => c.constructor.name === 'Sprite');
+                const bullet = comps.find(Bullet.check);
+                if (sprite && bullet) {
+                    bullets.push({ id, sprite });
+                }
+            }
+
+            expect(bullets.length).toBeGreaterThan(0);
+            // 向上发射时，精灵图旋转 0°
+            expect(bullets[0].sprite.rotate).toBeCloseTo(0, 1);
+        });
+
+        it('向下发射时，精灵图旋转角度应为 180°', () => {
+            const enemyId = generateId();
+
+            world.entities.set(enemyId, []);
+            addComponent(world, enemyId, new Transform({ x: 400, y: 100 }));
+            addComponent(world, enemyId, new Weapon({
+                id: EnemyWeaponId.ENEMY_NORMAL,
+                ammoType: AmmoType.ENEMY_ORB_RED,
+                cooldown: 100,
+                bulletCount: 1,
+                pattern: WeaponPattern.SPREAD
+            }));
+            addComponent(world, enemyId, new EnemyTag({ id: EnemyId.NORMAL }));
+            // 向下发射，angle = Math.PI / 2
+            addComponent(world, enemyId, new FireIntent({
+                firing: true,
+                angle: Math.PI / 2
+            }));
+
+            WeaponSystem(world, 0.016);
+
+            // 查找生成的子弹
+            const bullets: Array<{ id: number; sprite: any }> = [];
+            for (const [id, comps] of world.entities.entries()) {
+                const sprite = comps.find(c => c.constructor.name === 'Sprite');
+                const bullet = comps.find(Bullet.check);
+                if (sprite && bullet) {
+                    bullets.push({ id, sprite });
+                }
+            }
+
+            expect(bullets.length).toBeGreaterThan(0);
+            // 向下发射时，精灵图旋转 180°
+            expect(bullets[0].sprite.rotate).toBeCloseTo(180, 1);
+        });
+
+        it('向右发射时，精灵图旋转角度应为 90°', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 300 }));
+            addComponent(world, playerId, new Weapon({
+                id: WeaponId.VULCAN,
+                ammoType: AmmoType.VULCAN_SPREAD,
+                cooldown: 100,
+                bulletCount: 1,
+                pattern: WeaponPattern.SPREAD
+            }));
+            addComponent(world, playerId, new PlayerTag());
+            // 向右发射，angle = 0
+            addComponent(world, playerId, new FireIntent({
+                firing: true,
+                angle: 0
+            }));
+
+            WeaponSystem(world, 0.016);
+
+            // 查找生成的子弹
+            const bullets: Array<{ id: number; sprite: any }> = [];
+            for (const [id, comps] of world.entities.entries()) {
+                const sprite = comps.find(c => c.constructor.name === 'Sprite');
+                const bullet = comps.find(Bullet.check);
+                if (sprite && bullet) {
+                    bullets.push({ id, sprite });
+                }
+            }
+
+            expect(bullets.length).toBeGreaterThan(0);
+            // 向右发射时，精灵图旋转 90°
+            expect(bullets[0].sprite.rotate).toBeCloseTo(90, 1);
+        });
+
+        it('向左发射时，精灵图旋转角度应为 270°', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 300 }));
+            addComponent(world, playerId, new Weapon({
+                id: WeaponId.VULCAN,
+                ammoType: AmmoType.VULCAN_SPREAD,
+                cooldown: 100,
+                bulletCount: 1,
+                pattern: WeaponPattern.SPREAD
+            }));
+            addComponent(world, playerId, new PlayerTag());
+            // 向左发射，angle = Math.PI
+            addComponent(world, playerId, new FireIntent({
+                firing: true,
+                angle: Math.PI
+            }));
+
+            WeaponSystem(world, 0.016);
+
+            // 查找生成的子弹
+            const bullets: Array<{ id: number; sprite: any }> = [];
+            for (const [id, comps] of world.entities.entries()) {
+                const sprite = comps.find(c => c.constructor.name === 'Sprite');
+                const bullet = comps.find(Bullet.check);
+                if (sprite && bullet) {
+                    bullets.push({ id, sprite });
+                }
+            }
+
+            expect(bullets.length).toBeGreaterThan(0);
+            // 向左发射时，精灵图旋转 270°
+            expect(bullets[0].sprite.rotate).toBeCloseTo(270, 1);
+        });
+
+        it('子弹的 Transform.rot 应始终为 0（不参与渲染）', () => {
+            const playerId = generateId();
+
+            world.entities.set(playerId, []);
+            addComponent(world, playerId, new Transform({ x: 400, y: 500 }));
+            addComponent(world, playerId, new Weapon({
+                id: WeaponId.VULCAN,
+                ammoType: AmmoType.VULCAN_SPREAD,
+                cooldown: 100,
+                bulletCount: 1,
+                pattern: WeaponPattern.SPREAD
+            }));
+            addComponent(world, playerId, new PlayerTag());
+            addComponent(world, playerId, new FireIntent({
+                firing: true,
+                angle: Math.PI / 3 // 随机角度
+            }));
+
+            WeaponSystem(world, 0.016);
+
+            // 查找生成的子弹
+            const bullets: Array<{ id: number; transform: any }> = [];
+            for (const [id, comps] of world.entities.entries()) {
+                const transform = comps.find(Transform.check);
+                const bullet = comps.find(Bullet.check);
+                if (transform && bullet) {
+                    bullets.push({ id, transform });
+                }
+            }
+
+            expect(bullets.length).toBeGreaterThan(0);
+            // Transform.rot 应为 0，旋转由 Sprite.rotate 控制
+            expect(bullets[0].transform.rot).toBe(0);
+        });
+    });
 });

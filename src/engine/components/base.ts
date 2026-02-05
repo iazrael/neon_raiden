@@ -15,7 +15,7 @@ export class Transform extends Component {
         x: number; 
         /** Y坐标 */
         y: number; 
-        /** 旋转角度 */
+        /** 旋转角度(弧度), 角度换弧度: degree * Math.PI / 180 */
         rot?: number; 
     }) { 
         super(); 

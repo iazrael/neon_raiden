@@ -64,7 +64,7 @@ export interface WeaponSpec {
     pattern: WeaponPattern;
     /** 每次发射的子弹数量 */
     bulletCount: number;
-    /** 扩散角度（度），默认 0 */
+    /** 扩散角度（度数），默认 0 */
     spread?: number;
     /** 穿透次数加成（在弹药基础值上增加），仅玩家武器使用 */
     pierceBonus?: number;

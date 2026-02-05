@@ -1,26 +1,15 @@
-<svg width="14" height="32" viewBox="0 0 14 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Thruster Flame (Top) -->
-  <path d="M7 0L4 6H10L7 0Z" fill="#FF4500" opacity="0.8"/>
-  
-  <!-- Missile Body (Main) -->
-  <path d="M7 4L2 10V24L7 32L12 24V10L7 4Z" fill="url(#missileBodyGrad)"/>
-  
-  <!-- Warhead/Tip highlight (Bottom) -->
-  <path d="M7 32L12 24H2L7 32Z" fill="url(#warheadGrad)"/>
-  
+<svg width="18" height="36" viewBox="0 0 24 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8 40L12 48L16 40H8Z" fill="#FF4500">
+    <animate attributeName="opacity" values="1;0.5;1" dur="0.2s" repeatCount="indefinite" />
+  </path>
 
-
+  <path d="M12 4C12 4 8 12 8 16V36H16V16C16 12 12 4 12 4Z" fill="url(#missileBody)"/>
+  
+  <path d="M8 30L4 36V38H8V30Z" fill="#4B5563"/>
+  <path d="M16 30L20 36V38H16V30Z" fill="#4B5563"/>
+  
   <defs>
-    <!-- Dark Metallic Body (Top to Bottom) -->
-    <linearGradient id="missileBodyGrad" x1="7" y1="4" x2="7" y2="32" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1A202C"/>
-      <stop offset="0.7" stop-color="#2D3748"/>
-      <stop offset="1" stop-color="#E53E3E"/>
-    </linearGradient>
-    <!-- Bright Warhead Tip (Bottom) -->
-    <linearGradient id="warheadGrad" x1="7" y1="24" x2="7" y2="32" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#E53E3E"/>
-      <stop offset="1" stop-color="#FFD700"/>
-    </linearGradient>
+    <linearGradient id="missileBody" x1="12" y1="4" x2="12" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f14d44"/> <stop offset="0.5" stop-color="#4B5563"/> <stop offset="1" stop-color="#1F2937"/> </linearGradient>
   </defs>
 </svg>

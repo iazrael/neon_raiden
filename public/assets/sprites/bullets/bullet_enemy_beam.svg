@@ -3,8 +3,6 @@
   <rect x="2" y="0" width="8" height="32" fill="url(#beamGrad)" rx="4"/>
   <!-- Bright core -->
   <rect x="4" y="0" width="4" height="32" fill="url(#coreGrad)" rx="2"/>
-  <!-- Glow effect -->
-  <ellipse cx="6" cy="4" rx="5" ry="3" fill="#FFA500" opacity="0.6"/>
   
   <defs>
     <linearGradient id="beamGrad" x1="6" y1="0" x2="6" y2="32" gradientUnits="userSpaceOnUse">

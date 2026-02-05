@@ -50,20 +50,41 @@ export class MoveIntent extends Component {
     static check(c: any): c is MoveIntent { return c instanceof MoveIntent; }
 }
 
-/** 开火意图组件 - 表示实体想要开火 */
+/** 
+ * 开火意图组件 - 表示实体想要开火 
+ * 
+ * 原点 (0,0) 在左上角
+ * X 轴向右为正
+ * Y 轴向下为正
+ * 
+    Y
+    ↓
+    ┌───────────→ X
+    │ (0,0)
+    │
+    │
+ *
+    弧度与方向对照
+    弧度	cos	sin	方向
+    0	1	0	→ 向右
+    π/2	0	1	↓ 向下
+    π	-1	0	← 向左
+    -π/2	0	-1	↑ 向上
+ */
 export class FireIntent extends Component {
-    constructor(cfg?: {
+    constructor(cfg: {
         firing?: boolean;
         angle?: number;
         targetId?: number;
     }) {
         super();
-        this.firing = cfg?.firing ?? true;
-        this.angle = cfg?.angle;
-        this.targetId = cfg?.targetId;
+        this.firing = cfg.firing ?? true;
+        this.angle = cfg.angle ?? -Math.PI / 2; // 默认向上;
+        this.targetId = cfg.targetId;
     }
     public firing: boolean;
-    public angle?: number;
+    /** 开火的角度(单位弧度) */
+    public angle: number;
     public targetId?: number;
     static check(c: any): c is FireIntent { return c instanceof FireIntent; }
 }
