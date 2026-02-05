@@ -35,7 +35,10 @@ export const BLUEPRINT_FIGHTER_NEON: Blueprint = {
 
     /** 武器组件 - 设置战机的初始武器 */
     // Weapon: WEAPON_TABLE[WeaponId.SHURIKEN],
-    Weapon: WEAPON_TABLE[WeaponId.VULCAN],
+    Weapon: {
+        ...WEAPON_TABLE[WeaponId.VULCAN],
+        fireOffset: { x: 0, y: -24 }  // 从机头发射，向上偏移 24px
+    },
 
     /** 炸弹组件 - 初始炸弹库存（3颗，最多9颗） */
     Bomb: { count: 3, maxCount: 9 },

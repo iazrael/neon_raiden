@@ -246,13 +246,18 @@ function createBullet(ctx: FireContext, angle: number): void {
     const finalPierce = ammoSpec.pierce + (weaponSpec.pierceBonus ?? 0);
     const finalBounces = ammoSpec.bounces + (weaponSpec.bouncesBonus ?? 0);
 
+    // 计算发射偏移（相对于实体中心）
+    const fireOffset = weapon.fireOffset ?? { x: 0, y: 0 };
+    const spawnX = transform.x + fireOffset.x;
+    const spawnY = transform.y + fireOffset.y;
+
     // 计算速度向量 - speed 是像素/秒
     const vx = Math.cos(angle) * ammoSpec.speed;
     const vy = Math.sin(angle) * ammoSpec.speed;
 
     // 创建子弹蓝图
     const bulletBlueprint: Blueprint = {
-        Transform: { x: transform.x, y: transform.y, rot: angle },
+        Transform: { x: spawnX, y: spawnY, rot: angle },
         Velocity: { vx, vy },
         Sprite: {
             spriteKey: spriteSpec.spriteKey,
@@ -306,5 +311,5 @@ function createBullet(ctx: FireContext, angle: number): void {
         };
     }
 
-    spawnBullet(world, bulletBlueprint, transform.x, transform.y, angle);
+    spawnBullet(world, bulletBlueprint, spawnX, spawnY, angle);
 }

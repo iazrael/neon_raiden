@@ -54,6 +54,8 @@ export class Weapon extends Component {
         pierce?: number;
         /** 弹跳次数 */
         bounces?: number;
+        /** 子弹发射偏移量（像素），相对于实体中心 */
+        fireOffset?: { x: number; y: number };
     }) {
         super();
         this.id = cfg.id;
@@ -68,6 +70,7 @@ export class Weapon extends Component {
         this.fireRateMultiplier = cfg.fireRateMultiplier ?? 1.0;
         this.pierce = cfg.pierce ?? 0;
         this.bounces = cfg.bounces ?? 0;
+        this.fireOffset = cfg.fireOffset;
     }
     public id: WeaponId | EnemyWeaponId;
     public ammoType: AmmoType;
@@ -83,6 +86,8 @@ export class Weapon extends Component {
     public fireRateMultiplier = 1.0;
     public pierce = 0;
     public bounces = 0;
+    /** 子弹发射偏移量（像素），相对于实体中心 */
+    public fireOffset?: { x: number; y: number };
     static check(c: any): c is Weapon { return c instanceof Weapon; }
 }
 
