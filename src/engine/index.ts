@@ -31,3 +31,6 @@ export { SpriteManager } from './SpriteManager';
 
 // ========== 事件 ==========
 export * from './events';
+
+// ========== 存储 ==========
+export * from './storage';
