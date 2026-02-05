@@ -27,7 +27,7 @@ export const LEVEL_CONFIGS: Record<number, LevelSpec> = {
             { id: EnemyId.NORMAL, cost: 10, weight: 3 },  // 33%
             { id: EnemyId.FAST, cost: 30, weight: 3 },   // 33%
             { id: EnemyId.TANK, cost: 60, weight: 2 },   // 22%
-            { id: EnemyId.STALKER, cost: 70, weight: 10 }, // 11%
+            { id: EnemyId.STALKER, cost: 70, weight: 1 }, // 11%
         ],
         boss: BossId.GUARDIAN
     },

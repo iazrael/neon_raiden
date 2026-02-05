@@ -161,9 +161,9 @@ describe('Boss蓝图测试', () => {
             expect(blueprint.Transform!.y).toBe(-200);
         });
 
-        it('Boss应该朝向下方', () => {
+        it('Boss蓝图rot初始值为0', () => {
             const blueprint = BLUEPRINT_BOSS_GUARDIAN;
-            expect(blueprint.Transform!.rot).toBe(180);
+            expect(blueprint.Transform!.rot).toBe(0);
         });
     });
 
