@@ -5,8 +5,8 @@
  * - 为带有 Homing 组件的子弹自动寻找最近敌人
  * - 调整飞行方向朝向目标
  *
- * 系统类型：行为层
- * 执行顺序：P4 - 在 VelocitySystem 之后
+ * 系统类型：物理层
+ * 执行顺序：P3 - 在 MovementSystem 之前，确保旋转同帧生效
  */
 
 import { World, view, getEntity, getComponents } from '../world';
@@ -190,7 +190,8 @@ export function HomingSystem(world: World, dt: number): void {
             velocity.vx = Math.cos(newAngle) * speed;
             velocity.vy = Math.sin(newAngle) * speed;
 
-            // 同步更新旋转角度，让导弹头朝向飞行方向（加上90度偏移，因为精灵图原始朝向是向上的）
+            // 同步更新旋转角度，让导弹头朝向飞行方向
+            // +Math.PI/2 是因为精灵图原始朝向是向上的
             transform.rot = newAngle + Math.PI / 2;
         }
     }

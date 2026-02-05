@@ -178,9 +178,9 @@ function drawSprite(ctx: CanvasRenderingContext2D, item: RenderItem, camX: numbe
     // 移动到绘制位置
     ctx.translate(screenX, screenY);
 
-    // 应用旋转
-    const rotation = transform.rot + sprite.rotate90 * 90;
-    ctx.rotate((rotation * Math.PI) / 180);
+    // 应用旋转（transform.rot 是弧度，rotate90 是 90 度增量，转换为弧度）
+    const rotation = transform.rot + sprite.rotate90 * (Math.PI / 2);
+    ctx.rotate(rotation);
 
     // 绘制边框（如果有配置）
     if (sprite.border) {

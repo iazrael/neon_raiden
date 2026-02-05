@@ -49,11 +49,12 @@ export const WEAPON_TABLE: Record<WeaponId, WeaponSpec> = {
     /**
      * 导弹武器蓝图
      * 智能追踪武器，能够自动锁定目标
+     * 高伤害单发，长冷却时间
      */
     [WeaponId.MISSILE]: {
         id: WeaponId.MISSILE,
         ammoType: AmmoType.MISSILE_HOMING,
-        cooldown: 400,
+        cooldown: 1000,
         curCD: 0,
         maxLevel: 3,
         pattern: WeaponPattern.AIMED,

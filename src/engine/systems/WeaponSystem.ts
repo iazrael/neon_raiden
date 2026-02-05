@@ -256,8 +256,9 @@ function createBullet(ctx: FireContext, angle: number): void {
     const vy = Math.sin(angle) * ammoSpec.speed;
 
     // 创建子弹蓝图
+    // rot: angle + Math.PI/2 是因为精灵图原始朝向是向上的，需要校正到飞行方向
     const bulletBlueprint: Blueprint = {
-        Transform: { x: spawnX, y: spawnY, rot: angle },
+        Transform: { x: spawnX, y: spawnY, rot: angle + Math.PI / 2 },
         Velocity: { vx, vy },
         Sprite: {
             spriteKey: spriteSpec.spriteKey,

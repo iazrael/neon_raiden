@@ -195,13 +195,13 @@ export class Engine {
         recordSys('WeaponSystem', 'P2', () => WeaponSystem(world, dt));
 
         // P3. 物理层 (位移)
+        recordSys('HomingSystem', 'P3', () => HomingSystem(world, dt));
         recordSys('MovementSystem', 'P3', () => MovementSystem(world, dt));
         recordSys('BounceSystem', 'P3', () => BounceSystem(world, dt));
 
         // P4. 交互层 (核心碰撞)
         recordSys('BombSystem', 'P4', () => BombSystem(world, dt));
         recordSys('CollisionSystem', 'P4', () => CollisionSystem(world, dt));
-        recordSys('HomingSystem', 'P4', () => HomingSystem(world, dt));
 
         // P5. 结算层 (事件处理)
         recordSys('PickupSystem', 'P5', () => PickupSystem(world, dt));

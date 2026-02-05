@@ -59,11 +59,11 @@ export const AMMO_TABLE: Record<AmmoType, AmmoSpec> = {
         /** 弹种唯一键（与 WeaponSpec.ammoType 对应） */
         id: AmmoType.MISSILE_HOMING,
         /** 每发子弹的基础伤害值 */
-        damage: 35,
+        damage: 60,
         /** 碰撞盒半径（像素） */
         radius: 8,
         /** 子弹飞行速度（像素/秒） */
-        speed: 400,
+        speed: 700,
         /** 可穿透敌人数（0 = 不穿透） */
         pierce: 0,
         /** 可反弹次数（0 = 不反弹） */

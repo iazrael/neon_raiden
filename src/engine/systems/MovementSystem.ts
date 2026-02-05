@@ -88,7 +88,7 @@ export function MovementSystem(world: World, dt: number): void {
         transform.x += vx * dtInSeconds * timeScale;
         transform.y += vy * dtInSeconds * timeScale;
 
-        // 更新旋转（vrot是弧度/秒）
+        // 更新旋转（vrot是弧度/秒，用于自转等效果）
         if (velocity.vrot !== 0) {
             transform.rot += velocity.vrot * dtInSeconds * timeScale;
         }
