@@ -22,9 +22,10 @@ import {
     InvulnerableState,
     TimeSlowState,
     ShieldAutoRegen,
+    Option,
 } from "../components";
 import { WeaponId, BuffType } from "../types";
-import { ensureComponent, getEvents, pushEvent, World } from "../world";
+import { addComponent, ensureComponent, getEvents, pushEvent, World } from "../world";
 import { PickupEvent, PlaySoundEvent } from "../events";
 import { WEAPON_TABLE } from "../blueprints/weapons";
 import {
@@ -35,7 +36,7 @@ import {
     BUFF_CATEGORY_CONFIG,
     BuffCategory,
 } from "../configs/powerups";
-import { spawnOption, spawnFromBlueprint } from "../factory";
+import { spawnOption } from "../factory";
 
 /**
  * 拾取处理器接口
@@ -153,7 +154,7 @@ const optionPickupHandler: PickupHandler = {
 
         const bp = OPTION_BLUEPRINT_MAP[blueprintType];
         if (bp) {
-            spawnOption(world, bp, index, x, y);
+            spawnOption(world, bp, x, y, playerId, index);
         }
 
         // 播放音效

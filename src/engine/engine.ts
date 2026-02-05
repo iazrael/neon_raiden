@@ -186,7 +186,7 @@ export class Engine {
 
         // P1. 决策层 (输入与AI)
         recordSys('InputSystem', 'P1', () => InputSystem(world, dt));
-        recordSys('SpawnSystem', 'P1', () => SpawnSystem(world, dt));
+        // recordSys('SpawnSystem', 'P1', () => SpawnSystem(world, dt));
         recordSys('BossSystem', 'P1', () => BossSystem(world, dt));
         recordSys('EnemySystem', 'P1', () => EnemySystem(world, dt));
 

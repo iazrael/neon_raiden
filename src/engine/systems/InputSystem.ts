@@ -1,59 +1,105 @@
-import { World } from '../world';
+import { removeTypes, removeTypesFromComps, World } from '../world';
+import { Component } from '../types';
 import { inputManager } from '../input/InputManager';
-import { MoveIntent, FireIntent, BombIntent, Velocity, PlayerTag, Option, Transform } from '../components';
+import { GAME_CONFIG } from '../configs/global';
+import { MoveIntent, FireIntent, BombIntent, Velocity, Option, Transform } from '../components';
 import { removeComponent, view } from '../world';
 
-export function InputSystem(world: World, dt: number) {
-    // 1. 获取输入源数据
-    const kbVec = inputManager.getKeyboardVector();
-    const pointerDelta = inputManager.consumePointerDelta(); // 注意：这会清空 Manager 里的积攒值
-    const isFiring = inputManager.isFiring();
-    const isBombing = inputManager.isBombing();
+// === 常量定义 ===
+const KEYBOARD_SPEED = 500;        // 键盘移动速度（像素/秒）
+const POSITION_EPSILON = 0.1;      // 位置判断精度阈值
 
-    // 2. 查找玩家
-    const playerComps = world.entities.get(world.playerId);
-    if (!playerComps) return;
-
-    // === 处理移动 (优先处理触摸/鼠标拖拽，其次键盘) ===
-    const playerVel = playerComps.find(Velocity.check);
-
-    // 键盘速度配置（像素/秒）
-    const KEYBOARD_SPEED = 500;
-
-    // 先移除旧的 MoveIntent，确保只有一个
-    const oldMoveIndex = playerComps.findIndex(MoveIntent.check);
-    if (oldMoveIndex >= 0) {
-        playerComps.splice(oldMoveIndex, 1);
+/**
+ * 处理 follow 模式的玩家移动
+ */
+function handleFollowMode(
+    playerComps: Component[],
+    playerTransform: Transform | undefined,
+    playerVel: Velocity | undefined
+): void {
+    const mousePos = inputManager.getPointerPosition();
+    // 忽略未初始化的指针位置 (init 时 lastPointer 为 0,0 会导致负值)
+    if (mousePos.x < 0 || mousePos.y < 0) {
+        return;
     }
-
-    // 逻辑：如果有指针位移，直接使用像素偏移 (Offset)
-    if (Math.abs(pointerDelta.x) > 0.1 || Math.abs(pointerDelta.y) > 0.1) {
-        // 清除键盘速度，防止残留
+    if(!playerTransform){
         if (playerVel) {
             playerVel.vx = 0;
             playerVel.vy = 0;
         }
-        // 触摸是 1:1 跟随，直接作为 Offset
+        return;
+    }
+
+    const dx = mousePos.x - playerTransform.x;
+    const dy = mousePos.y - playerTransform.y;
+
+    if (Math.abs(dx) > POSITION_EPSILON || Math.abs(dy) > POSITION_EPSILON) {
+        if (playerVel) {
+            playerVel.vx = 0;
+            playerVel.vy = 0;
+        }
+        playerComps.push(new MoveIntent({ dx, dy, type: 'offset' }));
+    } else {
+        if (playerVel) {
+            playerVel.vx = 0;
+            playerVel.vy = 0;
+        }
+    }
+}
+
+/**
+ * 处理 drag 模式的玩家移动
+ */
+function handleDragMode(playerComps: Component[], playerVel: Velocity | undefined): void {
+    const pointerDelta = inputManager.consumePointerDelta();
+
+    if (Math.abs(pointerDelta.x) > POSITION_EPSILON || Math.abs(pointerDelta.y) > POSITION_EPSILON) {
+        if (playerVel) {
+            playerVel.vx = 0;
+            playerVel.vy = 0;
+        }
         playerComps.push(new MoveIntent({ dx: pointerDelta.x, dy: pointerDelta.y, type: 'offset' }));
-    }
-    // 逻辑：否则，使用键盘向量 (Velocity)
-    else if (kbVec.x !== 0 || kbVec.y !== 0) {
-        playerComps.push(new MoveIntent({
-            dx: kbVec.x * KEYBOARD_SPEED,
-            dy: kbVec.y * KEYBOARD_SPEED,
-            type: 'velocity'
-        }));
-    }
-    // 无输入：直接清零速度，让玩家立即停止
-    else {
-        if (playerVel) {
-            playerVel.vx = 0;
-            playerVel.vy = 0;
+    } else {
+        const kbVec = inputManager.getKeyboardVector();
+        if (kbVec.x !== 0 || kbVec.y !== 0) {
+            playerComps.push(new MoveIntent({
+                dx: kbVec.x * KEYBOARD_SPEED,
+                dy: kbVec.y * KEYBOARD_SPEED,
+                type: 'velocity'
+            }));
+        } else {
+            if (playerVel) {
+                playerVel.vx = 0;
+                playerVel.vy = 0;
+            }
         }
     }
+}
 
-    // === 处理开火 ===
+/**
+ * 处理玩家移动逻辑
+ */
+function handlePlayerMovement(
+    playerComps: Component[],
+    playerTransform: Transform,
+    playerVel: Velocity | undefined
+): void {
+    removeTypesFromComps(playerComps, [MoveIntent]);
+
+    if (GAME_CONFIG.mouseControlMode === 'follow') {
+        handleFollowMode(playerComps, playerTransform, playerVel);
+    } else {
+        handleDragMode(playerComps, playerVel);
+    }
+}
+
+/**
+ * 处理玩家开火状态同步
+ */
+function handlePlayerFiring(world: World, playerComps: Component[]): void {
     const existingFire = playerComps.find(FireIntent.check);
+    const isFiring = inputManager.isFiring();
+
     if (isFiring) {
         if (!existingFire) {
             playerComps.push(new FireIntent());
@@ -63,56 +109,75 @@ export function InputSystem(world: World, dt: number) {
             removeComponent(world, world.playerId, existingFire);
         }
     }
+}
 
+/**
+ * 处理所有僚机的开火状态同步
+ */
+function handleOptionsFiring(world: World): void {
+    const isFiring = inputManager.isFiring();
 
-    // === 同步僚机移动意图 ===
-    // 僚机环绕配置
-    const OPTION_RADIUS = 60;
-    const ROTATION_SPEED = 2;
-    const LERP_FACTOR = 0.2;
-
-    // 获取玩家 Transform（用于计算僚机目标位置）
-    const playerTransform = playerComps.find(Transform.check);
-
-
-    // === 同步僚机开火意图 ===
-    // 遍历所有实体，找到僚机并同步玩家的开火状态
-    for (const [id, [option, optionTransform], comps] of view(world, [Option, Transform])) {
-        // 这是一个僚机
-        const optionFire = comps.find(FireIntent.check);
+    for (const [id, [_option, _optionTransform], comps] of view(world, [Option, Transform])) {
+        const existingFire = comps.find(FireIntent.check);
         if (isFiring) {
-            if (!optionFire) comps.push(new FireIntent());
+            if (!existingFire) comps.push(new FireIntent());
         } else {
-            if (optionFire) removeComponent(world, id, optionFire);
-        }
-        if (playerTransform) {
-            // 计算目标位置（环绕玩家旋转）
-            const angle = (world.time / 1000) * ROTATION_SPEED + option.angle;
-            const targetX = playerTransform.x + Math.cos(angle) * OPTION_RADIUS;
-            const targetY = playerTransform.y + Math.sin(angle) * OPTION_RADIUS;
-
-            // 生成移动意图（平滑移动）
-            comps.push(new MoveIntent({
-                dx: (targetX - optionTransform.x) * LERP_FACTOR,
-                dy: (targetY - optionTransform.y) * LERP_FACTOR,
-                type: 'offset'
-            }));
+            if (existingFire) removeComponent(world, id, existingFire);
         }
     }
+}
 
-    // === 处理炸弹 (B键 + 程序触发) ===
+/**
+ * 处理所有僚机的环绕移动
+ */
+function handleOptionsMovement(world: World, playerTransform: Transform | undefined): void {
+    for (const [_id, [option, optionTransform], comps] of view(world, [Option, Transform])) {
+
+        const angle = (world.time / 1000) * option.rotationSpeed + option.angle;
+        const targetX = playerTransform.x + Math.cos(angle) * option.radius;
+        const targetY = playerTransform.y + Math.sin(angle) * option.radius;
+
+        comps.push(new MoveIntent({
+            dx: (targetX - optionTransform.x) * option.lerpFactor,
+            dy: (targetY - optionTransform.y) * option.lerpFactor,
+            type: 'offset'
+        }));
+    }
+}
+
+/**
+ * 处理炸弹意图
+ */
+function handleBomb(world: World, playerComps: Component[]): void {
     const existingBomb = playerComps.find(BombIntent.check);
-    // isBombing 现在同时检查键盘和程序触发
+    const isBombing = inputManager.isBombing();
+
     if (isBombing) {
-        // 炸弹通常是一次性触发，这里持续按住会持续产生意图
-        // 后续 BombSystem 需要处理冷却或消耗
         if (!existingBomb) {
             playerComps.push(new BombIntent());
         }
-        // 消费程序触发状态，防止重复触发
         inputManager.consumeBomb();
     } else {
         if (existingBomb) removeComponent(world, world.playerId, existingBomb);
     }
+}
 
+/**
+ * 输入系统：处理所有玩家和僚机的输入意图
+ * @param world 世界对象
+ * @param _dt 增量时间（当前未使用，保留用于未来扩展）
+ */
+export function InputSystem(world: World, _dt: number) {
+    const playerComps = world.entities.get(world.playerId);
+    if (!playerComps) return;
+
+    const playerTransform = playerComps.find(Transform.check);
+    const playerVel = playerComps.find(Velocity.check);
+
+    handlePlayerMovement(playerComps, playerTransform, playerVel);
+    handlePlayerFiring(world, playerComps);
+    // FIXME: 其实僚机不应该在这里处理, 敌人也会有僚机, 僚机的Option配置里有 owner, 应该增加个系统来统一处理环绕移动和开火意图
+    handleOptionsFiring(world);
+    handleOptionsMovement(world, playerTransform);
+    handleBomb(world, playerComps);
 }

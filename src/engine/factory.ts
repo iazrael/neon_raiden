@@ -3,6 +3,7 @@ import { Blueprint } from './blueprints';
 import { Meteor, EnemyTag, Transform, Sprite, Option } from './components';
 import { EntityId, Component } from './types';
 import { World, generateId, getFromPool } from './world';
+import { OPTION_LERP_FACTOR, OPTION_RADIUS, OPTION_ROTATION_SPEED } from './configs';
 
 
 /** 根据蓝图生成实体，支持对象池 */
@@ -62,7 +63,7 @@ export function spawnEntity(world: World, comps: Component[]): EntityId {
  */
 export function spawnWorld(world: World): EntityId {
     return spawnEntity(world, [
-        new Meteor({ spawnInterval: 200, spawnChance: 0.1})
+        new Meteor({ spawnInterval: 200, spawnChance: 0.1 })
     ])
 
 }
@@ -114,15 +115,20 @@ export function spawnPickup(world: World, bp: Blueprint, x: number, y: number, r
  * @param y 初始 Y 坐标
  * @returns 僚机实体 ID
  */
-export function spawnOption(world: World, bp: Blueprint, index: number, x: number, y: number): EntityId {
+export function spawnOption(world: World, bp: Blueprint, x: number, y: number, ownerId: EntityId, index: number): EntityId {
     const id = spawnFromBlueprint(world, bp, x, y, 0);
 
     // 设置僚机的索引
     const optionComps = world.entities.get(id);
-    const option = optionComps?.find(Option.check);
-    if (option) {
-        option.index = index;
-    }
+    // 配置僚机所有者
+    optionComps.push(new Option({
+        owner: ownerId,
+        index,
+        angle: index * Math.PI,
+        radius: OPTION_RADIUS,
+        lerpFactor: OPTION_LERP_FACTOR,
+        rotationSpeed: OPTION_ROTATION_SPEED,
+    }));
 
     return id;
 }

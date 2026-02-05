@@ -70,8 +70,4 @@ export const BLUEPRINT_OPTION_VULCAN: Blueprint = {
         damageMultiplier: 0.5,
         pattern: WeaponPattern.AIMED
     },
-
-    /** 僚机组件 - 索引（会被 spawnOption 覆盖） */
-    Option: { index: 0 },
-
 };

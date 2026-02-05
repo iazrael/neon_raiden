@@ -1,5 +1,7 @@
 // src/engine/input/InputManager.ts
 
+import { GAME_CONFIG } from '../configs/global';
+
 export class InputManager {
     private static instance: InputManager;
     public static getInstance(): InputManager {
@@ -12,7 +14,7 @@ export class InputManager {
 
     // 指针状态 (鼠标 + 触摸)
     private pointerDelta = { x: 0, y: 0 }; // 本帧位移增量
-    private lastPointer = { x: 0, y: 0 };  // 上一次坐标
+    private lastPointer = { x: -1, y: -1 };  // 上一次坐标
     private isPointerDown = false;
 
     // 动作状态
@@ -59,8 +61,11 @@ export class InputManager {
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (!this.isPointerDown) return;
-            this.movePointer(e.clientX, e.clientY);
+            // follow 模式不需要按下，drag 模式需要按下
+            const shouldTrack = GAME_CONFIG.mouseControlMode === 'follow' || this.isPointerDown;
+            if (shouldTrack) {
+                this.movePointer(e.clientX, e.clientY);
+            }
         });
 
         canvas.addEventListener('mouseup', () => this.endPointer());
@@ -122,7 +127,8 @@ export class InputManager {
     }
 
     public isFiring() {
-        // return true
+        // 自动开火模式下始终返回 true
+        if (GAME_CONFIG.autoFire) return true;
         return this.keys.has('Space') || this._isFiring;
     }
 
@@ -132,6 +138,21 @@ export class InputManager {
      */
     public isBombing(): boolean {
         return this.keys.has('KeyB') || this._isBombing;
+    }
+
+    /**
+     * 获取鼠标在 canvas 中的绝对位置（逻辑像素）
+     * 坐标系转换：clientX/Y → canvas 内部坐标
+     * 用于 follow 模式的精确跟随
+     */
+    public getPointerPosition() {
+        if (!this.canvas) return { x: 0, y: 0 };
+        const rect = this.canvas.getBoundingClientRect();
+
+        return {
+            x: (this.lastPointer.x - rect.left),
+            y: (this.lastPointer.y - rect.top),
+        };
     }
 
     /**

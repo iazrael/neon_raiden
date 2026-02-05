@@ -289,7 +289,7 @@ export class TimeSlowState extends Component {
         this.scope = cfg.scope ?? 'global';
     }
     public scale: number;
-    public duration: number;    
+    public duration: number;
     public scope: 'global' | 'area';
 
     static check(c: any): c is TimeSlowState { return c instanceof TimeSlowState; }
@@ -323,10 +323,13 @@ export class ShieldAutoRegen extends Component {
 export class Option extends Component {
     static check = (comp: Component): comp is Option => comp instanceof Option;
 
+    /** 僚机的所有者 */
+    owner: EntityId;
+
     /** 僚机索引（0或1） */
     index: number;
 
-    /** 环绕半径（固定60像素） */
+    /** 环绕半径（像素） */
     radius: number;
 
     /** 当前角度（弧度） */
@@ -338,13 +341,21 @@ export class Option extends Component {
     /** 缓动系数（0-1，越小越平滑） */
     lerpFactor: number;
 
-    constructor(cfg: { index: number }) {
+    constructor(cfg: {
+        owner: EntityId,
+        index: number,
+        radius: number,
+        rotationSpeed: number,
+        lerpFactor: number,
+        angle?: number,
+    }) {
         super();
+        this.owner = cfg.owner;
         this.index = cfg.index;
-        this.radius = 60;
-        this.angle = cfg.index * Math.PI; // 0 和 π（180度）
-        this.rotationSpeed = 2;
-        this.lerpFactor = 0.2;
+        this.radius = cfg.radius;
+        this.angle = cfg.angle;
+        this.rotationSpeed = cfg.rotationSpeed;
+        this.lerpFactor = cfg.lerpFactor;
     }
 }
 

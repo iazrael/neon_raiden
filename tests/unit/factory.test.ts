@@ -4,10 +4,11 @@
  */
 
 import type { World } from '../../src/engine/world';
+import type { EntityId } from '../../src/engine/types';
 import { createWorld } from '../../src/engine/world';
 import { spawnOption } from '../../src/engine/factory';
 import { BLUEPRINT_OPTION_VULCAN } from '../../src/engine/blueprints/fighters';
-import { Option, PlayerTag, Transform } from '../../src/engine/components';
+import { Option, Transform } from '../../src/engine/components';
 
 describe('factory - spawnOption', () => {
     let world: World;
@@ -20,8 +21,9 @@ describe('factory - spawnOption', () => {
         const index = 0;
         const x = 100;
         const y = 200;
+        const ownerId = 1 as EntityId;
 
-        const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, index, x, y);
+        const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, x, y, ownerId, index);
 
         // 验证实体被创建
         const comps = world.entities.get(entityId);
@@ -39,8 +41,9 @@ describe('factory - spawnOption', () => {
         const index = 1;
         const x = 150;
         const y = 250;
+        const ownerId = 1 as EntityId;
 
-        const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, index, x, y);
+        const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, x, y, ownerId, index);
 
         const comps = world.entities.get(entityId);
         const option = comps?.find(Option.check);
@@ -52,8 +55,9 @@ describe('factory - spawnOption', () => {
         const index = 0;
         const x = 300;
         const y = 400;
+        const ownerId = 1 as EntityId;
 
-        const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, index, x, y);
+        const entityId = spawnOption(world, BLUEPRINT_OPTION_VULCAN, x, y, ownerId, index);
 
         const comps = world.entities.get(entityId);
         const transform = comps?.find(Transform.check);

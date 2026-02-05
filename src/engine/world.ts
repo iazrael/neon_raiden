@@ -387,7 +387,19 @@ export function removeTypes<T extends Ctor[]>(
         // 实体不存在，返回全false数组
         return new Array(types.length).fill(false) as any;
     }
+    return removeTypesFromComps(comps, types)
+}
 
+/**
+ * 根据类型从 Component 数组里删除组件
+ * @param comps 
+ * @param types 
+ * @returns 
+ */
+export function removeTypesFromComps<T extends Ctor[]>(
+    comps: Component[],
+    types: [...T]
+): { [K in keyof T]: boolean } {
     const result: boolean[] = [];
 
     for (const Ctor of types) {
