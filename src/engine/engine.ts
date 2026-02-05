@@ -247,4 +247,11 @@ export class Engine {
     get performanceStream(): BehaviorSubject<FrameSnapshot | null> {
         return this.performanceMonitor.stream;
     }
+
+    /**
+     * 获取 World 实例（供存储模块等使用）
+     */
+    getWorld(): World {
+        return this.world;
+    }
 }

@@ -16,6 +16,8 @@ import { Blueprint, BLUEPRINT_FIGHTER_NEON } from './blueprints';
 import type { GameSnapshot } from './snapshot';
 import { ComboState, GameState, WeaponId } from './types';
 import { inputManager } from './input/InputManager';
+import { GameStorage, StorageEventListener, CURRENT_SAVE_VERSION, LocalStorageBackend } from './storage';
+import { FighterId } from './types/ids';
 
 
 
@@ -25,6 +27,10 @@ import { inputManager } from './input/InputManager';
 export class ReactEngine {
     private engine: Engine;
     private canvas: HTMLCanvasElement | null = null;
+
+    // ========== 存储模块 ==========
+    private storage: GameStorage | null = null;
+    private storageListener: StorageEventListener | null = null;
 
 
     // ========== 游戏状态 (与旧 GameEngine 兼容) ==========
@@ -112,17 +118,47 @@ export class ReactEngine {
     }
 
     /**
+     * 初始化存储系统
+     */
+    private async initStorage(): Promise<void> {
+        this.storage = GameStorage.initialize({
+            version: CURRENT_SAVE_VERSION,
+            backend: new LocalStorageBackend('neon_raiden_'),
+            onVersionMismatch: (current, saved) => {
+                console.warn(`[Storage] 存档版本不匹配: ${saved} -> ${current}`);
+                // TODO: 可以触发 UI 提示
+            },
+        });
+
+        await this.storage.load();
+
+        // 初始化事件监听器
+        this.storageListener = new StorageEventListener(this.storage);
+    }
+
+    /**
      * 启动游戏 (内部方法)
      * @param canvas Canvas 元素
      * @param blueprint 玩家蓝图
      */
-    start(canvas: HTMLCanvasElement, blueprint: Blueprint): void {
+    async start(canvas: HTMLCanvasElement, blueprint: Blueprint): Promise<void> {
         this.canvas = canvas;
+
+        // 初始化存储系统（仅首次）
+        if (!this.storage) {
+            await this.initStorage();
+        }
 
         // 订阅快照流以同步状态
         this.snapshotSubscription = this.engine.snapshot$.subscribe((snapshot: GameSnapshot | null) => {
             if (snapshot) {
                 this.syncFromSnapshot(snapshot);
+
+                // 处理存储事件（每帧）
+                if (this.storageListener) {
+                    const world = this.engine.getWorld();
+                    this.storageListener.processEvents(world).catch(console.error);
+                }
             }
         });
 
@@ -135,8 +171,9 @@ export class ReactEngine {
 
     /**
      * 开始游戏 (与旧 GameEngine 兼容)
+     * @param fighterId 战机 ID
      */
-    startGame(): void {
+    async startGame(fighterId: FighterId = FighterId.NEON): Promise<void> {
         if (this.canvas) {
             // 使用预定义的玩家战机蓝图，包含 Health 等必要组件
             // 覆盖位置信息以适应当前 canvas 尺寸
@@ -148,7 +185,13 @@ export class ReactEngine {
                     rot: 0
                 }
             };
-            this.start(this.canvas, blueprint);
+            await this.start(this.canvas, blueprint);
+
+            // 设置当前战机并开始游戏会话
+            if (this.storageListener) {
+                this.storageListener.setCurrentFighter(fighterId);
+                this.storageListener.startGameSession();
+            }
         }
     }
 
@@ -340,5 +383,15 @@ export class ReactEngine {
         // 同步关卡事件
         this.levelEvent = snapshot.levelEvent;
         this.onLevelEventChange(this.levelEvent);
+    }
+
+    /**
+     * 获取存储实例（供其他模块使用）
+     */
+    getStorage(): GameStorage {
+        if (!this.storage) {
+            throw new Error('Storage not initialized');
+        }
+        return this.storage;
     }
 }

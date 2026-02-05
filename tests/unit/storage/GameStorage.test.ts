@@ -138,6 +138,8 @@ describe('GameStorage', () => {
       killCount: 0,
       highestDamage: 0,
       highestDamageReceived: 0,
+      firstSeenAt: 0,
+      lastSeenAt: 0,
     };
     await storage.save(data);
 
@@ -159,6 +161,8 @@ describe('GameStorage', () => {
       killCount: 0,
       highestDamage: 0,
       highestDamageReceived: 0,
+      firstSeenAt: 0,
+      lastSeenAt: 0,
     };
     await storage.save(data);
 
@@ -181,6 +185,8 @@ describe('GameStorage', () => {
       killCount: 0,
       highestDamage: 0,
       highestDamageReceived: 0,
+      firstSeenAt: 0,
+      lastSeenAt: 0,
     };
     await storage.save(data);
 
