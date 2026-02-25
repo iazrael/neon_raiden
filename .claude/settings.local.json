@@ -34,7 +34,8 @@
       "Skill(commit-commands:commit)",
       "Skill(commit-commands:commit:*)",
       "Bash(npx tsx:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "mcp__web-search-prime__webSearchPrime"
     ],
     "additionalDirectories": [
       "/Users/azraellong/workspaces/neon_raiden/",
